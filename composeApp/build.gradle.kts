@@ -66,9 +66,12 @@ kotlin {
             implementation(libs.androidx.navigation3.runtime)
 
             implementation(libs.navigation3.ui)
+//
+//            implementation(libs.androidx.navigation3.ui)
+//            implementation(libs.androidx.navigation3.viewmodel)
 
-            implementation(libs.androidx.navigation3.ui)
-            implementation(libs.androidx.navigation3.viewmodel)
+            implementation(libs.calf.filepicker)
+            implementation(libs.calf.permissions)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
