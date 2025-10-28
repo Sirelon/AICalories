@@ -8,7 +8,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 
 @Composable
-fun AiCaloriesTheme(
+fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     colors: AppColors = if (darkTheme) ThemesFactory.dark() else ThemesFactory.light(),
     typography: AppTypography = appTypography(),

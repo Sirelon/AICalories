@@ -1,5 +1,7 @@
 package com.sirelon.aicalories
 
+import aicalories.composeapp.generated.resources.Res
+import aicalories.composeapp.generated.resources.compose_multiplatform
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,19 +17,22 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.painterResource
-import aicalories.composeapp.generated.resources.Res
-import aicalories.composeapp.generated.resources.compose_multiplatform
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
-import coil3.compose.LocalPlatformContext as CoilLocalPlatformContext
-import com.mohamedrejeb.calf.core.LocalPlatformContext as CalfLocalPlatformContext
+import com.mohamedrejeb.calf.io.getName
+import com.mohamedrejeb.calf.io.readByteArray
 import com.mohamedrejeb.calf.permissions.ExperimentalPermissionsApi
 import com.mohamedrejeb.calf.permissions.Permission
 import com.mohamedrejeb.calf.permissions.PermissionStatus
@@ -36,26 +41,26 @@ import com.mohamedrejeb.calf.permissions.rememberPermissionState
 import com.mohamedrejeb.calf.picker.FilePickerFileType
 import com.mohamedrejeb.calf.picker.FilePickerSelectionMode
 import com.mohamedrejeb.calf.picker.rememberFilePickerLauncher
-import com.mohamedrejeb.calf.io.getName
-import com.mohamedrejeb.calf.io.readByteArray
-import com.sirelon.aicalories.designsystem.AiCaloriesTheme
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.di.appModule
 import com.sirelon.aicalories.di.networkModule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
+import coil3.compose.LocalPlatformContext as CoilLocalPlatformContext
+import com.mohamedrejeb.calf.core.LocalPlatformContext as CalfLocalPlatformContext
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 @Preview
 fun App() {
-    KoinApplication(application = {
-        modules(appModule, networkModule)
-    }) {
-        AiCaloriesTheme {
+    KoinApplication(
+        application = { modules(appModule, networkModule) },
+    ) {
+        AppTheme {
             val greeting: Greeting = koinInject()
             val greetingMessage = remember(greeting) { greeting.greet() }
             val platformName = remember { getPlatform().name }
