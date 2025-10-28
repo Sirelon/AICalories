@@ -4,5 +4,7 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>AI Calories needs access to the camera to capture your meal photos.</string>
 </dict>
 </plist>
