@@ -1,5 +1,5 @@
+
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.compose.reload.gradle.lifecycle
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -84,6 +84,7 @@ kotlin {
 //            implementation(libs.androidx.navigation3.viewmodel)
 
             implementation(libs.calf.filepicker)
+            implementation(libs.calf.filepicker.coil)
             implementation(libs.calf.permissions)
         }
         commonTest.dependencies {

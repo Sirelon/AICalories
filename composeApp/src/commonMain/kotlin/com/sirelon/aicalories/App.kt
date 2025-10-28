@@ -1,9 +1,6 @@
 package com.sirelon.aicalories
 
-import aicalories.composeapp.generated.resources.Res
-import aicalories.composeapp.generated.resources.compose_multiplatform
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,12 +11,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -31,8 +28,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
+import coil3.compose.setSingletonImageLoaderFactory
+import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.io.getName
-import com.mohamedrejeb.calf.io.readByteArray
 import com.mohamedrejeb.calf.permissions.ExperimentalPermissionsApi
 import com.mohamedrejeb.calf.permissions.Permission
 import com.mohamedrejeb.calf.permissions.PermissionStatus
@@ -40,23 +38,29 @@ import com.mohamedrejeb.calf.permissions.isGranted
 import com.mohamedrejeb.calf.permissions.rememberPermissionState
 import com.mohamedrejeb.calf.picker.FilePickerFileType
 import com.mohamedrejeb.calf.picker.FilePickerSelectionMode
+import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
 import com.mohamedrejeb.calf.picker.rememberFilePickerLauncher
+import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.di.appModule
 import com.sirelon.aicalories.di.networkModule
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
-import coil3.compose.LocalPlatformContext as CoilLocalPlatformContext
 import com.mohamedrejeb.calf.core.LocalPlatformContext as CalfLocalPlatformContext
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 @Preview
 fun App() {
+    setSingletonImageLoaderFactory {
+        ImageLoader.Builder(it)
+            .components {
+                add(KmpFileFetcher.Factory())
+            }
+            .build()
+    }
+
+
     KoinApplication(
         application = { modules(appModule, networkModule) },
     ) {
@@ -70,49 +74,29 @@ fun App() {
             }
 
             val calfPlatformContext = CalfLocalPlatformContext.current
-            val coilPlatformContext = CoilLocalPlatformContext.current
-            val imageLoader = remember(coilPlatformContext) {
-                ImageLoader.Builder(coilPlatformContext).build()
-            }
+
             val scope = rememberCoroutineScope()
 
             var permissionDeniedCount by remember { mutableStateOf(0) }
             var showRationaleDialog by remember { mutableStateOf(false) }
             var showSettingsDialog by remember { mutableStateOf(false) }
             var pendingPickerLaunch by remember { mutableStateOf(false) }
-            var selectedImageBytes by remember { mutableStateOf<ByteArray?>(null) }
             var selectedImageName by remember { mutableStateOf<String?>(null) }
             var pickerError by remember { mutableStateOf<String?>(null) }
-            var isReadingImage by remember { mutableStateOf(false) }
+
+            val filesState = remember { mutableStateListOf<KmpFile>() }
 
             val filePickerLauncher = rememberFilePickerLauncher(
                 type = FilePickerFileType.Image,
                 selectionMode = FilePickerSelectionMode.Single,
             ) { files ->
+                filesState.clear()
+                filesState.addAll(files)
+                selectedImageName = filesState
+                    .mapNotNull { it.getName(calfPlatformContext) }
+                    .joinToString()
+
                 pendingPickerLaunch = false
-                val file = files.firstOrNull()
-                if (file == null) {
-                    pickerError = null
-                    return@rememberFilePickerLauncher
-                }
-                scope.launch {
-                    isReadingImage = true
-                    pickerError = null
-                    try {
-                        val bytes = withContext(Dispatchers.Default) {
-                            file.readByteArray(calfPlatformContext)
-                        }
-                        selectedImageBytes = bytes
-                        selectedImageName =
-                            file.getName(calfPlatformContext) ?: "Selected meal photo"
-                    } catch (error: Throwable) {
-                        selectedImageBytes = null
-                        selectedImageName = null
-                        pickerError = error.message ?: "Failed to load the selected image."
-                    } finally {
-                        isReadingImage = false
-                    }
-                }
             }
 
             val cameraPermissionState = rememberPermissionState(Permission.Camera) { granted ->
@@ -183,7 +167,6 @@ fun App() {
                     style = AppTheme.typography.body,
                 )
                 Button(
-                    enabled = !isReadingImage,
                     onClick = {
                         showRationaleDialog = false
                         showSettingsDialog = false
@@ -207,13 +190,11 @@ fun App() {
                         color = AppTheme.colors.error,
                     )
                 }
-                if (isReadingImage) {
-                    CircularProgressIndicator()
-                }
-                AnimatedVisibility(permissionGranted && selectedImageBytes != null) {
+                AnimatedVisibility(permissionGranted) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
                     ) {
                         selectedImageName?.let {
                             Text(
@@ -222,22 +203,19 @@ fun App() {
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
-                        AsyncImage(
-                            model = selectedImageBytes,
-                            imageLoader = imageLoader,
-                            contentDescription = "Selected meal photo",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(220.dp),
-                            contentScale = ContentScale.Crop,
-                        )
+
+                        filesState.forEach { file ->
+                            AsyncImage(
+                                model = file,
+                                contentDescription = "Selected meal photo",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(220.dp),
+                                contentScale = ContentScale.Crop,
+                            )
+                        }
+
                         Spacer(modifier = Modifier.height(12.dp))
-                        Image(painterResource(Res.drawable.compose_multiplatform), null)
-                        Text(
-                            text = "Compose: $greetingMessage",
-                            style = AppTheme.typography.label,
-                            color = AppTheme.colors.success,
-                        )
                     }
                 }
             }
