@@ -47,23 +47,34 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.kotlinx.coroutines.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
+            implementation(compose.material3AdaptiveNavigationSuite)
             implementation(compose.ui)
             implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+            implementation(compose.preview)
+
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.koin.compose)
+
             implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
+
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.contentNegotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.ktor.client.logging)
             implementation(projects.shared)
             implementation(libs.androidx.navigation3.runtime)
 
@@ -80,7 +91,17 @@ kotlin {
         }
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
-//            implementation(libs.kotlinx.coroutinesSwing)
+            implementation(libs.ktor.client.java)
+            implementation(libs.kotlinx.coroutines.swing)
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
+        }
+        webMain.dependencies {
+            implementation(libs.ktor.client.js)
+        }
+        wasmJsMain.dependencies {
+            implementation(libs.ktor.client.js)
         }
     }
 }

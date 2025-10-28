@@ -21,10 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
-
 import aicalories.composeapp.generated.resources.Res
 import aicalories.composeapp.generated.resources.compose_multiplatform
+import androidx.compose.ui.tooling.preview.Preview
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext as CoilLocalPlatformContext
@@ -42,6 +41,7 @@ import com.mohamedrejeb.calf.io.readByteArray
 import com.sirelon.aicalories.designsystem.AiCaloriesTheme
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.di.appModule
+import com.sirelon.aicalories.di.networkModule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -53,7 +53,7 @@ import org.koin.compose.koinInject
 @Preview
 fun App() {
     KoinApplication(application = {
-        modules(appModule)
+        modules(appModule, networkModule)
     }) {
         AiCaloriesTheme {
             val greeting: Greeting = koinInject()
