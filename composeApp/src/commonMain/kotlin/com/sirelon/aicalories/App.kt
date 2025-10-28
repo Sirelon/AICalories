@@ -27,7 +27,7 @@ import com.mohamedrejeb.calf.permissions.PermissionStatus
 import com.mohamedrejeb.calf.permissions.isGranted
 import com.mohamedrejeb.calf.permissions.rememberPermissionState
 import com.sirelon.aicalories.designsystem.AiCaloriesTheme
-import com.sirelon.aicalories.designsystem.AiTheme
+import com.sirelon.aicalories.designsystem.AppTheme
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -84,7 +84,7 @@ fun App() {
 
         Column(
             modifier = Modifier
-                .background(AiTheme.colors.background)
+                .background(AppTheme.colors.background)
                 .safeContentPadding()
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -92,7 +92,7 @@ fun App() {
         ) {
             Text(
                 text = if (permissionGranted) "Camera permission granted" else "Camera permission required",
-                style = AiTheme.typography.title,
+                style = AppTheme.typography.title,
             )
             Text(
                 text = if (permissionGranted) {
@@ -100,7 +100,7 @@ fun App() {
                 } else {
                     "AI Calories needs camera access to analyse your meals."
                 },
-                style = AiTheme.typography.body,
+                style = AppTheme.typography.body,
             )
             Button(
                 enabled = !permissionGranted,
@@ -123,8 +123,8 @@ fun App() {
                     Image(painterResource(Res.drawable.compose_multiplatform), null)
                     Text(
                         text = "Compose: $greeting",
-                        style = AiTheme.typography.label,
-                        color = AiTheme.colors.success,
+                        style = AppTheme.typography.label,
+                        color = AppTheme.colors.success,
                     )
                 }
             }
