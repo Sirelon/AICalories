@@ -2,7 +2,7 @@ package com.sirelon.aicalories.camera
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.interop.LocalUIViewController
+import androidx.compose.ui.uikit.LocalUIViewController
 import kotlinx.cinterop.ExperimentalForeignApi
 import com.mohamedrejeb.calf.core.InternalCalfApi
 import com.mohamedrejeb.calf.io.KmpFile
@@ -12,14 +12,11 @@ import platform.Foundation.NSTemporaryDirectory
 import platform.UIKit.UIImage
 import platform.UIKit.UIImageJPEGRepresentation
 import platform.UIKit.UIImagePickerController
-import platform.UIKit.UIImagePickerControllerCameraCaptureModePhoto
+import platform.UIKit.UIImagePickerControllerCameraCaptureMode
 import platform.UIKit.UIImagePickerControllerDelegateProtocol
 import platform.UIKit.UIImagePickerControllerOriginalImage
-import platform.UIKit.UIImagePickerControllerSourceTypeCamera
+import platform.UIKit.UIImagePickerControllerSourceType
 import platform.UIKit.UINavigationControllerDelegateProtocol
-import platform.UIKit.presentViewController
-import platform.UIKit.dismissViewControllerAnimated
-import platform.UIKit.isSourceTypeAvailable
 import platform.Foundation.writeToURL
 
 @OptIn(ExperimentalForeignApi::class)
@@ -28,28 +25,33 @@ actual fun rememberCameraCaptureLauncher(
     onResult: (CameraCaptureResult) -> Unit,
 ): CameraLauncher {
     val currentController = LocalUIViewController.current
-    val delegate = remember { CameraCaptureDelegate() }
-    delegate.onResult = onResult
+    val pickerDelegate = remember { CameraCaptureDelegate() }
+    pickerDelegate.onResult = onResult
 
-    return remember(currentController, delegate) {
+    return remember(currentController, pickerDelegate) {
         CameraLauncherImpl {
-            if (!UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceTypeCamera)) {
+            val cameraSourceType =
+                UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypeCamera
+            val cameraModePhoto =
+                UIImagePickerControllerCameraCaptureMode.UIImagePickerControllerCameraCaptureModePhoto
+
+            if (!UIImagePickerController.isSourceTypeAvailable(cameraSourceType)) {
                 onResult(CameraCaptureResult(error = "Camera not available.", cancelled = true))
                 return@CameraLauncherImpl
             }
 
             val picker =
                 UIImagePickerController().apply {
-                    sourceType = UIImagePickerControllerSourceTypeCamera
-                    cameraCaptureMode = UIImagePickerControllerCameraCaptureModePhoto
-                    delegate = delegate
+                    sourceType = cameraSourceType
+                    cameraCaptureMode = cameraModePhoto
+                    this.delegate = pickerDelegate
                 }
-            delegate.onResult = onResult
+            pickerDelegate.onResult = onResult
 
             currentController.presentViewController(
                 picker,
-                true,
-                null,
+                animated = true,
+                completion = null,
             )
         }
     }
@@ -91,12 +93,12 @@ private class CameraCaptureDelegate :
             }
 
         onResult?.invoke(result)
-        picker.dismissViewControllerAnimated(true, null)
+        picker.dismissViewControllerAnimated(true, completion = null)
     }
 
     override fun imagePickerControllerDidCancel(picker: UIImagePickerController) {
         onResult?.invoke(CameraCaptureResult(cancelled = true))
-        picker.dismissViewControllerAnimated(true, null)
+        picker.dismissViewControllerAnimated(true, completion = null)
     }
 }
 
