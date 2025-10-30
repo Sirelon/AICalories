@@ -19,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +39,7 @@ import com.mohamedrejeb.calf.picker.FilePickerFileType
 import com.mohamedrejeb.calf.picker.FilePickerSelectionMode
 import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
 import com.mohamedrejeb.calf.picker.rememberFilePickerLauncher
+import com.sirelon.aicalories.camera.rememberCameraCaptureLauncher
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.di.appModule
@@ -75,20 +75,32 @@ fun App() {
 
             val calfPlatformContext = CalfLocalPlatformContext.current
 
-            val scope = rememberCoroutineScope()
-
             var permissionDeniedCount by remember { mutableStateOf(0) }
             var showRationaleDialog by remember { mutableStateOf(false) }
             var showSettingsDialog by remember { mutableStateOf(false) }
             var pendingPickerLaunch by remember { mutableStateOf(false) }
+            var pendingCameraLaunch by remember { mutableStateOf(false) }
             var selectedImageName by remember { mutableStateOf<String?>(null) }
             var pickerError by remember { mutableStateOf<String?>(null) }
 
             val filesState = remember { mutableStateListOf<KmpFile>() }
 
+            val cameraLauncher = rememberCameraCaptureLauncher { result ->
+                pendingCameraLaunch = false
+                if (result.file != null) {
+                    filesState.add(result.file)
+                    selectedImageName = filesState
+                        .mapNotNull { it.getName(calfPlatformContext) }
+                        .joinToString()
+                    pickerError = null
+                } else if (result.error != null && !result.cancelled) {
+                    pickerError = result.error
+                }
+            }
+
             val filePickerLauncher = rememberFilePickerLauncher(
                 type = FilePickerFileType.Image,
-                selectionMode = FilePickerSelectionMode.Single,
+                selectionMode = FilePickerSelectionMode.Multiple,
             ) { files ->
                 filesState.clear()
                 filesState.addAll(files)
@@ -97,6 +109,7 @@ fun App() {
                     .joinToString()
 
                 pendingPickerLaunch = false
+                pickerError = null
             }
 
             val cameraPermissionState = rememberPermissionState(Permission.Camera) { granted ->
@@ -105,16 +118,22 @@ fun App() {
                 } else {
                     permissionDeniedCount += 1
                     pendingPickerLaunch = false
+                    pendingCameraLaunch = false
                 }
             }
 
             val permissionStatus = cameraPermissionState.status
             val permissionGranted = permissionStatus.isGranted
 
-            LaunchedEffect(permissionGranted, pendingPickerLaunch) {
-                if (permissionGranted && pendingPickerLaunch) {
+            LaunchedEffect(permissionGranted, pendingPickerLaunch, pendingCameraLaunch) {
+                if (!permissionGranted) return@LaunchedEffect
+                if (pendingPickerLaunch) {
                     pendingPickerLaunch = false
                     filePickerLauncher.launch()
+                }
+                if (pendingCameraLaunch) {
+                    pendingCameraLaunch = false
+                    cameraLauncher.launch()
                 }
             }
 
@@ -170,6 +189,7 @@ fun App() {
                     onClick = {
                         showRationaleDialog = false
                         showSettingsDialog = false
+                        pickerError = null
                         if (permissionGranted) {
                             pendingPickerLaunch = false
                             filePickerLauncher.launch()
@@ -181,6 +201,24 @@ fun App() {
                 ) {
                     Text(
                         text = if (permissionGranted) "Pick meal photo" else "Grant camera permission",
+                    )
+                }
+                Button(
+                    onClick = {
+                        showRationaleDialog = false
+                        showSettingsDialog = false
+                        pickerError = null
+                        if (permissionGranted) {
+                            pendingCameraLaunch = false
+                            cameraLauncher.launch()
+                        } else {
+                            pendingCameraLaunch = true
+                            cameraPermissionState.launchPermissionRequest()
+                        }
+                    },
+                ) {
+                    Text(
+                        text = if (permissionGranted) "Capture meal photo" else "Grant camera permission",
                     )
                 }
                 if (pickerError != null) {
