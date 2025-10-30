@@ -53,6 +53,9 @@ kotlin {
             implementation(libs.kotlinx.coroutines.android)
         }
         commonMain.dependencies {
+            implementation(libs.supabase.compose.auth)
+            implementation(libs.supabase.compose.auth.ui)
+            implementation(libs.supabase.coil3.integration)
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
@@ -88,6 +91,7 @@ kotlin {
             implementation(libs.calf.filepicker)
             implementation(libs.calf.filepicker.coil)
             implementation(libs.calf.permissions)
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

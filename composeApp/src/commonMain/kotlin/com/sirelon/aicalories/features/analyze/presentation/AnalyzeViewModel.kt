@@ -1,32 +1,19 @@
 package com.sirelon.aicalories.features.analyze.presentation
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sirelon.aicalories.features.analyze.common.BaseViewModel
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AnalyzeViewModel(
     private val repository: AnalyzeRepository,
-) : ViewModel() {
+) : BaseViewModel<AnalyzeContract.AnalyzeState, AnalyzeContract.AnalyzeEvent, AnalyzeContract.AnalyzeEffect>() {
 
-    private val _state = MutableStateFlow(AnalyzeContract.AnalyzeState())
-    val state = _state.asStateFlow()
+    override fun initialState(): AnalyzeContract.AnalyzeState = AnalyzeContract.AnalyzeState()
 
-    private val _effects = MutableSharedFlow<AnalyzeContract.AnalyzeEffect>()
-    val effects = _effects.asSharedFlow()
-
-    fun onEvent(event: AnalyzeContract.AnalyzeEvent) {
+    override fun onEvent(event: AnalyzeContract.AnalyzeEvent) {
         when (event) {
-            is AnalyzeContract.AnalyzeEvent.PromptChanged -> _state.update {
+            is AnalyzeContract.AnalyzeEvent.PromptChanged -> setState {
                 it.copy(
                     prompt = event.value,
                     errorMessage = null
@@ -40,34 +27,33 @@ class AnalyzeViewModel(
     private fun analyze() {
         val prompt = state.value.prompt.trim()
         if (prompt.isEmpty()) {
-            viewModelScope.launch {
-                _effects.emit(AnalyzeContract.AnalyzeEffect.ShowMessage("Describe your meal first."))
-            }
+            postEffect(effect = AnalyzeContract.AnalyzeEffect.ShowMessage("Describe your meal first."))
             return
         }
 
         viewModelScope.launch {
-            _state.update {
+            setState {
                 it.copy(
                     isLoading = true,
                     errorMessage = null,
                 )
             }
 
+
             repository
                 .analyzeDescription(prompt)
                 .onSuccess { result ->
-                    _state.update {
+                    setState {
                         it.copy(
                             prompt = "",
                             isLoading = false,
                             result = result,
                         )
                     }
-                    _effects.emit(AnalyzeContract.AnalyzeEffect.ShowMessage("Analysis prepared."))
+                    postEffect(AnalyzeContract.AnalyzeEffect.ShowMessage("Analysis prepared."))
                 }
                 .onFailure { error ->
-                    _state.update {
+                    setState {
                         it.copy(
                             isLoading = false,
                             errorMessage = error.message ?: "Failed to analyze this meal.",
