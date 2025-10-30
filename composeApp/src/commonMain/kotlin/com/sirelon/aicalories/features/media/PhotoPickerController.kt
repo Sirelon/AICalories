@@ -24,7 +24,6 @@ interface PhotoPickerController {
     val uiState: State<PhotoPickerUiState>
     fun pickFromGallery()
     fun captureWithCamera()
-    fun clearError()
 }
 
 @Composable
@@ -75,12 +74,6 @@ fun rememberPhotoPickerController(
                 uiState.value = uiState.value.copy(errorMessage = null)
                 permissionController.requestPermission {
                     cameraLauncher.launch()
-                }
-            }
-
-            override fun clearError() {
-                if (uiState.value.errorMessage != null) {
-                    uiState.value = uiState.value.copy(errorMessage = null)
                 }
             }
         }
