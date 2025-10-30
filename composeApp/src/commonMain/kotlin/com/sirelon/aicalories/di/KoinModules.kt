@@ -6,7 +6,6 @@ import com.sirelon.aicalories.network.ApiTokenProvider
 import com.sirelon.aicalories.network.createHttpClient
 import com.sirelon.aicalories.supabase.SupabaseClient
 import org.koin.dsl.module
-import com.sirelon.aicalories.supabase.supabaseClient
 import org.koin.core.module.dsl.singleOf
 
 val appModule = module {

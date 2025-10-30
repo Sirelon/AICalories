@@ -1,15 +1,41 @@
 package com.sirelon.aicalories.features.analyze.presentation
 
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.viewModelScope
+import com.mohamedrejeb.calf.core.PlatformContext
+import com.mohamedrejeb.calf.io.KmpFile
 import com.sirelon.aicalories.features.analyze.common.BaseViewModel
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository
+import io.github.jan.supabase.storage.UploadStatus
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AnalyzeViewModel(
     private val repository: AnalyzeRepository,
 ) : BaseViewModel<AnalyzeContract.AnalyzeState, AnalyzeContract.AnalyzeEvent, AnalyzeContract.AnalyzeEffect>() {
 
     override fun initialState(): AnalyzeContract.AnalyzeState = AnalyzeContract.AnalyzeState()
+
+    val images = mutableStateMapOf<KmpFile, Double>()
+
+    val uploadImagesFlow = MutableStateFlow<KmpFile?>(null)
+
+    // TODO:
+    lateinit var platformContext: PlatformContext
+
+    init {
+        uploadImagesFlow
+            .filterNotNull()
+            .flatMapLatest(::uploadFileFlow)
+            .launchIn(viewModelScope)
+    }
 
     override fun onEvent(event: AnalyzeContract.AnalyzeEvent) {
         when (event) {
@@ -21,8 +47,27 @@ class AnalyzeViewModel(
             }
 
             AnalyzeContract.AnalyzeEvent.Submit -> analyze()
+            is AnalyzeContract.AnalyzeEvent.UploadFile -> viewModelScope.launch {
+                uploadImagesFlow.emit(event.kmpFile)
+            }
         }
     }
+
+    private fun uploadFileFlow(file: KmpFile): Flow<UploadStatus> = repository
+        .uploadFile(platformContext = platformContext, file = file)
+        .onEach { status ->
+            val percent = when (status) {
+                is UploadStatus.Progress -> {
+                    if (status.contentLength > 0) {
+                        (status.totalBytesSend.toDouble() / status.contentLength.toDouble()) * 100
+                    } else 0.0
+                }
+
+                is UploadStatus.Success -> 1.0
+            }
+
+            images[file] = percent
+        }
 
     private fun analyze() {
         val prompt = state.value.prompt.trim()

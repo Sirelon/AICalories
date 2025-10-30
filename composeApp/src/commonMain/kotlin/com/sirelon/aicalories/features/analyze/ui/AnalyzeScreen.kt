@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mohamedrejeb.calf.core.LocalPlatformContext
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.features.analyze.presentation.AnalyzeContract
 import com.sirelon.aicalories.features.analyze.presentation.AnalyzeViewModel
@@ -112,4 +113,12 @@ fun AnalyzeScreen(
 }
 
 @Composable
-private fun rememberAnalyzeViewModel(): AnalyzeViewModel = koinViewModel()
+private fun rememberAnalyzeViewModel(): AnalyzeViewModel = koinViewModel<AnalyzeViewModel>()
+    .also { viewModel ->
+        val context = LocalPlatformContext.current
+        LaunchedEffect(Unit) {
+            viewModel.platformContext = context
+        }
+    }
+
+
