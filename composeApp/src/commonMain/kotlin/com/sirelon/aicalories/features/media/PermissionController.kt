@@ -32,7 +32,7 @@ interface PermissionController {
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun rememberPermissionController(
-    permission: Permission = Permission.Camera,
+    permission: Permission,
     isIosDevice: Boolean,
 ): PermissionController {
     val uiState = remember { mutableStateOf(PermissionUiState()) }
@@ -75,7 +75,8 @@ fun rememberPermissionController(
             val denialCount = uiState.value.denialCount
             if (denialCount == 0 || denialCount == lastHandledDenial.value) return@LaunchedEffect
 
-            val requiresSettings = isIosDevice || (status as? PermissionStatus.Denied)?.shouldShowRationale != true
+            val requiresSettings =
+                isIosDevice || (status as? PermissionStatus.Denied)?.shouldShowRationale != true
             uiState.value = uiState.value.copy(
                 showSettings = requiresSettings,
                 showRationale = !requiresSettings,

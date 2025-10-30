@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.compose.setSingletonImageLoaderFactory
+import com.mohamedrejeb.calf.core.LocalPlatformContext
+import com.mohamedrejeb.calf.permissions.Permission
 import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
@@ -31,6 +33,8 @@ import com.sirelon.aicalories.di.networkModule
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.features.media.selectedFilesLabel
+import io.github.jan.supabase.CurrentPlatformTarget
+import io.github.jan.supabase.PlatformTarget
 import org.koin.compose.KoinApplication
 
 @Composable
@@ -54,9 +58,13 @@ fun App() {
                         platformName.contains("iPadOS", ignoreCase = true)
             }
 
-            val permissionController = rememberPermissionController(isIosDevice = isIosDevice)
+            val permissionController = rememberPermissionController(
+                permission = Permission.Camera,
+                isIosDevice = isIosDevice
+            )
             val permissionUi = permissionController.uiState.value
-            val photoPicker = rememberPhotoPickerController(permissionController = permissionController)
+            val photoPicker =
+                rememberPhotoPickerController(permissionController = permissionController)
             val photoUi = photoPicker.uiState.value
             val permissionGranted = permissionUi.hasPermission
 
@@ -107,14 +115,6 @@ fun App() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
                     ) {
-                        photoUi.selectedFilesLabel?.let {
-                            Text(
-                                text = it,
-                                style = AppTheme.typography.label,
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-
                         photoUi.files.forEach { file ->
                             AsyncImage(
                                 model = file,

@@ -16,12 +16,8 @@ import com.sirelon.aicalories.camera.rememberCameraCaptureLauncher
 
 data class PhotoPickerUiState(
     val files: List<KmpFile> = emptyList(),
-    val fileNames: List<String> = emptyList(),
     val errorMessage: String? = null,
 )
-
-val PhotoPickerUiState.selectedFilesLabel: String?
-    get() = fileNames.takeIf { it.isNotEmpty() }?.joinToString()
 
 @Stable
 interface PhotoPickerController {
@@ -37,7 +33,6 @@ fun rememberPhotoPickerController(
     type: FilePickerFileType = FilePickerFileType.Image,
     selectionMode: FilePickerSelectionMode = FilePickerSelectionMode.Multiple,
 ): PhotoPickerController {
-    val platformContext = LocalPlatformContext.current
     val filesState = remember { mutableStateListOf<KmpFile>() }
     val uiState = remember { mutableStateOf(PhotoPickerUiState()) }
 
@@ -46,7 +41,6 @@ fun rememberPhotoPickerController(
             filesState.add(result.file)
             uiState.value = uiState.value.copy(
                 files = filesState.toList(),
-                fileNames = filesState.mapNotNull { it.getName(platformContext) },
                 errorMessage = null,
             )
         } else if (result.error != null && !result.cancelled) {
@@ -62,7 +56,6 @@ fun rememberPhotoPickerController(
         filesState.addAll(files)
         uiState.value = uiState.value.copy(
             files = filesState.toList(),
-            fileNames = filesState.mapNotNull { it.getName(platformContext) },
             errorMessage = null,
         )
     }
