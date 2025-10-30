@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,18 +24,17 @@ import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.compose.setSingletonImageLoaderFactory
-import com.mohamedrejeb.calf.core.LocalPlatformContext
+import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.permissions.Permission
 import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.di.appModule
 import com.sirelon.aicalories.di.networkModule
+import com.sirelon.aicalories.platform.PlatformTargets
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.features.media.selectedFilesLabel
-import io.github.jan.supabase.CurrentPlatformTarget
-import io.github.jan.supabase.PlatformTarget
 import org.koin.compose.KoinApplication
 
 @Composable
@@ -52,20 +52,26 @@ fun App() {
         application = { modules(appModule, networkModule) },
     ) {
         AppTheme {
-            val platformName = remember { getPlatform().name }
-            val isIosDevice = remember(platformName) {
-                platformName.contains("iOS", ignoreCase = true) ||
-                        platformName.contains("iPadOS", ignoreCase = true)
-            }
+            val isIosDevice = PlatformTargets.isIos()
 
             val permissionController = rememberPermissionController(
                 permission = Permission.Camera,
-                isIosDevice = isIosDevice
+                isIosDevice = isIosDevice,
             )
             val permissionUi = permissionController.uiState.value
-            val photoPicker =
-                rememberPhotoPickerController(permissionController = permissionController)
-            val photoUi = photoPicker.uiState.value
+
+            val files = remember { mutableStateListOf<KmpFile>() }
+            val photoPicker = rememberPhotoPickerController(
+                permissionController = permissionController,
+                onResult = {
+                    it.onSuccess {
+                        files.clear()
+                        files.addAll(it)
+                    }.onFailure {
+                        // TODO:
+                    }
+                },
+            )
             val permissionGranted = permissionUi.hasPermission
 
             Column(
@@ -102,20 +108,20 @@ fun App() {
                         text = if (permissionGranted) "Capture meal photo" else "Grant camera permission",
                     )
                 }
-                photoUi.errorMessage?.let { message ->
-                    Text(
-                        text = message,
-                        style = AppTheme.typography.caption,
-                        color = AppTheme.colors.error,
-                    )
-                }
+//                photoUi.errorMessage?.let { message ->
+//                    Text(
+//                        text = message,
+//                        style = AppTheme.typography.caption,
+//                        color = AppTheme.colors.error,
+//                    )
+//                }
                 AnimatedVisibility(permissionGranted) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
                     ) {
-                        photoUi.files.forEach { file ->
+                        files.forEach { file ->
                             AsyncImage(
                                 model = file,
                                 contentDescription = "Selected meal photo",

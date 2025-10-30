@@ -19,9 +19,9 @@ data class PhotoPickerUiState(
     val errorMessage: String? = null,
 )
 
+// refactor PhotoPickerController. Split for
 @Stable
 interface PhotoPickerController {
-    val uiState: State<PhotoPickerUiState>
     fun pickFromGallery()
     fun captureWithCamera()
 }
@@ -29,21 +29,15 @@ interface PhotoPickerController {
 @Composable
 fun rememberPhotoPickerController(
     permissionController: PermissionController,
+    onResult: (Result<List<KmpFile>>) -> Unit,
     type: FilePickerFileType = FilePickerFileType.Image,
     selectionMode: FilePickerSelectionMode = FilePickerSelectionMode.Multiple,
 ): PhotoPickerController {
-    val filesState = remember { mutableStateListOf<KmpFile>() }
-    val uiState = remember { mutableStateOf(PhotoPickerUiState()) }
-
     val cameraLauncher = rememberCameraCaptureLauncher { result ->
         if (result.file != null) {
-            filesState.add(result.file)
-            uiState.value = uiState.value.copy(
-                files = filesState.toList(),
-                errorMessage = null,
-            )
+            onResult(Result.success(listOf(result.file)))
         } else if (result.error != null && !result.cancelled) {
-            uiState.value = uiState.value.copy(errorMessage = result.error)
+            onResult(Result.failure(RuntimeException(result.error)))
         }
     }
 
@@ -51,27 +45,18 @@ fun rememberPhotoPickerController(
         type = type,
         selectionMode = selectionMode,
     ) { files ->
-        filesState.clear()
-        filesState.addAll(files)
-        uiState.value = uiState.value.copy(
-            files = filesState.toList(),
-            errorMessage = null,
-        )
+        onResult(Result.success(files))
     }
 
     return remember(permissionController) {
         object : PhotoPickerController {
-            override val uiState: State<PhotoPickerUiState> = uiState
-
             override fun pickFromGallery() {
-                uiState.value = uiState.value.copy(errorMessage = null)
                 permissionController.requestPermission {
                     filePickerLauncher.launch()
                 }
             }
 
             override fun captureWithCamera() {
-                uiState.value = uiState.value.copy(errorMessage = null)
                 permissionController.requestPermission {
                     cameraLauncher.launch()
                 }
