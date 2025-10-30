@@ -28,6 +28,7 @@ import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.di.appModule
 import com.sirelon.aicalories.di.networkModule
+import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.features.media.selectedFilesLabel
 import org.koin.compose.KoinApplication
@@ -53,9 +54,11 @@ fun App() {
                         platformName.contains("iPadOS", ignoreCase = true)
             }
 
-            val photoPicker = rememberPhotoPickerController(isIosDevice = isIosDevice)
+            val permissionController = rememberPermissionController(isIosDevice = isIosDevice)
+            val permissionUi = permissionController.uiState.value
+            val photoPicker = rememberPhotoPickerController(permissionController = permissionController)
             val photoUi = photoPicker.uiState.value
-            val permissionGranted = photoUi.hasPermission
+            val permissionGranted = permissionUi.hasPermission
 
             Column(
                 modifier = Modifier
@@ -128,29 +131,29 @@ fun App() {
                 }
             }
 
-            if (photoUi.showRationale) {
+            if (permissionUi.showRationale) {
                 AlertDialog(
-                    onDismissRequest = { photoPicker.dismissRationale() },
+                    onDismissRequest = { permissionController.dismissRationale() },
                     title = { Text("Camera permission needed") },
                     text = {
                         Text("We use the camera to capture meal photos. Please allow access so you can keep tracking.")
                     },
                     confirmButton = {
-                        TextButton(onClick = { photoPicker.retryPermissionRequest() }) {
+                        TextButton(onClick = { permissionController.retry() }) {
                             Text("Retry")
                         }
                     },
                     dismissButton = {
-                        TextButton(onClick = { photoPicker.dismissRationale() }) {
+                        TextButton(onClick = { permissionController.dismissRationale() }) {
                             Text("Not now")
                         }
                     },
                 )
             }
 
-            if (photoUi.showSettings) {
+            if (permissionUi.showSettings) {
                 AlertDialog(
-                    onDismissRequest = { photoPicker.dismissSettings() },
+                    onDismissRequest = { permissionController.dismissSettings() },
                     title = { Text("Allow camera access from settings") },
                     text = {
                         val message = if (isIosDevice) {
@@ -161,12 +164,12 @@ fun App() {
                         Text(message)
                     },
                     confirmButton = {
-                        TextButton(onClick = { photoPicker.openSettings() }) {
+                        TextButton(onClick = { permissionController.openSettings() }) {
                             Text("Open settings")
                         }
                     },
                     dismissButton = {
-                        TextButton(onClick = { photoPicker.dismissSettings() }) {
+                        TextButton(onClick = { permissionController.dismissSettings() }) {
                             Text("Cancel")
                         }
                     },
