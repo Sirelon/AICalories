@@ -11,6 +11,7 @@ import com.mohamedrejeb.calf.permissions.Permission
 import com.mohamedrejeb.calf.permissions.PermissionStatus
 import com.mohamedrejeb.calf.permissions.isGranted
 import com.mohamedrejeb.calf.permissions.rememberPermissionState
+import com.sirelon.aicalories.platform.PlatformTargets
 
 data class PermissionUiState(
     val hasPermission: Boolean = false,
@@ -33,7 +34,7 @@ interface PermissionController {
 @Composable
 fun rememberPermissionController(
     permission: Permission,
-    isIosDevice: Boolean,
+    isIosDevice: Boolean = PlatformTargets.isIos(),
 ): PermissionController {
     val uiState = remember { mutableStateOf(PermissionUiState()) }
     val pendingAction = remember { mutableStateOf<(() -> Unit)?>(null) }

@@ -5,6 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import com.sirelon.aicalories.platform.PlatformTargets
 
 data class PermissionDialogContent(
     val title: String,
@@ -16,7 +17,7 @@ data class PermissionDialogContent(
 @Composable
 fun PermissionDialogs(
     controller: PermissionController,
-    isIosDevice: Boolean,
+    isIosDevice: Boolean = PlatformTargets.isIos(),
     rationaleContent: PermissionDialogContent = PermissionDialogContent(
         title = "Camera permission needed",
         message = "We use the camera to capture meal photos. Please allow access so you can keep tracking.",

@@ -73,7 +73,6 @@ import com.sirelon.aicalories.features.analyze.presentation.AnalyzeViewModel
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
-import com.sirelon.aicalories.platform.PlatformTargets
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
@@ -86,11 +85,7 @@ fun AnalyzeScreen(
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val isIosDevice = PlatformTargets.isIos()
-    val permissionController = rememberPermissionController(
-        permission = Permission.Camera,
-        isIosDevice = isIosDevice,
-    )
+    val permissionController = rememberPermissionController(permission = Permission.Camera)
     val files = viewModel.images
     val fileEntries = files.entries.toList()
     val hasResult = state.result != null
@@ -151,7 +146,6 @@ fun AnalyzeScreen(
             )
         },
     ) { innerPadding ->
-
         LazyVerticalGrid(
             modifier = Modifier
                 .fillMaxSize()
@@ -196,7 +190,6 @@ fun AnalyzeScreen(
 
     PermissionDialogs(
         controller = permissionController,
-        isIosDevice = isIosDevice,
     )
 }
 
