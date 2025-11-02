@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -42,6 +41,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowDpSize
+import androidx.compose.material3.adaptive.separatingVerticalHingeBounds
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,6 +57,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.mohamedrejeb.calf.core.LocalPlatformContext
@@ -68,9 +72,10 @@ import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.platform.PlatformTargets
+import androidx.window.core.layout.WindowSizeClass
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AnalyzeScreen(
     viewModel: AnalyzeViewModel = rememberAnalyzeViewModel(),
@@ -116,6 +121,13 @@ fun AnalyzeScreen(
         }
     }
 
+    val adaptiveInfo = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)
+    val windowDpSize = currentWindowDpSize()
+    val hasSeparatingHinge = adaptiveInfo.windowPosture.separatingVerticalHingeBounds.isNotEmpty()
+    val isMediumWidth = windowDpSize.width >= WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND.dp
+    val useSplitLayout = isMediumWidth && !hasSeparatingHinge
+    val contentSpacing = AppDimens.Spacing.xl6
+
     Scaffold(
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -136,85 +148,37 @@ fun AnalyzeScreen(
             )
         },
     ) { innerPadding ->
-        BoxWithConstraints(
-            modifier = Modifier
+        val baseModifier =
+            Modifier
                 .fillMaxSize()
                 .background(AppTheme.colors.background)
                 .padding(innerPadding)
-                .padding(
-                    horizontal = AppDimens.Spacing.xl6,
-                    vertical = AppDimens.Spacing.xl6,
-                ),
-        ) {
-            val isLandscape = maxWidth > maxHeight
-            val spacing = AppDimens.Spacing.xl6
-            val scrollState = rememberScrollState()
-            if (isLandscape) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState),
-                    horizontalArrangement = Arrangement.spacedBy(spacing),
-                ) {
-                    PhotosSection(
-                        modifier = Modifier.weight(1f),
-                        files = fileEntries,
-                        interactionEnabled = canInteractWithPhotos,
-                        canAddMore = canAddMorePhotos,
-                        hasResult = hasResult,
-                        onAddPhoto = {
-                            if (canOpenPicker) {
-                                showSourceDialog = true
-                            }
-                        },
-                    )
-                    Column(
-                        modifier = Modifier
-                            .weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(spacing),
-                    ) {
-                        if (!hasResult) {
-                            DescriptionSection(
-                                value = state.prompt,
-                                enabled = !state.isLoading,
-                                onValueChange = {
-                                    viewModel.onEvent(AnalyzeContract.AnalyzeEvent.PromptChanged(it))
-                                },
-                            )
-                        } else {
-                            state.result?.let {
-                                AnalyzeResultSection(result = it)
-                            }
-                        }
+                .padding(horizontal = contentSpacing, vertical = contentSpacing)
+        val scrollState = rememberScrollState()
 
-                        state.errorMessage?.let { error ->
-                            ErrorMessage(text = error)
+        if (useSplitLayout) {
+            Row(
+                modifier = baseModifier.verticalScroll(scrollState),
+                horizontalArrangement = Arrangement.spacedBy(contentSpacing),
+                verticalAlignment = Alignment.Top,
+            ) {
+                PhotosSection(
+                    modifier = Modifier.weight(1f),
+                    files = fileEntries,
+                    interactionEnabled = canInteractWithPhotos,
+                    canAddMore = canAddMorePhotos,
+                    hasResult = hasResult,
+                    onAddPhoto = {
+                        if (canOpenPicker) {
+                            showSourceDialog = true
                         }
+                    },
+                )
 
-                        if (state.isLoading) {
-                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                        }
-                    }
-                }
-            } else {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState),
-                    verticalArrangement = Arrangement.spacedBy(spacing),
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(contentSpacing),
                 ) {
-                    PhotosSection(
-                        files = fileEntries,
-                        interactionEnabled = canInteractWithPhotos,
-                        canAddMore = canAddMorePhotos,
-                        hasResult = hasResult,
-                        onAddPhoto = {
-                            if (canOpenPicker) {
-                                showSourceDialog = true
-                            }
-                        },
-                    )
-
                     if (!hasResult) {
                         DescriptionSection(
                             value = state.prompt,
@@ -236,9 +200,48 @@ fun AnalyzeScreen(
                     if (state.isLoading) {
                         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                     }
-
-                    Spacer(modifier = Modifier.height(AppDimens.Size.xl16))
                 }
+            }
+        } else {
+            Column(
+                modifier = baseModifier.verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(contentSpacing),
+            ) {
+                PhotosSection(
+                    files = fileEntries,
+                    interactionEnabled = canInteractWithPhotos,
+                    canAddMore = canAddMorePhotos,
+                    hasResult = hasResult,
+                    onAddPhoto = {
+                        if (canOpenPicker) {
+                            showSourceDialog = true
+                        }
+                    },
+                )
+
+                if (!hasResult) {
+                    DescriptionSection(
+                        value = state.prompt,
+                        enabled = !state.isLoading,
+                        onValueChange = {
+                            viewModel.onEvent(AnalyzeContract.AnalyzeEvent.PromptChanged(it))
+                        },
+                    )
+                } else {
+                    state.result?.let {
+                        AnalyzeResultSection(result = it)
+                    }
+                }
+
+                state.errorMessage?.let { error ->
+                    ErrorMessage(text = error)
+                }
+
+                if (state.isLoading) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
+
+                Spacer(modifier = Modifier.height(AppDimens.Size.xl16))
             }
         }
     }
