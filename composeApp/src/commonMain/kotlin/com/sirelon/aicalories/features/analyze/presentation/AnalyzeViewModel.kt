@@ -8,8 +8,11 @@ import com.sirelon.aicalories.features.analyze.common.BaseViewModel
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository
 import io.github.jan.supabase.storage.UploadStatus
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
@@ -34,6 +37,7 @@ class AnalyzeViewModel(
         uploadImagesFlow
             .filterNotNull()
             .flatMapLatest(::uploadFileFlow)
+            .catch { it.printStackTrace() }
             .launchIn(viewModelScope)
     }
 
@@ -51,9 +55,9 @@ class AnalyzeViewModel(
                 event
                     .result
                     .onSuccess {
-                        it.forEach {
-                            uploadImagesFlow.emit(it)
-                        }
+                        it
+                            .map { async { uploadImagesFlow.emit(it) } }
+                            .awaitAll()
                     }
                 // TODO: handle errors
             }

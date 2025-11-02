@@ -7,12 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -25,9 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.mohamedrejeb.calf.core.LocalPlatformContext
-import com.mohamedrejeb.calf.io.getName
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.features.analyze.presentation.AnalyzeContract
@@ -139,45 +134,12 @@ fun AnalyzeScreen(
                             style = AppTheme.typography.title,
                         )
 
-                        val context = LocalPlatformContext.current
-
-                        LazyColumn(
+                        ImagesCollectionComponent(
+                            files = files,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(240.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-
-                            items(
-                                items = files.entries.toList(),
-                            ) { (file, progress) ->
-
-                                val fileName = file.getName(context).orEmpty()
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                ) {
-                                    Text(
-                                        text = fileName,
-                                        style = AppTheme.typography.label,
-                                    )
-                                    AsyncImage(
-                                        model = file,
-                                        contentDescription = fileName,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(180.dp),
-                                    )
-                                    LinearProgressIndicator(
-                                        progress = { progress.toFloat() },
-                                        modifier = Modifier.fillMaxWidth(),
-                                    )
-                                    Text(
-                                        text = "$progress%",
-                                        style = AppTheme.typography.caption,
-                                    )
-                                }
-                            }
-                        }
+                        )
                     }
                 }
             }
