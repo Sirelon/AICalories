@@ -26,9 +26,12 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -37,6 +40,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -65,10 +71,11 @@ import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.platform.PlatformTargets
 import org.koin.compose.viewmodel.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnalyzeScreen(
     viewModel: AnalyzeViewModel = rememberAnalyzeViewModel(),
-    onBack: (() -> Unit)? = null,
+    onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -98,12 +105,17 @@ fun AnalyzeScreen(
         }
     }
 
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
     Scaffold(
-        modifier = Modifier.safeDrawingPadding(),
+        modifier = Modifier
+            .safeDrawingPadding()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             AnalyzeTopBar(
                 onBack = onBack,
+                scrollBehavior = scrollBehavior,
             )
         },
         bottomBar = {
@@ -194,49 +206,31 @@ private fun rememberAnalyzeViewModel(): AnalyzeViewModel = koinViewModel<Analyze
         }
     }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AnalyzeTopBar(
-    onBack: (() -> Unit)?,
+    onBack: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    Surface(
-        color = AppTheme.colors.surface,
-        contentColor = AppTheme.colors.onSurface,
-        shadowElevation = 0.dp,
-    ) {
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+    MediumFlexibleTopAppBar(
+        scrollBehavior = scrollBehavior,
+        title = {
+            Text("Add photos")
+        },
+        subtitle = {
+            Text(text = "Upload 1-3 images")
+        },
+        navigationIcon = {
+            IconButton(
+                onClick = onBack,
             ) {
-                IconButton(
-                    onClick = { onBack?.invoke() },
-                    enabled = onBack != null,
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                    )
-                }
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Text(
-                        text = "Add Photos",
-                        style = AppTheme.typography.title,
-                    )
-                    Text(
-                        text = "Upload 1-3 images",
-                        style = AppTheme.typography.caption,
-                        color = AppTheme.colors.onSurface,
-                    )
-                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                )
             }
-            AppDivider()
         }
-    }
+    )
 }
 
 @Composable

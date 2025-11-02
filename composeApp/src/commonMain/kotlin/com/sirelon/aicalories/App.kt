@@ -53,7 +53,7 @@ fun App() {
         AppTheme {
 
             if (true) {
-                AnalyzeScreen()
+                AnalyzeScreen(onBack = {})
                 return@AppTheme
             }
 
