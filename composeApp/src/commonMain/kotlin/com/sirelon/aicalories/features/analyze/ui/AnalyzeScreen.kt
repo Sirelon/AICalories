@@ -27,11 +27,12 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -59,6 +60,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.window.core.layout.WindowSizeClass
 import coil3.compose.AsyncImage
 import com.mohamedrejeb.calf.core.LocalPlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
@@ -72,7 +74,6 @@ import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.platform.PlatformTargets
-import androidx.window.core.layout.WindowSizeClass
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
@@ -82,6 +83,7 @@ fun AnalyzeScreen(
     onBack: (() -> Unit)? = null,
     onResultConfirmed: (() -> Unit)? = null,
 ) {
+
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val isIosDevice = PlatformTargets.isIos()
@@ -110,7 +112,9 @@ fun AnalyzeScreen(
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                is AnalyzeContract.AnalyzeEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
+                is AnalyzeContract.AnalyzeEffect.ShowMessage -> snackbarHostState.showSnackbar(
+                    effect.message
+                )
             }
         }
     }
@@ -179,27 +183,7 @@ fun AnalyzeScreen(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(contentSpacing),
                 ) {
-                    if (!hasResult) {
-                        DescriptionSection(
-                            value = state.prompt,
-                            enabled = !state.isLoading,
-                            onValueChange = {
-                                viewModel.onEvent(AnalyzeContract.AnalyzeEvent.PromptChanged(it))
-                            },
-                        )
-                    } else {
-                        state.result?.let {
-                            AnalyzeResultSection(result = it)
-                        }
-                    }
-
-                    state.errorMessage?.let { error ->
-                        ErrorMessage(text = error)
-                    }
-
-                    if (state.isLoading) {
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    }
+                    AnalyzeFields(hasResult, state, viewModel::onEvent)
                 }
             }
         } else {
@@ -219,27 +203,7 @@ fun AnalyzeScreen(
                     },
                 )
 
-                if (!hasResult) {
-                    DescriptionSection(
-                        value = state.prompt,
-                        enabled = !state.isLoading,
-                        onValueChange = {
-                            viewModel.onEvent(AnalyzeContract.AnalyzeEvent.PromptChanged(it))
-                        },
-                    )
-                } else {
-                    state.result?.let {
-                        AnalyzeResultSection(result = it)
-                    }
-                }
-
-                state.errorMessage?.let { error ->
-                    ErrorMessage(text = error)
-                }
-
-                if (state.isLoading) {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                }
+                AnalyzeFields(hasResult, state, viewModel::onEvent)
 
                 Spacer(modifier = Modifier.height(AppDimens.Size.xl16))
             }
@@ -268,6 +232,35 @@ fun AnalyzeScreen(
 }
 
 @Composable
+private fun AnalyzeFields(
+    hasResult: Boolean,
+    state: AnalyzeContract.AnalyzeState,
+    onEvent: (AnalyzeContract.AnalyzeEvent) -> Unit,
+) {
+    if (!hasResult) {
+        DescriptionSection(
+            value = state.prompt,
+            enabled = !state.isLoading,
+            onValueChange = {
+                onEvent(AnalyzeContract.AnalyzeEvent.PromptChanged(it))
+            },
+        )
+    } else {
+        state.result?.let {
+            AnalyzeResultSection(result = it)
+        }
+    }
+
+    state.errorMessage?.let { error ->
+        ErrorMessage(text = error)
+    }
+
+    if (state.isLoading) {
+        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
 private fun rememberAnalyzeViewModel(): AnalyzeViewModel = koinViewModel<AnalyzeViewModel>()
     .also { viewModel ->
         val context = LocalPlatformContext.current
@@ -276,7 +269,7 @@ private fun rememberAnalyzeViewModel(): AnalyzeViewModel = koinViewModel<Analyze
         }
     }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun AnalyzeTopBar(
     hasResult: Boolean,
@@ -285,21 +278,12 @@ private fun AnalyzeTopBar(
 ) {
     val title = if (hasResult) "Analysis Result" else "Add Photos"
     val subtitle = if (hasResult) "Review detected items" else "Upload 1-3 images"
-    MediumTopAppBar(
+    MediumFlexibleTopAppBar(
+        subtitle = {
+            Text(text = subtitle)
+        },
         title = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs),
-            ) {
-                Text(
-                    text = title,
-                    style = AppTheme.typography.title,
-                )
-                Text(
-                    text = subtitle,
-                    style = AppTheme.typography.caption,
-                    color = AppTheme.colors.onSurface,
-                )
-            }
+            Text(text = title)
         },
         navigationIcon = {
             if (onBack != null) {
@@ -311,11 +295,6 @@ private fun AnalyzeTopBar(
                 }
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = AppTheme.colors.surface,
-            titleContentColor = AppTheme.colors.onSurface,
-            navigationIconContentColor = AppTheme.colors.onSurface,
-        ),
         scrollBehavior = scrollBehavior,
     )
 }
