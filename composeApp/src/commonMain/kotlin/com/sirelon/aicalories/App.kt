@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -31,6 +29,8 @@ import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.di.appModule
 import com.sirelon.aicalories.di.networkModule
+import com.sirelon.aicalories.features.analyze.ui.AnalyzeScreen
+import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.platform.PlatformTargets
@@ -51,6 +51,12 @@ fun App() {
         application = { modules(appModule, networkModule) },
     ) {
         AppTheme {
+
+            if (true) {
+                AnalyzeScreen()
+                return@AppTheme
+            }
+
             val isIosDevice = PlatformTargets.isIos()
 
             val permissionController = rememberPermissionController(
@@ -136,50 +142,10 @@ fun App() {
                 }
             }
 
-            if (permissionUi.showRationale) {
-                AlertDialog(
-                    onDismissRequest = { permissionController.dismissRationale() },
-                    title = { Text("Camera permission needed") },
-                    text = {
-                        Text("We use the camera to capture meal photos. Please allow access so you can keep tracking.")
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { permissionController.retry() }) {
-                            Text("Retry")
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { permissionController.dismissRationale() }) {
-                            Text("Not now")
-                        }
-                    },
-                )
-            }
-
-            if (permissionUi.showSettings) {
-                AlertDialog(
-                    onDismissRequest = { permissionController.dismissSettings() },
-                    title = { Text("Allow camera access from settings") },
-                    text = {
-                        val message = if (isIosDevice) {
-                            "Camera access is blocked. Open Settings > Privacy > Camera and enable AI Calories."
-                        } else {
-                            "Camera access is blocked. Please open the app settings and enable the camera permission."
-                        }
-                        Text(message)
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { permissionController.openSettings() }) {
-                            Text("Open settings")
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { permissionController.dismissSettings() }) {
-                            Text("Cancel")
-                        }
-                    },
-                )
-            }
+            PermissionDialogs(
+                controller = permissionController,
+                isIosDevice = isIosDevice,
+            )
         }
     }
 }

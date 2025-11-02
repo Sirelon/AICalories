@@ -32,6 +32,7 @@ import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.features.analyze.presentation.AnalyzeContract
 import com.sirelon.aicalories.features.analyze.presentation.AnalyzeViewModel
+import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.platform.PlatformTargets
@@ -43,9 +44,10 @@ fun AnalyzeScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val isIosDevice = PlatformTargets.isIos()
     val permissionController = rememberPermissionController(
         permission = Permission.Camera,
-        isIosDevice = PlatformTargets.isIos(),
+        isIosDevice = isIosDevice,
     )
     val files = viewModel.images
 
@@ -218,6 +220,11 @@ fun AnalyzeScreen(
                     }
                 }
             }
+
+            PermissionDialogs(
+                controller = permissionController,
+                isIosDevice = isIosDevice,
+            )
         }
     }
 }

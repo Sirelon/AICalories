@@ -1,33 +1,31 @@
 package com.sirelon.aicalories.designsystem
 
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 
 @Composable
 fun Cell(
-    headlineContent: @Composable () -> Unit,
+    headline: @Composable () -> Unit,
     modifier: Modifier = Modifier,
-    overlineContent: @Composable (() -> Unit)? = null,
-    supportingContent: @Composable (() -> Unit)? = null,
-    leadingContent: @Composable (() -> Unit)? = null,
-    trailingContent: @Composable (() -> Unit)? = null,
-    colors: ListItemColors = ListItemDefaults.colors(),
-    tonalElevation: Dp = ListItemDefaults.Elevation,
-    shadowElevation: Dp = ListItemDefaults.Elevation,
+    onClick: (() -> Unit)? = null,
+    overline: @Composable (() -> Unit)? = null,
+    supporting: @Composable (() -> Unit)? = null,
+    leading: @Composable (() -> Unit)? = null,
+    trailing: @Composable (() -> Unit)? = null,
 ) {
+    val clickableModifier = onClick?.let { Modifier.clickable(onClick = onClick) } ?: Modifier
     ListItem(
-        headlineContent = headlineContent,
-        modifier = modifier,
-        overlineContent = overlineContent,
-        supportingContent = supportingContent,
-        leadingContent = leadingContent,
-        trailingContent = trailingContent,
-        colors = colors,
-        tonalElevation = tonalElevation,
-        shadowElevation = shadowElevation,
+        headlineContent = headline,
+        modifier = modifier.then(clickableModifier),
+        overlineContent = overline,
+        supportingContent = supporting,
+        leadingContent = leading,
+        trailingContent = trailing,
+        colors = ListItemDefaults.colors(),
+        tonalElevation = ListItemDefaults.Elevation,
+        shadowElevation = ListItemDefaults.Elevation,
     )
 }
