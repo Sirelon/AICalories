@@ -15,7 +15,7 @@ interface AnalyzeContract {
     sealed interface AnalyzeEvent {
         data class PromptChanged(val value: String) : AnalyzeEvent
 
-        data class UploadFile(val kmpFile: KmpFile) : AnalyzeEvent
+        data class UploadFilesResult(val result: Result<List<KmpFile>>) : AnalyzeEvent
         data object Submit : AnalyzeEvent
     }
 

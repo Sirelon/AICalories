@@ -47,8 +47,15 @@ class AnalyzeViewModel(
             }
 
             AnalyzeContract.AnalyzeEvent.Submit -> analyze()
-            is AnalyzeContract.AnalyzeEvent.UploadFile -> viewModelScope.launch {
-                uploadImagesFlow.emit(event.kmpFile)
+            is AnalyzeContract.AnalyzeEvent.UploadFilesResult -> viewModelScope.launch {
+                event
+                    .result
+                    .onSuccess {
+                        it.forEach {
+                            uploadImagesFlow.emit(it)
+                        }
+                    }
+                // TODO: handle errors
             }
         }
     }

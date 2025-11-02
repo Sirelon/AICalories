@@ -31,10 +31,9 @@ import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.di.appModule
 import com.sirelon.aicalories.di.networkModule
-import com.sirelon.aicalories.platform.PlatformTargets
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
-import com.sirelon.aicalories.features.media.selectedFilesLabel
+import com.sirelon.aicalories.platform.PlatformTargets
 import org.koin.compose.KoinApplication
 
 @Composable
