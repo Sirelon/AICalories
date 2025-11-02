@@ -1,9 +1,11 @@
 package com.sirelon.aicalories.features.analyze.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -20,19 +21,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MediumFlexibleTopAppBar
-import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -54,13 +54,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.mohamedrejeb.calf.core.LocalPlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.permissions.Permission
-import com.sirelon.aicalories.designsystem.AppDivider
+import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.features.analyze.data.AnalyzeResult
 import com.sirelon.aicalories.features.analyze.presentation.AnalyzeContract
@@ -75,7 +74,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun AnalyzeScreen(
     viewModel: AnalyzeViewModel = rememberAnalyzeViewModel(),
-    onBack: () -> Unit,
+    onBack: (() -> Unit)? = null,
+    onResultConfirmed: (() -> Unit)? = null,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -85,6 +85,12 @@ fun AnalyzeScreen(
         isIosDevice = isIosDevice,
     )
     val files = viewModel.images
+    val fileEntries = files.entries.toList()
+    val hasResult = state.result != null
+    val canInteractWithPhotos = !hasResult && !state.isLoading
+    val canAddMorePhotos = files.size < MAX_PHOTO_COUNT
+    val canOpenPicker = canInteractWithPhotos && canAddMorePhotos
+    val canSubmit = !state.isLoading && (state.prompt.isNotBlank() || fileEntries.isNotEmpty())
 
     val photoPicker =
         rememberPhotoPickerController(
@@ -94,85 +100,146 @@ fun AnalyzeScreen(
             },
         )
     var showSourceDialog by remember { mutableStateOf(false) }
+    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                is AnalyzeContract.AnalyzeEffect.ShowMessage -> {
-                    snackbarHostState.showSnackbar(effect.message)
-                }
+                is AnalyzeContract.AnalyzeEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.message)
             }
         }
     }
 
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    LaunchedEffect(hasResult) {
+        if (hasResult) {
+            showSourceDialog = false
+        }
+    }
 
     Scaffold(
-        modifier = Modifier
-            .safeDrawingPadding()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             AnalyzeTopBar(
+                hasResult = hasResult,
                 onBack = onBack,
-                scrollBehavior = scrollBehavior,
+                scrollBehavior = topAppBarScrollBehavior,
             )
         },
         bottomBar = {
             AnalyzeBottomBar(
-                enabled = state.prompt.isNotBlank() && !state.isLoading,
+                hasResult = hasResult,
+                canSubmit = canSubmit,
                 isLoading = state.isLoading,
                 onAnalyze = { viewModel.onEvent(AnalyzeContract.AnalyzeEvent.Submit) },
+                onConfirm = onResultConfirmed,
             )
         },
     ) { innerPadding ->
-        val scrollState = rememberScrollState()
-        Column(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .background(AppTheme.colors.background)
                 .padding(innerPadding)
-                .padding(horizontal = 24.dp, vertical = 24.dp)
-                .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+                .padding(
+                    horizontal = AppDimens.Spacing.xl6,
+                    vertical = AppDimens.Spacing.xl6,
+                ),
         ) {
-            PhotosSection(
-                files = files.entries.toList(),
-                onAddPhoto = {
-                    if (!state.isLoading && files.size < MAX_PHOTO_COUNT) {
-                        showSourceDialog = true
+            val isLandscape = maxWidth > maxHeight
+            val spacing = AppDimens.Spacing.xl6
+            val scrollState = rememberScrollState()
+            if (isLandscape) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState),
+                    horizontalArrangement = Arrangement.spacedBy(spacing),
+                ) {
+                    PhotosSection(
+                        modifier = Modifier.weight(1f),
+                        files = fileEntries,
+                        interactionEnabled = canInteractWithPhotos,
+                        canAddMore = canAddMorePhotos,
+                        hasResult = hasResult,
+                        onAddPhoto = {
+                            if (canOpenPicker) {
+                                showSourceDialog = true
+                            }
+                        },
+                    )
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(spacing),
+                    ) {
+                        if (!hasResult) {
+                            DescriptionSection(
+                                value = state.prompt,
+                                enabled = !state.isLoading,
+                                onValueChange = {
+                                    viewModel.onEvent(AnalyzeContract.AnalyzeEvent.PromptChanged(it))
+                                },
+                            )
+                        } else {
+                            state.result?.let {
+                                AnalyzeResultSection(result = it)
+                            }
+                        }
+
+                        state.errorMessage?.let { error ->
+                            ErrorMessage(text = error)
+                        }
+
+                        if (state.isLoading) {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        }
                     }
-                },
-                canAddMore = files.size < MAX_PHOTO_COUNT,
-            )
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState),
+                    verticalArrangement = Arrangement.spacedBy(spacing),
+                ) {
+                    PhotosSection(
+                        files = fileEntries,
+                        interactionEnabled = canInteractWithPhotos,
+                        canAddMore = canAddMorePhotos,
+                        hasResult = hasResult,
+                        onAddPhoto = {
+                            if (canOpenPicker) {
+                                showSourceDialog = true
+                            }
+                        },
+                    )
 
-            DescriptionSection(
-                value = state.prompt,
-                enabled = !state.isLoading,
-                onValueChange = {
-                    viewModel.onEvent(AnalyzeContract.AnalyzeEvent.PromptChanged(it))
-                },
-            )
+                    if (!hasResult) {
+                        DescriptionSection(
+                            value = state.prompt,
+                            enabled = !state.isLoading,
+                            onValueChange = {
+                                viewModel.onEvent(AnalyzeContract.AnalyzeEvent.PromptChanged(it))
+                            },
+                        )
+                    } else {
+                        state.result?.let {
+                            AnalyzeResultSection(result = it)
+                        }
+                    }
 
-            state.errorMessage?.let { error ->
-                Text(
-                    text = error,
-                    style = AppTheme.typography.caption,
-                    color = AppTheme.colors.error,
-                )
+                    state.errorMessage?.let { error ->
+                        ErrorMessage(text = error)
+                    }
+
+                    if (state.isLoading) {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    }
+
+                    Spacer(modifier = Modifier.height(AppDimens.Size.xl16))
+                }
             }
-
-            state.result?.let { result ->
-                ResultCard(result = result)
-            }
-
-            if (state.isLoading) {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-
-            Spacer(modifier = Modifier.height(80.dp))
         }
     }
 
@@ -206,65 +273,103 @@ private fun rememberAnalyzeViewModel(): AnalyzeViewModel = koinViewModel<Analyze
         }
     }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AnalyzeTopBar(
-    onBack: () -> Unit,
+    hasResult: Boolean,
+    onBack: (() -> Unit)?,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    MediumFlexibleTopAppBar(
-        scrollBehavior = scrollBehavior,
+    val title = if (hasResult) "Analysis Result" else "Add Photos"
+    val subtitle = if (hasResult) "Review detected items" else "Upload 1-3 images"
+    MediumTopAppBar(
         title = {
-            Text("Add photos")
-        },
-        subtitle = {
-            Text(text = "Upload 1-3 images")
-        },
-        navigationIcon = {
-            IconButton(
-                onClick = onBack,
+            Column(
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs),
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
+                Text(
+                    text = title,
+                    style = AppTheme.typography.title,
+                )
+                Text(
+                    text = subtitle,
+                    style = AppTheme.typography.caption,
+                    color = AppTheme.colors.onSurface,
                 )
             }
-        }
+        },
+        navigationIcon = {
+            if (onBack != null) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "Back",
+                    )
+                }
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = AppTheme.colors.surface,
+            titleContentColor = AppTheme.colors.onSurface,
+            navigationIconContentColor = AppTheme.colors.onSurface,
+        ),
+        scrollBehavior = scrollBehavior,
     )
 }
 
 @Composable
 private fun AnalyzeBottomBar(
-    enabled: Boolean,
+    hasResult: Boolean,
+    canSubmit: Boolean,
     isLoading: Boolean,
     onAnalyze: () -> Unit,
+    onConfirm: (() -> Unit)?,
 ) {
     Surface(
         color = AppTheme.colors.surface,
         contentColor = AppTheme.colors.onSurface,
-        shadowElevation = 8.dp,
+        tonalElevation = AppDimens.Size.xs,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(
+                    horizontal = AppDimens.Spacing.xl6,
+                    vertical = AppDimens.Spacing.xl4,
+                ),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl4),
         ) {
-            AppDivider()
+            HorizontalDivider(color = AppTheme.colors.outline.copy(alpha = 0.12f))
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                enabled = enabled,
-                onClick = onAnalyze,
+                    .height(AppDimens.Size.xl13),
+                enabled = if (hasResult) onConfirm != null else canSubmit,
+                onClick = {
+                    if (hasResult) {
+                        onConfirm?.invoke()
+                    } else {
+                        onAnalyze()
+                    }
+                },
             ) {
-                if (isLoading) {
+                if (hasResult) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                    )
+                    Spacer(modifier = Modifier.width(AppDimens.Spacing.xl3))
+                    Text(
+                        text = "Confirm & Save",
+                        style = AppTheme.typography.title,
+                    )
+                } else if (isLoading) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(AppDimens.Size.xl6),
+                        strokeWidth = AppDimens.BorderWidth.s,
                         color = AppTheme.colors.onPrimary,
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(AppDimens.Spacing.xl3))
                     Text(
                         text = "Analyzing…",
                         style = AppTheme.typography.title,
@@ -282,33 +387,51 @@ private fun AnalyzeBottomBar(
 
 @Composable
 private fun PhotosSection(
+    modifier: Modifier = Modifier,
     files: List<Map.Entry<KmpFile, Double>>,
-    onAddPhoto: () -> Unit,
+    interactionEnabled: Boolean,
     canAddMore: Boolean,
+    hasResult: Boolean,
+    onAddPhoto: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
+        color = AppTheme.colors.surface,
+        tonalElevation = AppDimens.Size.xs,
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppDimens.Spacing.xl5),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl4),
         ) {
-            Text(
-                text = "Photos",
-                style = AppTheme.typography.title,
-            )
-            Text(
-                text = "Tap to add images",
-                style = AppTheme.typography.caption,
-                color = AppTheme.colors.onSurface,
+            Column(
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs),
+            ) {
+                Text(
+                    text = "Photos",
+                    style = AppTheme.typography.title,
+                )
+                val helperText = if (hasResult) {
+                    "Uploads are locked after analysis."
+                } else {
+                    "Tap to add images"
+                }
+                Text(
+                    text = helperText,
+                    style = AppTheme.typography.caption,
+                    color = AppTheme.colors.onSurface,
+                )
+            }
+
+            PhotosGrid(
+                files = files,
+                canAddMore = interactionEnabled && canAddMore,
+                interactionEnabled = interactionEnabled,
+                onAddPhoto = onAddPhoto,
             )
         }
-
-        PhotosGrid(
-            files = files,
-            canAddMore = canAddMore,
-            onAddPhoto = onAddPhoto,
-        )
     }
 }
 
@@ -316,21 +439,24 @@ private fun PhotosSection(
 private fun PhotosGrid(
     files: List<Map.Entry<KmpFile, Double>>,
     canAddMore: Boolean,
+    interactionEnabled: Boolean,
     onAddPhoto: () -> Unit,
 ) {
     val totalSlots = when {
-        canAddMore -> (files.size + 1).coerceAtLeast(3)
-        else -> files.size.coerceAtLeast(3)
+        canAddMore -> (files.size + 1).coerceAtLeast(MIN_GRID_SIZE)
+        else -> files.size.coerceAtLeast(MIN_GRID_SIZE)
     }
+
+    val rows = (totalSlots + GRID_COLUMNS - 1) / GRID_COLUMNS
+
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
     ) {
-        val rows = (totalSlots + GRID_COLUMNS - 1) / GRID_COLUMNS
         repeat(rows) { rowIndex ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
             ) {
                 repeat(GRID_COLUMNS) { columnIndex ->
                     val slotIndex = rowIndex * GRID_COLUMNS + columnIndex
@@ -355,6 +481,7 @@ private fun PhotosGrid(
                                 modifier = Modifier
                                     .weight(1f)
                                     .aspectRatio(1f),
+                                enabled = interactionEnabled,
                                 onClick = onAddPhoto,
                             )
                         } else {
@@ -377,9 +504,10 @@ private fun PhotoPreview(
     progress: Double,
     file: KmpFile,
 ) {
-    Card(
+    Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
+        tonalElevation = AppDimens.Size.xs,
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -390,7 +518,7 @@ private fun PhotoPreview(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
             )
-            if (progress < 100.0) {
+            if (progress < COMPLETE_PERCENTAGE) {
                 UploadStatusIndicator(progress = progress)
             }
         }
@@ -401,7 +529,7 @@ private fun PhotoPreview(
 private fun BoxScope.UploadStatusIndicator(
     progress: Double,
 ) {
-    val percent = progress.coerceIn(0.0, 100.0)
+    val percent = progress.coerceIn(0.0, COMPLETE_PERCENTAGE)
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -413,11 +541,14 @@ private fun BoxScope.UploadStatusIndicator(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+                .padding(
+                    horizontal = AppDimens.Spacing.xl,
+                    vertical = AppDimens.Spacing.m,
+                ),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.s),
         ) {
             LinearProgressIndicator(
-                progress = { (percent / 100f).toFloat() },
+                progress = { (percent / COMPLETE_PERCENTAGE).toFloat() },
                 modifier = Modifier.fillMaxWidth(),
                 color = Color.White,
                 trackColor = Color.White.copy(alpha = 0.3f),
@@ -432,15 +563,22 @@ private fun BoxScope.UploadStatusIndicator(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddPhotoCell(
     modifier: Modifier,
+    enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    OutlinedCard(
+    Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
+        enabled = enabled,
         modifier = modifier,
+        shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
+        border = BorderStroke(
+            width = AppDimens.BorderWidth.l,
+            color = AppTheme.colors.outline.copy(alpha = if (enabled) 1f else 0.4f),
+        ),
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -450,7 +588,7 @@ private fun AddPhotoCell(
                 imageVector = Icons.Filled.Add,
                 tint = AppTheme.colors.onSurface.copy(alpha = 0.6f),
                 contentDescription = "Add photo",
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(AppDimens.Size.xl8),
             )
         }
     }
@@ -462,56 +600,108 @@ private fun DescriptionSection(
     enabled: Boolean,
     onValueChange: (String) -> Unit,
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+    Surface(
+        shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
+        color = AppTheme.colors.surface,
+        tonalElevation = AppDimens.Size.xs,
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppDimens.Spacing.xl5),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
             Text(
-                text = "Add description",
+                text = "Add description (optional)",
                 style = AppTheme.typography.title,
             )
-            Text(
-                text = "(optional)",
-                style = AppTheme.typography.caption,
-                color = AppTheme.colors.onSurface,
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = value,
+                onValueChange = onValueChange,
+                enabled = enabled,
+                minLines = 4,
+                label = { Text("e.g., Breakfast at home, restaurant meal...") },
             )
         }
-
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = value,
-            onValueChange = onValueChange,
-            enabled = enabled,
-            minLines = 4,
-            label = { Text("e.g., Breakfast at home, restaurant meal...") },
-        )
     }
 }
 
 @Composable
-private fun ResultCard(result: AnalyzeResult) {
-    Card(
+private fun AnalyzeResultSection(
+    result: AnalyzeResult,
+) {
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl4),
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+        Text(
+            text = "Detected insights",
+            style = AppTheme.typography.title,
+        )
+        Surface(
+            shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
+            tonalElevation = AppDimens.Size.xs,
         ) {
-            Text(
-                text = result.summary,
-                style = AppTheme.typography.title,
-            )
-            Text(
-                text = result.recommendation,
-                style = AppTheme.typography.body,
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(AppDimens.Spacing.xl5),
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
+            ) {
+                Text(
+                    text = "Summary",
+                    style = AppTheme.typography.label,
+                )
+                Text(
+                    text = result.summary,
+                    style = AppTheme.typography.body,
+                )
+            }
         }
+        Surface(
+            shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
+            border = BorderStroke(
+                width = AppDimens.BorderWidth.s,
+                color = AppTheme.colors.primary.copy(alpha = 0.3f),
+            ),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(AppDimens.Spacing.xl5),
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
+            ) {
+                Text(
+                    text = "Recommendation",
+                    style = AppTheme.typography.label,
+                    color = AppTheme.colors.primary,
+                )
+                Text(
+                    text = result.recommendation,
+                    style = AppTheme.typography.body,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ErrorMessage(
+    text: String,
+) {
+    Surface(
+        shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
+        color = AppTheme.colors.error.copy(alpha = 0.1f),
+        contentColor = AppTheme.colors.error,
+    ) {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppDimens.Spacing.xl4),
+            text = text,
+            style = AppTheme.typography.caption,
+        )
     }
 }
 
@@ -532,7 +722,7 @@ private fun PhotoSourceDialog(
         },
         text = {
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
             ) {
                 TextButton(
                     onClick = onPickFromGallery,
@@ -557,4 +747,6 @@ private fun PhotoSourceDialog(
 }
 
 private const val GRID_COLUMNS = 3
+private const val MIN_GRID_SIZE = 3
 private const val MAX_PHOTO_COUNT = 3
+private const val COMPLETE_PERCENTAGE = 100.0

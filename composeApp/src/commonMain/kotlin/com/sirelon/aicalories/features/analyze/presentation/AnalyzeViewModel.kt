@@ -68,8 +68,8 @@ class AnalyzeViewModel(
 
     private fun analyze() {
         val prompt = state.value.prompt.trim()
-        if (prompt.isEmpty()) {
-            postEffect(effect = AnalyzeContract.AnalyzeEffect.ShowMessage("Describe your meal first."))
+        if (prompt.isEmpty() && images.isEmpty()) {
+            postEffect(effect = AnalyzeContract.AnalyzeEffect.ShowMessage("Add a description or at least one photo."))
             return
         }
 
@@ -83,7 +83,7 @@ class AnalyzeViewModel(
 
 
             repository
-                .analyzeDescription(prompt)
+                .analyzeDescription(prompt = prompt.ifBlank { "Meal photo" })
                 .onSuccess { result ->
                     setState {
                         it.copy(
