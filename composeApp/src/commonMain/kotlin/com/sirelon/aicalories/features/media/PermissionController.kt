@@ -127,7 +127,12 @@ fun rememberPermissionController(
             }
 
             override fun openSettings() {
-                uiState.value = uiState.value.copy(showSettings = false)
+                uiState.value = uiState.value.copy(
+                    showSettings = false,
+                    showRationale = false,
+                    denialCount = 0,
+                )
+                lastHandledDenial.value = 0
                 permissionState.openAppSettings()
             }
         }
