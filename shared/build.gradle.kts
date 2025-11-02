@@ -33,6 +33,14 @@ val supabaseKey =
     resolveSecret("SUPABASE_KEY", "supabase.key")
         ?: error("Missing Supabase anon key. Set SUPABASE_KEY in local.properties or provide it as a Gradle/environment property.")
 
+val defaultEmail =
+    resolveSecret("SUPABASE_DEFAULT_EMAIL", "supabase.default.email")
+        ?: "test@sirelon.org"
+
+val defaultPassword =
+    resolveSecret("SUPABASE_DEFAULT_PASSWORD", "supabase.default.password")
+        ?: "testMe"
+
 kotlin {
     androidTarget {
         compilerOptions {
@@ -87,5 +95,7 @@ buildkonfig {
     defaultConfigs {
         buildConfigField(STRING, "SUPABASE_URL", supabaseUrl)
         buildConfigField(STRING, "SUPABASE_KEY", supabaseKey)
+        buildConfigField(STRING, "SUPABASE_DEFAULT_EMAIL", defaultEmail)
+        buildConfigField(STRING, "SUPABASE_DEFAULT_PASSWORD", defaultPassword)
     }
 }

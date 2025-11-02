@@ -7,19 +7,11 @@ import com.mohamedrejeb.calf.io.KmpFile
 import com.sirelon.aicalories.features.analyze.common.BaseViewModel
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository
 import io.github.jan.supabase.storage.UploadStatus
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class AnalyzeViewModel(
     private val repository: AnalyzeRepository,
 ) : BaseViewModel<AnalyzeContract.AnalyzeState, AnalyzeContract.AnalyzeEvent, AnalyzeContract.AnalyzeEffect>() {
@@ -28,18 +20,8 @@ class AnalyzeViewModel(
 
     val images = mutableStateMapOf<KmpFile, Double>()
 
-    val uploadImagesFlow = MutableStateFlow<KmpFile?>(null)
-
     // TODO:
     lateinit var platformContext: PlatformContext
-
-    init {
-        uploadImagesFlow
-            .filterNotNull()
-            .flatMapLatest(::uploadFileFlow)
-            .catch { it.printStackTrace() }
-            .launchIn(viewModelScope)
-    }
 
     override fun onEvent(event: AnalyzeContract.AnalyzeEvent) {
         when (event) {
@@ -51,13 +33,17 @@ class AnalyzeViewModel(
             }
 
             AnalyzeContract.AnalyzeEvent.Submit -> analyze()
-            is AnalyzeContract.AnalyzeEvent.UploadFilesResult -> viewModelScope.launch {
-                event
-                    .result
-                    .onSuccess {
-                        it
-                            .map { async { uploadImagesFlow.emit(it) } }
-                            .awaitAll()
+            is AnalyzeContract.AnalyzeEvent.UploadFilesResult -> {
+                event.result
+                    .onSuccess { selectedFiles ->
+                        selectedFiles.forEach { file ->
+                            if (!images.containsKey(file)) {
+                                images[file] = 0.0
+                            }
+                            viewModelScope.launch {
+                                uploadFileFlow(file).collect()
+                            }
+                        }
                     }
                 // TODO: handle errors
             }
@@ -74,7 +60,7 @@ class AnalyzeViewModel(
                     } else 0.0
                 }
 
-                is UploadStatus.Success -> 1.0
+                is UploadStatus.Success -> 100.0
             }
 
             images[file] = percent

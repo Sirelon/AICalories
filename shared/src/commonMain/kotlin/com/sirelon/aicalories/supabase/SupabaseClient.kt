@@ -3,10 +3,9 @@ package com.sirelon.aicalories.supabase
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.currentSessionOrNull
-import io.github.jan.supabase.auth.retrieveUserForCurrentSession
-import io.github.jan.supabase.auth.signInAnonymously
+import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.storage.UploadStatus
@@ -17,6 +16,8 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 private const val STORAGE_BUCKET_NAME = "aicalories"
 
@@ -34,7 +35,7 @@ class SupabaseClient {
 
     fun uploadFile(path: String, byteArray: ByteArray): Flow<UploadStatus> {
         return flow {
-            val userId = ensureAnonymousUserId()
+            val userId = ensureAuthenticatedUserId()
             val storagePath = buildStoragePath(userId, path)
 
             emitAll(
@@ -48,38 +49,68 @@ class SupabaseClient {
 
     private val sessionMutex = Mutex()
 
-    private suspend fun ensureAnonymousUserId(): String? {
+    private suspend fun ensureAuthenticatedUserId(): String {
         val authPlugin = client.auth
         authPlugin.awaitInitialization()
 
         return sessionMutex.withLock {
-            val currentSession = authPlugin.currentSessionOrNull()
-            when {
-                currentSession?.user != null -> currentSession.user?.id
-                currentSession == null -> {
-                    authPlugin.signInAnonymously()
-                    authPlugin.currentSessionOrNull()?.user?.id ?: runCatching {
-                        authPlugin.retrieveUserForCurrentSession()
-                    }.getOrNull()?.id
-                }
-
-                else -> runCatching {
-                    authPlugin.retrieveUserForCurrentSession()
-                }.getOrNull()?.id
+            retrieveUserId(authPlugin) ?: run {
+                authenticateWithDefaultCredentials(authPlugin)
+                retrieveUserId(authPlugin)
             }
-        }
+        } ?: error("Unable to determine Supabase user id after authentication")
     }
 
-    private fun buildStoragePath(userId: String?, originalPath: String): String {
+    private suspend fun authenticateWithDefaultCredentials(authPlugin: Auth) {
+        val email = SupabaseConfig.SUPABASE_DEFAULT_EMAIL
+        val password = SupabaseConfig.SUPABASE_DEFAULT_PASSWORD
+
+        runCatching {
+            authPlugin.signInWith(Email) {
+                this.email = email
+                this.password = password
+            }
+        }.recoverCatching { signInError ->
+            if (signInError is RestException) {
+                // In case the seed user was removed, create it on the fly.
+                runCatching {
+                    authPlugin.signUpWith(Email) {
+                        this.email = email
+                        this.password = password
+                    }
+                }.onFailure { signUpError ->
+                    throw signUpError
+                }
+
+                authPlugin.signInWith(Email) {
+                    this.email = email
+                    this.password = password
+                }
+            } else {
+                throw signInError
+            }
+        }.getOrThrow()
+    }
+
+    private suspend fun retrieveUserId(authPlugin: Auth): String? {
+        return authPlugin.currentSessionOrNull()?.user?.id ?: runCatching {
+            authPlugin.retrieveUserForCurrentSession().id
+        }.getOrNull()
+    }
+
+    @OptIn(ExperimentalUuidApi::class)
+    private fun buildStoragePath(userId: String, originalPath: String): String {
         val sanitizedName = originalPath
             .substringAfterLast('/')
             .substringAfterLast('\\')
             .ifBlank { originalPath }
+            .trim()
 
-        return if (!userId.isNullOrBlank()) {
-            "$userId/$sanitizedName"
-        } else {
-            sanitizedName
-        }
+        val safeName = sanitizedName
+            .replace(Regex("""[^\w.\-]"""), "_")
+            .takeIf { it.isNotBlank() }
+            ?: "upload_${Uuid.random()}"
+
+        return "$userId/${Uuid.random()}_$safeName"
     }
 }
