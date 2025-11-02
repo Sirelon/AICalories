@@ -16,9 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -130,7 +130,6 @@ fun AnalyzeScreen(
     val hasSeparatingHinge = adaptiveInfo.windowPosture.separatingVerticalHingeBounds.isNotEmpty()
     val isMediumWidth = windowDpSize.width >= WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND.dp
     val useSplitLayout = isMediumWidth && !hasSeparatingHinge
-    val contentSpacing = AppDimens.Spacing.xl6
 
     Scaffold(
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
@@ -152,22 +151,16 @@ fun AnalyzeScreen(
             )
         },
     ) { innerPadding ->
-        val baseModifier =
-            Modifier
+
+        LazyVerticalGrid(
+            modifier = Modifier
                 .fillMaxSize()
                 .background(AppTheme.colors.background)
-                .padding(innerPadding)
-                .padding(horizontal = contentSpacing, vertical = contentSpacing)
-        val scrollState = rememberScrollState()
-
-        if (useSplitLayout) {
-            Row(
-                modifier = baseModifier.verticalScroll(scrollState),
-                horizontalArrangement = Arrangement.spacedBy(contentSpacing),
-                verticalAlignment = Alignment.Top,
-            ) {
+                .padding(innerPadding),
+            columns = GridCells.Fixed(if (useSplitLayout) 2 else 1)
+        ) {
+            item {
                 PhotosSection(
-                    modifier = Modifier.weight(1f),
                     files = fileEntries,
                     interactionEnabled = canInteractWithPhotos,
                     canAddMore = canAddMorePhotos,
@@ -178,34 +171,10 @@ fun AnalyzeScreen(
                         }
                     },
                 )
-
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(contentSpacing),
-                ) {
-                    AnalyzeFields(hasResult, state, viewModel::onEvent)
-                }
             }
-        } else {
-            Column(
-                modifier = baseModifier.verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(contentSpacing),
-            ) {
-                PhotosSection(
-                    files = fileEntries,
-                    interactionEnabled = canInteractWithPhotos,
-                    canAddMore = canAddMorePhotos,
-                    hasResult = hasResult,
-                    onAddPhoto = {
-                        if (canOpenPicker) {
-                            showSourceDialog = true
-                        }
-                    },
-                )
 
+            item {
                 AnalyzeFields(hasResult, state, viewModel::onEvent)
-
-                Spacer(modifier = Modifier.height(AppDimens.Size.xl16))
             }
         }
     }
