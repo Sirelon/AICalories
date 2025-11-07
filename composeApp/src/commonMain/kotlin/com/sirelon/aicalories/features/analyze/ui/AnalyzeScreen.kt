@@ -70,6 +70,7 @@ import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.features.analyze.data.AnalyzeResult
 import com.sirelon.aicalories.features.analyze.presentation.AnalyzeContract
 import com.sirelon.aicalories.features.analyze.presentation.AnalyzeViewModel
+import com.sirelon.aicalories.features.analyze.presentation.UploadItem
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
@@ -86,13 +87,13 @@ fun AnalyzeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val permissionController = rememberPermissionController(permission = Permission.Camera)
-    val files = viewModel.images
-    val fileEntries = files.entries.toList()
+    val uploads = state.uploads
+    val fileEntries = uploads.entries.toList()
     val hasResult = state.result != null
     val canInteractWithPhotos = !hasResult && !state.isLoading
-    val canAddMorePhotos = files.size < MAX_PHOTO_COUNT
+    val canAddMorePhotos = uploads.size < MAX_PHOTO_COUNT
     val canOpenPicker = canInteractWithPhotos && canAddMorePhotos
-    val canSubmit = !state.isLoading && (state.prompt.isNotBlank() || fileEntries.isNotEmpty())
+    val canSubmit = state.canSubmit
 
     val photoPicker =
         rememberPhotoPickerController(
@@ -332,7 +333,7 @@ private fun AnalyzeBottomBar(
 @Composable
 private fun PhotosSection(
     modifier: Modifier = Modifier,
-    files: List<Map.Entry<KmpFile, Double>>,
+    files: List<Map.Entry<KmpFile, UploadItem>>,
     interactionEnabled: Boolean,
     canAddMore: Boolean,
     hasResult: Boolean,
@@ -381,7 +382,7 @@ private fun PhotosSection(
 
 @Composable
 private fun PhotosGrid(
-    files: List<Map.Entry<KmpFile, Double>>,
+    files: List<Map.Entry<KmpFile, UploadItem>>,
     canAddMore: Boolean,
     interactionEnabled: Boolean,
     onAddPhoto: () -> Unit,
@@ -417,7 +418,7 @@ private fun PhotosGrid(
                                 modifier = Modifier
                                     .weight(1f)
                                     .aspectRatio(1f),
-                                progress = entry.value,
+                                progress = entry.value.progress,
                                 file = entry.key,
                             )
                         } else if (canAddMore) {
