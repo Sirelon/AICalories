@@ -1,5 +1,6 @@
 package com.sirelon.aicalories.features.analyze.presentation
 
+import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
 import com.sirelon.aicalories.features.analyze.data.AnalyzeResult
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository.UploadedFile
@@ -25,7 +26,10 @@ interface AnalyzeContract {
     sealed interface AnalyzeEvent {
         data class PromptChanged(val value: String) : AnalyzeEvent
 
-        data class UploadFilesResult(val result: Result<List<KmpFile>>) : AnalyzeEvent
+        data class UploadFilesResult(
+            val platformContext: PlatformContext,
+            val result: Result<List<KmpFile>>,
+        ) : AnalyzeEvent
         data object Submit : AnalyzeEvent
     }
 
