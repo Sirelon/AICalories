@@ -5,6 +5,7 @@ import com.sirelon.aicalories.supabase.model.FoodEntryRecord
 import com.sirelon.aicalories.supabase.model.FoodEntryToFileInsert
 import com.sirelon.aicalories.supabase.model.StorageObjectRecord
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
@@ -13,10 +14,12 @@ import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.functions.Functions
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.storage.UploadStatus
 import io.github.jan.supabase.storage.storage
 import io.github.jan.supabase.storage.uploadAsFlow
+import io.ktor.client.plugins.HttpTimeout
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -28,11 +31,19 @@ import kotlin.uuid.Uuid
 private const val STORAGE_BUCKET_NAME = "aicalories"
 
 class SupabaseClient {
+    @OptIn(SupabaseInternal::class)
     private val client: SupabaseClient by lazy {
         createSupabaseClient(
             supabaseUrl = SupabaseConfig.SUPABASE_URL,
             supabaseKey = SupabaseConfig.SUPABASE_KEY
         ) {
+            httpConfig {
+                install(HttpTimeout) {
+                    requestTimeoutMillis = 60_000
+                    connectTimeoutMillis = 15_000
+                    socketTimeoutMillis = 60_000
+                }
+            }
             install(Auth)
             install(Postgrest)
             install(Storage)
@@ -43,6 +54,20 @@ class SupabaseClient {
     fun uploadFile(path: String, byteArray: ByteArray): Flow<UploadStatus> {
         return flow {
             val userId = ensureAuthenticatedUserId()
+
+            runCatching {
+                client
+                    .from("food_entry")
+                    .insert(
+                        mapOf(
+                            "note" to "sample test",
+                            "user_id" to userId,
+                        )
+                    )
+            }.onFailure { error ->
+                println("SupabaseClient: Failed to insert food_entry note due to ${error.message}")
+            }
+
             val storagePath = buildStoragePath(userId, path)
 
             emitAll(
