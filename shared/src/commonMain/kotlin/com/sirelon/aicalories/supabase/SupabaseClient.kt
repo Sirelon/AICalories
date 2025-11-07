@@ -14,7 +14,6 @@ import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.functions.Functions
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.storage.UploadStatus
 import io.github.jan.supabase.storage.storage
@@ -54,19 +53,6 @@ class SupabaseClient {
     fun uploadFile(path: String, byteArray: ByteArray): Flow<UploadStatus> {
         return flow {
             val userId = ensureAuthenticatedUserId()
-
-            runCatching {
-                client
-                    .from("food_entry")
-                    .insert(
-                        mapOf(
-                            "note" to "sample test",
-                            "user_id" to userId,
-                        )
-                    )
-            }.onFailure { error ->
-                println("SupabaseClient: Failed to insert food_entry note due to ${error.message}")
-            }
 
             val storagePath = buildStoragePath(userId, path)
 
