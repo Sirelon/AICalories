@@ -79,12 +79,13 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AnalyzeScreen(
-    viewModel: AnalyzeViewModel = rememberAnalyzeViewModel(),
+    viewModel: AnalyzeViewModel = koinViewModel(),
     onBack: (() -> Unit)? = null,
     onResultConfirmed: (() -> Unit)? = null,
 ) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val platformContext = LocalPlatformContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val permissionController = rememberPermissionController(permission = Permission.Camera)
     val uploads = state.uploads
@@ -99,7 +100,12 @@ fun AnalyzeScreen(
         rememberPhotoPickerController(
             permissionController = permissionController,
             onResult = {
-                viewModel.onEvent(AnalyzeContract.AnalyzeEvent.UploadFilesResult(it))
+                viewModel.onEvent(
+                    AnalyzeContract.AnalyzeEvent.UploadFilesResult(
+                        platformContext = platformContext,
+                        result = it,
+                    )
+                )
             },
         )
     var showSourceDialog by remember { mutableStateOf(false) }
@@ -222,15 +228,6 @@ private fun AnalyzeFields(
         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
     }
 }
-
-@Composable
-private fun rememberAnalyzeViewModel(): AnalyzeViewModel = koinViewModel<AnalyzeViewModel>()
-    .also { viewModel ->
-        val context = LocalPlatformContext.current
-        LaunchedEffect(Unit) {
-            viewModel.platformContext = context
-        }
-    }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
