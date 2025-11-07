@@ -1,4 +1,4 @@
-package com.sirelon.aicalories.features.analyze.common
+package com.sirelon.aicalories.features.common.presentation
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,6 +26,4 @@ abstract class BaseViewModel<State, Event, Effect> : ViewModel() {
     fun postEffect(effect: Effect) {
         _effects.tryEmit(effect)
     }
-
-
 }

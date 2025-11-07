@@ -3,7 +3,7 @@ package com.sirelon.aicalories.features.analyze.presentation
 import androidx.lifecycle.viewModelScope
 import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
-import com.sirelon.aicalories.features.analyze.common.BaseViewModel
+import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository.UploadedFile
 import io.github.jan.supabase.storage.UploadStatus
