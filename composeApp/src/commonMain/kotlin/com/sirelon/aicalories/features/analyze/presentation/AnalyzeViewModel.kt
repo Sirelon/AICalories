@@ -18,9 +18,6 @@ class AnalyzeViewModel(
 
     override fun initialState(): AnalyzeContract.AnalyzeState = AnalyzeContract.AnalyzeState()
 
-    // TODO:
-    lateinit var platformContext: PlatformContext
-
     override fun onEvent(event: AnalyzeContract.AnalyzeEvent) {
         when (event) {
             is AnalyzeContract.AnalyzeEvent.PromptChanged -> {
@@ -39,7 +36,10 @@ class AnalyzeViewModel(
                         selectedFiles.forEach { file ->
                             addUploadPlaceholder(file)
                             viewModelScope.launch {
-                                uploadFileFlow(file).collect()
+                                uploadFileFlow(
+                                    platformContext = event.platformContext,
+                                    file = file,
+                                ).collect()
                             }
                         }
                     }
@@ -48,7 +48,10 @@ class AnalyzeViewModel(
         }
     }
 
-    private fun uploadFileFlow(file: KmpFile): Flow<UploadStatus> = repository
+    private fun uploadFileFlow(
+        platformContext: PlatformContext,
+        file: KmpFile,
+    ): Flow<UploadStatus> = repository
         .uploadFile(platformContext = platformContext, file = file)
         .onEach { status ->
             val percent = when (status) {
