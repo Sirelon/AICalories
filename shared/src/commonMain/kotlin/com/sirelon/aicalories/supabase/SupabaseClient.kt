@@ -1,5 +1,9 @@
 package com.sirelon.aicalories.supabase
 
+import com.sirelon.aicalories.supabase.model.FoodEntryInsert
+import com.sirelon.aicalories.supabase.model.FoodEntryRecord
+import com.sirelon.aicalories.supabase.model.FoodEntryToFileInsert
+import com.sirelon.aicalories.supabase.model.StorageObjectRecord
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
@@ -8,6 +12,7 @@ import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.functions.Functions
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.storage.UploadStatus
 import io.github.jan.supabase.storage.storage
@@ -100,6 +105,56 @@ class SupabaseClient {
         }.getOrNull()
     }
 
+    suspend fun createFoodEntry(note: String?): Long {
+        ensureAuthenticatedUserId()
+
+        val result = client
+            .postgrest["food_entry"]
+            .insert(
+                value = FoodEntryInsert(note = note?.ifBlank { null }),
+            ) {
+                select()
+            }
+
+        return result.decodeSingle<FoodEntryRecord>().id
+    }
+
+    suspend fun linkFilesToFoodEntry(foodEntryId: Long, fileIds: List<String>) {
+        if (fileIds.isEmpty()) return
+
+        ensureAuthenticatedUserId()
+
+        client
+            .postgrest["food_entry_to_file"]
+            .insert(
+                values = fileIds.map { fileId ->
+                    FoodEntryToFileInsert(
+                        fileId = fileId,
+                        foodEntryId = foodEntryId,
+                    )
+                },
+            )
+    }
+
+    suspend fun fetchStorageObjectIds(paths: List<String>): Map<String, String> {
+        if (paths.isEmpty()) return emptyMap()
+
+        ensureAuthenticatedUserId()
+
+        val result = client
+            .postgrest
+            .from(schema = "storage", table = "objects")
+            .select {
+                filter {
+                    eq(column = "bucket_id", value = STORAGE_BUCKET_NAME)
+                    isIn(column = "name", values = paths)
+                }
+            }
+
+        return result
+            .decodeList<StorageObjectRecord>()
+            .associate { it.name to it.id }
+    }
     @OptIn(ExperimentalUuidApi::class)
     private fun buildStoragePath(userId: String, originalPath: String): String {
         val sanitizedName = originalPath

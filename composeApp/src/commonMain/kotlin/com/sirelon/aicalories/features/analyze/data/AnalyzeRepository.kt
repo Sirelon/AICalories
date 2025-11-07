@@ -18,6 +18,11 @@ class AnalyzeRepository(
     private val client: SupabaseClient,
 ) {
 
+    data class UploadedFile(
+        val id: String?,
+        val path: String,
+    )
+
     @OptIn(ExperimentalUuidApi::class)
     fun uploadFile(platformContext: PlatformContext, file: KmpFile): Flow<UploadStatus> {
         return flow {
@@ -29,6 +34,31 @@ class AnalyzeRepository(
             )
             emitAll(flow)
         }
+    }
+
+    suspend fun createFoodEntry(note: String?, files: List<UploadedFile>): Result<Long> = runCatching {
+        val sanitizedNote = note?.ifBlank { null }
+        val foodEntryId = client.createFoodEntry(sanitizedNote)
+
+        val missingPaths = files.mapNotNull { file ->
+            file.takeIf { file.id.isNullOrBlank() }?.path
+        }
+
+        val resolvedIds = if (missingPaths.isNotEmpty()) {
+            client.fetchStorageObjectIds(missingPaths)
+        } else {
+            emptyMap()
+        }
+
+        val fileIds = files.mapNotNull { file ->
+            file.id ?: resolvedIds[file.path]
+        }
+
+        if (fileIds.isNotEmpty()) {
+            client.linkFilesToFoodEntry(foodEntryId = foodEntryId, fileIds = fileIds)
+        }
+
+        foodEntryId
     }
 
     suspend fun analyzeDescription(prompt: String): Result<AnalyzeResult> {
