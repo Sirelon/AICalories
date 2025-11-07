@@ -1,6 +1,5 @@
 package com.sirelon.aicalories.supabase
 
-import com.sirelon.aicalories.supabase.model.FoodEntryInsert
 import com.sirelon.aicalories.supabase.model.FoodEntryRecord
 import com.sirelon.aicalories.supabase.model.FoodEntryToFileInsert
 import com.sirelon.aicalories.supabase.model.StorageObjectRecord
@@ -117,12 +116,15 @@ class SupabaseClient {
     }
 
     suspend fun createFoodEntry(note: String?): Long {
-        ensureAuthenticatedUserId()
+        val userId = ensureAuthenticatedUserId()
 
         val result = client
             .postgrest["food_entry"]
             .insert(
-                value = FoodEntryInsert(note = note?.ifBlank { null }),
+                mapOf(
+                    "note" to note?.ifBlank { null },
+                    "user_id" to userId,
+                )
             ) {
                 select()
             }

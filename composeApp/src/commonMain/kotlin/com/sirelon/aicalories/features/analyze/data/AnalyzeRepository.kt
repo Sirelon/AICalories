@@ -7,7 +7,6 @@ import com.mohamedrejeb.calf.io.getPath
 import com.mohamedrejeb.calf.io.readByteArray
 import com.sirelon.aicalories.supabase.SupabaseClient
 import io.github.jan.supabase.storage.UploadStatus
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -59,16 +58,5 @@ class AnalyzeRepository(
         }
 
         foodEntryId
-    }
-
-    suspend fun analyzeDescription(prompt: String): Result<AnalyzeResult> {
-        delay(450)
-
-        return Result.success(
-            AnalyzeResult(
-                summary = "Nutritional insights will appear here soon.",
-                recommendation = "Keep tracking meals like \"$prompt\" to unlock analysis.",
-            ),
-        )
     }
 }

@@ -4,12 +4,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class FoodEntryInsert(
-    @SerialName("note")
-    val note: String? = null,
-)
-
-@Serializable
 internal data class FoodEntryRecord(
     @SerialName("id")
     val id: Long,

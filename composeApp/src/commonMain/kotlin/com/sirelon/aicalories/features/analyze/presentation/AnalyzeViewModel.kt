@@ -116,28 +116,16 @@ class AnalyzeViewModel(
                             errorMessage = error.message ?: "Failed to create food entry.",
                         )
                     }
-                    return@launch
-                }
-
-            repository
-                .analyzeDescription(prompt = prompt.ifBlank { "Meal photo" })
-                .onSuccess { result ->
+                }.onSuccess {
+                    // TODO:
                     setState {
                         it.copy(
                             prompt = "",
                             isLoading = false,
-                            result = result,
+                            result = null,
                         )
                     }
                     postEffect(AnalyzeContract.AnalyzeEffect.ShowMessage("Analysis prepared."))
-                }
-                .onFailure { error ->
-                    setState {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = error.message ?: "Failed to analyze this meal.",
-                        )
-                    }
                 }
         }
     }
