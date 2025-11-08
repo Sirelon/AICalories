@@ -73,6 +73,7 @@ import com.sirelon.aicalories.features.analyze.model.MealEntryUi
 import com.sirelon.aicalories.features.analyze.model.MealSummaryUi
 import com.sirelon.aicalories.features.analyze.presentation.AnalyzeContract
 import com.sirelon.aicalories.features.analyze.presentation.AnalyzeViewModel
+import com.sirelon.aicalories.features.analyze.presentation.UploadItem
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
@@ -81,38 +82,45 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AnalyzeScreen(
-    viewModel: AnalyzeViewModel = rememberAnalyzeViewModel(),
+    viewModel: AnalyzeViewModel = koinViewModel(),
     foodEntryId: Long? = null,
     onBack: (() -> Unit)? = null,
     onResultConfirmed: (() -> Unit)? = null,
 ) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val platformContext = LocalPlatformContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val permissionController = rememberPermissionController(permission = Permission.Camera)
-    val files = viewModel.images
-    val fileEntries = files.entries.toList()
+    val uploads = state.uploads
+    val fileEntries = uploads.entries.toList()
     val hasReport = state.foodEntryId != null
     val hasResultData = state.result?.hasContent == true
     val canInteractWithPhotos = !hasReport && !state.isLoading
-    val canAddMorePhotos = files.size < MAX_PHOTO_COUNT
+    val canAddMorePhotos = uploads.size < MAX_PHOTO_COUNT
     val canOpenPicker = canInteractWithPhotos && canAddMorePhotos
-    val canSubmit = !hasReport && !state.isLoading &&
-        (state.prompt.isNotBlank() || fileEntries.isNotEmpty())
+    val canSubmit = state.canSubmit && !hasReport
+
+    LaunchedEffect(foodEntryId) {
+        if (foodEntryId != null) {
+            viewModel.attachFoodEntry(foodEntryId)
+        }
+    }
 
     val photoPicker =
         rememberPhotoPickerController(
             permissionController = permissionController,
             onResult = {
-                viewModel.onEvent(AnalyzeContract.AnalyzeEvent.UploadFilesResult(it))
+                viewModel.onEvent(
+                    AnalyzeContract.AnalyzeEvent.UploadFilesResult(
+                        platformContext = platformContext,
+                        result = it,
+                    )
+                )
             },
         )
     var showSourceDialog by remember { mutableStateOf(false) }
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-
-    LaunchedEffect(foodEntryId) {
-        foodEntryId?.let(viewModel::observeFoodEntry)
-    }
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
@@ -149,8 +157,8 @@ fun AnalyzeScreen(
         bottomBar = {
             AnalyzeBottomBar(
                 hasResult = hasReport,
-                canConfirm = hasResultData,
                 canSubmit = canSubmit,
+                canConfirm = hasResultData,
                 isLoading = state.isLoading,
                 onAnalyze = { viewModel.onEvent(AnalyzeContract.AnalyzeEvent.Submit) },
                 onConfirm = onResultConfirmed,
@@ -239,16 +247,6 @@ private fun AnalyzeFields(
 }
 
 @Composable
-private fun rememberAnalyzeViewModel(): AnalyzeViewModel = koinViewModel<AnalyzeViewModel>()
-    .also { viewModel ->
-        val context = LocalPlatformContext.current
-        LaunchedEffect(Unit) {
-            viewModel.platformContext = context
-        }
-    }
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
-@Composable
 private fun AnalyzeTopBar(
     hasResult: Boolean,
     onBack: (() -> Unit)?,
@@ -280,8 +278,8 @@ private fun AnalyzeTopBar(
 @Composable
 private fun AnalyzeBottomBar(
     hasResult: Boolean,
-    canConfirm: Boolean,
     canSubmit: Boolean,
+    canConfirm: Boolean,
     isLoading: Boolean,
     onAnalyze: () -> Unit,
     onConfirm: (() -> Unit)?,
@@ -336,7 +334,7 @@ private fun AnalyzeBottomBar(
                     )
                     Spacer(modifier = Modifier.width(AppDimens.Spacing.xl3))
                     Text(
-                        text = "Analyzing…",
+                        text = if (hasResult) "Syncing…" else "Analyzing…",
                         style = AppTheme.typography.title,
                     )
                 } else {
@@ -353,7 +351,7 @@ private fun AnalyzeBottomBar(
 @Composable
 private fun PhotosSection(
     modifier: Modifier = Modifier,
-    files: List<Map.Entry<KmpFile, Double>>,
+    files: List<Map.Entry<KmpFile, UploadItem>>,
     interactionEnabled: Boolean,
     canAddMore: Boolean,
     hasResult: Boolean,
@@ -402,7 +400,7 @@ private fun PhotosSection(
 
 @Composable
 private fun PhotosGrid(
-    files: List<Map.Entry<KmpFile, Double>>,
+    files: List<Map.Entry<KmpFile, UploadItem>>,
     canAddMore: Boolean,
     interactionEnabled: Boolean,
     onAddPhoto: () -> Unit,
@@ -438,7 +436,7 @@ private fun PhotosGrid(
                                 modifier = Modifier
                                     .weight(1f)
                                     .aspectRatio(1f),
-                                progress = entry.value,
+                                progress = entry.value.progress,
                                 file = entry.key,
                             )
                         } else if (canAddMore) {

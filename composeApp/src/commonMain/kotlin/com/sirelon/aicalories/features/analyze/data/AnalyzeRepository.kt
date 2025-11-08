@@ -8,7 +8,6 @@ import com.mohamedrejeb.calf.io.readByteArray
 import com.sirelon.aicalories.features.analyze.model.MealAnalysisUi
 import com.sirelon.aicalories.supabase.SupabaseClient
 import io.github.jan.supabase.storage.UploadStatus
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -25,6 +24,11 @@ class AnalyzeRepository(
     private val client: SupabaseClient,
     private val mapper: ReportAnalysisUiMapper,
 ) {
+
+    data class UploadedFile(
+        val id: String?,
+        val path: String,
+    )
 
     @OptIn(ExperimentalUuidApi::class)
     fun uploadFile(platformContext: PlatformContext, file: KmpFile): Flow<UploadStatus> {
@@ -64,9 +68,28 @@ class AnalyzeRepository(
             .onStart { emit(null) }
     }
 
-    suspend fun analyzeDescription(prompt: String): Result<Long> {
-        delay(450)
+    suspend fun createFoodEntry(note: String?, files: List<UploadedFile>): Result<Long> = runCatching {
+        val sanitizedNote = note?.ifBlank { null }
+        val foodEntryId = client.createFoodEntry(sanitizedNote)
 
-        return Result.success(System.currentTimeMillis())
+        val missingPaths = files.mapNotNull { file ->
+            file.takeIf { file.id.isNullOrBlank() }?.path
+        }
+
+        val resolvedIds = if (missingPaths.isNotEmpty()) {
+            client.fetchStorageObjectIds(missingPaths)
+        } else {
+            emptyMap()
+        }
+
+        val fileIds = files.mapNotNull { file ->
+            file.id ?: resolvedIds[file.path]
+        }
+
+        if (fileIds.isNotEmpty()) {
+            client.linkFilesToFoodEntry(foodEntryId = foodEntryId, fileIds = fileIds)
+        }
+
+        foodEntryId
     }
 }

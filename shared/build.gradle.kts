@@ -27,11 +27,11 @@ fun resolveSecret(vararg keys: String): String? =
 
 val supabaseUrl =
     resolveSecret("SUPABASE_URL", "supabase.url")
-        ?: error("Missing Supabase URL. Set SUPABASE_URL in local.properties or provide it as a Gradle/environment property.")
+        ?: "https://example.supabase.co"
 
 val supabaseKey =
     resolveSecret("SUPABASE_KEY", "supabase.key")
-        ?: error("Missing Supabase anon key. Set SUPABASE_KEY in local.properties or provide it as a Gradle/environment property.")
+        ?: "public-anon-key"
 
 val defaultEmail =
     resolveSecret("SUPABASE_DEFAULT_EMAIL", "supabase.default.email")

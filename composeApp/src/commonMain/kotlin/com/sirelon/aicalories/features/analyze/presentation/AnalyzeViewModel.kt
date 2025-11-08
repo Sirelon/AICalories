@@ -1,12 +1,11 @@
 package com.sirelon.aicalories.features.analyze.presentation
 
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.viewModelScope
 import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
-import com.sirelon.aicalories.features.analyze.common.BaseViewModel
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository
-import com.sirelon.aicalories.features.analyze.model.MealAnalysisUi
+import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository.UploadedFile
+import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import io.github.jan.supabase.storage.UploadStatus
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -21,21 +20,18 @@ class AnalyzeViewModel(
 
     override fun initialState(): AnalyzeContract.AnalyzeState = AnalyzeContract.AnalyzeState()
 
-    val images = mutableStateMapOf<KmpFile, Double>()
-
-    // TODO:
-    lateinit var platformContext: PlatformContext
-
     private var observationJob: Job? = null
     private var observedFoodEntryId: Long? = null
 
     override fun onEvent(event: AnalyzeContract.AnalyzeEvent) {
         when (event) {
-            is AnalyzeContract.AnalyzeEvent.PromptChanged -> setState {
-                it.copy(
-                    prompt = event.value,
-                    errorMessage = null
-                )
+            is AnalyzeContract.AnalyzeEvent.PromptChanged -> {
+                setState {
+                    it.copy(
+                        prompt = event.value,
+                        errorMessage = null,
+                    )
+                }
             }
 
             AnalyzeContract.AnalyzeEvent.Submit -> analyze()
@@ -43,11 +39,12 @@ class AnalyzeViewModel(
                 event.result
                     .onSuccess { selectedFiles ->
                         selectedFiles.forEach { file ->
-                            if (!images.containsKey(file)) {
-                                images[file] = 0.0
-                            }
+                           addUploadPlaceholder(file)
                             viewModelScope.launch {
-                                uploadFileFlow(file).collect()
+                                uploadFileFlow(
+                                    platformContext = event.platformContext,
+                                    file = file,
+                                ).collect()
                             }
                         }
                     }
@@ -56,7 +53,10 @@ class AnalyzeViewModel(
         }
     }
 
-    private fun uploadFileFlow(file: KmpFile): Flow<UploadStatus> = repository
+    private fun uploadFileFlow(
+        platformContext: PlatformContext,
+        file: KmpFile,
+    ): Flow<UploadStatus> = repository
         .uploadFile(platformContext = platformContext, file = file)
         .onEach { status ->
             val percent = when (status) {
@@ -69,13 +69,37 @@ class AnalyzeViewModel(
                 is UploadStatus.Success -> 100.0
             }
 
-            images[file] = percent
+            when (status) {
+                is UploadStatus.Progress -> updateUpload(
+                    file = file,
+                ) { item ->
+                    item.copy(progress = percent)
+                }
+
+                is UploadStatus.Success -> updateUpload(
+                    file = file,
+                ) { item ->
+                    item.copy(
+                        progress = percent,
+                        uploadedFile = UploadedFile(
+                            id = status.response.id,
+                            path = status.response.path,
+                        ),
+                    )
+                }
+            }
         }
 
     private fun analyze() {
         val prompt = state.value.prompt.trim()
-        if (prompt.isEmpty() && images.isEmpty()) {
+        val uploadsSnapshot = state.value.uploads
+        if (prompt.isEmpty() && uploadsSnapshot.isEmpty()) {
             postEffect(effect = AnalyzeContract.AnalyzeEffect.ShowMessage("Add a description or at least one photo."))
+            return
+        }
+
+        if (state.value.hasPendingUploads) {
+            postEffect(effect = AnalyzeContract.AnalyzeEffect.ShowMessage("Please wait until all uploads finish."))
             return
         }
 
@@ -92,35 +116,40 @@ class AnalyzeViewModel(
             observationJob?.cancel()
             observedFoodEntryId = null
 
+            val uploadedFiles = state.value.uploads.values.mapNotNull { it.uploadedFile }
+            val note = prompt.ifBlank { null }
+
             repository
-                .analyzeDescription(prompt = prompt.ifBlank { "Meal photo" })
-                .onSuccess { foodEntryId ->
-                    images.clear()
-                    observeFoodEntry(foodEntryId)
-                    setState { current ->
-                        current.copy(
-                            prompt = "",
-                            errorMessage = null,
+                .createFoodEntry(note = note, files = uploadedFiles)
+                .onFailure { error ->
+                    setState {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = error.message ?: "Failed to create food entry.",
                         )
                     }
+                }.onSuccess { foodEntryId ->
+                    setState {
+                        it.copy(
+                            prompt = "",
+                            uploads = emptyMap(),
+                        )
+                    }
+                    observeFoodEntry(foodEntryId)
                     postEffect(
                         AnalyzeContract.AnalyzeEffect.ShowMessage(
                             "Analysis started. You'll see results here shortly.",
                         ),
                     )
                 }
-                .onFailure { error ->
-                    setState {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = error.message ?: "Failed to analyze this meal.",
-                        )
-                    }
-                }
         }
     }
 
-    fun observeFoodEntry(foodEntryId: Long) {
+    fun attachFoodEntry(foodEntryId: Long) {
+        observeFoodEntry(foodEntryId)
+    }
+
+    private fun observeFoodEntry(foodEntryId: Long) {
         if (foodEntryId <= 0L) return
         if (observedFoodEntryId == foodEntryId) return
 
@@ -156,6 +185,30 @@ class AnalyzeViewModel(
                         )
                     }
                 }
+        }
+    }
+
+    private fun addUploadPlaceholder(file: KmpFile) {
+        setState { current ->
+            if (current.uploads.containsKey(file)) {
+                current
+            } else {
+                current.copy(
+                    uploads = current.uploads + (file to UploadItem())
+                )
+            }
+        }
+    }
+
+    private fun updateUpload(
+        file: KmpFile,
+        reducer: (UploadItem) -> UploadItem,
+    ) {
+        setState { current ->
+            val existing = current.uploads[file] ?: return@setState current
+            current.copy(
+                uploads = current.uploads + (file to reducer(existing))
+            )
         }
     }
 }
