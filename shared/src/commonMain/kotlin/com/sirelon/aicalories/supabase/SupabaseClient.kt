@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.buildJsonObject
@@ -38,7 +39,7 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 private const val STORAGE_BUCKET_NAME = "aicalories"
-private const val ANALYZE_FUNCTION_NAME = "analyze-food-entry"
+private const val ANALYZE_FUNCTION_NAME = "analize-food"
 
 class SupabaseClient {
     @OptIn(SupabaseInternal::class)
@@ -194,6 +195,7 @@ class SupabaseClient {
                 },
             )
     }
+
     @OptIn(ExperimentalUuidApi::class)
     private fun buildStoragePath(userId: String, originalPath: String): String {
         val sanitizedName = originalPath
@@ -224,6 +226,9 @@ class SupabaseClient {
             )
             .map { summaries ->
                 summaries.firstOrNull()
+            }
+            .onStart {
+                ensureAuthenticatedUserId()
             }
     }
 

@@ -5,24 +5,21 @@ import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.io.getName
 import com.mohamedrejeb.calf.io.getPath
 import com.mohamedrejeb.calf.io.readByteArray
-import com.sirelon.aicalories.features.analyze.model.MealAnalysisUi
 import com.sirelon.aicalories.supabase.SupabaseClient
+import com.sirelon.aicalories.supabase.model.AnalyseReportData
 import io.github.jan.supabase.storage.UploadStatus
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 class AnalyzeRepository(
     private val client: SupabaseClient,
-    private val mapper: ReportAnalysisUiMapper,
 ) {
 
     data class UploadedFile(
@@ -43,55 +40,47 @@ class AnalyzeRepository(
         }
     }
 
-    fun observeAnalysis(foodEntryId: Long): Flow<MealAnalysisUi?> {
-        val summaryFlow = client.observeReportSummary(foodEntryId)
-        val entriesFlow = summaryFlow
-            .map { it?.id }
-            .distinctUntilChanged()
-            .flatMapLatest { summaryId ->
-                if (summaryId == null) {
-                    flowOf(emptyList())
-                } else {
-                    client.observeReportEntries(summaryId)
-                }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun observeAnalysis(foodEntryId: Long): Flow<AnalyseReportData> {
+        return client.observeReportSummary(foodEntryId)
+            .filterNotNull()
+            .flatMapLatest { summary ->
+                client
+                    .observeReportEntries(summary.id)
+                    .map { entries ->
+                        AnalyseReportData(
+                            summary = summary,
+                            entries = entries,
+                        )
+                    }
             }
-
-        return summaryFlow
-            .combine(entriesFlow) { summary, entries ->
-                summary?.let {
-                    mapper.toUi(
-                        summary = it,
-                        entries = entries,
-                    )
-                }
-            }
-            .onStart { emit(null) }
     }
 
-    suspend fun createFoodEntry(note: String?, files: List<UploadedFile>): Result<Long> = runCatching {
-        val sanitizedNote = note?.ifBlank { null }
-        val foodEntryId = client.createFoodEntry(sanitizedNote)
+    suspend fun createFoodEntry(note: String?, files: List<UploadedFile>): Result<Long> =
+        runCatching {
+            val sanitizedNote = note?.ifBlank { null }
+            val foodEntryId = client.createFoodEntry(sanitizedNote)
 
-        val missingPaths = files.mapNotNull { file ->
-            file.takeIf { file.id.isNullOrBlank() }?.path
+            val missingPaths = files.mapNotNull { file ->
+                file.takeIf { file.id.isNullOrBlank() }?.path
+            }
+
+            val resolvedIds = if (missingPaths.isNotEmpty()) {
+                client.fetchStorageObjectIds(missingPaths)
+            } else {
+                emptyMap()
+            }
+
+            val fileIds = files.mapNotNull { file ->
+                file.id ?: resolvedIds[file.path]
+            }
+
+            if (fileIds.isNotEmpty()) {
+                client.linkFilesToFoodEntry(foodEntryId = foodEntryId, fileIds = fileIds)
+            }
+
+            foodEntryId
         }
-
-        val resolvedIds = if (missingPaths.isNotEmpty()) {
-            client.fetchStorageObjectIds(missingPaths)
-        } else {
-            emptyMap()
-        }
-
-        val fileIds = files.mapNotNull { file ->
-            file.id ?: resolvedIds[file.path]
-        }
-
-        if (fileIds.isNotEmpty()) {
-            client.linkFilesToFoodEntry(foodEntryId = foodEntryId, fileIds = fileIds)
-        }
-
-        foodEntryId
-    }
 
     suspend fun requestAnalysis(foodEntryId: Long): Result<Unit> = runCatching {
         client.invokeFoodEntryAnalysis(foodEntryId)

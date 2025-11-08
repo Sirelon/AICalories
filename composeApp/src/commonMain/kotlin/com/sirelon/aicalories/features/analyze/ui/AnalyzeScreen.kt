@@ -80,7 +80,6 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun AnalyzeScreen(
     viewModel: AnalyzeViewModel = koinViewModel(),
-    foodEntryId: Long? = null,
     onBack: (() -> Unit)? = null,
     onResultConfirmed: (() -> Unit)? = null,
 ) {
@@ -91,18 +90,12 @@ fun AnalyzeScreen(
     val permissionController = rememberPermissionController(permission = Permission.Camera)
     val uploads = state.uploads
     val fileEntries = uploads.entries.toList()
-    val hasReport = state.foodEntryId != null
+    val hasReport = state.hasReport
     val hasResultData = state.result?.hasContent == true
     val canInteractWithPhotos = !hasReport && !state.isLoading
     val canAddMorePhotos = uploads.size < MAX_PHOTO_COUNT
     val canOpenPicker = canInteractWithPhotos && canAddMorePhotos
     val canSubmit = state.canSubmit && !hasReport
-
-    LaunchedEffect(foodEntryId) {
-        if (foodEntryId != null) {
-            viewModel.attachFoodEntry(foodEntryId)
-        }
-    }
 
     val photoPicker =
         rememberPhotoPickerController(
