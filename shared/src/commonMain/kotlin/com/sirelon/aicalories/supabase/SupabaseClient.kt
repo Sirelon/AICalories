@@ -38,7 +38,7 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 private const val STORAGE_BUCKET_NAME = "aicalories"
-private const val ANALYZE_FUNCTION_NAME = "analyze-food-entry"
+private const val ANALYZE_FUNCTION_NAME = "analize-food"
 
 class SupabaseClient {
     @OptIn(SupabaseInternal::class)
