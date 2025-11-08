@@ -3,11 +3,13 @@ package com.sirelon.aicalories.features.analyze.presentation
 import androidx.lifecycle.viewModelScope
 import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
-import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository.UploadedFile
+import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import io.github.jan.supabase.storage.UploadStatus
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -17,6 +19,9 @@ class AnalyzeViewModel(
 ) : BaseViewModel<AnalyzeContract.AnalyzeState, AnalyzeContract.AnalyzeEvent, AnalyzeContract.AnalyzeEffect>() {
 
     override fun initialState(): AnalyzeContract.AnalyzeState = AnalyzeContract.AnalyzeState()
+
+    private var observationJob: Job? = null
+    private var observedFoodEntryId: Long? = null
 
     override fun onEvent(event: AnalyzeContract.AnalyzeEvent) {
         when (event) {
@@ -33,17 +38,28 @@ class AnalyzeViewModel(
             is AnalyzeContract.AnalyzeEvent.UploadFilesResult -> {
                 event.result
                     .onSuccess { selectedFiles ->
+                        if (selectedFiles.isEmpty()) {
+                            showError("No files were selected.")
+                            return@onSuccess
+                        }
+
+                        setState { it.copy(errorMessage = null) }
+
                         selectedFiles.forEach { file ->
                             addUploadPlaceholder(file)
                             viewModelScope.launch {
                                 uploadFileFlow(
                                     platformContext = event.platformContext,
                                     file = file,
-                                ).collect()
+                                )
+                                    .catch { error -> handleUploadFailure(file, error) }
+                                    .collect()
                             }
                         }
                     }
-                // TODO: handle errors
+                    .onFailure { error ->
+                        showError(error.message ?: "Unable to access selected files.")
+                    }
             }
         }
     }
@@ -103,9 +119,13 @@ class AnalyzeViewModel(
                 it.copy(
                     isLoading = true,
                     errorMessage = null,
+                    result = null,
+                    foodEntryId = null,
                 )
             }
 
+            observationJob?.cancel()
+            observedFoodEntryId = null
 
             val uploadedFiles = state.value.uploads.values.mapNotNull { it.uploadedFile }
             val note = prompt.ifBlank { null }
@@ -136,12 +156,58 @@ class AnalyzeViewModel(
                     setState {
                         it.copy(
                             prompt = "",
-                            isLoading = false,
-                            errorMessage = null,
-                            result = null,
+                            uploads = emptyMap(),
                         )
                     }
-                    postEffect(AnalyzeContract.AnalyzeEffect.ShowMessage("Analysis started."))
+                    observeFoodEntry(foodEntryId)
+                    postEffect(
+                        AnalyzeContract.AnalyzeEffect.ShowMessage(
+                            "Analysis started. You'll see results here shortly.",
+                        ),
+                    )
+                }
+        }
+    }
+
+    fun attachFoodEntry(foodEntryId: Long) {
+        observeFoodEntry(foodEntryId)
+    }
+
+    private fun observeFoodEntry(foodEntryId: Long) {
+        if (foodEntryId <= 0L) return
+        if (observedFoodEntryId == foodEntryId) return
+
+        observationJob?.cancel()
+        observedFoodEntryId = foodEntryId
+        observationJob = viewModelScope.launch {
+            setState { current ->
+                current.copy(
+                    isLoading = true,
+                    errorMessage = null,
+                    foodEntryId = foodEntryId,
+                    result = current.result?.takeIf { it.hasContent },
+                )
+            }
+
+            repository
+                .observeAnalysis(foodEntryId)
+                .catch { error ->
+                    setState { current ->
+                        current.copy(
+                            isLoading = false,
+                            errorMessage = error.message ?: "Unable to load analysis report.",
+                        )
+                    }
+                }
+                .collect { report ->
+                    setState { current ->
+                        current.copy(
+                            result = report,
+                            isLoading = report == null,
+                            errorMessage = if (report == null) current.errorMessage else null,
+                            foodEntryId = foodEntryId,
+                        )
+                    }
                 }
         }
     }
@@ -156,6 +222,22 @@ class AnalyzeViewModel(
                 )
             }
         }
+    }
+
+    private fun handleUploadFailure(file: KmpFile, error: Throwable) {
+        val message = error.message ?: "Failed to upload file."
+        setState { current ->
+            current.copy(
+                errorMessage = message,
+                uploads = current.uploads - file,
+            )
+        }
+        postEffect(AnalyzeContract.AnalyzeEffect.ShowMessage(message))
+    }
+
+    private fun showError(message: String) {
+        setState { it.copy(errorMessage = message) }
+        postEffect(AnalyzeContract.AnalyzeEffect.ShowMessage(message))
     }
 
     private fun updateUpload(

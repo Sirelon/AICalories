@@ -3,7 +3,10 @@ package com.sirelon.aicalories.supabase
 import com.sirelon.aicalories.supabase.model.FoodEntryRecord
 import com.sirelon.aicalories.supabase.model.FoodEntryToFileInsert
 import com.sirelon.aicalories.supabase.model.StorageObjectRecord
+import com.sirelon.aicalories.supabase.response.ReportAnalysisEntryResponse
+import com.sirelon.aicalories.supabase.response.ReportAnalysisSummaryResponse
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.annotations.SupabaseExperimental
 import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
@@ -14,6 +17,10 @@ import io.github.jan.supabase.functions.Functions
 import io.github.jan.supabase.functions.functions
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.filter.FilterOperation
+import io.github.jan.supabase.postgrest.query.filter.FilterOperator
+import io.github.jan.supabase.realtime.Realtime
+import io.github.jan.supabase.realtime.selectAsFlow
 import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.storage.UploadStatus
 import io.github.jan.supabase.storage.storage
@@ -22,6 +29,7 @@ import io.ktor.client.plugins.HttpTimeout
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.buildJsonObject
@@ -50,6 +58,7 @@ class SupabaseClient {
             install(Postgrest)
             install(Storage)
             install(Functions)
+            install(Realtime)
         }
     }
 
@@ -185,7 +194,6 @@ class SupabaseClient {
                 },
             )
     }
-
     @OptIn(ExperimentalUuidApi::class)
     private fun buildStoragePath(userId: String, originalPath: String): String {
         val sanitizedName = originalPath
@@ -200,5 +208,36 @@ class SupabaseClient {
             ?: "upload_${Uuid.random()}"
 
         return "$userId/${Uuid.random()}_$safeName"
+    }
+
+    @OptIn(SupabaseExperimental::class)
+    fun observeReportSummary(foodEntryId: Long): Flow<ReportAnalysisSummaryResponse?> {
+        return client
+            .postgrest["report_analyse_summary"]
+            .selectAsFlow(
+                primaryKey = ReportAnalysisSummaryResponse::id,
+                filter = FilterOperation(
+                    column = "food_entry_id",
+                    operator = FilterOperator.EQ,
+                    value = foodEntryId,
+                ),
+            )
+            .map { summaries ->
+                summaries.firstOrNull()
+            }
+    }
+
+    @OptIn(SupabaseExperimental::class)
+    fun observeReportEntries(reportAnalyseId: Long): Flow<List<ReportAnalysisEntryResponse>> {
+        return client
+            .postgrest["report_analyse_entry"]
+            .selectAsFlow(
+                primaryKey = ReportAnalysisEntryResponse::id,
+                filter = FilterOperation(
+                    column = "report_analyse_id",
+                    operator = FilterOperator.EQ,
+                    value = reportAnalyseId,
+                ),
+            )
     }
 }
