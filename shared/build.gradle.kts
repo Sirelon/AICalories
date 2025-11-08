@@ -69,6 +69,7 @@ kotlin {
             implementation(libs.supabase.storage)
             implementation(libs.supabase.postgrest)
             implementation(libs.supabase.functions)
+            implementation(libs.supabase.realtime)
             implementation(libs.koin.core)
         }
         commonTest.dependencies {

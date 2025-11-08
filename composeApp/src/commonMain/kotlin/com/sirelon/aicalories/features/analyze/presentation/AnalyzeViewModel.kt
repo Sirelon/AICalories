@@ -6,8 +6,11 @@ import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
 import com.sirelon.aicalories.features.analyze.common.BaseViewModel
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository
+import com.sirelon.aicalories.features.analyze.model.MealAnalysisUi
 import io.github.jan.supabase.storage.UploadStatus
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -22,6 +25,9 @@ class AnalyzeViewModel(
 
     // TODO:
     lateinit var platformContext: PlatformContext
+
+    private var observationJob: Job? = null
+    private var observedFoodEntryId: Long? = null
 
     override fun onEvent(event: AnalyzeContract.AnalyzeEvent) {
         when (event) {
@@ -78,27 +84,75 @@ class AnalyzeViewModel(
                 it.copy(
                     isLoading = true,
                     errorMessage = null,
+                    result = null,
+                    foodEntryId = null,
                 )
             }
 
+            observationJob?.cancel()
+            observedFoodEntryId = null
 
             repository
                 .analyzeDescription(prompt = prompt.ifBlank { "Meal photo" })
-                .onSuccess { result ->
-                    setState {
-                        it.copy(
+                .onSuccess { foodEntryId ->
+                    images.clear()
+                    observeFoodEntry(foodEntryId)
+                    setState { current ->
+                        current.copy(
                             prompt = "",
-                            isLoading = false,
-                            result = result,
+                            errorMessage = null,
                         )
                     }
-                    postEffect(AnalyzeContract.AnalyzeEffect.ShowMessage("Analysis prepared."))
+                    postEffect(
+                        AnalyzeContract.AnalyzeEffect.ShowMessage(
+                            "Analysis started. You'll see results here shortly.",
+                        ),
+                    )
                 }
                 .onFailure { error ->
                     setState {
                         it.copy(
                             isLoading = false,
                             errorMessage = error.message ?: "Failed to analyze this meal.",
+                        )
+                    }
+                }
+        }
+    }
+
+    fun observeFoodEntry(foodEntryId: Long) {
+        if (foodEntryId <= 0L) return
+        if (observedFoodEntryId == foodEntryId) return
+
+        observationJob?.cancel()
+        observedFoodEntryId = foodEntryId
+        observationJob = viewModelScope.launch {
+            setState { current ->
+                current.copy(
+                    isLoading = true,
+                    errorMessage = null,
+                    foodEntryId = foodEntryId,
+                    result = current.result?.takeIf { it.hasContent },
+                )
+            }
+
+            repository
+                .observeAnalysis(foodEntryId)
+                .catch { error ->
+                    setState { current ->
+                        current.copy(
+                            isLoading = false,
+                            errorMessage = error.message ?: "Unable to load analysis report.",
+                        )
+                    }
+                }
+                .collect { report ->
+                    setState { current ->
+                        current.copy(
+                            result = report,
+                            isLoading = report == null,
+                            errorMessage = if (report == null) current.errorMessage else null,
+                            foodEntryId = foodEntryId,
                         )
                     }
                 }
