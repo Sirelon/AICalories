@@ -81,33 +81,35 @@ class AnalyzeViewModel(
             }
 
             AnalyzeContract.AnalyzeEvent.Submit -> analyze()
-            is AnalyzeContract.AnalyzeEvent.UploadFilesResult -> {
-                event.result
-                    .onSuccess { selectedFiles ->
-                        if (selectedFiles.isEmpty()) {
-                            showError("No files were selected.")
-                            return@onSuccess
-                        }
-
-                        setState { it.copy(errorMessage = null) }
-
-                        selectedFiles.forEach { file ->
-                            addUploadPlaceholder(file)
-                            viewModelScope.launch {
-                                uploadFileFlow(
-                                    platformContext = event.platformContext,
-                                    file = file,
-                                )
-                                    .catch { error -> handleUploadFailure(file, error) }
-                                    .collect()
-                            }
-                        }
-                    }
-                    .onFailure { error ->
-                        showError(error.message ?: "Unable to access selected files.")
-                    }
-            }
+            is AnalyzeContract.AnalyzeEvent.UploadFilesResult -> onFileResult(event)
         }
+    }
+
+    private fun onFileResult(event: AnalyzeContract.AnalyzeEvent.UploadFilesResult) {
+        event.result
+            .onSuccess { selectedFiles ->
+                if (selectedFiles.isEmpty()) {
+                    showError("No files were selected.")
+                    return@onSuccess
+                }
+
+                setState { it.copy(errorMessage = null) }
+
+                selectedFiles.forEach { file ->
+                    addUploadPlaceholder(file)
+                    viewModelScope.launch {
+                        uploadFileFlow(
+                            platformContext = event.platformContext,
+                            file = file,
+                        )
+                            .catch { error -> handleUploadFailure(file, error) }
+                            .collect()
+                    }
+                }
+            }
+            .onFailure { error ->
+                showError(error.message ?: "Unable to access selected files.")
+            }
     }
 
     private fun uploadFileFlow(
