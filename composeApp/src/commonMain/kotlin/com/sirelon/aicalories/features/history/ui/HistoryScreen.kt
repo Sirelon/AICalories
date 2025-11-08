@@ -8,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,12 +23,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
@@ -48,15 +45,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
+import com.sirelon.aicalories.designsystem.ChipComponent
+import com.sirelon.aicalories.designsystem.ChipStyle
+import com.sirelon.aicalories.designsystem.TagGroup
+import com.sirelon.aicalories.features.history.presentation.HistorySampleDataProvider
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     renderModel: HistoryScreenRenderModel,
@@ -65,12 +66,11 @@ fun HistoryScreen(
     onEntryClick: (HistoryEntryRenderModel) -> Unit = {},
     onEmptyStateAction: (() -> Unit)? = null,
 ) {
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior =
+        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
-        modifier = modifier
-            .fillMaxSize()
-            .background(AppTheme.colors.background),
+        modifier = modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             HistoryTopBar(
                 header = renderModel.header,
@@ -106,7 +106,7 @@ fun HistoryScreen(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl5),
         ) {
             item(key = "history_header") {
-                HistoryHeaderSection(renderModel.header)
+                TagGroup(title = "Insights", tags = renderModel.insights, style = ChipStyle.Success)
             }
 
             renderModel.weeklySummary?.let { weekly ->
@@ -129,6 +129,7 @@ fun HistoryScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HistoryTopBar(
     header: HistoryHeaderRenderModel,
@@ -163,31 +164,6 @@ private fun HistoryTopBar(
         },
         scrollBehavior = scrollBehavior,
     )
-}
-
-@Composable
-private fun HistoryHeaderSection(header: HistoryHeaderRenderModel) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        if (header.insights.isNotEmpty()) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-            ) {
-                header.insights.forEach { insight ->
-                    TagPill(
-                        text = insight,
-                        containerColor = AppTheme.colors.success.copy(alpha = 0.15f),
-                        contentColor = AppTheme.colors.success,
-                        iconColor = AppTheme.colors.success,
-                        icon = Icons.Filled.CheckCircle,
-                    )
-                }
-            }
-        }
-    }
 }
 
 @Composable
@@ -295,7 +271,8 @@ private fun WeeklyChart(points: List<CaloriePointRenderModel>) {
         val path = Path()
         chartPoints.forEachIndexed { index, point ->
             val ratio = point.caloriesValue.toFloat() / maxCalories
-            val x = if (chartPoints.size == 1) width / 2f else width * index / (chartPoints.size - 1)
+            val x =
+                if (chartPoints.size == 1) width / 2f else width * index / (chartPoints.size - 1)
             val y = height - (ratio * height)
             if (index == 0) {
                 path.moveTo(x, y)
@@ -316,7 +293,8 @@ private fun WeeklyChart(points: List<CaloriePointRenderModel>) {
 
         chartPoints.forEachIndexed { index, point ->
             val ratio = point.caloriesValue.toFloat() / maxCalories
-            val x = if (chartPoints.size == 1) width / 2f else width * index / (chartPoints.size - 1)
+            val x =
+                if (chartPoints.size == 1) width / 2f else width * index / (chartPoints.size - 1)
             val y = height - (ratio * height)
             drawCircle(
                 color = primary,
@@ -362,7 +340,8 @@ private fun HistoryEntryCard(
     isHighlighted: Boolean,
     onClick: () -> Unit,
 ) {
-    val borderColor = if (isHighlighted) AppTheme.colors.primary else AppTheme.colors.outline.copy(alpha = 0.3f)
+    val borderColor =
+        if (isHighlighted) AppTheme.colors.primary else AppTheme.colors.outline.copy(alpha = 0.3f)
     val containerColor = if (isHighlighted) {
         AppTheme.colors.primary.copy(alpha = 0.08f)
     } else {
@@ -427,15 +406,11 @@ private fun HistoryEntryCard(
                             color = AppTheme.colors.onSurface.copy(alpha = 0.7f),
                         )
                     }
-                    entry.summary?.qualityLabel?.let {
-                        TagPill(
-                            text = it,
-                            containerColor = AppTheme.colors.success.copy(alpha = 0.18f),
-                            contentColor = AppTheme.colors.success,
-                            icon = Icons.Filled.CheckCircle,
-                            iconColor = AppTheme.colors.success,
-                        )
-                    }
+
+                    ChipComponent(
+                        data = entry.summary.qualityLabel,
+                        style = ChipStyle.Neutral,
+                    )
                 }
             }
 
@@ -466,22 +441,11 @@ private fun HistoryEntryCard(
                 )
             }
 
-            if (entry.tags.isNotEmpty()) {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-                    verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-                ) {
-                    entry.tags.forEach { tag ->
-                        TagPill(
-                            text = tag,
-                            containerColor = AppTheme.colors.surface.copy(alpha = 0.6f),
-                            contentColor = AppTheme.colors.onSurface,
-                            icon = Icons.Filled.Info,
-                            iconColor = AppTheme.colors.onSurface.copy(alpha = 0.7f),
-                        )
-                    }
-                }
-            }
+            TagGroup(
+                title = "Tags",
+                tags = entry.tags,
+                style = ChipStyle.Neutral,
+            )
         }
     }
 }
@@ -540,8 +504,7 @@ private fun HistorySummarySection(summary: HistoryReportSummaryRenderModel) {
             TagGroup(
                 title = "Issues",
                 tags = summary.issues,
-                toneColor = AppTheme.colors.error,
-                icon = Icons.Filled.ErrorOutline,
+                style = ChipStyle.Error,
             )
         }
 
@@ -549,8 +512,7 @@ private fun HistorySummarySection(summary: HistoryReportSummaryRenderModel) {
             TagGroup(
                 title = "Uncertainties",
                 tags = summary.uncertainties,
-                toneColor = AppTheme.colors.onSurface,
-                icon = Icons.Filled.Info,
+                style = ChipStyle.Neutral,
             )
         }
 
@@ -558,41 +520,8 @@ private fun HistorySummarySection(summary: HistoryReportSummaryRenderModel) {
             TagGroup(
                 title = "Checklist",
                 tags = summary.checklist,
-                toneColor = AppTheme.colors.success,
-                icon = Icons.Filled.CheckCircle,
+                style = ChipStyle.Success,
             )
-        }
-    }
-}
-
-@Composable
-private fun TagGroup(
-    title: String,
-    tags: List<String>,
-    toneColor: Color,
-    icon: ImageVector,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-    ) {
-        Text(
-            text = title,
-            style = AppTheme.typography.label,
-            color = toneColor,
-        )
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-        ) {
-            tags.forEach { tag ->
-                TagPill(
-                    text = tag,
-                    containerColor = toneColor.copy(alpha = 0.15f),
-                    contentColor = toneColor,
-                    icon = icon,
-                    iconColor = toneColor,
-                )
-            }
         }
     }
 }
@@ -693,7 +622,10 @@ private fun AttachmentsRow(
             ) { attachment ->
                 Surface(
                     shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
-                    border = BorderStroke(AppDimens.BorderWidth.xs, AppTheme.colors.outline.copy(alpha = 0.3f)),
+                    border = BorderStroke(
+                        AppDimens.BorderWidth.xs,
+                        AppTheme.colors.outline.copy(alpha = 0.3f)
+                    ),
                 ) {
                     Box(
                         modifier = Modifier
@@ -724,46 +656,6 @@ private fun AttachmentsRow(
 
 @Composable
 private fun surfaceVariantColor(): Color = MaterialTheme.colorScheme.surfaceVariant
-
-@Composable
-private fun TagPill(
-    text: String,
-    containerColor: Color,
-    contentColor: Color,
-    icon: ImageVector? = null,
-    iconColor: Color = contentColor,
-) {
-    Surface(
-        shape = RoundedCornerShape(AppDimens.BorderRadius.xl2),
-        color = containerColor,
-        contentColor = contentColor,
-    ) {
-        Row(
-            modifier = Modifier.padding(
-                horizontal = AppDimens.Spacing.xl3,
-                vertical = AppDimens.Spacing.m,
-            ),
-            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            icon?.let {
-                Icon(
-                    imageVector = it,
-                    contentDescription = null,
-                    tint = iconColor,
-                    modifier = Modifier.size(AppDimens.Size.xl - AppDimens.Size.xs),
-                )
-            }
-            Text(
-                text = text,
-                style = AppTheme.typography.caption,
-                color = contentColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-    }
-}
 
 @Composable
 private fun HistoryEmptyState(
@@ -808,152 +700,8 @@ private fun HistoryEmptyState(
 private fun HistoryScreenPreview() {
     AppTheme {
         HistoryScreen(
-            renderModel = previewHistoryScreenRenderModel(),
+            renderModel = HistorySampleDataProvider.randomRenderModel(),
             onEntryClick = {},
         )
     }
-}
-
-private fun previewHistoryScreenRenderModel(): HistoryScreenRenderModel {
-    val attachments = listOf(
-        HistoryAttachmentRenderModel(
-            id = "file-1",
-            previewUrl = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400",
-            description = "Lunch plate",
-        ),
-        HistoryAttachmentRenderModel(
-            id = "file-2",
-            previewUrl = "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=400",
-            description = "Smoothie",
-        ),
-    )
-    val foods = listOf(
-        HistoryFoodRenderModel(
-            id = "food-1",
-            title = "Grilled Chicken",
-            description = "Skinless, herbs",
-            quantityLabel = "180 g",
-            caloriesLabel = "290 kcal",
-            macroLabel = "P32 • F6 • C0",
-            confidenceLabel = "from image • 94%",
-            fromImage = true,
-        ),
-        HistoryFoodRenderModel(
-            id = "food-2",
-            title = "Brown Rice",
-            quantityLabel = "1 cup",
-            caloriesLabel = "210 kcal",
-            macroLabel = "P5 • F2 • C45",
-            confidenceLabel = "from note • 88%",
-            fromNote = true,
-        ),
-    )
-    val summary = HistoryReportSummaryRenderModel(
-        advice = "Great balance! Add leafy greens for extra micronutrients.",
-        qualityLabel = "High quality",
-        issues = listOf("Added oil not detected", "Fiber lower than target"),
-        uncertainties = listOf("Sauce ingredients unconfirmed"),
-        checklist = listOf("Protein source logged", "Hydration noted"),
-    )
-
-    val entry = HistoryEntryRenderModel(
-        id = 1,
-        dateLabel = "Nov 2, 2025",
-        timeLabel = "12:32 PM",
-        caloriesLabel = "710 kcal",
-        note = "Post workout lunch with extra avocado.",
-        attachments = attachments,
-        foods = foods,
-        macros = MacroBreakdownRenderModel(
-            calories = "710 kcal",
-            protein = "48 g",
-            fat = "22 g",
-            carbs = "78 g",
-        ),
-        summary = summary,
-        tags = listOf("Contains allergens", "Tracked via AI"),
-        photoCountLabel = "2 photos",
-        confidenceLabel = "Confidence 92%",
-    )
-
-    val breakfastEntry = entry.copy(
-        id = 2,
-        dateLabel = "Nov 2, 2025",
-        timeLabel = "08:05 AM",
-        caloriesLabel = "430 kcal",
-        note = "Oatmeal with berries and nuts.",
-        attachments = attachments.take(1),
-        summary = summary.copy(
-            advice = "Consider adding a protein shake after the workout.",
-            issues = listOf("Protein target not met"),
-            uncertainties = emptyList(),
-        ),
-        tags = listOf("Fiber rich"),
-        foods = listOf(
-            HistoryFoodRenderModel(
-                id = "food-3",
-                title = "Oatmeal",
-                description = "Rolled oats cooked with oat milk",
-                quantityLabel = "1 bowl",
-                caloriesLabel = "280 kcal",
-                macroLabel = "P10 • F6 • C46",
-                confidenceLabel = "from image • 91%",
-                fromImage = true,
-            ),
-            HistoryFoodRenderModel(
-                id = "food-4",
-                title = "Blueberries",
-                quantityLabel = "40 g",
-                caloriesLabel = "45 kcal",
-                macroLabel = "P1 • F0 • C11",
-                confidenceLabel = "from note • 85%",
-                fromNote = true,
-            ),
-        ),
-    )
-
-    return HistoryScreenRenderModel(
-        header = HistoryHeaderRenderModel(
-            title = "History & Insights",
-            subtitle = "Track past analyses",
-            insights = listOf("Consistency +8%", "Avg 2050 kcal"),
-        ),
-        weeklySummary = WeeklyCaloriesRenderModel(
-            title = "Calories this week",
-            totalLabel = "9,850 kcal",
-            changeLabel = "+4% vs last week",
-            targetLabel = "Target 9,450 kcal",
-            points = listOf(
-                CaloriePointRenderModel("mon", "Mon", 1850, "1.8k"),
-                CaloriePointRenderModel("tue", "Tue", 2100, "2.1k"),
-                CaloriePointRenderModel("wed", "Wed", 1950, "1.9k"),
-                CaloriePointRenderModel("thu", "Thu", 2200, "2.2k"),
-                CaloriePointRenderModel("fri", "Fri", 1900, "1.9k"),
-                CaloriePointRenderModel("sat", "Sat", 2400, "2.4k"),
-                CaloriePointRenderModel("sun", "Sun", 2050, "2.0k"),
-            ),
-        ),
-        groupedEntries = listOf(
-            HistoryGroupRenderModel(
-                groupId = "nov-2",
-                dayLabel = "Nov 2, 2025",
-                entries = listOf(entry, breakfastEntry),
-            ),
-            HistoryGroupRenderModel(
-                groupId = "nov-1",
-                dayLabel = "Nov 1, 2025",
-                entries = listOf(
-                    entry.copy(
-                        id = 3,
-                        dateLabel = "Nov 1, 2025",
-                        timeLabel = "07:45 PM",
-                        caloriesLabel = "780 kcal",
-                        tags = listOf("Needs review"),
-                        summary = summary.copy(issues = listOf("Missing micronutrients snapshot")),
-                    ),
-                ),
-            ),
-        ),
-        highlightedEntryId = 1,
-    )
 }

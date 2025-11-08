@@ -1,12 +1,10 @@
 package com.sirelon.aicalories.features.history.ui
 
-/**
- * Collection of lightweight render models that mirrors the Supabase history schema while
- * exposing pre-formatted strings for the UI layer. They intentionally avoid business logic so
- * the screen can be previewed without a data source.
- */
+import com.sirelon.aicalories.designsystem.ChipData
+
 data class HistoryScreenRenderModel(
-    val header: HistoryHeaderRenderModel = HistoryHeaderRenderModel(),
+    val header: HistoryHeaderRenderModel,
+    val insights: List<ChipData> = emptyList(),
     val weeklySummary: WeeklyCaloriesRenderModel? = null,
     val groupedEntries: List<HistoryGroupRenderModel> = emptyList(),
     val highlightedEntryId: Long? = null,
@@ -14,9 +12,8 @@ data class HistoryScreenRenderModel(
 )
 
 data class HistoryHeaderRenderModel(
-    val title: String = "",
-    val subtitle: String? = null,
-    val insights: List<String> = emptyList(),
+    val title: String,
+    val subtitle: String,
 )
 
 data class WeeklyCaloriesRenderModel(
@@ -49,8 +46,8 @@ data class HistoryEntryRenderModel(
     val attachments: List<HistoryAttachmentRenderModel> = emptyList(),
     val foods: List<HistoryFoodRenderModel> = emptyList(),
     val macros: MacroBreakdownRenderModel? = null,
-    val summary: HistoryReportSummaryRenderModel? = null,
-    val tags: List<String> = emptyList(),
+    val summary: HistoryReportSummaryRenderModel,
+    val tags: List<ChipData> = emptyList(),
     val photoCountLabel: String? = null,
     val confidenceLabel: String? = null,
 )
@@ -82,10 +79,10 @@ data class MacroBreakdownRenderModel(
 
 data class HistoryReportSummaryRenderModel(
     val advice: String? = null,
-    val qualityLabel: String? = null,
-    val issues: List<String> = emptyList(),
-    val uncertainties: List<String> = emptyList(),
-    val checklist: List<String> = emptyList(),
+    val qualityLabel: ChipData,
+    val issues: List<ChipData> = emptyList(),
+    val uncertainties: List<ChipData> = emptyList(),
+    val checklist: List<ChipData> = emptyList(),
 )
 
 data class HistoryEmptyStateRenderModel(

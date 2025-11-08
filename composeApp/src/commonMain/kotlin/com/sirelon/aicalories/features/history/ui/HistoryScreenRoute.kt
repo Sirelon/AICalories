@@ -10,11 +10,11 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun HistoryScreenRoute(
-    viewModel: HistoryViewModel = koinViewModel(),
     onBack: (() -> Unit)? = null,
     onEntrySelected: (Long) -> Unit = {},
     onCaptureNewMeal: () -> Unit = {},
 ) {
+    val viewModel: HistoryViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
@@ -30,21 +30,23 @@ fun HistoryScreenRoute(
         }
     }
 
-    val renderModel = state.renderModel ?: HistoryScreenRenderModel(
-        header = HistoryHeaderRenderModel(
-            title = "History & Insights",
-            subtitle = "Track your analysed meals",
-        ),
-        emptyState = HistoryEmptyStateRenderModel(
-            title = if (state.isLoading) "Loading history…" else "No history yet",
-            description = if (state.isLoading) {
-                "Preparing sample data..."
-            } else {
-                "Analyze your first meal to see items here."
-            },
-            actionLabel = "Capture meal",
-        ),
-    )
+    val renderModel = state.renderModel
+
+        ?: HistoryScreenRenderModel(
+            header = HistoryHeaderRenderModel(
+                title = "History & Insights",
+                subtitle = "Track your analysed meals",
+            ),
+            emptyState = HistoryEmptyStateRenderModel(
+                title = if (state.isLoading) "Loading history…" else "No history yet",
+                description = if (state.isLoading) {
+                    "Preparing sample data..."
+                } else {
+                    "Analyze your first meal to see items here."
+                },
+                actionLabel = "Capture meal",
+            ),
+        )
 
     HistoryScreen(
         renderModel = renderModel,

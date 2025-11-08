@@ -1,18 +1,21 @@
 package com.sirelon.aicalories.features.history.presentation
 
+import com.sirelon.aicalories.designsystem.RandomData
 import com.sirelon.aicalories.features.history.ui.CaloriePointRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryAttachmentRenderModel
+import com.sirelon.aicalories.features.history.ui.HistoryEmptyStateRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryEntryRenderModel
+import com.sirelon.aicalories.features.history.ui.HistoryFoodRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryGroupRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryHeaderRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryReportSummaryRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRenderModel
-import com.sirelon.aicalories.features.history.ui.HistoryFoodRenderModel
-import com.sirelon.aicalories.features.history.ui.HistoryEmptyStateRenderModel
 import com.sirelon.aicalories.features.history.ui.MacroBreakdownRenderModel
 import com.sirelon.aicalories.features.history.ui.WeeklyCaloriesRenderModel
 import kotlin.math.roundToInt
 import kotlin.random.Random
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 object HistorySampleDataProvider {
 
@@ -44,7 +47,10 @@ object HistorySampleDataProvider {
         "https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?w=400",
     )
 
-    fun randomRenderModel(seed: Long = System.currentTimeMillis()): HistoryScreenRenderModel {
+    @OptIn(ExperimentalTime::class)
+    fun randomRenderModel(
+        seed: Long = Clock.System.now().toEpochMilliseconds()
+    ): HistoryScreenRenderModel {
         val random = Random(seed)
         val weeklyPoints = dayLabels.map { day ->
             val calories = random.nextInt(1700, 2500)
@@ -52,7 +58,7 @@ object HistorySampleDataProvider {
                 id = day.lowercase(),
                 dayLabel = day,
                 caloriesValue = calories,
-                caloriesLabel = "${(calories / 100).roundToInt() / 10.0}k",
+                caloriesLabel = "${(calories / 100f).roundToInt() / 10.0}k",
             )
         }
         val total = weeklyPoints.sumOf { it.caloriesValue }
@@ -77,15 +83,19 @@ object HistorySampleDataProvider {
             header = HistoryHeaderRenderModel(
                 title = "History & Insights",
                 subtitle = "Track your analysed meals",
-                insights = listOf(
-                    "Avg ${average} kcal/day",
-                    "Consistency +${random.nextInt(2, 12)}%",
-                ),
             ),
+
+            insights = RandomData.randomInsightChip(random, average),
+
             weeklySummary = WeeklyCaloriesRenderModel(
                 title = "Calories this week",
                 totalLabel = "${total} kcal",
-                changeLabel = "${if (random.nextBoolean()) "+" else "-"}${random.nextInt(1, 6)}% vs last week",
+                changeLabel = "${if (random.nextBoolean()) "+" else "-"}${
+                    random.nextInt(
+                        1,
+                        6
+                    )
+                }% vs last week",
                 points = weeklyPoints,
                 targetLabel = "Target ${average - 150} kcal",
             ),
@@ -112,7 +122,12 @@ object HistorySampleDataProvider {
                 description = ingredientSuffixes.random(random),
                 quantityLabel = "${random.nextInt(80, 240)} g",
                 caloriesLabel = "${random.nextInt(120, 320)} kcal",
-                macroLabel = "P${random.nextInt(8, 32)} • F${random.nextInt(5, 20)} • C${random.nextInt(20, 60)}",
+                macroLabel = "P${random.nextInt(8, 32)} • F${
+                    random.nextInt(
+                        5,
+                        20
+                    )
+                } • C${random.nextInt(20, 60)}",
                 confidenceLabel = "Confidence ${random.nextInt(80, 97)}%",
                 fromImage = random.nextBoolean(),
                 fromNote = random.nextBoolean(),
@@ -124,25 +139,28 @@ object HistorySampleDataProvider {
             fat = "${random.nextInt(10, 35)} g",
             carbs = "${random.nextInt(30, 90)} g",
         )
-        val attachments = sampleImages.shuffled(random).take(random.nextInt(1, 3)).mapIndexed { index, url ->
-            HistoryAttachmentRenderModel(
-                id = "$id-attachment-$index",
-                previewUrl = url,
-                description = "Meal photo ${index + 1}",
-            )
-        }
+        val attachments =
+            sampleImages.shuffled(random).take(random.nextInt(1, 3)).mapIndexed { index, url ->
+                HistoryAttachmentRenderModel(
+                    id = "$id-attachment-$index",
+                    previewUrl = url,
+                    description = "Meal photo ${index + 1}",
+                )
+            }
         val summary = HistoryReportSummaryRenderModel(
             advice = "Add leafy greens for extra fiber and micronutrients.",
-            qualityLabel = listOf("High quality", "Needs attention", "Balanced").random(random),
-            issues = if (random.nextBoolean()) listOf("Fiber below target") else emptyList(),
-            uncertainties = if (random.nextBoolean()) listOf("Sauce ingredients unclear") else emptyList(),
-            checklist = listOf("Protein logged", "Hydration noted", "Veggies included").shuffled(random).take(2),
+            qualityLabel = RandomData.randomQualityChip(),
+            issues = if (random.nextBoolean()) listOf(RandomData.randomChip()) else emptyList(),
+            uncertainties = if (random.nextBoolean()) listOf(RandomData.randomChip()) else emptyList(),
+            checklist = listOf(RandomData.randomChip(), RandomData.randomChip()),
         )
 
         return HistoryEntryRenderModel(
             id = id,
             dateLabel = dateLabel,
-            timeLabel = "${random.nextInt(6, 22)}:${random.nextInt(0, 59).toString().padStart(2, '0')} ${
+            timeLabel = "${random.nextInt(6, 22)}:${
+                random.nextInt(0, 59).toString().padStart(2, '0')
+            } ${
                 if (random.nextBoolean()) "AM" else "PM"
             }",
             caloriesLabel = "$calories kcal",
@@ -156,7 +174,8 @@ object HistorySampleDataProvider {
             foods = foods,
             macros = macros,
             summary = summary,
-            tags = listOf("AI sourced", "Manual note", "Contains nuts").shuffled(random).take(random.nextInt(0, 3)),
+            tags = listOf("AI sourced", "Manual note", "Contains nuts").shuffled(random)
+                .take(random.nextInt(0, 3)).map { RandomData.randomChip(it) },
             photoCountLabel = "${attachments.size} photo${if (attachments.size > 1) "s" else ""}",
             confidenceLabel = "Confidence ${random.nextInt(80, 98)}%",
         )

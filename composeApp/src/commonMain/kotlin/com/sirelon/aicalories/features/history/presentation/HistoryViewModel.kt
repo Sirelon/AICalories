@@ -5,11 +5,13 @@ import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class HistoryViewModel(
-    private val sampleDataProvider: HistorySampleDataProvider = HistorySampleDataProvider,
-) : BaseViewModel<HistoryContract.HistoryState, HistoryContract.HistoryEvent, HistoryContract.HistoryEffect>() {
+internal class HistoryViewModel() :
+    BaseViewModel<HistoryContract.HistoryState, HistoryContract.HistoryEvent, HistoryContract.HistoryEffect>() {
 
-    override fun initialState(): HistoryContract.HistoryState = HistoryContract.HistoryState(isLoading = true)
+
+    private val sampleDataProvider: HistorySampleDataProvider = HistorySampleDataProvider
+    override fun initialState(): HistoryContract.HistoryState =
+        HistoryContract.HistoryState(isLoading = true)
 
     init {
         loadHistory(force = true)
