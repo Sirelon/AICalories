@@ -1,32 +1,25 @@
 package com.sirelon.aicalories.features.analyze.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
@@ -49,21 +42,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
-import coil3.compose.AsyncImage
 import com.mohamedrejeb.calf.core.LocalPlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.designsystem.AppDimens
+import com.sirelon.aicalories.designsystem.AppDivider
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.AppTheme
+import com.sirelon.aicalories.designsystem.ChipComponent
+import com.sirelon.aicalories.designsystem.ChipStyle
+import com.sirelon.aicalories.designsystem.TagGroup
 import com.sirelon.aicalories.features.analyze.model.MacroStatUi
 import com.sirelon.aicalories.features.analyze.model.MealAnalysisUi
 import com.sirelon.aicalories.features.analyze.model.MealEntryUi
@@ -79,17 +72,16 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AnalyzeScreen(
-    viewModel: AnalyzeViewModel = koinViewModel(),
     onBack: (() -> Unit)? = null,
     onResultConfirmed: (() -> Unit)? = null,
 ) {
+    val viewModel: AnalyzeViewModel = koinViewModel()
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     val platformContext = LocalPlatformContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val permissionController = rememberPermissionController(permission = Permission.Camera)
     val uploads = state.uploads
-    val fileEntries = uploads.entries.toList()
     val hasReport = state.hasReport
     val hasResultData = state.result?.hasContent == true
     val canInteractWithPhotos = !hasReport && !state.isLoading
@@ -164,7 +156,7 @@ fun AnalyzeScreen(
         ) {
             item {
                 PhotosSection(
-                    files = fileEntries,
+                    files = uploads,
                     interactionEnabled = canInteractWithPhotos,
                     canAddMore = canAddMorePhotos,
                     hasResult = hasReport,
@@ -276,7 +268,7 @@ private fun AnalyzeBottomBar(
                 ),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl4),
         ) {
-            HorizontalDivider(color = AppTheme.colors.outline.copy(alpha = 0.12f))
+            AppDivider()
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -329,7 +321,7 @@ private fun AnalyzeBottomBar(
 @Composable
 private fun PhotosSection(
     modifier: Modifier = Modifier,
-    files: List<Map.Entry<KmpFile, UploadItem>>,
+    files: Map<KmpFile, UploadItem>,
     interactionEnabled: Boolean,
     canAddMore: Boolean,
     hasResult: Boolean,
@@ -366,170 +358,11 @@ private fun PhotosSection(
                 )
             }
 
-            PhotosGrid(
+            PhotosGridComponent(
                 files = files,
                 canAddMore = interactionEnabled && canAddMore,
                 interactionEnabled = interactionEnabled,
                 onAddPhoto = onAddPhoto,
-            )
-        }
-    }
-}
-
-@Composable
-private fun PhotosGrid(
-    files: List<Map.Entry<KmpFile, UploadItem>>,
-    canAddMore: Boolean,
-    interactionEnabled: Boolean,
-    onAddPhoto: () -> Unit,
-) {
-    val totalSlots = when {
-        canAddMore -> (files.size + 1).coerceAtLeast(MIN_GRID_SIZE)
-        else -> files.size.coerceAtLeast(MIN_GRID_SIZE)
-    }
-
-    val rows = (totalSlots + GRID_COLUMNS - 1) / GRID_COLUMNS
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
-    ) {
-        repeat(rows) { rowIndex ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
-            ) {
-                repeat(GRID_COLUMNS) { columnIndex ->
-                    val slotIndex = rowIndex * GRID_COLUMNS + columnIndex
-                    if (slotIndex >= totalSlots) {
-                        Spacer(
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f),
-                        )
-                    } else {
-                        val entry = files.getOrNull(slotIndex)
-                        if (entry != null) {
-                            PhotoPreview(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .aspectRatio(1f),
-                                progress = entry.value.progress,
-                                file = entry.key,
-                            )
-                        } else if (canAddMore) {
-                            AddPhotoCell(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .aspectRatio(1f),
-                                enabled = interactionEnabled,
-                                onClick = onAddPhoto,
-                            )
-                        } else {
-                            Spacer(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .aspectRatio(1f),
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun PhotoPreview(
-    modifier: Modifier,
-    progress: Double,
-    file: KmpFile,
-) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
-        tonalElevation = AppDimens.Size.xs,
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            AsyncImage(
-                model = file,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-            )
-            if (progress < COMPLETE_PERCENTAGE) {
-                UploadStatusIndicator(progress = progress)
-            }
-        }
-    }
-}
-
-@Composable
-private fun BoxScope.UploadStatusIndicator(
-    progress: Double,
-) {
-    val percent = progress.coerceIn(0.0, COMPLETE_PERCENTAGE)
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .align(Alignment.BottomCenter),
-        color = Color.Black.copy(alpha = 0.4f),
-        contentColor = Color.White,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = AppDimens.Spacing.xl,
-                    vertical = AppDimens.Spacing.m,
-                ),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.s),
-        ) {
-            LinearProgressIndicator(
-                progress = { (percent / COMPLETE_PERCENTAGE).toFloat() },
-                modifier = Modifier.fillMaxWidth(),
-                color = Color.White,
-                trackColor = Color.White.copy(alpha = 0.3f),
-            )
-            Text(
-                text = "${percent.toInt()}%",
-                style = AppTheme.typography.caption,
-                textAlign = TextAlign.End,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun AddPhotoCell(
-    modifier: Modifier,
-    enabled: Boolean,
-    onClick: () -> Unit,
-) {
-    Surface(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = modifier,
-        shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
-        border = BorderStroke(
-            width = AppDimens.BorderWidth.l,
-            color = AppTheme.colors.outline.copy(alpha = if (enabled) 1f else 0.4f),
-        ),
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Add,
-                tint = AppTheme.colors.onSurface.copy(alpha = 0.6f),
-                contentDescription = "Add photo",
-                modifier = Modifier.size(AppDimens.Size.xl8),
             )
         }
     }
@@ -751,10 +584,7 @@ private fun EntriesSection(
             entries.forEachIndexed { index, entry ->
                 EntryCard(entry = entry)
                 if (index < entries.lastIndex) {
-                    HorizontalDivider(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = AppTheme.colors.outline.copy(alpha = 0.08f),
-                    )
+                    AppDivider()
                 }
             }
         }
@@ -785,11 +615,7 @@ private fun EntryCard(
                     style = AppTheme.typography.title,
                 )
                 entry.confidenceText?.let { confidence ->
-                    ResultTag(
-                        text = confidence,
-                        color = AppTheme.colors.primary.copy(alpha = 0.12f),
-                        contentColor = AppTheme.colors.primary,
-                    )
+                    ChipComponent(data = confidence, style = ChipStyle.Success)
                 }
             }
             entry.description?.let {
@@ -805,7 +631,8 @@ private fun EntryCard(
                 )
             }
             MacronutrientRow(stats = entry.macroStats)
-            EntryTagRow(tags = entry.sourceTags)
+
+            TagGroup(title = "Tags", tags = entry.sourceTags, style = ChipStyle.Neutral)
         }
     }
 }
@@ -824,42 +651,6 @@ private fun MacronutrientRow(
                 value = stat.value,
             )
         }
-    }
-}
-
-@Composable
-private fun EntryTagRow(
-    tags: List<String>,
-) {
-    if (tags.isEmpty()) return
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl2),
-    ) {
-        tags.forEach { tag ->
-            ResultTag(text = tag)
-        }
-    }
-}
-
-@Composable
-private fun ResultTag(
-    text: String,
-    color: Color = AppTheme.colors.surfaceVariant,
-    contentColor: Color = AppTheme.colors.onSurface,
-) {
-    Surface(
-        shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
-        color = color,
-    ) {
-        Text(
-            modifier = Modifier.padding(
-                horizontal = AppDimens.Spacing.xl2,
-                vertical = AppDimens.Spacing.xs,
-            ),
-            text = text,
-            style = AppTheme.typography.caption,
-            color = contentColor,
-        )
     }
 }
 
@@ -941,7 +732,4 @@ private fun PhotoSourceDialog(
     )
 }
 
-private const val GRID_COLUMNS = 3
-private const val MIN_GRID_SIZE = 3
 private const val MAX_PHOTO_COUNT = 3
-private const val COMPLETE_PERCENTAGE = 100.0
