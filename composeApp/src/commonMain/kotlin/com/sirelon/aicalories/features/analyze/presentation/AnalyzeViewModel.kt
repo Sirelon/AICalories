@@ -5,23 +5,69 @@ import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository.UploadedFile
+import com.sirelon.aicalories.features.analyze.data.ReportAnalysisUiMapper
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import io.github.jan.supabase.storage.UploadStatus
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AnalyzeViewModel(
     private val repository: AnalyzeRepository,
+    private val mapper: ReportAnalysisUiMapper,
 ) : BaseViewModel<AnalyzeContract.AnalyzeState, AnalyzeContract.AnalyzeEvent, AnalyzeContract.AnalyzeEffect>() {
 
     override fun initialState(): AnalyzeContract.AnalyzeState = AnalyzeContract.AnalyzeState()
 
-    private var observationJob: Job? = null
-    private var observedFoodEntryId: Long? = null
+
+    private val foodEntryIdEmitter = MutableStateFlow<Long?>(null)
+
+
+    init {
+        foodEntryIdEmitter
+            .filterNotNull()
+            .onEach {
+                setState { current ->
+                    current.copy(
+                        isLoading = true,
+                        errorMessage = null,
+                        hasReport = false,
+                        result = current.result?.takeIf { it.hasContent },
+                    )
+                }
+            }
+            .flatMapLatest(repository::observeAnalysis)
+            .map { mapper.toUi(it.summary, it.entries) }
+            .onEach { report ->
+                setState { current ->
+                    current.copy(
+                        result = report,
+                        isLoading = false,
+                        errorMessage = null,
+                        hasReport = true,
+                    )
+                }
+            }
+            .catch { error ->
+                setState { current ->
+                    current.copy(
+                        isLoading = false,
+                        errorMessage = error.message ?: "Unable to load analysis report.",
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
 
     override fun onEvent(event: AnalyzeContract.AnalyzeEvent) {
         when (event) {
@@ -115,18 +161,6 @@ class AnalyzeViewModel(
         }
 
         viewModelScope.launch {
-            setState {
-                it.copy(
-                    isLoading = true,
-                    errorMessage = null,
-                    result = null,
-                    foodEntryId = null,
-                )
-            }
-
-            observationJob?.cancel()
-            observedFoodEntryId = null
-
             val uploadedFiles = state.value.uploads.values.mapNotNull { it.uploadedFile }
             val note = prompt.ifBlank { null }
 
@@ -146,55 +180,14 @@ class AnalyzeViewModel(
                             uploads = emptyMap(),
                         )
                     }
-                    observeFoodEntry(foodEntryId)
+
                     postEffect(
                         AnalyzeContract.AnalyzeEffect.ShowMessage(
                             "Analysis started. You'll see results here shortly.",
                         ),
                     )
-                }
-        }
-    }
 
-    fun attachFoodEntry(foodEntryId: Long) {
-        observeFoodEntry(foodEntryId)
-    }
-
-    private fun observeFoodEntry(foodEntryId: Long) {
-        if (foodEntryId <= 0L) return
-        if (observedFoodEntryId == foodEntryId) return
-
-        observationJob?.cancel()
-        observedFoodEntryId = foodEntryId
-        observationJob = viewModelScope.launch {
-            setState { current ->
-                current.copy(
-                    isLoading = true,
-                    errorMessage = null,
-                    foodEntryId = foodEntryId,
-                    result = current.result?.takeIf { it.hasContent },
-                )
-            }
-
-            repository
-                .observeAnalysis(foodEntryId)
-                .catch { error ->
-                    setState { current ->
-                        current.copy(
-                            isLoading = false,
-                            errorMessage = error.message ?: "Unable to load analysis report.",
-                        )
-                    }
-                }
-                .collect { report ->
-                    setState { current ->
-                        current.copy(
-                            result = report,
-                            isLoading = report == null,
-                            errorMessage = if (report == null) current.errorMessage else null,
-                            foodEntryId = foodEntryId,
-                        )
-                    }
+                    foodEntryIdEmitter.emit(foodEntryId)
                 }
         }
     }

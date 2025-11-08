@@ -11,7 +11,7 @@ interface AnalyzeContract {
         val prompt: String = "",
         val isLoading: Boolean = false,
         val result: MealAnalysisUi? = null,
-        val foodEntryId: Long? = null,
+        val hasReport: Boolean = false,
         val errorMessage: String? = null,
         val uploads: Map<KmpFile, UploadItem> = emptyMap(),
     ) {
