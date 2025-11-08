@@ -92,4 +92,8 @@ class AnalyzeRepository(
 
         foodEntryId
     }
+
+    suspend fun requestAnalysis(foodEntryId: Long): Result<Unit> = runCatching {
+        client.invokeFoodEntryAnalysis(foodEntryId)
+    }
 }
