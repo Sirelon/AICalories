@@ -40,7 +40,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.currentWindowDpSize
 import androidx.compose.material3.adaptive.separatingVerticalHingeBounds
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,7 +52,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
 import coil3.compose.AsyncImage
@@ -128,7 +129,7 @@ fun AnalyzeScreen(
     }
 
     val adaptiveInfo = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)
-    val windowDpSize = currentWindowDpSize()
+    val windowDpSize = LocalWindowInfo.current.containerDpSize
     val hasSeparatingHinge = adaptiveInfo.windowPosture.separatingVerticalHingeBounds.isNotEmpty()
     val isMediumWidth = windowDpSize.width >= WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND.dp
     val useSplitLayout = isMediumWidth && !hasSeparatingHinge
