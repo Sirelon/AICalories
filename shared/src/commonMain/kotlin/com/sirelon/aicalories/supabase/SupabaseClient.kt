@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.buildJsonObject
@@ -194,6 +195,7 @@ class SupabaseClient {
                 },
             )
     }
+
     @OptIn(ExperimentalUuidApi::class)
     private fun buildStoragePath(userId: String, originalPath: String): String {
         val sanitizedName = originalPath
@@ -212,6 +214,24 @@ class SupabaseClient {
 
     @OptIn(SupabaseExperimental::class)
     fun observeReportSummary(foodEntryId: Long): Flow<ReportAnalysisSummaryResponse?> {
+
+        if (true)
+            return flow {
+
+                val userId = ensureAuthenticatedUserId()
+                val result = client
+                    .postgrest["report_analyse_summary"]
+                    .select {
+                        filter {
+                            eq("food_entry_id", foodEntryId)
+                        }
+                    }
+
+                val data = result.decodeList<ReportAnalysisSummaryResponse>().firstOrNull()
+                emit(data)
+            }
+
+
         return client
             .postgrest["report_analyse_summary"]
             .selectAsFlow(
@@ -224,6 +244,9 @@ class SupabaseClient {
             )
             .map { summaries ->
                 summaries.firstOrNull()
+            }
+            .onStart {
+                ensureAuthenticatedUserId()
             }
     }
 
