@@ -17,10 +17,6 @@ fun HistoryScreenRoute(
     val viewModel: HistoryViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        viewModel.onEvent(HistoryContract.HistoryEvent.ScreenShown)
-    }
-
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
@@ -30,26 +26,9 @@ fun HistoryScreenRoute(
         }
     }
 
-    val renderModel = state.renderModel
-
-        ?: HistoryScreenRenderModel(
-            header = HistoryHeaderRenderModel(
-                title = "History & Insights",
-                subtitle = "Track your analysed meals",
-            ),
-            emptyState = HistoryEmptyStateRenderModel(
-                title = if (state.isLoading) "Loading history…" else "No history yet",
-                description = if (state.isLoading) {
-                    "Preparing sample data..."
-                } else {
-                    "Analyze your first meal to see items here."
-                },
-                actionLabel = "Capture meal",
-            ),
-        )
-
     HistoryScreen(
-        renderModel = renderModel,
+        renderModel = state.renderModel,
+        isLoading = state.isLoading,
         onBack = onBack,
         onEntryClick = { entry ->
             viewModel.onEvent(HistoryContract.HistoryEvent.EntryClicked(entry.id))

@@ -6,12 +6,11 @@ interface HistoryContract {
 
     data class HistoryState(
         val isLoading: Boolean = false,
-        val renderModel: HistoryScreenRenderModel? = null,
+        val renderModel: HistoryScreenRenderModel,
         val errorMessage: String? = null,
     )
 
     sealed interface HistoryEvent {
-        data object ScreenShown : HistoryEvent
         data object Refresh : HistoryEvent
         data class EntryClicked(val entryId: Long) : HistoryEvent
         data object EmptyCtaClicked : HistoryEvent

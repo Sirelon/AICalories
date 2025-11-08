@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.outlined.Image
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,7 +42,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
 import com.sirelon.aicalories.designsystem.AppDimens
@@ -52,12 +50,14 @@ import com.sirelon.aicalories.designsystem.ChipComponent
 import com.sirelon.aicalories.designsystem.ChipStyle
 import com.sirelon.aicalories.designsystem.LargeAppBar
 import com.sirelon.aicalories.designsystem.TagGroup
+import com.sirelon.aicalories.designsystem.screens.EmptyScreen
 import com.sirelon.aicalories.features.history.presentation.HistorySampleDataProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     renderModel: HistoryScreenRenderModel,
+    isLoading: Boolean,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     onEntryClick: (HistoryEntryRenderModel) -> Unit = {},
@@ -70,58 +70,60 @@ fun HistoryScreen(
         modifier = modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeAppBar(
-                title = renderModel.header.title,
-                subTitle = renderModel.header.subtitle,
+                title = "History & Insights",
+                subTitle = "Track your analysed meals",
                 onBack = onBack,
                 scrollBehavior = scrollBehavior,
             )
         },
     ) { innerPadding ->
-        if (renderModel.groupedEntries.isEmpty()) {
-            HistoryEmptyState(
-                model = renderModel.emptyState ?: HistoryEmptyStateRenderModel(
-                    title = "No history yet",
-                    description = "Your analysed meals will appear here once you capture and submit them.",
-                ),
+        if (renderModel.isEmpty) {
+            EmptyScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                onActionClick = onEmptyStateAction,
+                title = if (isLoading) "Loading history" else "No history yet",
+                description = if (isLoading) "Wait a moment" else "Your analysed meals will appear here once you capture and submit them.",
+                actionLabel = "Capture meal".takeUnless { isLoading },
+                onActionClick = onEmptyStateAction.takeUnless { isLoading },
             )
-            return@Scaffold
-        }
-
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(
-                start = AppDimens.Spacing.xl6,
-                end = AppDimens.Spacing.xl6,
-                bottom = AppDimens.Spacing.xl8,
-                top = AppDimens.Spacing.xl5,
-            ),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl5),
-        ) {
-            item(key = "history_header") {
-                TagGroup(title = "Insights", tags = renderModel.insights, style = ChipStyle.Success)
-            }
-
-            renderModel.weeklySummary?.let { weekly ->
-                item(key = "weekly_summary") {
-                    WeeklyCaloriesCard(weekly)
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentPadding = PaddingValues(
+                    start = AppDimens.Spacing.xl6,
+                    end = AppDimens.Spacing.xl6,
+                    bottom = AppDimens.Spacing.xl8,
+                    top = AppDimens.Spacing.xl5,
+                ),
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl5),
+            ) {
+                item(key = "history_header") {
+                    TagGroup(
+                        title = "Insights",
+                        tags = renderModel.insights,
+                        style = ChipStyle.Success
+                    )
                 }
-            }
 
-            items(
-                items = renderModel.groupedEntries,
-                key = { it.groupId },
-            ) { group ->
-                HistoryGroupSection(
-                    group = group,
-                    highlightedEntryId = renderModel.highlightedEntryId,
-                    onEntryClick = onEntryClick,
-                )
+                renderModel.weeklySummary?.let { weekly ->
+                    item(key = "weekly_summary") {
+                        WeeklyCaloriesCard(weekly)
+                    }
+                }
+
+                items(
+                    items = renderModel.groupedEntries,
+                    key = { it.groupId },
+                ) { group ->
+                    HistoryGroupSection(
+                        group = group,
+                        highlightedEntryId = renderModel.highlightedEntryId,
+                        onEntryClick = onEntryClick,
+                    )
+                }
             }
         }
     }
@@ -618,50 +620,13 @@ private fun AttachmentsRow(
 @Composable
 private fun surfaceVariantColor(): Color = MaterialTheme.colorScheme.surfaceVariant
 
-@Composable
-private fun HistoryEmptyState(
-    model: HistoryEmptyStateRenderModel,
-    modifier: Modifier = Modifier,
-    onActionClick: (() -> Unit)? = null,
-) {
-    Column(
-        modifier = modifier
-            .background(AppTheme.colors.background)
-            .padding(AppDimens.Spacing.xl8),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = model.title,
-            style = AppTheme.typography.title,
-            color = AppTheme.colors.onBackground,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(modifier = Modifier.height(AppDimens.Spacing.xl3))
-        Text(
-            text = model.description,
-            style = AppTheme.typography.body,
-            color = AppTheme.colors.onSurface.copy(alpha = 0.7f),
-            textAlign = TextAlign.Center,
-        )
-        model.actionLabel?.let { actionLabel ->
-            Spacer(modifier = Modifier.height(AppDimens.Spacing.xl4))
-            Button(
-                onClick = { onActionClick?.invoke() },
-                enabled = onActionClick != null,
-            ) {
-                Text(actionLabel)
-            }
-        }
-    }
-}
-
 @Preview
 @Composable
 private fun HistoryScreenPreview() {
     AppTheme {
         HistoryScreen(
             renderModel = HistorySampleDataProvider.randomRenderModel(),
+            isLoading = false,
             onEntryClick = {},
         )
     }

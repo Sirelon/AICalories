@@ -3,18 +3,13 @@ package com.sirelon.aicalories.features.history.ui
 import com.sirelon.aicalories.designsystem.ChipData
 
 data class HistoryScreenRenderModel(
-    val header: HistoryHeaderRenderModel,
     val insights: List<ChipData> = emptyList(),
     val weeklySummary: WeeklyCaloriesRenderModel? = null,
     val groupedEntries: List<HistoryGroupRenderModel> = emptyList(),
     val highlightedEntryId: Long? = null,
-    val emptyState: HistoryEmptyStateRenderModel? = null,
-)
-
-data class HistoryHeaderRenderModel(
-    val title: String,
-    val subtitle: String,
-)
+) {
+    val isEmpty = groupedEntries.isEmpty()
+}
 
 data class WeeklyCaloriesRenderModel(
     val title: String,
@@ -83,10 +78,4 @@ data class HistoryReportSummaryRenderModel(
     val issues: List<ChipData> = emptyList(),
     val uncertainties: List<ChipData> = emptyList(),
     val checklist: List<ChipData> = emptyList(),
-)
-
-data class HistoryEmptyStateRenderModel(
-    val title: String,
-    val description: String,
-    val actionLabel: String? = null,
 )

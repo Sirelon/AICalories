@@ -3,11 +3,9 @@ package com.sirelon.aicalories.features.history.presentation
 import com.sirelon.aicalories.designsystem.RandomData
 import com.sirelon.aicalories.features.history.ui.CaloriePointRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryAttachmentRenderModel
-import com.sirelon.aicalories.features.history.ui.HistoryEmptyStateRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryEntryRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryFoodRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryGroupRenderModel
-import com.sirelon.aicalories.features.history.ui.HistoryHeaderRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryReportSummaryRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRenderModel
 import com.sirelon.aicalories.features.history.ui.MacroBreakdownRenderModel
@@ -80,11 +78,6 @@ object HistorySampleDataProvider {
         }
 
         return HistoryScreenRenderModel(
-            header = HistoryHeaderRenderModel(
-                title = "History & Insights",
-                subtitle = "Track your analysed meals",
-            ),
-
             insights = RandomData.randomInsightChip(random, average),
 
             weeklySummary = WeeklyCaloriesRenderModel(
@@ -101,11 +94,6 @@ object HistorySampleDataProvider {
             ),
             groupedEntries = groups,
             highlightedEntryId = groups.firstOrNull()?.entries?.firstOrNull()?.id,
-            emptyState = HistoryEmptyStateRenderModel(
-                title = "No history yet",
-                description = "Analyze your first meal to see reports here.",
-                actionLabel = "Capture meal",
-            ),
         )
     }
 
