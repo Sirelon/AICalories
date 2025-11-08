@@ -133,16 +133,18 @@ class AnalyzeViewModel(
                     item.copy(progress = percent)
                 }
 
-                is UploadStatus.Success -> updateUpload(
-                    file = file,
-                ) { item ->
-                    item.copy(
-                        progress = percent,
-                        uploadedFile = UploadedFile(
-                            id = status.response.id,
-                            path = status.response.path,
-                        ),
-                    )
+                is UploadStatus.Success -> {
+                    updateUpload(
+                        file = file,
+                    ) { item ->
+                        item.copy(
+                            progress = percent,
+                            uploadedFile = UploadedFile(
+                                id = status.response.id,
+                                path = status.response.path,
+                            ),
+                        )
+                    }
                 }
             }
         }
@@ -160,6 +162,16 @@ class AnalyzeViewModel(
             return
         }
 
+        setState {
+            it.copy(isLoading = true)
+        }
+
+        postEffect(
+            AnalyzeContract.AnalyzeEffect.ShowMessage(
+                "Analysis started. You'll see results here shortly.",
+            ),
+        )
+
         viewModelScope.launch {
             val uploadedFiles = state.value.uploads.values.mapNotNull { it.uploadedFile }
             val note = prompt.ifBlank { null }
@@ -176,6 +188,8 @@ class AnalyzeViewModel(
                 }
                 .getOrElse { return@launch }
 
+            foodEntryIdEmitter.emit(foodEntryId)
+
             repository
                 .requestAnalysis(foodEntryId)
                 .onFailure { error ->
@@ -185,22 +199,6 @@ class AnalyzeViewModel(
                             errorMessage = error.message ?: "Failed to start analysis.",
                         )
                     }
-                }
-                .onSuccess {
-                    setState {
-                        it.copy(
-                            prompt = "",
-                            uploads = emptyMap(),
-                        )
-                    }
-
-                    postEffect(
-                        AnalyzeContract.AnalyzeEffect.ShowMessage(
-                            "Analysis started. You'll see results here shortly.",
-                        ),
-                    )
-
-                    foodEntryIdEmitter.emit(foodEntryId)
                 }
         }
     }
