@@ -14,6 +14,7 @@ import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.functions.Functions
+import io.github.jan.supabase.functions.functions
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.filter.FilterOperation
@@ -31,10 +32,13 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 private const val STORAGE_BUCKET_NAME = "aicalories"
+private const val ANALYZE_FUNCTION_NAME = "analyze-food-entry"
 
 class SupabaseClient {
     @OptIn(SupabaseInternal::class)
@@ -178,6 +182,18 @@ class SupabaseClient {
             .associate { it.name to it.id }
     }
 
+    suspend fun invokeFoodEntryAnalysis(foodEntryId: Long) {
+        ensureAuthenticatedUserId()
+
+        client
+            .functions
+            .invoke(
+                function = ANALYZE_FUNCTION_NAME,
+                body = buildJsonObject {
+                    put("foodEntryId", foodEntryId)
+                },
+            )
+    }
     @OptIn(ExperimentalUuidApi::class)
     private fun buildStoragePath(userId: String, originalPath: String): String {
         val sanitizedName = originalPath

@@ -164,7 +164,7 @@ class AnalyzeViewModel(
             val uploadedFiles = state.value.uploads.values.mapNotNull { it.uploadedFile }
             val note = prompt.ifBlank { null }
 
-            repository
+            val foodEntryId = repository
                 .createFoodEntry(note = note, files = uploadedFiles)
                 .onFailure { error ->
                     setState {
@@ -173,7 +173,20 @@ class AnalyzeViewModel(
                             errorMessage = error.message ?: "Failed to create food entry.",
                         )
                     }
-                }.onSuccess { foodEntryId ->
+                }
+                .getOrElse { return@launch }
+
+            repository
+                .requestAnalysis(foodEntryId)
+                .onFailure { error ->
+                    setState {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = error.message ?: "Failed to start analysis.",
+                        )
+                    }
+                }
+                .onSuccess {
                     setState {
                         it.copy(
                             prompt = "",
