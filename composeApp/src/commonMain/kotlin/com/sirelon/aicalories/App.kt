@@ -29,7 +29,7 @@ import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.di.appModule
 import com.sirelon.aicalories.di.networkModule
-import com.sirelon.aicalories.features.history.ui.HistoryScreenRoute
+import com.sirelon.aicalories.features.analyze.ui.AnalyzeScreen
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
@@ -53,8 +53,8 @@ fun App() {
         AppTheme {
 
             if (true) {
-//                AnalyzeScreen(onBack = {})
-                HistoryScreenRoute()
+                AnalyzeScreen(onBack = {})
+//                HistoryScreenRoute()
                 return@AppTheme
             }
 
