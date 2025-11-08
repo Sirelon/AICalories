@@ -29,7 +29,7 @@ class AnalyzeViewModel(
     override fun initialState(): AnalyzeContract.AnalyzeState = AnalyzeContract.AnalyzeState()
 
 
-    private val foodEntryIdEmitter = MutableStateFlow<Long?>(19L)
+    private val foodEntryIdEmitter = MutableStateFlow<Long?>()
 
 
     init {

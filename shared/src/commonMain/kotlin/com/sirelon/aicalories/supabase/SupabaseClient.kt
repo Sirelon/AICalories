@@ -214,24 +214,6 @@ class SupabaseClient {
 
     @OptIn(SupabaseExperimental::class)
     fun observeReportSummary(foodEntryId: Long): Flow<ReportAnalysisSummaryResponse?> {
-
-        if (true)
-            return flow {
-
-                val userId = ensureAuthenticatedUserId()
-                val result = client
-                    .postgrest["report_analyse_summary"]
-                    .select {
-                        filter {
-                            eq("food_entry_id", foodEntryId)
-                        }
-                    }
-
-                val data = result.decodeList<ReportAnalysisSummaryResponse>().firstOrNull()
-                emit(data)
-            }
-
-
         return client
             .postgrest["report_analyse_summary"]
             .selectAsFlow(
