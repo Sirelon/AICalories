@@ -22,20 +22,16 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -54,6 +50,7 @@ import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.ChipComponent
 import com.sirelon.aicalories.designsystem.ChipStyle
+import com.sirelon.aicalories.designsystem.LargeAppBar
 import com.sirelon.aicalories.designsystem.TagGroup
 import com.sirelon.aicalories.features.history.presentation.HistorySampleDataProvider
 
@@ -72,8 +69,9 @@ fun HistoryScreen(
     Scaffold(
         modifier = modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            HistoryTopBar(
-                header = renderModel.header,
+            LargeAppBar(
+                title = renderModel.header.title,
+                subTitle = renderModel.header.subtitle,
                 onBack = onBack,
                 scrollBehavior = scrollBehavior,
             )
@@ -127,43 +125,6 @@ fun HistoryScreen(
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun HistoryTopBar(
-    header: HistoryHeaderRenderModel,
-    onBack: (() -> Unit)?,
-    scrollBehavior: TopAppBarScrollBehavior,
-) {
-    LargeTopAppBar(
-        title = {
-            Column {
-                Text(
-                    text = header.title,
-                    style = AppTheme.typography.headline,
-                )
-                header.subtitle?.let {
-                    Text(
-                        text = it,
-                        style = AppTheme.typography.label,
-                        color = AppTheme.colors.onSurface.copy(alpha = 0.7f),
-                    )
-                }
-            }
-        },
-        navigationIcon = {
-            onBack?.let {
-                IconButton(onClick = it) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Back",
-                    )
-                }
-            }
-        },
-        scrollBehavior = scrollBehavior,
-    )
 }
 
 @Composable
