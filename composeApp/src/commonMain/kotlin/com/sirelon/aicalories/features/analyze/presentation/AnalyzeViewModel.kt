@@ -38,17 +38,28 @@ class AnalyzeViewModel(
             is AnalyzeContract.AnalyzeEvent.UploadFilesResult -> {
                 event.result
                     .onSuccess { selectedFiles ->
+                        if (selectedFiles.isEmpty()) {
+                            showError("No files were selected.")
+                            return@onSuccess
+                        }
+
+                        setState { it.copy(errorMessage = null) }
+
                         selectedFiles.forEach { file ->
-                           addUploadPlaceholder(file)
+                            addUploadPlaceholder(file)
                             viewModelScope.launch {
                                 uploadFileFlow(
                                     platformContext = event.platformContext,
                                     file = file,
-                                ).collect()
+                                )
+                                    .catch { error -> handleUploadFailure(file, error) }
+                                    .collect()
                             }
                         }
                     }
-                // TODO: handle errors
+                    .onFailure { error ->
+                        showError(error.message ?: "Unable to access selected files.")
+                    }
             }
         }
     }
@@ -198,6 +209,22 @@ class AnalyzeViewModel(
                 )
             }
         }
+    }
+
+    private fun handleUploadFailure(file: KmpFile, error: Throwable) {
+        val message = error.message ?: "Failed to upload file."
+        setState { current ->
+            current.copy(
+                errorMessage = message,
+                uploads = current.uploads - file,
+            )
+        }
+        postEffect(AnalyzeContract.AnalyzeEffect.ShowMessage(message))
+    }
+
+    private fun showError(message: String) {
+        setState { it.copy(errorMessage = message) }
+        postEffect(AnalyzeContract.AnalyzeEffect.ShowMessage(message))
     }
 
     private fun updateUpload(
