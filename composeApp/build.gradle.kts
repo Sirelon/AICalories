@@ -46,7 +46,6 @@ kotlin {
     
     sourceSets {
         androidMain.dependencies {
-            implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.core.ktx)
             implementation(libs.koin.android)
@@ -57,14 +56,13 @@ kotlin {
             implementation(libs.supabase.compose.auth)
             implementation(libs.supabase.compose.auth.ui)
             implementation(libs.supabase.coil3.integration)
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.material3AdaptiveNavigationSuite)
-            implementation(compose.ui)
-            implementation(compose.materialIconsExtended)
-            implementation(compose.components.resources)
-            implementation(compose.preview)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.ui)
+            implementation(libs.compose.components.resources)
+            implementation(libs.compose.preview)
+            implementation(libs.material3)
+            implementation(libs.material3.adaptive.navigation.suite)
+            implementation(libs.material.icons.extended)
 
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)

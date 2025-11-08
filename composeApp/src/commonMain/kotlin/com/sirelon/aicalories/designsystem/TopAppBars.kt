@@ -20,14 +20,14 @@ fun AppLargeAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     LargeFlexibleTopAppBar(
-        title = {
-            Text(text = title)
-        },
         subtitle = if (subtitle != null) {
             {
                 Text(text = subtitle)
             }
         } else null,
+        title = {
+            Text(text = title)
+        },
         navigationIcon = {
             onBack?.let {
                 IconButton(onClick = it) {

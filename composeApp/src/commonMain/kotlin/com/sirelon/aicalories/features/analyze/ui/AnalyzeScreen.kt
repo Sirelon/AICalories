@@ -54,7 +54,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
 import coil3.compose.AsyncImage
@@ -643,7 +642,8 @@ private fun SummaryCard(
                 style = AppTheme.typography.label,
             )
             Text(
-                text = summary.headline ?: "We’ll highlight key nutrition facts here once available.",
+                text = summary.headline
+                    ?: "We’ll highlight key nutrition facts here once available.",
                 style = AppTheme.typography.body,
             )
             summary.qualityLabel?.let { label ->
