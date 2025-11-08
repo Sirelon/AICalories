@@ -13,9 +13,9 @@ import androidx.compose.runtime.Composable
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun LargeAppBar(
+fun AppLargeAppBar(
     title: String,
-    subTitle: String?,
+    subtitle: String?,
     onBack: (() -> Unit)?,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
@@ -23,9 +23,9 @@ fun LargeAppBar(
         title = {
             Text(text = title)
         },
-        subtitle = if (subTitle != null) {
+        subtitle = if (subtitle != null) {
             {
-                Text(text = subTitle)
+                Text(text = subtitle)
             }
         } else null,
         navigationIcon = {

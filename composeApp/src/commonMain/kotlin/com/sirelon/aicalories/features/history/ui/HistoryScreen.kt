@@ -48,7 +48,7 @@ import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.ChipComponent
 import com.sirelon.aicalories.designsystem.ChipStyle
-import com.sirelon.aicalories.designsystem.LargeAppBar
+import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.TagGroup
 import com.sirelon.aicalories.designsystem.screens.EmptyScreen
 import com.sirelon.aicalories.features.history.presentation.HistorySampleDataProvider
@@ -69,9 +69,9 @@ fun HistoryScreen(
     Scaffold(
         modifier = modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            LargeAppBar(
+            AppLargeAppBar(
                 title = "History & Insights",
-                subTitle = "Track your analysed meals",
+                subtitle = "Track your analysed meals",
                 onBack = onBack,
                 scrollBehavior = scrollBehavior,
             )

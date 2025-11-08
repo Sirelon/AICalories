@@ -21,18 +21,14 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MediumFlexibleTopAppBar
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -66,6 +62,7 @@ import com.mohamedrejeb.calf.core.LocalPlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.designsystem.AppDimens
+import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.features.analyze.model.MacroStatUi
 import com.sirelon.aicalories.features.analyze.model.MealAnalysisUi
@@ -246,6 +243,7 @@ private fun AnalyzeFields(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AnalyzeTopBar(
     hasResult: Boolean,
@@ -254,23 +252,10 @@ private fun AnalyzeTopBar(
 ) {
     val title = if (hasResult) "Analysis Result" else "Add Photos"
     val subtitle = if (hasResult) "Review detected items" else "Upload 1-3 images"
-    MediumFlexibleTopAppBar(
-        subtitle = {
-            Text(text = subtitle)
-        },
-        title = {
-            Text(text = title)
-        },
-        navigationIcon = {
-            if (onBack != null) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Back",
-                    )
-                }
-            }
-        },
+    AppLargeAppBar(
+        title = title,
+        subtitle = subtitle,
+        onBack = onBack,
         scrollBehavior = scrollBehavior,
     )
 }
@@ -692,9 +677,9 @@ private fun SummaryInsightsRow(
     text: String,
 ) {
     Surface(
-        shape = RoundedCornerShape(AppDimens.BorderRadius.full),
+        shape = RoundedCornerShape(AppDimens.BorderRadius.xl),
         color = AppTheme.colors.primary.copy(alpha = 0.1f),
-        tonalElevation = AppDimens.Size.xxs,
+        tonalElevation = AppDimens.Size.xs,
     ) {
         Text(
             modifier = Modifier
@@ -866,10 +851,10 @@ private fun EntryTagRow(
 private fun ResultTag(
     text: String,
     color: Color = AppTheme.colors.surfaceVariant,
-    contentColor: Color = AppTheme.colors.onSurfaceVariant,
+    contentColor: Color = AppTheme.colors.onSurface,
 ) {
     Surface(
-        shape = RoundedCornerShape(AppDimens.BorderRadius.full),
+        shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
         color = color,
     ) {
         Text(
