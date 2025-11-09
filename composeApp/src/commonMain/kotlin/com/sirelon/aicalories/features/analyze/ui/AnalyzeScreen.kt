@@ -127,9 +127,7 @@ fun AnalyzeScreen(
     val useSplitLayout = isMediumWidth && !hasSeparatingHinge
 
     Scaffold(
-        modifier = Modifier
-            .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-            .padding(horizontal = AppDimens.Spacing.xl3),
+        modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             AnalyzeTopBar(
@@ -153,8 +151,9 @@ fun AnalyzeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(AppTheme.colors.background)
-                .padding(innerPadding),
-            columns = GridCells.Fixed(if (useSplitLayout) 2 else 1)
+                .padding(horizontal = AppDimens.Spacing.xl3),
+            columns = GridCells.Fixed(if (useSplitLayout) 2 else 1),
+            contentPadding = innerPadding
         ) {
             item {
                 PhotosSection(
