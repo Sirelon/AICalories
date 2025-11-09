@@ -613,7 +613,7 @@ private fun EntryCard(
                     text = entry.title,
                     style = AppTheme.typography.title,
                 )
-                entry.confidenceText?.let { confidence ->
+                entry.confidence?.let { confidence ->
                     ChipComponent(data = confidence)
                 }
             }

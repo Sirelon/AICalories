@@ -12,7 +12,8 @@ import com.sirelon.aicalories.features.analyze.model.MealEntryUi
 import com.sirelon.aicalories.features.analyze.model.MealSummaryUi
 import com.sirelon.aicalories.supabase.response.ReportAnalysisEntryResponse
 import com.sirelon.aicalories.supabase.response.ReportAnalysisSummaryResponse
-import kotlin.math.round
+import com.sirelon.aicalories.utils.normalizePercentage
+import com.sirelon.aicalories.utils.roundToDecimals
 
 class ReportAnalysisUiMapper {
 
@@ -51,7 +52,7 @@ class ReportAnalysisUiMapper {
                 MacroStatUi(label = "Carbs", value = entry.carbsGrams.formatMacro("g")),
                 MacroStatUi(label = "Fat", value = entry.fatGrams.formatMacro("g")),
             ),
-            confidenceText = confidenceChip(entry.confidence),
+            confidence = confidenceChip(entry.confidence),
             sourceTags = sourceTags(entry),
         )
     }
@@ -79,12 +80,13 @@ class ReportAnalysisUiMapper {
             }
         }
 
-    private fun confidenceChip(confidence: Double?): ChipData? {
-        val label = confidence.formatConfidence() ?: return null
+    private fun confidenceChip(confidence: Double?): ChipData {
+        val percentage = confidence.normalizePercentage()
+        val label = percentage.formatConfidence()
         return ChipData(
             text = label,
             icon = Icons.Default.Check,
-            style = confidence.confidenceStyle(),
+            style = percentage.confidenceStyle(),
         )
     }
 
@@ -113,24 +115,9 @@ class ReportAnalysisUiMapper {
     private fun Double?.formatMacro(suffix: String): String =
         this?.let { "${it.roundToDecimals()} $suffix" } ?: PLACEHOLDER
 
-    private fun Double.roundToDecimals(decimals: Int = 1): String {
-        if (decimals <= 0) {
-            return round(this).toInt().toString()
-        }
-        val factor = (1..decimals).fold(1.0) { acc, _ -> acc * 10.0 }
-        val rounded = round(this * factor) / factor
-        return if (rounded % 1.0 == 0.0) {
-            rounded.toInt().toString()
-        } else {
-            rounded.toString()
-        }
-    }
 
-    private fun Double?.formatConfidence(): String? {
-        if (this == null) return null
-        val percentage = if (this <= 1.0) this * 100 else this
-        val normalized = percentage.coerceIn(0.0, 100.0)
-        val rounded = normalized.roundToDecimals(0)
+    private fun Double.formatConfidence(): String {
+        val rounded = roundToDecimals(0)
         return "$rounded% confidence"
     }
 }

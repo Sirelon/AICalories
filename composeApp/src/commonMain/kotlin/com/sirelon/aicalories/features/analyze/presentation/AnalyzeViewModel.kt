@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class AnalyzeViewModel(
+internal class AnalyzeViewModel(
     private val repository: AnalyzeRepository,
     private val mapper: ReportAnalysisUiMapper,
     private val imageFormatConverter: ImageFormatConverter,
@@ -35,9 +35,7 @@ class AnalyzeViewModel(
 
     override fun initialState(): AnalyzeContract.AnalyzeState = AnalyzeContract.AnalyzeState()
 
-
-    private val foodEntryIdEmitter = MutableStateFlow<Long?>(null)
-
+    private val foodEntryIdEmitter = MutableStateFlow<Long?>(19L)
 
     init {
         foodEntryIdEmitter

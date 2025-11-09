@@ -31,7 +31,7 @@ data class MealEntryUi(
     val description: String?,
     val quantityText: String?,
     val macroStats: List<MacroStatUi>,
-    val confidenceText: ChipData?,
+    val confidence: ChipData?,
     val sourceTags: List<ChipData>,
 )
 
