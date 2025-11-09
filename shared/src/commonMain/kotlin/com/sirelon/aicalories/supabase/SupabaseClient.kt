@@ -265,7 +265,11 @@ class SupabaseClient {
 
 private suspend fun RestException.parseRemoteErrorMessage(): String {
     val fallbackMessage = description ?: error
-    val rawBody = runCatching { response.bodyAsText() }.getOrNull()
+    val rawBody = try {
+        response.bodyAsText()
+    } catch (_: Throwable) {
+        null
+    }
 
     if (rawBody.isNullOrBlank()) return fallbackMessage
 
