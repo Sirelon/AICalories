@@ -10,6 +10,7 @@ import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository.UploadedFi
 import com.sirelon.aicalories.features.analyze.data.ReportAnalysisUiMapper
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.media.ImageFormatConverter
+import com.sirelon.aicalories.supabase.error.RemoteException
 import io.github.jan.supabase.storage.UploadStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -208,12 +209,10 @@ class AnalyzeViewModel(
             val foodEntryId = repository
                 .createFoodEntry(note = note, files = uploadedFiles)
                 .onFailure { error ->
-                    setState {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = error.message ?: "Failed to create food entry.",
-                        )
-                    }
+                    onError(
+                        error = error,
+                        fallbackMessage = "Failed to create food entry.",
+                    )
                 }
                 .getOrElse { return@launch }
 
@@ -222,13 +221,27 @@ class AnalyzeViewModel(
             repository
                 .requestAnalysis(foodEntryId)
                 .onFailure { error ->
-                    setState {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = error.message ?: "Failed to start analysis.",
-                        )
-                    }
+                    onError(
+                        error = error,
+                        fallbackMessage = "Failed to start analysis.",
+                    )
                 }
+        }
+    }
+
+    private fun onError(error: Throwable, fallbackMessage: String) {
+        val isRemote = error is RemoteException
+        val message = error.message ?: fallbackMessage
+
+        setState {
+            it.copy(
+                isLoading = false,
+                errorMessage = message.takeUnless { isRemote },
+            )
+        }
+
+        if (isRemote) {
+            postEffect(AnalyzeContract.AnalyzeEffect.ShowMessage(message))
         }
     }
 

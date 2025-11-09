@@ -1,5 +1,6 @@
 package com.sirelon.aicalories.features.history.presentation
 
+import com.sirelon.aicalories.designsystem.ChipStyle
 import com.sirelon.aicalories.designsystem.RandomData
 import com.sirelon.aicalories.features.history.ui.CaloriePointRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryAttachmentRenderModel
@@ -138,9 +139,20 @@ object HistorySampleDataProvider {
         val summary = HistoryReportSummaryRenderModel(
             advice = "Add leafy greens for extra fiber and micronutrients.",
             qualityLabel = RandomData.randomQualityChip(),
-            issues = if (random.nextBoolean()) listOf(RandomData.randomChip()) else emptyList(),
-            uncertainties = if (random.nextBoolean()) listOf(RandomData.randomChip()) else emptyList(),
-            checklist = listOf(RandomData.randomChip(), RandomData.randomChip()),
+            issues = if (random.nextBoolean()) {
+                listOf(RandomData.randomChip(style = ChipStyle.Error))
+            } else {
+                emptyList()
+            },
+            uncertainties = if (random.nextBoolean()) {
+                listOf(RandomData.randomChip())
+            } else {
+                emptyList()
+            },
+            checklist = listOf(
+                RandomData.randomChip(style = ChipStyle.Success),
+                RandomData.randomChip(style = ChipStyle.Success),
+            ),
         )
 
         return HistoryEntryRenderModel(

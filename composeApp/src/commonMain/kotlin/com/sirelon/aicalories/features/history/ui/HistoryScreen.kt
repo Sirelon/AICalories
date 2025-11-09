@@ -46,9 +46,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
-import com.sirelon.aicalories.designsystem.ChipComponent
-import com.sirelon.aicalories.designsystem.ChipStyle
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
+import com.sirelon.aicalories.designsystem.ChipComponent
 import com.sirelon.aicalories.designsystem.TagGroup
 import com.sirelon.aicalories.designsystem.screens.EmptyScreen
 import com.sirelon.aicalories.features.history.presentation.HistorySampleDataProvider
@@ -104,7 +103,6 @@ fun HistoryScreen(
                     TagGroup(
                         title = "Insights",
                         tags = renderModel.insights,
-                        style = ChipStyle.Success
                     )
                 }
 
@@ -372,7 +370,6 @@ private fun HistoryEntryCard(
 
                     ChipComponent(
                         data = entry.summary.qualityLabel,
-                        style = ChipStyle.Neutral,
                     )
                 }
             }
@@ -407,7 +404,6 @@ private fun HistoryEntryCard(
             TagGroup(
                 title = "Tags",
                 tags = entry.tags,
-                style = ChipStyle.Neutral,
             )
         }
     }
@@ -467,7 +463,6 @@ private fun HistorySummarySection(summary: HistoryReportSummaryRenderModel) {
             TagGroup(
                 title = "Issues",
                 tags = summary.issues,
-                style = ChipStyle.Error,
             )
         }
 
@@ -475,7 +470,6 @@ private fun HistorySummarySection(summary: HistoryReportSummaryRenderModel) {
             TagGroup(
                 title = "Uncertainties",
                 tags = summary.uncertainties,
-                style = ChipStyle.Neutral,
             )
         }
 
@@ -483,7 +477,6 @@ private fun HistorySummarySection(summary: HistoryReportSummaryRenderModel) {
             TagGroup(
                 title = "Checklist",
                 tags = summary.checklist,
-                style = ChipStyle.Success,
             )
         }
     }

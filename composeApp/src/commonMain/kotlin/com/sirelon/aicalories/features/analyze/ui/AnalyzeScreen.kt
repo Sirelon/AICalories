@@ -55,7 +55,6 @@ import com.sirelon.aicalories.designsystem.AppDivider
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.ChipComponent
-import com.sirelon.aicalories.designsystem.ChipStyle
 import com.sirelon.aicalories.designsystem.TagGroup
 import com.sirelon.aicalories.features.analyze.model.MacroStatUi
 import com.sirelon.aicalories.features.analyze.model.MealAnalysisUi
@@ -615,7 +614,7 @@ private fun EntryCard(
                     style = AppTheme.typography.title,
                 )
                 entry.confidenceText?.let { confidence ->
-                    ChipComponent(data = confidence, style = ChipStyle.Success)
+                    ChipComponent(data = confidence)
                 }
             }
             entry.description?.let {
@@ -632,7 +631,7 @@ private fun EntryCard(
             }
             MacronutrientRow(stats = entry.macroStats)
 
-            TagGroup(title = "Tags", tags = entry.sourceTags, style = ChipStyle.Neutral)
+            TagGroup(title = "Tags", tags = entry.sourceTags)
         }
     }
 }

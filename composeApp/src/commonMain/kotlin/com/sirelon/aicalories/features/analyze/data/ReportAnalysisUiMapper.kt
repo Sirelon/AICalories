@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.filled.Note
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Image
 import com.sirelon.aicalories.designsystem.ChipData
+import com.sirelon.aicalories.designsystem.ChipStyle
 import com.sirelon.aicalories.features.analyze.model.MacroStatUi
 import com.sirelon.aicalories.features.analyze.model.MealAnalysisUi
 import com.sirelon.aicalories.features.analyze.model.MealEntryUi
@@ -55,23 +56,46 @@ class ReportAnalysisUiMapper {
         )
     }
 
-    private fun sourceTags(entry: ReportAnalysisEntryResponse): List<ChipData> = buildList {
-        if (entry.fromImage) {
-            val text = entry.photoIndex?.let { "Photo #${it + 1}" } ?: "From photo"
-            ChipData(text = text, icon = Icons.Default.Image)
+    private fun sourceTags(entry: ReportAnalysisEntryResponse): List<ChipData> =
+        buildList {
+            if (entry.fromImage) {
+                val text = entry.photoIndex?.let { "Photo #${it + 1}" } ?: "From photo"
+                add(
+                    ChipData(
+                        text = text,
+                        icon = Icons.Default.Image,
+                        style = ChipStyle.Neutral,
+                    )
+                )
+            }
+            if (entry.fromNote) {
+                add(
+                    ChipData(
+                        text = "From note",
+                        icon = Icons.AutoMirrored.Filled.Note,
+                        style = ChipStyle.Neutral,
+                    )
+                )
+            }
         }
-        if (entry.fromNote) {
-            ChipData(text = "From note", icon = Icons.AutoMirrored.Filled.Note)
-        }
+
+    private fun confidenceChip(confidence: Double?): ChipData? {
+        val label = confidence.formatConfidence() ?: return null
+        return ChipData(
+            text = label,
+            icon = Icons.Default.Check,
+            style = confidence.confidenceStyle(),
+        )
     }
 
-    private fun confidenceChip(confidence: Double?): ChipData? =
-        confidence.formatConfidence()?.let {
-            ChipData(
-                text = it,
-                icon = Icons.Default.Check,
-            )
+    private fun Double?.confidenceStyle(): ChipStyle {
+        val normalized = this ?: return ChipStyle.Neutral
+        return when {
+            normalized > 75 -> ChipStyle.Success
+            normalized < 30 -> ChipStyle.Error
+            else -> ChipStyle.Neutral
         }
+    }
 
     private fun List<String?>.filterNotNullOrBlank(): List<String> =
         mapNotNull { it?.trim() }.filter { it.isNotEmpty() }
