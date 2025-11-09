@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -56,8 +58,8 @@ import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.ChipComponent
 import com.sirelon.aicalories.designsystem.TagGroup
-import com.sirelon.aicalories.features.analyze.model.MacroStatUi
-import com.sirelon.aicalories.features.analyze.model.MealAnalysisUi
+import com.sirelon.aicalories.designsystem.templates.CardWithTitle
+import com.sirelon.aicalories.designsystem.templates.MacronutrientRow
 import com.sirelon.aicalories.features.analyze.model.MealEntryUi
 import com.sirelon.aicalories.features.analyze.model.MealSummaryUi
 import com.sirelon.aicalories.features.analyze.presentation.AnalyzeContract
@@ -146,12 +148,16 @@ fun AnalyzeScreen(
             )
         },
     ) { innerPadding ->
+        val arrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
         LazyVerticalGrid(
             modifier = Modifier
                 .fillMaxSize()
                 .background(AppTheme.colors.background)
-                .padding(innerPadding),
-            columns = GridCells.Fixed(if (useSplitLayout) 2 else 1)
+                .padding(horizontal = AppDimens.Spacing.xl3),
+            columns = GridCells.Fixed(if (useSplitLayout) 2 else 1),
+            contentPadding = innerPadding,
+            horizontalArrangement = arrangement,
+            verticalArrangement = arrangement,
         ) {
             item {
                 PhotosSection(
@@ -167,12 +173,57 @@ fun AnalyzeScreen(
                 )
             }
 
-            item {
-                AnalyzeFields(
-                    showResult = hasReport,
-                    state = state,
-                    onEvent = viewModel::onEvent,
-                )
+            if (hasReport) {
+                val result = state.result
+                if (result == null) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        PendingAnalysisCard(isLoading = state.isLoading)
+                    }
+                } else {
+                    result.combinedMacroStats?.let {
+                        item {
+                            CardWithTitle(
+                                title = "Total nutrition:",
+                            ) {
+                                MacronutrientRow(stats = it)
+                            }
+                        }
+                    }
+
+
+                    item {
+                        CardWithTitle(title = "Detected insights") {
+                            SummaryCard(summary = result.summary)
+                        }
+                    }
+
+                    items(items = result.entries) {
+                        EntryCard(entry = it)
+                    }
+                }
+            } else {
+                item {
+                    DescriptionSection(
+                        value = state.prompt,
+                        enabled = !state.isLoading,
+                        onValueChange = {
+                            viewModel.onEvent(AnalyzeContract.AnalyzeEvent.PromptChanged(it))
+                        },
+                    )
+                }
+
+            }
+
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                state.errorMessage?.let { error ->
+                    ErrorMessage(text = error)
+                }
+            }
+
+            if (state.isLoading) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
             }
         }
     }
@@ -195,36 +246,6 @@ fun AnalyzeScreen(
     PermissionDialogs(
         controller = permissionController,
     )
-}
-
-@Composable
-private fun AnalyzeFields(
-    showResult: Boolean,
-    state: AnalyzeContract.AnalyzeState,
-    onEvent: (AnalyzeContract.AnalyzeEvent) -> Unit,
-) {
-    if (!showResult) {
-        DescriptionSection(
-            value = state.prompt,
-            enabled = !state.isLoading,
-            onValueChange = {
-                onEvent(AnalyzeContract.AnalyzeEvent.PromptChanged(it))
-            },
-        )
-    } else {
-        AnalyzeResultSection(
-            result = state.result,
-            isLoading = state.isLoading,
-        )
-    }
-
-    state.errorMessage?.let { error ->
-        ErrorMessage(text = error)
-    }
-
-    if (state.isLoading) {
-        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -401,29 +422,6 @@ private fun DescriptionSection(
 }
 
 @Composable
-private fun AnalyzeResultSection(
-    result: MealAnalysisUi?,
-    isLoading: Boolean,
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl4),
-    ) {
-        Text(
-            text = "Detected insights",
-            style = AppTheme.typography.title,
-        )
-        if (result == null) {
-            PendingAnalysisCard(isLoading = isLoading)
-            return
-        }
-
-        SummaryCard(summary = result.summary)
-        EntriesSection(entries = result.entries)
-    }
-}
-
-@Composable
 private fun PendingAnalysisCard(
     isLoading: Boolean,
 ) {
@@ -547,76 +545,27 @@ private fun SummaryListSection(
 }
 
 @Composable
-private fun EntriesSection(
-    entries: List<MealEntryUi>,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
-    ) {
-        Text(
-            text = "Detected items (${entries.size})",
-            style = AppTheme.typography.label,
-        )
-        if (entries.isEmpty()) {
-            Surface(
-                shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
-                tonalElevation = AppDimens.Size.xs,
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(AppDimens.Spacing.xl5),
-                    verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl2),
-                ) {
-                    Text(
-                        text = "No food items detected yet",
-                        style = AppTheme.typography.body,
-                    )
-                    Text(
-                        text = "We’ll populate this list once the detector extracts ingredients from your photos and note.",
-                        style = AppTheme.typography.caption,
-                        color = AppTheme.colors.onSurface.copy(alpha = 0.7f),
-                    )
-                }
-            }
-        } else {
-            entries.forEachIndexed { index, entry ->
-                EntryCard(entry = entry)
-                if (index < entries.lastIndex) {
-                    AppDivider()
-                }
-            }
-        }
-    }
-}
+private fun EntryCard(entry: MealEntryUi) {
+    val spacing = AppDimens.Spacing.xl
 
-@Composable
-private fun EntryCard(
-    entry: MealEntryUi,
-) {
-    Surface(
-        shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
-        tonalElevation = AppDimens.Size.xs,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(AppDimens.Spacing.xl5),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl2),
-        ) {
+    CardWithTitle(
+        spacing = spacing,
+        title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl2),
+                horizontalArrangement = Arrangement.spacedBy(spacing),
             ) {
                 Text(
                     modifier = Modifier.weight(1f),
                     text = entry.title,
-                    style = AppTheme.typography.title,
                 )
-                entry.confidenceText?.let { confidence ->
-                    ChipComponent(data = confidence)
+
+                entry.confidence?.let { chip ->
+                    ChipComponent(data = chip)
                 }
             }
+        },
+        content = {
             entry.description?.let {
                 Text(
                     text = it,
@@ -633,42 +582,7 @@ private fun EntryCard(
 
             TagGroup(title = "Tags", tags = entry.sourceTags)
         }
-    }
-}
-
-@Composable
-private fun MacronutrientRow(
-    stats: List<MacroStatUi>,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        stats.forEach { stat ->
-            NutrientStat(
-                label = stat.label,
-                value = stat.value,
-            )
-        }
-    }
-}
-
-@Composable
-private fun NutrientStat(
-    label: String,
-    value: String,
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = value,
-            style = AppTheme.typography.title,
-        )
-        Text(
-            text = label,
-            style = AppTheme.typography.caption,
-            color = AppTheme.colors.onSurface.copy(alpha = 0.7f),
-        )
-    }
+    )
 }
 
 @Composable
