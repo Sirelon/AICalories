@@ -560,7 +560,9 @@ private fun EntryCard(entry: MealEntryUi) {
                     text = entry.title,
                 )
 
-                ChipComponent(data = entry.confidence)
+                entry.confidence?.let { chip ->
+                    ChipComponent(data = chip)
+                }
             }
         },
         content = {

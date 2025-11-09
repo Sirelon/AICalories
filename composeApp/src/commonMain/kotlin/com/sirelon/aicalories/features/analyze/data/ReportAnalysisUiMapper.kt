@@ -114,8 +114,9 @@ class ReportAnalysisUiMapper {
             }
         }
 
-    private fun confidenceChip(confidence: Double?): ChipData {
-        val percentage = confidence.normalizePercentage()
+    private fun confidenceChip(confidence: Double?): ChipData? {
+        val value = confidence ?: return null
+        val percentage = value.normalizePercentage()
         val label = percentage.formatConfidence()
         return ChipData(
             text = label,
