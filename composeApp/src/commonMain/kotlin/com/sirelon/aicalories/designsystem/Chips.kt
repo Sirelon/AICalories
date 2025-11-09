@@ -23,31 +23,31 @@ import androidx.compose.ui.text.style.TextOverflow
 @Immutable
 data class ChipData(
     val text: String,
-    val icon: ImageVector?
+    val icon: ImageVector?,
+    val style: ChipStyle = ChipStyle.Neutral,
 )
 
 enum class ChipStyle {
     Success,
     Error,
-    Neutral
+    Neutral,
 }
 
 @Composable
 fun TagGroup(
     title: String,
     tags: List<ChipData>,
-    style: ChipStyle,
+    titleColor: Color = AppTheme.colors.onSurface,
 ) {
     if (tags.isEmpty()) return
 
-    val toneColor = style.toneColor()
     Column(
         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
     ) {
         Text(
             text = title,
             style = AppTheme.typography.label,
-            color = toneColor,
+            color = titleColor,
         )
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
@@ -56,7 +56,6 @@ fun TagGroup(
             tags.forEach { tag ->
                 ChipComponent(
                     data = tag,
-                    style = style,
                 )
             }
         }
@@ -91,11 +90,10 @@ private fun ChipStyle.containerColor(): Color {
 @Composable
 fun ChipComponent(
     data: ChipData,
-    style: ChipStyle,
     modifier: Modifier = Modifier,
 ) {
-    val tone = style.toneColor()
-    val container = style.containerColor()
+    val tone = data.style.toneColor()
+    val container = data.style.containerColor()
 
     Surface(
         modifier = modifier,
@@ -131,4 +129,3 @@ fun ChipComponent(
         }
     }
 }
-

@@ -20,7 +20,10 @@ import kotlin.random.Random
 
 object RandomData {
 
-    fun randomChip(label: String? = null): ChipData {
+    fun randomChip(
+        label: String? = null,
+        style: ChipStyle = ChipStyle.entries.random(),
+    ): ChipData {
         val foodTags = listOf(
             "Protein", "Carbs", "Fats", "Fiber", "Vitamins", "Low Sugar",
             "High Protein", "Keto", "Vegan", "Gluten-Free", "Breakfast", "Snack",
@@ -40,7 +43,7 @@ object RandomData {
 
         val text = label ?: foodTags.random()
         val icon = icons.random()
-        return ChipData(text = text, icon = icon)
+        return ChipData(text = text, icon = icon, style = style)
     }
 
 
@@ -68,20 +71,29 @@ object RandomData {
         )
 
         val index = tags.indices.random()
-        return ChipData(text = tags[index], icon = icons.getOrNull(index))
+        val style = when (tags[index]) {
+            "High quality",
+            "Balanced",
+            "Protein-rich" -> ChipStyle.Success
+            "Needs attention",
+            "Too fatty",
+            "Too sweet" -> ChipStyle.Error
+            else -> ChipStyle.Neutral
+        }
+        return ChipData(text = tags[index], icon = icons.getOrNull(index), style = style)
     }
 
     fun randomInsightChip(random: Random, average: Int): List<ChipData> {
 
         val options = listOf(
-            ChipData("Avg ${average} kcal/day", Icons.Default.LocalFireDepartment),
-            ChipData("Consistency +${random.nextInt(2, 12)}%", Icons.Default.Insights),
-            ChipData("Protein +${random.nextInt(5, 20)}g", Icons.Default.FitnessCenter),
-            ChipData("Hydration ${random.nextInt(1, 4)}L", Icons.Default.WaterDrop),
-            ChipData("Sleep ${random.nextInt(6, 9)}h", Icons.Default.Bedtime),
-            ChipData("Steps ${random.nextInt(6000, 12000)}", Icons.Default.DirectionsRun),
-            ChipData("Fat −${random.nextInt(5, 15)}%", Icons.Default.Whatshot),
-            ChipData("Carbs ${random.nextInt(40, 65)}%", Icons.Default.LocalDining),
+            ChipData("Avg ${average} kcal/day", Icons.Default.LocalFireDepartment, ChipStyle.Success),
+            ChipData("Consistency +${random.nextInt(2, 12)}%", Icons.Default.Insights, ChipStyle.Success),
+            ChipData("Protein +${random.nextInt(5, 20)}g", Icons.Default.FitnessCenter, ChipStyle.Success),
+            ChipData("Hydration ${random.nextInt(1, 4)}L", Icons.Default.WaterDrop, ChipStyle.Success),
+            ChipData("Sleep ${random.nextInt(6, 9)}h", Icons.Default.Bedtime, ChipStyle.Success),
+            ChipData("Steps ${random.nextInt(6000, 12000)}", Icons.Default.DirectionsRun, ChipStyle.Success),
+            ChipData("Fat −${random.nextInt(5, 15)}%", Icons.Default.Whatshot, ChipStyle.Success),
+            ChipData("Carbs ${random.nextInt(40, 65)}%", Icons.Default.LocalDining, ChipStyle.Success),
         )
 
         return options.shuffled(random).take(2)
