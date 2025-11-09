@@ -3,11 +3,15 @@ package com.sirelon.aicalories.features.analyze.presentation
 import androidx.lifecycle.viewModelScope
 import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
+import com.mohamedrejeb.calf.io.getName
+import com.mohamedrejeb.calf.io.getPath
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository.UploadedFile
 import com.sirelon.aicalories.features.analyze.data.ReportAnalysisUiMapper
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
+import com.sirelon.aicalories.features.media.ImageFormatConverter
 import io.github.jan.supabase.storage.UploadStatus
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,11 +23,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AnalyzeViewModel(
     private val repository: AnalyzeRepository,
     private val mapper: ReportAnalysisUiMapper,
+    private val imageFormatConverter: ImageFormatConverter,
 ) : BaseViewModel<AnalyzeContract.AnalyzeState, AnalyzeContract.AnalyzeEvent, AnalyzeContract.AnalyzeEffect>() {
 
     override fun initialState(): AnalyzeContract.AnalyzeState = AnalyzeContract.AnalyzeState()
@@ -86,30 +92,51 @@ class AnalyzeViewModel(
     }
 
     private fun onFileResult(event: AnalyzeContract.AnalyzeEvent.UploadFilesResult) {
-        event.result
-            .onSuccess { selectedFiles ->
-                if (selectedFiles.isEmpty()) {
-                    showError("No files were selected.")
-                    return@onSuccess
-                }
+        viewModelScope.launch {
+            val selectedFiles = event.result.getOrElse { error ->
+                showError(error.message ?: "Unable to access selected files.")
+                return@launch
+            }
 
-                setState { it.copy(errorMessage = null) }
+            if (selectedFiles.isEmpty()) {
+                showError("No files were selected.")
+                return@launch
+            }
 
-                selectedFiles.forEach { file ->
-                    addUploadPlaceholder(file)
-                    viewModelScope.launch {
-                        uploadFileFlow(
-                            platformContext = event.platformContext,
-                            file = file,
-                        )
-                            .catch { error -> handleUploadFailure(file, error) }
-                            .collect()
+            val unsupportedFiles = selectedFiles.filterNot {
+                it.isSupportedOrConvertible(event.platformContext)
+            }
+
+            if (unsupportedFiles.isNotEmpty()) {
+                showError("Only JPG, PNG, or WEBP images are supported.")
+                return@launch
+            }
+
+            val processedFiles = runCatching {
+                withContext(Dispatchers.Default) {
+                    selectedFiles.map { file ->
+                        imageFormatConverter.convert(event.platformContext, file)
                     }
                 }
+            }.getOrElse { error ->
+                showError(error.message ?: "Unable to process selected files.")
+                return@launch
             }
-            .onFailure { error ->
-                showError(error.message ?: "Unable to access selected files.")
+
+            setState { it.copy(errorMessage = null) }
+
+            processedFiles.forEach { file ->
+                addUploadPlaceholder(file)
+                viewModelScope.launch {
+                    uploadFileFlow(
+                        platformContext = event.platformContext,
+                        file = file,
+                    )
+                        .catch { error -> handleUploadFailure(file, error) }
+                        .collect()
+                }
             }
+        }
     }
 
     private fun uploadFileFlow(
@@ -244,4 +271,20 @@ class AnalyzeViewModel(
             )
         }
     }
+}
+
+private val SUPPORTED_IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "webp")
+private val CONVERTIBLE_IMAGE_EXTENSIONS = setOf("heic", "heif")
+
+private fun KmpFile.isSupportedOrConvertible(context: PlatformContext): Boolean {
+    val extension = getFileExtension(context) ?: return false
+    return extension in SUPPORTED_IMAGE_EXTENSIONS || extension in CONVERTIBLE_IMAGE_EXTENSIONS
+}
+
+private fun KmpFile.getFileExtension(context: PlatformContext): String? {
+    val candidate = getName(context)
+        ?: getPath(context)
+        ?: return null
+    val rawExt = candidate.substringAfterLast('.', missingDelimiterValue = "")
+    return rawExt.takeIf { it.isNotBlank() }?.lowercase()
 }
