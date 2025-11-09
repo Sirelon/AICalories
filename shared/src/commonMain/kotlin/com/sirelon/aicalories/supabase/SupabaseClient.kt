@@ -12,6 +12,7 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.createSupabaseClient
+import com.sirelon.aicalories.supabase.error.RemoteException
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.functions.Functions
 import io.github.jan.supabase.functions.functions
@@ -26,6 +27,7 @@ import io.github.jan.supabase.storage.UploadStatus
 import io.github.jan.supabase.storage.storage
 import io.github.jan.supabase.storage.uploadAsFlow
 import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -33,13 +35,20 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 private const val STORAGE_BUCKET_NAME = "aicalories"
 private const val ANALYZE_FUNCTION_NAME = "analize-food"
+private val remoteErrorParser = Json {
+    ignoreUnknownKeys = true
+}
 
 class SupabaseClient {
     @OptIn(SupabaseInternal::class)
@@ -186,14 +195,21 @@ class SupabaseClient {
     suspend fun invokeFoodEntryAnalysis(foodEntryId: Long) {
         ensureAuthenticatedUserId()
 
-        client
-            .functions
-            .invoke(
-                function = ANALYZE_FUNCTION_NAME,
-                body = buildJsonObject {
-                    put("foodEntryId", foodEntryId)
-                },
+        try {
+            client
+                .functions
+                .invoke(
+                    function = ANALYZE_FUNCTION_NAME,
+                    body = buildJsonObject {
+                        put("foodEntryId", foodEntryId)
+                    },
+                )
+        } catch (error: RestException) {
+            throw RemoteException(
+                message = error.parseRemoteErrorMessage(),
+                cause = error,
             )
+        }
     }
 
     @OptIn(ExperimentalUuidApi::class)
@@ -245,4 +261,22 @@ class SupabaseClient {
                 ),
             )
     }
+}
+
+private suspend fun RestException.parseRemoteErrorMessage(): String {
+    val fallbackMessage = description ?: error
+    val rawBody = runCatching { response.bodyAsText() }.getOrNull()
+
+    if (rawBody.isNullOrBlank()) return fallbackMessage
+
+    val parsedMessage = runCatching {
+        val json = remoteErrorParser.parseToJsonElement(rawBody).jsonObject
+        val errorTitle = json["error"]?.jsonPrimitive?.contentOrNull
+        val details = json["details"]?.jsonPrimitive?.contentOrNull
+        listOfNotNull(errorTitle, details)
+            .filter { it.isNotBlank() }
+            .joinToString(": ")
+    }.getOrNull()
+
+    return parsedMessage?.takeIf { it.isNotBlank() } ?: fallbackMessage
 }
