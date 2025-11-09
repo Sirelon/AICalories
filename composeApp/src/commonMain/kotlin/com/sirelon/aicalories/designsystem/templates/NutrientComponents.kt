@@ -43,9 +43,9 @@ fun NutrientStat(value: NutritionValue) {
 }
 
 @Composable
-fun MacronutrientRow(stats: MacroStats) {
+fun MacronutrientRow(stats: MacroStats, modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
 

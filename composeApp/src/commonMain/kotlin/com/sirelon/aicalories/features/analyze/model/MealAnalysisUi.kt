@@ -6,6 +6,7 @@ import com.sirelon.aicalories.designsystem.templates.MacroStats
 data class MealAnalysisUi(
     val summary: MealSummaryUi,
     val entries: List<MealEntryUi>,
+    val combinedMacroStats: MacroStats?,
 ) {
     val hasContent: Boolean
         get() = summary.hasContent || entries.isNotEmpty()

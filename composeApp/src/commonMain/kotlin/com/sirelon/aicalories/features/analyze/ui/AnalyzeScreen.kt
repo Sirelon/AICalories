@@ -127,7 +127,9 @@ fun AnalyzeScreen(
     val useSplitLayout = isMediumWidth && !hasSeparatingHinge
 
     Scaffold(
-        modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
+        modifier = Modifier
+            .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+            .padding(horizontal = AppDimens.Spacing.xl3),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             AnalyzeTopBar(
@@ -410,14 +412,29 @@ private fun AnalyzeResultSection(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl4),
     ) {
-        Text(
-            text = "Detected insights",
-            style = AppTheme.typography.title,
-        )
         if (result == null) {
             PendingAnalysisCard(isLoading = isLoading)
             return
         }
+
+        result.combinedMacroStats?.let {
+            Text(
+                text = "Total nutrition:",
+                style = AppTheme.typography.title,
+            )
+
+            Card {
+                MacronutrientRow(
+                    modifier = Modifier.padding(AppDimens.Spacing.xl3),
+                    stats = it,
+                )
+            }
+        }
+
+        Text(
+            text = "Detected insights",
+            style = AppTheme.typography.title,
+        )
 
         SummaryCard(summary = result.summary)
         EntriesSection(entries = result.entries)
@@ -552,7 +569,6 @@ private fun EntriesSection(
     entries: List<MealEntryUi>,
 ) {
     Column(
-        modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
     ) {
         Text(

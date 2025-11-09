@@ -34,9 +34,29 @@ class ReportAnalysisUiMapper {
 
         val entryUi = entries.map(::entryToUi)
 
+        val combinedMacroStats = MacroStats(
+            calories = NutritionValue(
+                value = entryUi.sumOf { it.macroStats.calories.value },
+                type = MeasureUnit.Kcal
+            ),
+            carbs = NutritionValue(
+                value = entryUi.sumOf { it.macroStats.carbs.value },
+                type = MeasureUnit.Grams,
+            ),
+            fat = NutritionValue(
+                value = entryUi.sumOf { it.macroStats.fat.value },
+                type = MeasureUnit.Grams,
+            ),
+            protein = NutritionValue(
+                value = entryUi.sumOf { it.macroStats.protein.value },
+                type = MeasureUnit.Grams,
+            ),
+        )
+
         return MealAnalysisUi(
             summary = summaryUi,
             entries = entryUi,
+            combinedMacroStats = combinedMacroStats.takeIf { entryUi.isNotEmpty() },
         )
     }
 
