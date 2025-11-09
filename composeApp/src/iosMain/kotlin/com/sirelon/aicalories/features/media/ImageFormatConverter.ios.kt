@@ -4,6 +4,8 @@ import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.io.getName
 import com.mohamedrejeb.calf.io.readByteArray
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import platform.Foundation.NSData
@@ -23,34 +25,36 @@ private class IosImageFormatConverter : ImageFormatConverter {
         platformContext: PlatformContext,
         file: KmpFile,
     ): KmpFile {
-        val currentName = file.getName(platformContext)
-        if (!currentName.isHeic()) {
-            return file
-        }
+        return withContext(Dispatchers.Main) {
+            val currentName = file.getName(platformContext)
+            if (!currentName.isHeic()) {
+                return@withContext file
+            }
 
-        val imageData = runCatching {
-            file.readByteArray(platformContext)
-        }.getOrNull()
-            ?: return file
+            val imageData = runCatching {
+                file.readByteArray(platformContext)
+            }.getOrNull()
+                ?: return@withContext file
 
-        val uiImage = UIImage(data = imageData.toNSData())
-            ?: return file
+            val uiImage = UIImage(data = imageData.toNSData())
+                ?: return@withContext file
 
-        val jpegData = UIImageJPEGRepresentation(uiImage, 0.9)
-            ?: return file
+            val jpegData = UIImageJPEGRepresentation(uiImage, 0.9)
+                ?: return@withContext file
 
-        val destinationName = currentName.toJpegFileName()
-        val destinationUrl =
-            NSURL.fileURLWithPath(
-                path = NSTemporaryDirectory() + destinationName,
-                isDirectory = false,
-            )
+            val destinationName = currentName.toJpegFileName()
+            val destinationUrl =
+                NSURL.fileURLWithPath(
+                    path = NSTemporaryDirectory() + destinationName,
+                    isDirectory = false,
+                )
 
-        val success = jpegData.writeToURL(destinationUrl, true)
-        return if (success) {
-            KmpFile(url = destinationUrl, tempUrl = destinationUrl)
-        } else {
-            file
+            val success = jpegData.writeToURL(destinationUrl, true)
+            if (success) {
+                KmpFile(url = destinationUrl, tempUrl = destinationUrl)
+            } else {
+                file
+            }
         }
     }
 }
