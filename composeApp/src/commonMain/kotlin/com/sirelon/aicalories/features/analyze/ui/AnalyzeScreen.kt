@@ -14,12 +14,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -58,8 +58,8 @@ import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.ChipComponent
 import com.sirelon.aicalories.designsystem.TagGroup
+import com.sirelon.aicalories.designsystem.templates.CardWithTitle
 import com.sirelon.aicalories.designsystem.templates.MacronutrientRow
-import com.sirelon.aicalories.features.analyze.model.MealAnalysisUi
 import com.sirelon.aicalories.features.analyze.model.MealEntryUi
 import com.sirelon.aicalories.features.analyze.model.MealSummaryUi
 import com.sirelon.aicalories.features.analyze.presentation.AnalyzeContract
@@ -148,13 +148,16 @@ fun AnalyzeScreen(
             )
         },
     ) { innerPadding ->
+        val arrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
         LazyVerticalGrid(
             modifier = Modifier
                 .fillMaxSize()
                 .background(AppTheme.colors.background)
                 .padding(horizontal = AppDimens.Spacing.xl3),
             columns = GridCells.Fixed(if (useSplitLayout) 2 else 1),
-            contentPadding = innerPadding
+            contentPadding = innerPadding,
+            horizontalArrangement = arrangement,
+            verticalArrangement = arrangement,
         ) {
             item {
                 PhotosSection(
@@ -171,11 +174,32 @@ fun AnalyzeScreen(
             }
 
             if (hasReport) {
-                item {
-                    AnalyzeResultSection(
-                        result = state.result,
-                        isLoading = state.isLoading,
-                    )
+                val result = state.result
+                if (result == null) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        PendingAnalysisCard(isLoading = state.isLoading)
+                    }
+                } else {
+                    result.combinedMacroStats?.let {
+                        item {
+                            CardWithTitle(
+                                title = "Total nutrition:",
+                            ) {
+                                MacronutrientRow(stats = it)
+                            }
+                        }
+                    }
+
+
+                    item {
+                        CardWithTitle(title = "Detected insights") {
+                            SummaryCard(summary = result.summary)
+                        }
+                    }
+
+                    items(items = result.entries) {
+                        EntryCard(entry = it)
+                    }
                 }
             } else {
                 item {
@@ -398,44 +422,6 @@ private fun DescriptionSection(
 }
 
 @Composable
-private fun AnalyzeResultSection(
-    result: MealAnalysisUi?,
-    isLoading: Boolean,
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl4),
-    ) {
-        if (result == null) {
-            PendingAnalysisCard(isLoading = isLoading)
-            return
-        }
-
-        result.combinedMacroStats?.let {
-            Text(
-                text = "Total nutrition:",
-                style = AppTheme.typography.title,
-            )
-
-            Card {
-                MacronutrientRow(
-                    modifier = Modifier.padding(AppDimens.Spacing.xl3),
-                    stats = it,
-                )
-            }
-        }
-
-        Text(
-            text = "Detected insights",
-            style = AppTheme.typography.title,
-        )
-
-        SummaryCard(summary = result.summary)
-        EntriesSection(entries = result.entries)
-    }
-}
-
-@Composable
 private fun PendingAnalysisCard(
     isLoading: Boolean,
 ) {
@@ -559,56 +545,12 @@ private fun SummaryListSection(
 }
 
 @Composable
-private fun EntriesSection(
-    entries: List<MealEntryUi>,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
-    ) {
-        Text(
-            text = "Detected items (${entries.size})",
-            style = AppTheme.typography.title,
-        )
-        if (entries.isEmpty()) {
-            Surface(
-                shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
-                tonalElevation = AppDimens.Size.xs,
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(AppDimens.Spacing.xl5),
-                    verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl2),
-                ) {
-                    Text(
-                        text = "No food items detected yet",
-                        style = AppTheme.typography.body,
-                    )
-                    Text(
-                        text = "We’ll populate this list once the detector extracts ingredients from your photos and note.",
-                        style = AppTheme.typography.caption,
-                        color = AppTheme.colors.onSurface.copy(alpha = 0.7f),
-                    )
-                }
-            }
-        } else {
-            entries.forEach {
-                EntryCard(entry = it)
-            }
-        }
-    }
-}
-
-@Composable
 private fun EntryCard(entry: MealEntryUi) {
-    val spacing = AppDimens.Spacing.xl2
-    Card() {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(AppDimens.Spacing.xl5),
-            verticalArrangement = Arrangement.spacedBy(spacing),
-        ) {
+    val spacing = AppDimens.Spacing.xl
+
+    CardWithTitle(
+        spacing = spacing,
+        title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(spacing),
@@ -616,11 +558,12 @@ private fun EntryCard(entry: MealEntryUi) {
                 Text(
                     modifier = Modifier.weight(1f),
                     text = entry.title,
-                    style = AppTheme.typography.title,
                 )
 
                 ChipComponent(data = entry.confidence)
             }
+        },
+        content = {
             entry.description?.let {
                 Text(
                     text = it,
@@ -637,7 +580,7 @@ private fun EntryCard(entry: MealEntryUi) {
 
             TagGroup(title = "Tags", tags = entry.sourceTags)
         }
-    }
+    )
 }
 
 @Composable
