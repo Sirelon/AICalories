@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -169,12 +170,36 @@ fun AnalyzeScreen(
                 )
             }
 
-            item {
-                AnalyzeFields(
-                    showResult = hasReport,
-                    state = state,
-                    onEvent = viewModel::onEvent,
-                )
+            if (hasReport) {
+                item {
+                    AnalyzeResultSection(
+                        result = state.result,
+                        isLoading = state.isLoading,
+                    )
+                }
+            } else {
+                item {
+                    DescriptionSection(
+                        value = state.prompt,
+                        enabled = !state.isLoading,
+                        onValueChange = {
+                            viewModel.onEvent(AnalyzeContract.AnalyzeEvent.PromptChanged(it))
+                        },
+                    )
+                }
+
+            }
+
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                state.errorMessage?.let { error ->
+                    ErrorMessage(text = error)
+                }
+            }
+
+            if (state.isLoading) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
             }
         }
     }
@@ -197,36 +222,6 @@ fun AnalyzeScreen(
     PermissionDialogs(
         controller = permissionController,
     )
-}
-
-@Composable
-private fun AnalyzeFields(
-    showResult: Boolean,
-    state: AnalyzeContract.AnalyzeState,
-    onEvent: (AnalyzeContract.AnalyzeEvent) -> Unit,
-) {
-    if (!showResult) {
-        DescriptionSection(
-            value = state.prompt,
-            enabled = !state.isLoading,
-            onValueChange = {
-                onEvent(AnalyzeContract.AnalyzeEvent.PromptChanged(it))
-            },
-        )
-    } else {
-        AnalyzeResultSection(
-            result = state.result,
-            isLoading = state.isLoading,
-        )
-    }
-
-    state.errorMessage?.let { error ->
-        ErrorMessage(text = error)
-    }
-
-    if (state.isLoading) {
-        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
