@@ -4,9 +4,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Note
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Image
+import com.sirelon.aicalories.common.MeasureUnit
 import com.sirelon.aicalories.designsystem.ChipData
 import com.sirelon.aicalories.designsystem.ChipStyle
-import com.sirelon.aicalories.features.analyze.model.MacroStatUi
+import com.sirelon.aicalories.designsystem.templates.MacroStats
+import com.sirelon.aicalories.designsystem.templates.NutritionValue
 import com.sirelon.aicalories.features.analyze.model.MealAnalysisUi
 import com.sirelon.aicalories.features.analyze.model.MealEntryUi
 import com.sirelon.aicalories.features.analyze.model.MealSummaryUi
@@ -44,18 +46,30 @@ class ReportAnalysisUiMapper {
             title = entry.name.ifBlank { "Unnamed item" },
             description = entry.description?.trim().takeIf { !it.isNullOrBlank() },
             quantityText = formatQuantity(entry.quantityValue, entry.quantityUnit),
-            macroStats = listOf(
-                MacroStatUi(
-                    label = "Calories",
-                    value = entry.kcal?.let { "$it kcal" } ?: PLACEHOLDER),
-                MacroStatUi(label = "Protein", value = entry.proteinGrams.formatMacro("g")),
-                MacroStatUi(label = "Carbs", value = entry.carbsGrams.formatMacro("g")),
-                MacroStatUi(label = "Fat", value = entry.fatGrams.formatMacro("g")),
-            ),
+            macroStats = macroStats(entry),
             confidence = confidenceChip(entry.confidence),
             sourceTags = sourceTags(entry),
         )
     }
+
+    private fun macroStats(entry: ReportAnalysisEntryResponse): MacroStats = MacroStats(
+        calories = NutritionValue(
+            type = MeasureUnit.Kcal,
+            value = entry.kcal?.toDouble() ?: 0.0
+        ),
+        protein = NutritionValue(
+            type = MeasureUnit.Grams,
+            value = entry.proteinGrams?.roundToDecimals() ?: 0.0
+        ),
+        carbs = NutritionValue(
+            type = MeasureUnit.Grams,
+            value = entry.carbsGrams?.roundToDecimals() ?: 0.0
+        ),
+        fat = NutritionValue(
+            type = MeasureUnit.Grams,
+            value = entry.fatGrams?.roundToDecimals() ?: 0.0,
+        ),
+    )
 
     private fun sourceTags(entry: ReportAnalysisEntryResponse): List<ChipData> =
         buildList {
@@ -90,11 +104,10 @@ class ReportAnalysisUiMapper {
         )
     }
 
-    private fun Double?.confidenceStyle(): ChipStyle {
-        val normalized = this ?: return ChipStyle.Neutral
+    private fun Double.confidenceStyle(): ChipStyle {
         return when {
-            normalized > 75 -> ChipStyle.Success
-            normalized < 30 -> ChipStyle.Error
+            this >= 70 -> ChipStyle.Success
+            this <= 25 -> ChipStyle.Error
             else -> ChipStyle.Neutral
         }
     }
@@ -112,14 +125,8 @@ class ReportAnalysisUiMapper {
         }
     }
 
-    private fun Double?.formatMacro(suffix: String): String =
-        this?.let { "${it.roundToDecimals()} $suffix" } ?: PLACEHOLDER
-
-
     private fun Double.formatConfidence(): String {
         val rounded = roundToDecimals(0)
         return "$rounded% confidence"
     }
 }
-
-private const val PLACEHOLDER = "—"

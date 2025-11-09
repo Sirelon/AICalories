@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -56,7 +57,7 @@ import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.ChipComponent
 import com.sirelon.aicalories.designsystem.TagGroup
-import com.sirelon.aicalories.features.analyze.model.MacroStatUi
+import com.sirelon.aicalories.designsystem.templates.MacronutrientRow
 import com.sirelon.aicalories.features.analyze.model.MealAnalysisUi
 import com.sirelon.aicalories.features.analyze.model.MealEntryUi
 import com.sirelon.aicalories.features.analyze.model.MealSummaryUi
@@ -551,11 +552,12 @@ private fun EntriesSection(
     entries: List<MealEntryUi>,
 ) {
     Column(
+        modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
     ) {
         Text(
             text = "Detected items (${entries.size})",
-            style = AppTheme.typography.label,
+            style = AppTheme.typography.title,
         )
         if (entries.isEmpty()) {
             Surface(
@@ -580,42 +582,34 @@ private fun EntriesSection(
                 }
             }
         } else {
-            entries.forEachIndexed { index, entry ->
-                EntryCard(entry = entry)
-                if (index < entries.lastIndex) {
-                    AppDivider()
-                }
+            entries.forEach {
+                EntryCard(entry = it)
             }
         }
     }
 }
 
 @Composable
-private fun EntryCard(
-    entry: MealEntryUi,
-) {
-    Surface(
-        shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
-        tonalElevation = AppDimens.Size.xs,
-    ) {
+private fun EntryCard(entry: MealEntryUi) {
+    val spacing = AppDimens.Spacing.xl2
+    Card() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(AppDimens.Spacing.xl5),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl2),
+            verticalArrangement = Arrangement.spacedBy(spacing),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl2),
+                horizontalArrangement = Arrangement.spacedBy(spacing),
             ) {
                 Text(
                     modifier = Modifier.weight(1f),
                     text = entry.title,
                     style = AppTheme.typography.title,
                 )
-                entry.confidence?.let { confidence ->
-                    ChipComponent(data = confidence)
-                }
+
+                ChipComponent(data = entry.confidence)
             }
             entry.description?.let {
                 Text(
@@ -633,41 +627,6 @@ private fun EntryCard(
 
             TagGroup(title = "Tags", tags = entry.sourceTags)
         }
-    }
-}
-
-@Composable
-private fun MacronutrientRow(
-    stats: List<MacroStatUi>,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        stats.forEach { stat ->
-            NutrientStat(
-                label = stat.label,
-                value = stat.value,
-            )
-        }
-    }
-}
-
-@Composable
-private fun NutrientStat(
-    label: String,
-    value: String,
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = value,
-            style = AppTheme.typography.title,
-        )
-        Text(
-            text = label,
-            style = AppTheme.typography.caption,
-            color = AppTheme.colors.onSurface.copy(alpha = 0.7f),
-        )
     }
 }
 

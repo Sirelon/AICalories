@@ -33,7 +33,7 @@ fun PhotosGridComponent(
     onAddPhoto: () -> Unit,
     gridSize: Int = 3,
 ) {
-    val emptyItems = gridSize - files.size + if (canAddMore) 1 else -1
+    val emptyItems = gridSize - files.size + if (canAddMore) 1 else 0
     val spacing = AppDimens.Spacing.xl3
     val arrangement = Arrangement.spacedBy(spacing)
     BoxWithConstraints {

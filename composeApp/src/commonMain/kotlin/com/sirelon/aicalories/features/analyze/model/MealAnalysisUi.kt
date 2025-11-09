@@ -1,6 +1,7 @@
 package com.sirelon.aicalories.features.analyze.model
 
 import com.sirelon.aicalories.designsystem.ChipData
+import com.sirelon.aicalories.designsystem.templates.MacroStats
 
 data class MealAnalysisUi(
     val summary: MealSummaryUi,
@@ -30,12 +31,7 @@ data class MealEntryUi(
     val title: String,
     val description: String?,
     val quantityText: String?,
-    val macroStats: List<MacroStatUi>,
-    val confidence: ChipData?,
+    val macroStats: MacroStats,
+    val confidence: ChipData,
     val sourceTags: List<ChipData>,
-)
-
-data class MacroStatUi(
-    val label: String,
-    val value: String,
 )
