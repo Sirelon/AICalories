@@ -2,6 +2,7 @@ package com.sirelon.aicalories.features.agile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,9 +10,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -22,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -31,10 +36,11 @@ import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.Input
 import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
-import com.sirelon.aicalories.features.agile.presentation.AgileContract
-import com.sirelon.aicalories.features.agile.presentation.AgileViewModel
+import com.sirelon.aicalories.features.agile.Estimation
 import com.sirelon.aicalories.features.agile.model.Ticket
 import com.sirelon.aicalories.features.agile.model.UserStory
+import com.sirelon.aicalories.features.agile.presentation.AgileContract
+import com.sirelon.aicalories.features.agile.presentation.AgileViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -57,6 +63,15 @@ fun AgileScreen(
         onTicketNameChange = { storyId, ticketId, name ->
             viewModel.onEvent(AgileContract.AgileEvent.TicketNameChanged(storyId, ticketId, name))
         },
+        onTicketEstimationChange = { storyId, ticketId, estimation ->
+            viewModel.onEvent(
+                AgileContract.AgileEvent.TicketEstimationChanged(
+                    storyId = storyId,
+                    ticketId = ticketId,
+                    estimation = estimation,
+                )
+            )
+        },
     )
 }
 
@@ -68,6 +83,7 @@ private fun AgileScreenContent(
     onAddTicket: (Int) -> Unit,
     onStoryNameChange: (Int, String) -> Unit,
     onTicketNameChange: (Int, Int, String) -> Unit,
+    onTicketEstimationChange: (Int, Int, Estimation) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -145,11 +161,12 @@ private fun AgileScreenContent(
                         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
                     ) {
                         story.tickets.forEach { ticket ->
-                            Input(
-                                modifier = Modifier.fillMaxWidth(),
-                                value = ticket.name,
-                                onValueChange = { onTicketNameChange(story.id, ticket.id, it) },
-                                singleLine = true,
+                            TicketInput(
+                                ticket = ticket,
+                                onTicketNameChange = { onTicketNameChange(story.id, ticket.id, it) },
+                                onTicketEstimationChange = { estimationValue ->
+                                    onTicketEstimationChange(story.id, ticket.id, estimationValue)
+                                },
                             )
                         }
                         TextButton(
@@ -169,6 +186,72 @@ private fun AgileScreenContent(
     }
 }
 
+@Composable
+private fun TicketInput(
+    ticket: Ticket,
+    onTicketNameChange: (String) -> Unit,
+    onTicketEstimationChange: (Estimation) -> Unit,
+) {
+    var isSheetOpen by remember { mutableStateOf(false) }
+
+    Input(
+        modifier = Modifier.fillMaxWidth(),
+        value = ticket.name,
+        onValueChange = onTicketNameChange,
+        singleLine = true,
+        trailingIcon = {
+            TicketEstimationTrailing(
+                estimation = ticket.estimation,
+                onClick = { isSheetOpen = true },
+            )
+        },
+    )
+
+    if (isSheetOpen) {
+        EstimationPickerSheet(
+            selected = ticket.estimation,
+            onSelected = {
+                onTicketEstimationChange(it)
+                isSheetOpen = false
+            },
+            onDismissRequest = { isSheetOpen = false },
+        )
+    }
+}
+
+@Composable
+private fun TicketEstimationTrailing(
+    estimation: Estimation,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.small,
+        tonalElevation = 0.dp,
+        color = estimation.color().copy(alpha = 0.15f),
+    ) {
+        Row(
+            modifier = Modifier.padding(
+                horizontal = AppDimens.Spacing.l,
+                vertical = AppDimens.Spacing.s,
+            ),
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = estimation.code(),
+                style = MaterialTheme.typography.labelLarge,
+                color = estimation.color(),
+            )
+            Icon(
+                imageVector = Icons.Outlined.ExpandMore,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun AgileScreenPreview() {
@@ -180,7 +263,7 @@ private fun AgileScreenPreview() {
                     name = "User Story #1",
                     tickets = listOf(
                         Ticket(id = 1, name = "Ticket #1"),
-                        Ticket(id = 2, name = "Ticket #2"),
+                        Ticket(id = 2, name = "Ticket #2", estimation = Estimation.L),
                     ),
                 ),
                 UserStory(
@@ -197,5 +280,6 @@ private fun AgileScreenPreview() {
         onAddTicket = { _ -> },
         onStoryNameChange = { _, _ -> },
         onTicketNameChange = { _, _, _ -> },
+        onTicketEstimationChange = { _, _, _ -> },
     )
 }

@@ -35,7 +35,6 @@ fun EstimationChooser(
     modifier: Modifier = Modifier,
 ) {
     var isSheetOpen by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -68,35 +67,49 @@ fun EstimationChooser(
     }
 
     if (isSheetOpen) {
-        ModalBottomSheet(
+        EstimationPickerSheet(
+            selected = selected,
+            onSelected = {
+                onSelected(it)
+                isSheetOpen = false
+            },
             onDismissRequest = { isSheetOpen = false },
-            sheetState = sheetState,
+        )
+    }
+}
+
+@Composable
+fun EstimationPickerSheet(
+    selected: Estimation,
+    onSelected: (Estimation) -> Unit,
+    onDismissRequest: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    vertical = AppDimens.Spacing.xl4,
+                    horizontal = AppDimens.Spacing.xl4,
+                ),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        vertical = AppDimens.Spacing.xl4,
-                        horizontal = AppDimens.Spacing.xl4,
-                    ),
-                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
-            ) {
-                Text(
-                    text = "Select estimation",
-                    style = MaterialTheme.typography.titleLarge,
+            Text(
+                text = "Select estimation",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Estimation.entries.forEach { estimation ->
+                EstimationOption(
+                    estimation = estimation,
+                    isSelected = estimation == selected,
+                    onClick = { onSelected(estimation) },
                 )
-                Estimation.entries.forEach { estimation ->
-                    EstimationOption(
-                        estimation = estimation,
-                        isSelected = estimation == selected,
-                        onClick = {
-                            onSelected(estimation)
-                            isSheetOpen = false
-                        },
-                    )
-                }
-                Spacer(modifier = Modifier.height(AppDimens.Spacing.xl5))
             }
+            Spacer(modifier = Modifier.height(AppDimens.Spacing.xl5))
         }
     }
 }

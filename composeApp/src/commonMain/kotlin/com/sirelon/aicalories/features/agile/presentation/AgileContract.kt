@@ -1,5 +1,6 @@
 package com.sirelon.aicalories.features.agile.presentation
 
+import com.sirelon.aicalories.features.agile.Estimation
 import com.sirelon.aicalories.features.agile.model.UserStory
 
 interface AgileContract {
@@ -15,6 +16,11 @@ interface AgileContract {
         data class AddTicket(val storyId: Int) : AgileEvent
         data class StoryNameChanged(val storyId: Int, val name: String) : AgileEvent
         data class TicketNameChanged(val storyId: Int, val ticketId: Int, val name: String) : AgileEvent
+        data class TicketEstimationChanged(
+            val storyId: Int,
+            val ticketId: Int,
+            val estimation: Estimation,
+        ) : AgileEvent
     }
 
     sealed interface AgileEffect
