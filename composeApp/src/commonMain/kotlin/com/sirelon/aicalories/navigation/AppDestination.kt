@@ -13,4 +13,8 @@ sealed interface AppDestination : NavKey {
 
     @Serializable
     data object History : AppDestination
+
+
+    @Serializable
+    data object Agile : AppDestination
 }

@@ -24,7 +24,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -52,11 +51,13 @@ import androidx.window.core.layout.WindowSizeClass
 import com.mohamedrejeb.calf.core.LocalPlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.permissions.Permission
+import com.sirelon.aicalories.designsystem.AppCard
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppDivider
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.ChipComponent
+import com.sirelon.aicalories.designsystem.Input
 import com.sirelon.aicalories.designsystem.TagGroup
 import com.sirelon.aicalories.designsystem.templates.CardWithTitle
 import com.sirelon.aicalories.designsystem.templates.MacronutrientRow
@@ -409,13 +410,13 @@ private fun DescriptionSection(
                 text = "Add description (optional)",
                 style = AppTheme.typography.title,
             )
-            OutlinedTextField(
+            Input(
                 modifier = Modifier.fillMaxWidth(),
                 value = value,
                 onValueChange = onValueChange,
                 enabled = enabled,
                 minLines = 4,
-                label = { Text("e.g., Breakfast at home, restaurant meal...") },
+                label = "e.g., Breakfast at home, restaurant meal...",
             )
         }
     }
@@ -425,7 +426,7 @@ private fun DescriptionSection(
 private fun PendingAnalysisCard(
     isLoading: Boolean,
 ) {
-    Surface(
+    AppCard(
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
         tonalElevation = AppDimens.Size.xs,
     ) {
@@ -458,7 +459,7 @@ private fun PendingAnalysisCard(
 private fun SummaryCard(
     summary: MealSummaryUi,
 ) {
-    Surface(
+    AppCard(
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
         tonalElevation = AppDimens.Size.xs,
     ) {

@@ -28,7 +28,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -44,6 +43,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
+import com.sirelon.aicalories.designsystem.AppCard
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
@@ -132,12 +132,11 @@ private fun WeeklyCaloriesCard(
     model: WeeklyCaloriesRenderModel,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
+    AppCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl4),
-        color = AppTheme.colors.surface,
+        containerColor = AppTheme.colors.surface,
         tonalElevation = AppDimens.Size.xs,
-        shadowElevation = AppDimens.Size.xs,
     ) {
         Column(
             modifier = Modifier.padding(AppDimens.Spacing.xl6),
@@ -309,10 +308,10 @@ private fun HistoryEntryCard(
         AppTheme.colors.surface
     }
 
-    Surface(
+    AppCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl4),
-        color = containerColor,
+        containerColor = containerColor,
         border = BorderStroke(AppDimens.BorderWidth.xs, borderColor),
         tonalElevation = AppDimens.Size.xs,
         onClick = onClick,
