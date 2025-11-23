@@ -3,6 +3,20 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+val composeOptInAnnotations = listOf(
+    "androidx.compose.foundation.layout.ExperimentalLayoutApi",
+    "androidx.compose.material3.ExperimentalMaterial3Api",
+    "androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
+    "androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi",
+    "androidx.compose.ui.ExperimentalComposeUiApi",
+    "com.mohamedrejeb.calf.core.InternalCalfApi",
+    "com.mohamedrejeb.calf.permissions.ExperimentalPermissionsApi",
+    "kotlin.time.ExperimentalTime",
+    "kotlin.uuid.ExperimentalUuidApi",
+    "kotlinx.coroutines.ExperimentalCoroutinesApi",
+    "kotlinx.cinterop.ExperimentalForeignApi",
+)
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
@@ -45,6 +59,11 @@ kotlin {
     }
     
     sourceSets {
+        all {
+            languageSettings.apply {
+                composeOptInAnnotations.forEach { optIn(it) }
+            }
+        }
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.core.ktx)

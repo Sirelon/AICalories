@@ -3,8 +3,6 @@ package com.sirelon.aicalories.camera
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.uikit.LocalUIViewController
-import kotlinx.cinterop.ExperimentalForeignApi
-import com.mohamedrejeb.calf.core.InternalCalfApi
 import com.mohamedrejeb.calf.io.KmpFile
 import platform.Foundation.NSUUID
 import platform.Foundation.NSURL
@@ -19,7 +17,6 @@ import platform.UIKit.UIImagePickerControllerSourceType
 import platform.UIKit.UINavigationControllerDelegateProtocol
 import platform.Foundation.writeToURL
 
-@OptIn(ExperimentalForeignApi::class)
 @Composable
 actual fun rememberCameraCaptureLauncher(
     onResult: (CameraCaptureResult) -> Unit,
@@ -57,7 +54,6 @@ actual fun rememberCameraCaptureLauncher(
     }
 }
 
-@OptIn(ExperimentalForeignApi::class)
 private class CameraCaptureDelegate :
     platform.darwin.NSObject(),
     UIImagePickerControllerDelegateProtocol,
@@ -83,7 +79,6 @@ private class CameraCaptureDelegate :
 
         val result =
             if (writeSucceeded && fileUrl != null) {
-                @OptIn(InternalCalfApi::class)
                 CameraCaptureResult(
                     file = KmpFile(url = fileUrl, tempUrl = fileUrl),
                     displayName = fileName,
@@ -102,7 +97,6 @@ private class CameraCaptureDelegate :
     }
 }
 
-@OptIn(ExperimentalForeignApi::class)
 private fun UIImage.jpegData() = UIImageJPEGRepresentation(this, 0.9)
 
 private class CameraLauncherImpl(

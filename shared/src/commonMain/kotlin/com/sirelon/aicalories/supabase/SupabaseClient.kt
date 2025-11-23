@@ -6,8 +6,6 @@ import com.sirelon.aicalories.supabase.model.StorageObjectRecord
 import com.sirelon.aicalories.supabase.response.ReportAnalysisEntryResponse
 import com.sirelon.aicalories.supabase.response.ReportAnalysisSummaryResponse
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.annotations.SupabaseExperimental
-import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
@@ -41,7 +39,6 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 private const val STORAGE_BUCKET_NAME = "aicalories"
@@ -51,7 +48,6 @@ private val remoteErrorParser = Json {
 }
 
 class SupabaseClient {
-    @OptIn(SupabaseInternal::class)
     private val client: SupabaseClient by lazy {
         createSupabaseClient(
             supabaseUrl = SupabaseConfig.SUPABASE_URL,
@@ -212,7 +208,6 @@ class SupabaseClient {
         }
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     private fun buildStoragePath(userId: String, originalPath: String): String {
         val sanitizedName = originalPath
             .substringAfterLast('/')
@@ -228,7 +223,6 @@ class SupabaseClient {
         return "$userId/${Uuid.random()}_$safeName"
     }
 
-    @OptIn(SupabaseExperimental::class)
     fun observeReportSummary(foodEntryId: Long): Flow<ReportAnalysisSummaryResponse?> {
         return client
             .postgrest["report_analyse_summary"]
@@ -248,7 +242,6 @@ class SupabaseClient {
             }
     }
 
-    @OptIn(SupabaseExperimental::class)
     fun observeReportEntries(reportAnalyseId: Long): Flow<List<ReportAnalysisEntryResponse>> {
         return client
             .postgrest["report_analyse_entry"]

@@ -3,7 +3,6 @@ package com.sirelon.aicalories.features.history.presentation
 import androidx.lifecycle.viewModelScope
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRenderModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -12,7 +11,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class HistoryViewModel() :
     BaseViewModel<HistoryContract.HistoryState, HistoryContract.HistoryEvent, HistoryContract.HistoryEffect>() {
 

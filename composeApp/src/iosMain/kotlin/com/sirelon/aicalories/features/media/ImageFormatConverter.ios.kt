@@ -1,13 +1,11 @@
 package com.sirelon.aicalories.features.media
 
-import com.mohamedrejeb.calf.core.InternalCalfApi
 import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.io.getName
 import com.mohamedrejeb.calf.io.readByteArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import platform.Foundation.NSData
@@ -21,7 +19,6 @@ import platform.Foundation.writeToURL
 
 actual fun imageFormatConverter(): ImageFormatConverter = IosImageFormatConverter()
 
-@OptIn(InternalCalfApi::class)
 private class IosImageFormatConverter : ImageFormatConverter {
 
     override suspend fun convert(
@@ -74,7 +71,6 @@ private fun String?.toJpegFileName(): String {
     return "$safeBase.jpg"
 }
 
-@OptIn(ExperimentalForeignApi::class)
 private fun ByteArray.toNSData(): NSData =
     usePinned { pinned ->
         NSData.create(

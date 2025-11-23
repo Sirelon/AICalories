@@ -6,7 +6,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import com.mohamedrejeb.calf.permissions.ExperimentalPermissionsApi
 import com.mohamedrejeb.calf.permissions.Permission
 import com.mohamedrejeb.calf.permissions.PermissionStatus
 import com.mohamedrejeb.calf.permissions.isGranted
@@ -30,7 +29,6 @@ interface PermissionController {
     fun openSettings()
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun rememberPermissionController(
     permission: Permission,
