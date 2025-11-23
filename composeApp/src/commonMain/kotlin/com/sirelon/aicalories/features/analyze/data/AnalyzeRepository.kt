@@ -8,14 +8,12 @@ import com.mohamedrejeb.calf.io.readByteArray
 import com.sirelon.aicalories.supabase.SupabaseClient
 import com.sirelon.aicalories.supabase.model.AnalyseReportData
 import io.github.jan.supabase.storage.UploadStatus
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 class AnalyzeRepository(
@@ -27,7 +25,6 @@ class AnalyzeRepository(
         val path: String,
     )
 
-    @OptIn(ExperimentalUuidApi::class)
     fun uploadFile(platformContext: PlatformContext, file: KmpFile): Flow<UploadStatus> {
         return flow {
             val flow = client.uploadFile(
@@ -40,7 +37,6 @@ class AnalyzeRepository(
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     fun observeAnalysis(foodEntryId: Long): Flow<AnalyseReportData> {
         return client.observeReportSummary(foodEntryId)
             .filterNotNull()

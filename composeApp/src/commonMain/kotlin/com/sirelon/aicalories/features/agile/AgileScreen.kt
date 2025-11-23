@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.sirelon.aicalories.features.agile
 
 import androidx.compose.foundation.layout.Arrangement
@@ -11,11 +9,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -33,8 +31,6 @@ import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.Input
 import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
-import com.sirelon.aicalories.features.agile.Estimation.M
-import com.sirelon.aicalories.features.agile.EstimationChooser
 import com.sirelon.aicalories.features.agile.presentation.AgileContract
 import com.sirelon.aicalories.features.agile.presentation.AgileViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -118,7 +114,7 @@ private fun AgileScreenContent(
                 items = state.stories,
                 key = { story -> story.id },
             ) { story ->
-                var estimation by rememberSaveable(story.id) { mutableStateOf(M) }
+                var estimation by rememberSaveable(story.id) { mutableStateOf(Estimation.M) }
 
                 AppExpandableCard(
                     modifier = Modifier.fillMaxWidth(),
@@ -154,7 +150,7 @@ private fun AgileScreenContent(
                                 singleLine = true,
                             )
                         }
-                        androidx.compose.material3.TextButton(
+                        TextButton(
                             onClick = { onAddTicket(story.id) },
                             modifier = Modifier.fillMaxWidth(),
                         ) {

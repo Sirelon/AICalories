@@ -4,6 +4,12 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
+val sharedOptInAnnotations = listOf(
+    "io.github.jan.supabase.annotations.SupabaseExperimental",
+    "io.github.jan.supabase.annotations.SupabaseInternal",
+    "kotlin.uuid.ExperimentalUuidApi",
+)
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
@@ -64,6 +70,11 @@ kotlin {
     }
     
     sourceSets {
+        all {
+            languageSettings.apply {
+                sharedOptInAnnotations.forEach { optIn(it) }
+            }
+        }
         commonMain.dependencies {
             implementation(libs.supabase.auth)
             implementation(libs.supabase.storage)
