@@ -1,5 +1,7 @@
 package com.sirelon.aicalories.features.agile.presentation
 
+import com.sirelon.aicalories.features.agile.model.Ticket
+import com.sirelon.aicalories.features.agile.model.UserStory
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 
 internal class AgileViewModel :
@@ -7,7 +9,7 @@ internal class AgileViewModel :
 
     override fun initialState(): AgileContract.AgileState {
         val initialStoryId = 1
-        val initialStory = AgileContract.UserStory(
+        val initialStory = UserStory(
             id = initialStoryId,
             name = userStoryName(initialStoryId),
             tickets = emptyList(),
@@ -31,7 +33,7 @@ internal class AgileViewModel :
     private fun addUserStory() {
         setState { currentState ->
             val storyId = currentState.nextStoryId
-            val newStory = AgileContract.UserStory(
+            val newStory = UserStory(
                 id = storyId,
                 name = userStoryName(storyId),
                 tickets = emptyList(),
@@ -49,7 +51,7 @@ internal class AgileViewModel :
             val updatedStories = currentState.stories.map { story ->
                 if (story.id == storyId) {
                     story.copy(
-                        tickets = story.tickets + AgileContract.Ticket(
+                        tickets = story.tickets + Ticket(
                             id = ticketId,
                             name = ticketName(ticketId),
                         )

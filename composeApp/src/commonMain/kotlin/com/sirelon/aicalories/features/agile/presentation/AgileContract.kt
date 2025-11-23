@@ -1,22 +1,13 @@
 package com.sirelon.aicalories.features.agile.presentation
 
+import com.sirelon.aicalories.features.agile.model.UserStory
+
 interface AgileContract {
 
     data class AgileState(
         val stories: List<UserStory> = emptyList(),
         val nextStoryId: Int = 1,
         val nextTicketId: Int = 1,
-    )
-
-    data class UserStory(
-        val id: Int,
-        val name: String,
-        val tickets: List<Ticket>,
-    )
-
-    data class Ticket(
-        val id: Int,
-        val name: String,
     )
 
     sealed interface AgileEvent {

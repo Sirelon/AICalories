@@ -33,6 +33,8 @@ import com.sirelon.aicalories.designsystem.Input
 import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
 import com.sirelon.aicalories.features.agile.presentation.AgileContract
 import com.sirelon.aicalories.features.agile.presentation.AgileViewModel
+import com.sirelon.aicalories.features.agile.model.Ticket
+import com.sirelon.aicalories.features.agile.model.UserStory
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -173,15 +175,15 @@ private fun AgileScreenPreview() {
     AgileScreenContent(
         state = AgileContract.AgileState(
             stories = listOf(
-                AgileContract.UserStory(
+                UserStory(
                     id = 1,
                     name = "User Story #1",
                     tickets = listOf(
-                        AgileContract.Ticket(id = 1, name = "Ticket #1"),
-                        AgileContract.Ticket(id = 2, name = "Ticket #2"),
+                        Ticket(id = 1, name = "Ticket #1"),
+                        Ticket(id = 2, name = "Ticket #2"),
                     ),
                 ),
-                AgileContract.UserStory(
+                UserStory(
                     id = 2,
                     name = "User Story #2",
                     tickets = emptyList(),
