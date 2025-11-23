@@ -1,6 +1,7 @@
 package com.sirelon.aicalories.features.agile.presentation
 
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
+import com.sirelon.aicalories.features.agile.Estimation
 
 internal class AgileViewModel :
     BaseViewModel<AgileContract.AgileState, AgileContract.AgileEvent, AgileContract.AgileEffect>() {
@@ -25,6 +26,8 @@ internal class AgileViewModel :
             is AgileContract.AgileEvent.AddTicket -> addTicket(event.storyId)
             is AgileContract.AgileEvent.StoryNameChanged -> updateStoryName(event.storyId, event.name)
             is AgileContract.AgileEvent.TicketNameChanged -> updateTicketName(event.storyId, event.ticketId, event.name)
+            is AgileContract.AgileEvent.TicketEstimationChanged ->
+                updateTicketEstimation(event.storyId, event.ticketId, event.estimation)
         }
     }
 
@@ -52,6 +55,7 @@ internal class AgileViewModel :
                         tickets = story.tickets + AgileContract.Ticket(
                             id = ticketId,
                             name = ticketName(ticketId),
+                            estimation = defaultTicketEstimation(),
                         )
                     )
                 } else {
@@ -99,7 +103,29 @@ internal class AgileViewModel :
         }
     }
 
+    private fun updateTicketEstimation(storyId: Int, ticketId: Int, estimation: Estimation) {
+        setState { currentState ->
+            val updatedStories = currentState.stories.map { story ->
+                if (story.id == storyId) {
+                    val updatedTickets = story.tickets.map { ticket ->
+                        if (ticket.id == ticketId) {
+                            ticket.copy(estimation = estimation)
+                        } else {
+                            ticket
+                        }
+                    }
+                    story.copy(tickets = updatedTickets)
+                } else {
+                    story
+                }
+            }
+            currentState.copy(stories = updatedStories)
+        }
+    }
+
     private fun userStoryName(id: Int) = "User Story #$id"
 
     private fun ticketName(id: Int) = "Ticket #$id"
+
+    private fun defaultTicketEstimation() = Estimation.M
 }
