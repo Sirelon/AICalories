@@ -11,26 +11,25 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.Input
+import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
 import com.sirelon.aicalories.features.agile.presentation.AgileContract
 import com.sirelon.aicalories.features.agile.presentation.AgileViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -114,62 +113,44 @@ private fun AgileScreenContent(
                 items = state.stories,
                 key = { story -> story.id },
             ) { story ->
-                UserStoryCard(
-                    story = story,
-                    onStoryNameChange = { onStoryNameChange(story.id, it) },
-                    onAddTicket = { onAddTicket(story.id) },
-                    onTicketNameChange = { ticketId, value ->
-                        onTicketNameChange(story.id, ticketId, value)
+                AppExpandableCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = {
+                        Input(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = AppDimens.Spacing.m),
+                            value = story.name,
+                            onValueChange = { onStoryNameChange(story.id, it) },
+                            singleLine = true,
+                        )
                     },
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun UserStoryCard(
-    story: AgileContract.UserStory,
-    onStoryNameChange: (String) -> Unit,
-    onAddTicket: () -> Unit,
-    onTicketNameChange: (Int, String) -> Unit,
-) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(AppDimens.Spacing.xl3),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
-        ) {
-            Input(
-                modifier = Modifier.fillMaxWidth(),
-                value = story.name,
-                onValueChange = onStoryNameChange,
-                singleLine = true,
-            )
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
-            ) {
-                story.tickets.forEach { ticket ->
-                    Input(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = ticket.name,
-                        onValueChange = { onTicketNameChange(ticket.id, it) },
-                        singleLine = true,
-                    )
+                ) {
+                    Column(
+                        modifier = Modifier.alpha(0.85f),
+                        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
+                    ) {
+                        story.tickets.forEach { ticket ->
+                            Input(
+                                modifier = Modifier.fillMaxWidth(),
+                                value = ticket.name,
+                                onValueChange = { onTicketNameChange(story.id, ticket.id, it) },
+                                singleLine = true,
+                            )
+                        }
+                        androidx.compose.material3.TextButton(
+                            onClick = { onAddTicket(story.id) },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Icon(Icons.Outlined.Add, contentDescription = null)
+                            Text(
+                                modifier = Modifier.padding(start = AppDimens.Spacing.m),
+                                text = "Add ticket",
+                            )
+                        }
+                    }
                 }
             }
-            TextButton(
-                onClick = onAddTicket,
-                modifier = Modifier.fillMaxWidth(),
-                content = {
-                    Icon(Icons.Outlined.Add, contentDescription = null)
-                    Text(
-                        modifier = Modifier.padding(start = AppDimens.Spacing.m),
-                        text = "Add ticket",
-                    )
-                },
-            )
         }
     }
 }
