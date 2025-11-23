@@ -2,7 +2,9 @@ package com.sirelon.aicalories.designsystem
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -10,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
-import androidx.compose.material3.Card as MaterialCard
 
 @Composable
 fun AppCard(
@@ -23,7 +24,7 @@ fun AppCard(
     border: BorderStroke? = null,
     tonalElevation: Dp = AppDimens.Size.xs,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    content: @Composable () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = CardDefaults.cardColors(
         containerColor = containerColor,
@@ -32,7 +33,7 @@ fun AppCard(
     val elevation = CardDefaults.cardElevation(defaultElevation = tonalElevation)
 
     if (onClick != null) {
-        MaterialCard(
+        Card(
             onClick = onClick,
             modifier = modifier,
             enabled = enabled,
@@ -44,7 +45,7 @@ fun AppCard(
             content = content,
         )
     } else {
-        MaterialCard(
+        Card(
             modifier = modifier,
             shape = shape,
             colors = colors,

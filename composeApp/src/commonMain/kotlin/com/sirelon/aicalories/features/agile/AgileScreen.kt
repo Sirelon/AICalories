@@ -24,10 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.Input
@@ -148,7 +148,7 @@ private fun UserStoryCard(
             )
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.lg),
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
             ) {
                 story.tickets.forEach { ticket ->
                     Input(
@@ -165,7 +165,7 @@ private fun UserStoryCard(
                 content = {
                     Icon(Icons.Outlined.Add, contentDescription = null)
                     Text(
-                        modifier = Modifier.padding(start = AppDimens.Spacing.md),
+                        modifier = Modifier.padding(start = AppDimens.Spacing.m),
                         text = "Add ticket",
                     )
                 },
