@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -15,7 +16,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,15 +24,48 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
+import com.sirelon.aicalories.designsystem.Input
+import com.sirelon.aicalories.features.agile.presentation.AgileContract
+import com.sirelon.aicalories.features.agile.presentation.AgileViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun AgileScreen(
     onBack: () -> Unit,
+) {
+    val viewModel: AgileViewModel = koinViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    AgileScreenContent(
+        state = state,
+        onBack = onBack,
+        onAddUserStory = { viewModel.onEvent(AgileContract.AgileEvent.AddUserStory) },
+        onAddTicket = { storyId ->
+            viewModel.onEvent(AgileContract.AgileEvent.AddTicket(storyId))
+        },
+        onStoryNameChange = { storyId, name ->
+            viewModel.onEvent(AgileContract.AgileEvent.StoryNameChanged(storyId, name))
+        },
+        onTicketNameChange = { storyId, ticketId, name ->
+            viewModel.onEvent(AgileContract.AgileEvent.TicketNameChanged(storyId, ticketId, name))
+        },
+    )
+}
+
+@Composable
+private fun AgileScreenContent(
+    state: AgileContract.AgileState,
+    onBack: () -> Unit,
+    onAddUserStory: () -> Unit,
+    onAddTicket: (Int) -> Unit,
+    onStoryNameChange: (Int, String) -> Unit,
+    onTicketNameChange: (Int, Int, String) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -55,7 +88,7 @@ fun AgileScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = {},
+                onClick = onAddUserStory,
                 text = { Text("Add User story") },
                 icon = {
                     Icon(Icons.Outlined.Add, contentDescription = null)
@@ -73,18 +106,22 @@ fun AgileScreen(
             item {
                 Text(
                     modifier = Modifier.padding(AppDimens.Spacing.xl3),
-                    text = "Count of commands:",
+                    text = "Count of user stories: ${state.stories.size}",
                 )
             }
 
-            item {
-                UserStoryCard()
-            }
-            item {
-                UserStoryCard()
-            }
-            item {
-                UserStoryCard()
+            items(
+                items = state.stories,
+                key = { story -> story.id },
+            ) { story ->
+                UserStoryCard(
+                    story = story,
+                    onStoryNameChange = { onStoryNameChange(story.id, it) },
+                    onAddTicket = { onAddTicket(story.id) },
+                    onTicketNameChange = { ticketId, value ->
+                        onTicketNameChange(story.id, ticketId, value)
+                    },
+                )
             }
         }
     }
@@ -92,26 +129,45 @@ fun AgileScreen(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun UserStoryCard() {
+private fun UserStoryCard(
+    story: AgileContract.UserStory,
+    onStoryNameChange: (String) -> Unit,
+    onAddTicket: () -> Unit,
+    onTicketNameChange: (Int, String) -> Unit,
+) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            modifier = Modifier.padding(AppDimens.Spacing.xl3),
-            text = "User Story #1",
-            style = MaterialTheme.typography.titleLargeEmphasized,
-        )
         Column(
             modifier = Modifier.padding(AppDimens.Spacing.xl3),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
-            Text("* Ticket #1")
-            Text("* Ticket #2")
-            Text("* Ticket #3")
+            Input(
+                modifier = Modifier.fillMaxWidth(),
+                value = story.name,
+                onValueChange = onStoryNameChange,
+                singleLine = true,
+            )
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.lg),
+            ) {
+                story.tickets.forEach { ticket ->
+                    Input(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = ticket.name,
+                        onValueChange = { onTicketNameChange(ticket.id, it) },
+                        singleLine = true,
+                    )
+                }
+            }
             TextButton(
-                onClick = {},
+                onClick = onAddTicket,
                 modifier = Modifier.fillMaxWidth(),
                 content = {
                     Icon(Icons.Outlined.Add, contentDescription = null)
-                    Text("Add ticket")
+                    Text(
+                        modifier = Modifier.padding(start = AppDimens.Spacing.md),
+                        text = "Add ticket",
+                    )
                 },
             )
         }
@@ -121,5 +177,30 @@ private fun UserStoryCard() {
 @Preview
 @Composable
 private fun AgileScreenPreview() {
-    AgileScreen(onBack = {})
+    AgileScreenContent(
+        state = AgileContract.AgileState(
+            stories = listOf(
+                AgileContract.UserStory(
+                    id = 1,
+                    name = "User Story #1",
+                    tickets = listOf(
+                        AgileContract.Ticket(id = 1, name = "Ticket #1"),
+                        AgileContract.Ticket(id = 2, name = "Ticket #2"),
+                    ),
+                ),
+                AgileContract.UserStory(
+                    id = 2,
+                    name = "User Story #2",
+                    tickets = emptyList(),
+                ),
+            ),
+            nextStoryId = 3,
+            nextTicketId = 3,
+        ),
+        onBack = {},
+        onAddUserStory = {},
+        onAddTicket = { _ -> },
+        onStoryNameChange = { _, _ -> },
+        onTicketNameChange = { _, _, _ -> },
+    )
 }
