@@ -15,7 +15,7 @@ import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.di.appModule
 import com.sirelon.aicalories.di.networkModule
-import com.sirelon.aicalories.features.agile.AgileScreen
+import com.sirelon.aicalories.features.agile.AgileRoot
 import com.sirelon.aicalories.features.analyze.ui.AnalyzeScreen
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRoute
 import com.sirelon.aicalories.navigation.AppDestination
@@ -67,9 +67,7 @@ fun App() {
                 entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AppDestination>()),
                 entryProvider = entryProvider<AppDestination> {
                     entry<AppDestination.Agile> {
-                        AgileScreen(
-                            onBack = popDestination,
-                        )
+                        AgileRoot(onExit = popDestination)
                     }
 
                     entry<AppDestination.Analyze> {
