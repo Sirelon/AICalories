@@ -20,7 +20,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -30,6 +33,8 @@ import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.Input
 import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
+import com.sirelon.aicalories.features.agile.Estimation.M
+import com.sirelon.aicalories.features.agile.EstimationChooser
 import com.sirelon.aicalories.features.agile.presentation.AgileContract
 import com.sirelon.aicalories.features.agile.presentation.AgileViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -113,17 +118,28 @@ private fun AgileScreenContent(
                 items = state.stories,
                 key = { story -> story.id },
             ) { story ->
+                var estimation by rememberSaveable(story.id) { mutableStateOf(M) }
+
                 AppExpandableCard(
                     modifier = Modifier.fillMaxWidth(),
                     title = {
-                        Input(
+                        Column(
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(end = AppDimens.Spacing.m),
-                            value = story.name,
-                            onValueChange = { onStoryNameChange(story.id, it) },
-                            singleLine = true,
-                        )
+                            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l),
+                        ) {
+                            Input(
+                                modifier = Modifier.fillMaxWidth(),
+                                value = story.name,
+                                onValueChange = { onStoryNameChange(story.id, it) },
+                                singleLine = true,
+                            )
+                            EstimationChooser(
+                                selected = estimation,
+                                onSelected = { estimation = it },
+                            )
+                        }
                     },
                 ) {
                     Column(
