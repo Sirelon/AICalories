@@ -13,7 +13,6 @@ import com.sirelon.aicalories.features.media.ImageFormatConverter
 import com.sirelon.aicalories.supabase.error.RemoteException
 import io.github.jan.supabase.storage.UploadStatus
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class AnalyzeViewModel(
     private val repository: AnalyzeRepository,
     private val mapper: ReportAnalysisUiMapper,

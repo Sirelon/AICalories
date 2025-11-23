@@ -14,7 +14,6 @@ import com.sirelon.aicalories.features.history.ui.WeeklyCaloriesRenderModel
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
 object HistorySampleDataProvider {
 
@@ -46,7 +45,6 @@ object HistorySampleDataProvider {
         "https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?w=400",
     )
 
-    @OptIn(ExperimentalTime::class)
     fun randomRenderModel(
         seed: Long = Clock.System.now().toEpochMilliseconds()
     ): HistoryScreenRenderModel {
