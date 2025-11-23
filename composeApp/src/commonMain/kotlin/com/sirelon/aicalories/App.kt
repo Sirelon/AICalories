@@ -15,6 +15,7 @@ import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.di.appModule
 import com.sirelon.aicalories.di.networkModule
+import com.sirelon.aicalories.features.agile.AgileScreen
 import com.sirelon.aicalories.features.analyze.ui.AnalyzeScreen
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRoute
 import com.sirelon.aicalories.navigation.AppDestination
@@ -36,7 +37,9 @@ fun App() {
     ) {
         AppTheme {
             val navBackStack = remember {
-                mutableStateListOf<AppDestination>(AppDestination.Analyze)
+                val startDestination = AppDestination.Agile
+
+                mutableStateListOf<AppDestination>(startDestination)
             }
 
             val popDestination: () -> Unit = {
@@ -63,6 +66,12 @@ fun App() {
                 backStack = navBackStack,
                 entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AppDestination>()),
                 entryProvider = entryProvider<AppDestination> {
+                    entry<AppDestination.Agile> {
+                        AgileScreen(
+                            onBack = popDestination,
+                        )
+                    }
+
                     entry<AppDestination.Analyze> {
                         AnalyzeScreen(
                             onBack = if (showBackButton) popDestination else null,
