@@ -1,6 +1,7 @@
 package com.sirelon.aicalories.di
 
 import com.sirelon.aicalories.Greeting
+import com.sirelon.aicalories.features.agile.di.agileModule
 import com.sirelon.aicalories.features.analyze.di.analyzeModule
 import com.sirelon.aicalories.features.history.di.historyModule
 import com.sirelon.aicalories.network.ApiTokenProvider
@@ -10,7 +11,7 @@ import org.koin.dsl.module
 import org.koin.core.module.dsl.singleOf
 
 val appModule = module {
-    includes(analyzeModule, historyModule)
+    includes(agileModule, analyzeModule, historyModule)
     single { Greeting() }
 }
 
