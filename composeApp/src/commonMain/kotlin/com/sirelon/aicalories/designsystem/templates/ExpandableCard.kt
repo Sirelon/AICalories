@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
-
 package com.sirelon.aicalories.designsystem.templates
 
 import androidx.compose.animation.AnimatedVisibility
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -30,7 +27,7 @@ import com.sirelon.aicalories.designsystem.AppDimens
 @Composable
 fun AppExpandableCard(
     modifier: Modifier = Modifier,
-    initiallyExpanded: Boolean = false,
+    initiallyExpanded: Boolean = true,
     title: @Composable RowScope.(expanded: Boolean) -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
