@@ -23,7 +23,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
@@ -93,6 +95,8 @@ fun AgileScreen(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun UserStoryCard() {
+    var estimation by rememberSaveable { mutableStateOf(Estimation.M) }
+
     Card(modifier = Modifier.fillMaxWidth()) {
         Text(
             modifier = Modifier.padding(AppDimens.Spacing.xl3),
@@ -103,6 +107,11 @@ private fun UserStoryCard() {
             modifier = Modifier.padding(AppDimens.Spacing.xl3),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
+            EstimationChooser(
+                selected = estimation,
+                onSelected = { estimation = it },
+            )
+
             Text("* Ticket #1")
             Text("* Ticket #2")
             Text("* Ticket #3")
