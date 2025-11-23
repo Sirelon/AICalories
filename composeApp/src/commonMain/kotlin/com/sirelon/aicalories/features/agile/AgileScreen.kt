@@ -2,16 +2,15 @@ package com.sirelon.aicalories.features.agile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ExpandMore
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,16 +24,21 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.Input
+import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
+import com.sirelon.aicalories.features.agile.Estimation
+import com.sirelon.aicalories.features.agile.model.Ticket
+import com.sirelon.aicalories.features.agile.model.UserStory
 import com.sirelon.aicalories.features.agile.presentation.AgileContract
 import com.sirelon.aicalories.features.agile.presentation.AgileViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -128,73 +132,63 @@ private fun AgileScreenContent(
                 items = state.stories,
                 key = { story -> story.id },
             ) { story ->
-                UserStoryCard(
-                    story = story,
-                    onStoryNameChange = { onStoryNameChange(story.id, it) },
-                    onAddTicket = { onAddTicket(story.id) },
-                    onTicketNameChange = { ticketId, value ->
-                        onTicketNameChange(story.id, ticketId, value)
-                    },
-                    onTicketEstimationChange = { ticketId, estimation ->
-                        onTicketEstimationChange(story.id, ticketId, estimation)
-                    },
-                )
-            }
-        }
-    }
-}
+                var estimation by rememberSaveable(story.id) { mutableStateOf(Estimation.M) }
 
-@Composable
-private fun UserStoryCard(
-    story: AgileContract.UserStory,
-    onStoryNameChange: (String) -> Unit,
-    onAddTicket: () -> Unit,
-    onTicketNameChange: (Int, String) -> Unit,
-    onTicketEstimationChange: (Int, Estimation) -> Unit,
-) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(AppDimens.Spacing.xl3),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
-        ) {
-            Input(
-                modifier = Modifier.fillMaxWidth(),
-                value = story.name,
-                onValueChange = onStoryNameChange,
-                singleLine = true,
-            )
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
-            ) {
-                story.tickets.forEach { ticket ->
-                    TicketInput(
-                        ticket = ticket,
-                        onTicketNameChange = { onTicketNameChange(ticket.id, it) },
-                        onTicketEstimationChange = { estimation ->
-                            onTicketEstimationChange(ticket.id, estimation)
-                        },
-                    )
+                AppExpandableCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = AppDimens.Spacing.m),
+                            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l),
+                        ) {
+                            Input(
+                                modifier = Modifier.fillMaxWidth(),
+                                value = story.name,
+                                onValueChange = { onStoryNameChange(story.id, it) },
+                                singleLine = true,
+                            )
+                            EstimationChooser(
+                                selected = estimation,
+                                onSelected = { estimation = it },
+                            )
+                        }
+                    },
+                ) {
+                    Column(
+                        modifier = Modifier.alpha(0.85f),
+                        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
+                    ) {
+                        story.tickets.forEach { ticket ->
+                            TicketInput(
+                                ticket = ticket,
+                                onTicketNameChange = { onTicketNameChange(story.id, ticket.id, it) },
+                                onTicketEstimationChange = { estimationValue ->
+                                    onTicketEstimationChange(story.id, ticket.id, estimationValue)
+                                },
+                            )
+                        }
+                        TextButton(
+                            onClick = { onAddTicket(story.id) },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Icon(Icons.Outlined.Add, contentDescription = null)
+                            Text(
+                                modifier = Modifier.padding(start = AppDimens.Spacing.m),
+                                text = "Add ticket",
+                            )
+                        }
+                    }
                 }
             }
-            TextButton(
-                onClick = onAddTicket,
-                modifier = Modifier.fillMaxWidth(),
-                content = {
-                    Icon(Icons.Outlined.Add, contentDescription = null)
-                    Text(
-                        modifier = Modifier.padding(start = AppDimens.Spacing.m),
-                        text = "Add ticket",
-                    )
-                },
-            )
         }
     }
 }
 
 @Composable
 private fun TicketInput(
-    ticket: AgileContract.Ticket,
+    ticket: Ticket,
     onTicketNameChange: (String) -> Unit,
     onTicketEstimationChange: (Estimation) -> Unit,
 ) {
@@ -264,15 +258,15 @@ private fun AgileScreenPreview() {
     AgileScreenContent(
         state = AgileContract.AgileState(
             stories = listOf(
-                AgileContract.UserStory(
+                UserStory(
                     id = 1,
                     name = "User Story #1",
                     tickets = listOf(
-                        AgileContract.Ticket(id = 1, name = "Ticket #1"),
-                        AgileContract.Ticket(id = 2, name = "Ticket #2", estimation = Estimation.L),
+                        Ticket(id = 1, name = "Ticket #1"),
+                        Ticket(id = 2, name = "Ticket #2", estimation = Estimation.L),
                     ),
                 ),
-                AgileContract.UserStory(
+                UserStory(
                     id = 2,
                     name = "User Story #2",
                     tickets = emptyList(),
