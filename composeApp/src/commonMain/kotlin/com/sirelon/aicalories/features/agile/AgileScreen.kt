@@ -127,7 +127,6 @@ private fun AgileScreenContent(
                                     )
                                 )
                             },
-                            singleLine = true,
                         )
                     },
                 ) {
@@ -211,16 +210,24 @@ private fun TicketInput(
         modifier = modifier.fillMaxWidth(),
         value = ticket.name,
         onValueChange = onTicketNameChange,
-        singleLine = true,
-        suffix = {
-            TicketEstimationTrailing(
-                estimation = ticket.estimation,
-                onClick = { setSheetVisible(true) },
-            )
-        },
         trailingIcon = {
-            IconButton(onClick = onTicketRemoved) {
-                Icon(Icons.Default.Delete, contentDescription = null)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(
+                    space = AppDimens.Spacing.s
+                )
+            ) {
+                TicketEstimationTrailing(
+                    estimation = ticket.estimation,
+                    onClick = { setSheetVisible(true) },
+                )
+                IconButton(onClick = onTicketRemoved) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     )
