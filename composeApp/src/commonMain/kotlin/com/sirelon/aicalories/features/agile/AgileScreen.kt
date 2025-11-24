@@ -112,9 +112,10 @@ private fun AgileScreenContent(
                 items = state.stories,
                 key = { story -> story.id },
             ) { story ->
-
                 AppExpandableCard(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .animateItem()
+                        .fillMaxWidth(),
                     title = {
                         Input(
                             modifier = Modifier.fillMaxWidth(),
