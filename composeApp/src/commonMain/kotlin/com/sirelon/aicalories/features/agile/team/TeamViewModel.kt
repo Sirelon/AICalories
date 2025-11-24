@@ -2,6 +2,9 @@ package com.sirelon.aicalories.features.agile.team
 
 import com.sirelon.aicalories.features.agile.data.AgileRepository
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 internal class TeamViewModel(
     private val teamId: Int,
@@ -11,6 +14,16 @@ internal class TeamViewModel(
     override fun initialState(): TeamContract.TeamState {
         val team = repository.getOrCreateTeam(teamId)
         return TeamContract.TeamState(team = team)
+    }
+
+    init {
+        viewModelScope.launch {
+            repository.observeTeam(teamId).collectLatest { team ->
+                setState { currentState ->
+                    currentState.copy(team = team)
+                }
+            }
+        }
     }
 
     override fun onEvent(event: TeamContract.TeamEvent) {
