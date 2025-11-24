@@ -1,12 +1,14 @@
 package com.sirelon.aicalories.features.agile.presentation
 
+import com.sirelon.aicalories.features.agile.Estimation
+import com.sirelon.aicalories.features.agile.EstimationCalculator
 import com.sirelon.aicalories.features.agile.model.Ticket
 import com.sirelon.aicalories.features.agile.model.UserStory
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
-import com.sirelon.aicalories.features.agile.Estimation
 
-internal class AgileViewModel :
-    BaseViewModel<AgileContract.AgileState, AgileContract.AgileEvent, AgileContract.AgileEffect>() {
+internal class AgileViewModel(
+    private val calculator: EstimationCalculator,
+) : BaseViewModel<AgileContract.AgileState, AgileContract.AgileEvent, AgileContract.AgileEffect>() {
 
     override fun initialState(): AgileContract.AgileState {
         val initialStoryId = 1
@@ -26,10 +28,21 @@ internal class AgileViewModel :
         when (event) {
             AgileContract.AgileEvent.AddUserStory -> addUserStory()
             is AgileContract.AgileEvent.AddTicket -> addTicket(event.storyId)
-            is AgileContract.AgileEvent.StoryNameChanged -> updateStoryName(event.storyId, event.name)
-            is AgileContract.AgileEvent.TicketNameChanged -> updateTicketName(event.storyId, event.ticketId, event.name)
+            is AgileContract.AgileEvent.StoryNameChanged -> updateStoryName(
+                event.storyId,
+                event.name
+            )
+
+            is AgileContract.AgileEvent.TicketNameChanged -> updateTicketName(
+                event.storyId,
+                event.ticketId,
+                event.name
+            )
+
             is AgileContract.AgileEvent.TicketEstimationChanged ->
                 updateTicketEstimation(event.storyId, event.ticketId, event.estimation)
+
+            is AgileContract.AgileEvent.TicketRemoved -> removeTicket(event.storyId, event.ticketId)
         }
     }
 
@@ -44,6 +57,20 @@ internal class AgileViewModel :
             currentState.copy(
                 stories = currentState.stories + newStory,
                 nextStoryId = storyId + 1,
+            )
+        }
+    }
+
+    private fun removeTicket(storyId: Int, ticketId: Int) {
+        setState { currentState ->
+            currentState.copy(
+                stories = currentState.stories.map {
+                    if (it.id == storyId) {
+                        it.copy(tickets = it.tickets.filter { it.id != ticketId })
+                    } else {
+                        it
+                    }
+                }
             )
         }
     }

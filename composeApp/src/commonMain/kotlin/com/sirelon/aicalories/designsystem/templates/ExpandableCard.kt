@@ -4,10 +4,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
@@ -23,19 +23,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import com.sirelon.aicalories.designsystem.AppDimens
+import com.sirelon.aicalories.designsystem.AppDivider
 
 @Composable
 fun AppExpandableCard(
     modifier: Modifier = Modifier,
     initiallyExpanded: Boolean = true,
-    title: @Composable RowScope.(expanded: Boolean) -> Unit,
+    title: @Composable () -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     var expanded by rememberSaveable { mutableStateOf(initiallyExpanded) }
 
-    Card(
-        modifier = modifier,
-    ) {
+    Card(modifier = modifier) {
         Column(
             modifier = Modifier.padding(AppDimens.Spacing.xl3),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
@@ -43,11 +42,11 @@ fun AppExpandableCard(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                title(expanded)
+                Box(modifier = Modifier.weight(1f)) {
+                    title()
+                }
 
-                IconButton(
-                    onClick = { expanded = !expanded },
-                ) {
+                IconButton(onClick = { expanded = !expanded }) {
                     Icon(
                         modifier = Modifier.rotate(if (expanded) 180f else 0f),
                         imageVector = Icons.Outlined.KeyboardArrowDown,
@@ -56,6 +55,8 @@ fun AppExpandableCard(
                 }
             }
 
+            AppDivider()
+
             AnimatedVisibility(
                 visible = expanded,
                 enter = expandVertically(),
@@ -63,9 +64,8 @@ fun AppExpandableCard(
             ) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
-                ) {
-                    content()
-                }
+                    content = content,
+                )
             }
         }
     }

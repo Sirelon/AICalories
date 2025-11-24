@@ -16,6 +16,7 @@ interface AgileContract {
         data class AddTicket(val storyId: Int) : AgileEvent
         data class StoryNameChanged(val storyId: Int, val name: String) : AgileEvent
         data class TicketNameChanged(val storyId: Int, val ticketId: Int, val name: String) : AgileEvent
+        data class TicketRemoved(val storyId: Int, val ticketId: Int) : AgileEvent
         data class TicketEstimationChanged(
             val storyId: Int,
             val ticketId: Int,
