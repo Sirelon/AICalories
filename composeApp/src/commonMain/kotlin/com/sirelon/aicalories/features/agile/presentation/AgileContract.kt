@@ -13,6 +13,7 @@ interface AgileContract {
 
     sealed interface AgileEvent {
         data object AddUserStory : AgileEvent
+        data object CalculateCapacity : AgileEvent
         data class AddTicket(val storyId: Int) : AgileEvent
         data class StoryNameChanged(val storyId: Int, val name: String) : AgileEvent
         data class TicketNameChanged(val storyId: Int, val ticketId: Int, val name: String) : AgileEvent

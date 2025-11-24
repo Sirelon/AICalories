@@ -43,7 +43,16 @@ internal class AgileViewModel(
                 updateTicketEstimation(event.storyId, event.ticketId, event.estimation)
 
             is AgileContract.AgileEvent.TicketRemoved -> removeTicket(event.storyId, event.ticketId)
+            AgileContract.AgileEvent.CalculateCapacity -> calculateCapacity()
         }
+    }
+
+    private fun calculateCapacity() {
+        // TODO: get capacity from team
+        val tickets = state.value.stories.flatMap { it.tickets }
+        val result = calculator.evaluate(tickets = tickets, capacity = 40)
+
+        print("calculateCapacity result: $result")
     }
 
     private fun addUserStory() {
