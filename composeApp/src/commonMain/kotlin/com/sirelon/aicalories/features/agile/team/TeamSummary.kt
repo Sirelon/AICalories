@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.sirelon.aicalories.designsystem.AppDimens
+import kotlin.math.roundToInt
 
 @Composable
 fun TeamSummary(
@@ -23,6 +24,14 @@ fun TeamSummary(
     storiesCount: Int? = null,
     ticketsCount: Int? = null,
 ) {
+    val boundedRisk = team.riskFactor.coerceIn(0.0, 1.0)
+    val riskPercentage = (boundedRisk * 100).roundToInt()
+    val pessimisticCapacity = (team.capacity - team.capacity * boundedRisk)
+        .roundToInt()
+        .coerceAtLeast(0)
+    val optimisticCapacity = (team.capacity + team.capacity * boundedRisk)
+        .roundToInt()
+
     Column(
         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
         modifier = Modifier
@@ -60,6 +69,16 @@ fun TeamSummary(
                 onClick = {},
                 enabled = false,
                 label = { Text("Capacity ${team.capacity}") },
+            )
+            AssistChip(
+                onClick = {},
+                enabled = false,
+                label = { Text("Risk ±$riskPercentage%") },
+            )
+            AssistChip(
+                onClick = {},
+                enabled = false,
+                label = { Text("Range $pessimisticCapacity-$optimisticCapacity") },
             )
             storiesCount?.let { count ->
                 AssistChip(

@@ -22,6 +22,7 @@ import com.sirelon.aicalories.designsystem.Input
 import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import kotlin.math.roundToInt
 
 @Composable
 fun TeamScreen(
@@ -46,8 +47,7 @@ private fun TeamScreenContent(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val team = state.team
-    val totalCapacity = team.capacity
-    val totalPeople = team.peopleCount
+    val riskPercentage = (team.riskFactor.coerceIn(0.0, 1.0) * 100).roundToInt()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -82,7 +82,7 @@ private fun TeamScreenContent(
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Text(
-                            text = "People: ${team.peopleCount} | Capacity: ${team.capacity}",
+                            text = "People: ${team.peopleCount} | Capacity: ${team.capacity} | Risk: $riskPercentage%",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -152,4 +152,22 @@ private fun TeamFields(
             ),
         )
     }
+    Input(
+        modifier = Modifier.fillMaxWidth(),
+        value = team.riskFactor.toString(),
+        onValueChange = {
+            onEvent(
+                TeamContract.TeamEvent.RiskFactorChanged(
+                    teamId = team.id,
+                    riskFactor = it,
+                )
+            )
+        },
+        label = "Risk factor",
+        supportingText = "0.0 to 1.0 (20% risk = 0.2)",
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Decimal,
+        ),
+    )
 }

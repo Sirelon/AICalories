@@ -22,11 +22,15 @@ internal class CapacityResultViewModel(
         viewModelScope.launch {
             repository.observeTeamWithStories(teamId).collectLatest { teamWithStories ->
                 val tickets = teamWithStories.stories.flatMap { it.tickets }
-                val capacity = teamWithStories.team.capacity
-                val result = calculator.evaluate(tickets = tickets, capacity = capacity)
+                val team = teamWithStories.team
+                val result = calculator.evaluate(
+                    tickets = tickets,
+                    capacity = team.capacity,
+                    riskFactor = team.riskFactor,
+                )
                 setState { currentState ->
                     currentState.copy(
-                        team = teamWithStories.team,
+                        team = team,
                         result = result,
                     )
                 }
@@ -43,9 +47,14 @@ internal class CapacityResultViewModel(
     private fun recalculate() {
         val snapshot = repository.getTeamWithStories(teamId)
         val tickets = snapshot.stories.flatMap { it.tickets }
-        val result = calculator.evaluate(tickets = tickets, capacity = snapshot.team.capacity)
+        val team = snapshot.team
+        val result = calculator.evaluate(
+            tickets = tickets,
+            capacity = team.capacity,
+            riskFactor = team.riskFactor,
+        )
         setState { currentState ->
-            currentState.copy(team = snapshot.team, result = result)
+            currentState.copy(team = team, result = result)
         }
     }
 }

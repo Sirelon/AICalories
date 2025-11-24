@@ -48,6 +48,7 @@ import com.sirelon.aicalories.features.agile.team.Team
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @Composable
 internal fun CapacityResultScreen(
@@ -140,30 +141,26 @@ private fun ResultSummaryCard(
     result: EstimationResult,
     team: Team?,
 ) {
-    val remaining = result.capacity - result.totalEffort
-    val isOverCapacity = remaining < 0
-    val statusColor = if (result.canCloseAll) {
+    val capacity = result.capacity
+    val riskPercent = (capacity.riskFactor * 100).roundToInt()
+    val pessimisticRemaining = capacity.pessimistic - result.totalEffort
+    val optimisticRemaining = capacity.optimistic - result.totalEffort
+    val fitsPessimistic = pessimisticRemaining >= 0
+    val fitsOptimistic = optimisticRemaining >= 0
+    val statusColor = if (fitsOptimistic) {
         MaterialTheme.colorScheme.primary
     } else {
         MaterialTheme.colorScheme.error
     }
-    val statusText = if (result.canCloseAll) {
-        if (remaining == 0) {
-            "Exact fit to the available capacity."
-        } else {
-            "Everything fits this sprint."
-        }
-    } else {
-        "You need ${abs(remaining)} more points."
+    val statusText = when {
+        fitsPessimistic -> "Everything fits even with the pessimistic capacity."
+        fitsOptimistic -> "Scope fits only in the optimistic scenario."
+        else -> "You need ${abs(optimisticRemaining)} more points."
     }
-    val detailText = if (result.canCloseAll) {
-        if (remaining > 0) {
-            "Total effort ${result.totalEffort} of ${result.capacity} capacity — $remaining points free."
-        } else {
-            "Total effort ${result.totalEffort} matches the ${result.capacity} capacity."
-        }
-    } else {
-        "Scope effort is ${result.totalEffort} with capacity ${result.capacity}."
+    val detailText = when {
+        fitsPessimistic -> "Effort ${result.totalEffort} vs capacity ${capacity.pessimistic}-${capacity.optimistic} (risk ±$riskPercent%)."
+        fitsOptimistic -> "Effort ${result.totalEffort} exceeds pessimistic capacity by ${abs(pessimisticRemaining)} but fits optimistic ${capacity.optimistic}."
+        else -> "Effort ${result.totalEffort} is above the optimistic capacity ${capacity.optimistic}."
     }
 
     Surface(
@@ -192,7 +189,17 @@ private fun ResultSummaryCard(
                 AssistChip(
                     onClick = {},
                     enabled = false,
-                    label = { Text("Capacity ${result.capacity}") },
+                    label = { Text("Capacity ${capacity.pessimistic}-${capacity.optimistic}") },
+                )
+                AssistChip(
+                    onClick = {},
+                    enabled = false,
+                    label = { Text("Base ${capacity.base}") },
+                )
+                AssistChip(
+                    onClick = {},
+                    enabled = false,
+                    label = { Text("Risk ±$riskPercent%") },
                 )
                 AssistChip(
                     onClick = {},
@@ -203,22 +210,44 @@ private fun ResultSummaryCard(
                         disabledLabelColor = MaterialTheme.colorScheme.primary,
                     ),
                 )
-                val balanceLabel = if (isOverCapacity) {
-                    "Over by ${abs(remaining)}"
+                val pessimisticBalance = if (pessimisticRemaining < 0) {
+                    "Pessimistic over ${abs(pessimisticRemaining)}"
                 } else {
-                    "Remaining $remaining"
+                    "Pessimistic slack $pessimisticRemaining"
                 }
                 AssistChip(
                     onClick = {},
                     enabled = false,
-                    label = { Text(balanceLabel) },
+                    label = { Text(pessimisticBalance) },
                     colors = AssistChipDefaults.assistChipColors(
-                        disabledContainerColor = if (isOverCapacity) {
+                        disabledContainerColor = if (pessimisticRemaining < 0) {
                             MaterialTheme.colorScheme.errorContainer
                         } else {
                             MaterialTheme.colorScheme.secondaryContainer
                         },
-                        disabledLabelColor = if (isOverCapacity) {
+                        disabledLabelColor = if (pessimisticRemaining < 0) {
+                            MaterialTheme.colorScheme.onErrorContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                        },
+                    ),
+                )
+                val optimisticBalance = if (optimisticRemaining < 0) {
+                    "Optimistic over ${abs(optimisticRemaining)}"
+                } else {
+                    "Optimistic slack $optimisticRemaining"
+                }
+                AssistChip(
+                    onClick = {},
+                    enabled = false,
+                    label = { Text(optimisticBalance) },
+                    colors = AssistChipDefaults.assistChipColors(
+                        disabledContainerColor = if (optimisticRemaining < 0) {
+                            MaterialTheme.colorScheme.errorContainer
+                        } else {
+                            MaterialTheme.colorScheme.secondaryContainer
+                        },
+                        disabledLabelColor = if (optimisticRemaining < 0) {
                             MaterialTheme.colorScheme.onErrorContainer
                         } else {
                             MaterialTheme.colorScheme.onSecondaryContainer
@@ -248,16 +277,7 @@ private fun ResultSummaryCard(
 private fun FeasibleVariantsSection(
     result: EstimationResult,
 ) {
-    val sortedVariants = remember(result) {
-        result.feasibleVariants.sortedWith(variantDisplayComparator)
-    }
-    val totalVariants = result.totalVariants.takeIf { it > 0 } ?: sortedVariants.size
-    var showAll by rememberSaveable { mutableStateOf(false) }
-
-    val maxVisible = if (showAll) MAX_VISIBLE_VARIANTS else COLLAPSED_VARIANTS
-    val variantsToDisplay = sortedVariants.take(maxVisible)
-    val hasHidden = totalVariants > variantsToDisplay.size
-    val isCapped = totalVariants > MAX_VISIBLE_VARIANTS
+    val capacityForVariants = result.capacity.pessimistic
 
     Column(
         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l),
@@ -271,18 +291,38 @@ private fun FeasibleVariantsSection(
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
             )
             Text(
-                text = "Sorted by best fit to the available capacity.",
+                text = "Sorted by best fit to the pessimistic capacity.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
+        if (result.canCloseAll) {
+            Text(
+                text = "All tickets fit into the optimistic capacity, so no alternative subsets are needed.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            return@Column
+        }
+
+        val sortedVariants = remember(result) {
+            result.feasibleVariants.sortedWith(variantDisplayComparator)
+        }
+        val totalVariants = result.totalVariants.takeIf { it > 0 } ?: sortedVariants.size
+        var showAll by rememberSaveable { mutableStateOf(false) }
+
+        val maxVisible = if (showAll) MAX_VISIBLE_VARIANTS else COLLAPSED_VARIANTS
+        val variantsToDisplay = sortedVariants.take(maxVisible)
+        val hasHidden = totalVariants > variantsToDisplay.size
+        val isCapped = totalVariants > MAX_VISIBLE_VARIANTS
+
         if (totalVariants == 0 || sortedVariants.isEmpty()) {
             Text(
                 text = if (result.totalEffort == 0) {
-                    "Add tickets to see how they stack against the current capacity."
+                    "Add tickets to see how they stack against the current risk-adjusted capacity."
                 } else {
-                    "No combination of tickets fits the current capacity. Trim scope or increase capacity."
+                    "No combination of tickets fits the current pessimistic capacity. Trim scope or increase capacity."
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.error,
@@ -294,7 +334,7 @@ private fun FeasibleVariantsSection(
             VariantCard(
                 index = index,
                 variant = variant,
-                capacity = result.capacity,
+                capacity = capacityForVariants,
             )
         }
 

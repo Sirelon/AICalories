@@ -52,6 +52,15 @@ internal class TeamViewModel(
                     )
                 },
             )
+
+            is TeamContract.TeamEvent.RiskFactorChanged -> updateTeam(
+                event.teamId,
+                transform = { team ->
+                    team.copy(
+                        riskFactor = sanitizeRiskFactor(event.riskFactor),
+                    )
+                },
+            )
         }
     }
 
@@ -66,4 +75,10 @@ internal class TeamViewModel(
 
     private fun sanitizeNumber(input: String): Int =
         input.filter { it.isDigit() }.toIntOrNull() ?: 0
+
+    private fun sanitizeRiskFactor(input: String): Double {
+        val normalized = input.replace(',', '.')
+        val value = normalized.toDoubleOrNull() ?: 0.0
+        return value.coerceIn(0.0, 1.0)
+    }
 }
