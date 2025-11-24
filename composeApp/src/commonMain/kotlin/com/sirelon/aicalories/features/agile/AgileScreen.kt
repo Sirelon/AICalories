@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +46,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun AgileScreen(
     onBack: () -> Unit,
+    onOpenTeamSettings: (Int) -> Unit,
 ) {
     val viewModel: AgileViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -52,6 +54,7 @@ fun AgileScreen(
     AgileScreenContent(
         state = state,
         onBack = onBack,
+        onOpenTeamSettings = onOpenTeamSettings,
         onEvent = viewModel::onEvent,
     )
 }
@@ -60,6 +63,7 @@ fun AgileScreen(
 private fun AgileScreenContent(
     state: AgileContract.AgileState,
     onBack: () -> Unit,
+    onOpenTeamSettings: (Int) -> Unit,
     onEvent: (AgileContract.AgileEvent) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -98,6 +102,10 @@ private fun AgileScreenContent(
             contentPadding = it,
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
+            item {
+                TeamSettingsEntry(onOpenTeamSettings = onOpenTeamSettings)
+            }
+
             item {
                 Text(
                     modifier = Modifier.padding(AppDimens.Spacing.xl3),
@@ -177,6 +185,49 @@ private fun AgileScreenContent(
                     }
                 }
             }
+        }
+    }
+}
+
+private const val DEFAULT_TEAM_ID = 1
+
+@Composable
+private fun TeamSettingsEntry(onOpenTeamSettings: (Int) -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = { onOpenTeamSettings(DEFAULT_TEAM_ID) },
+        shape = MaterialTheme.shapes.medium,
+        tonalElevation = 1.dp,
+    ) {
+        Row(
+            modifier = Modifier.padding(AppDimens.Spacing.xl3),
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Settings,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs),
+            ) {
+                Text(
+                    text = "Team settings",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    text = "Capture team capacity before estimation.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Icon(
+                imageVector = Icons.Outlined.ExpandMore,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
@@ -271,6 +322,7 @@ private fun AgileScreenPreview() {
             nextTicketId = 3,
         ),
         onBack = {},
+        onOpenTeamSettings = { _ -> },
         onEvent = {},
     )
 }
