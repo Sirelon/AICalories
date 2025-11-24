@@ -1,10 +1,10 @@
 package com.sirelon.aicalories.features.agile.team
 
+import androidx.lifecycle.viewModelScope
 import com.sirelon.aicalories.features.agile.data.AgileRepository
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 internal class TeamViewModel(
     private val teamId: Int,
@@ -17,13 +17,12 @@ internal class TeamViewModel(
     }
 
     init {
-        viewModelScope.launch {
-            repository.observeTeam(teamId).collectLatest { team ->
-                setState { currentState ->
-                    currentState.copy(team = team)
-                }
+        repository
+            .observeTeam(teamId)
+            .onEach { team ->
+                setState { it.copy(team = team) }
             }
-        }
+            .launchIn(viewModelScope)
     }
 
     override fun onEvent(event: TeamContract.TeamEvent) {
@@ -65,12 +64,9 @@ internal class TeamViewModel(
     }
 
     private fun updateTeam(teamId: Int, transform: (Team) -> Team) {
-        setState { currentState ->
-            if (currentState.team.id != teamId) return@setState currentState
-            val updatedTeam = transform(currentState.team)
-            repository.updateTeam(updatedTeam)
-            currentState.copy(team = updatedTeam)
-        }
+        val currentState = state.value
+        val updatedTeam = transform(currentState.team)
+        repository.updateTeam(updatedTeam)
     }
 
     private fun sanitizeNumber(input: String): Int =

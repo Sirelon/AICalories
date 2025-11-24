@@ -118,7 +118,7 @@ private fun TeamFields(
     ) {
         Input(
             modifier = Modifier.weight(1f),
-            value = team.peopleCount.toString(),
+            value = team.peopleCount.takeIf { it > 0 }?.toString().orEmpty(),
             onValueChange = {
                 onEvent(
                     TeamContract.TeamEvent.PeopleCountChanged(
@@ -135,7 +135,7 @@ private fun TeamFields(
         )
         Input(
             modifier = Modifier.weight(1f),
-            value = team.capacity.toString(),
+            value = team.capacity.takeIf { it > 0 }?.toString().orEmpty(),
             onValueChange = {
                 onEvent(
                     TeamContract.TeamEvent.CapacityChanged(
@@ -154,7 +154,7 @@ private fun TeamFields(
     }
     Input(
         modifier = Modifier.fillMaxWidth(),
-        value = team.riskFactor.toString(),
+        value = team.riskFactor.takeIf { it > 0 }?.toString().orEmpty(),
         onValueChange = {
             onEvent(
                 TeamContract.TeamEvent.RiskFactorChanged(
