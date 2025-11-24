@@ -113,26 +113,19 @@ private fun AgileScreenContent(
                 AppExpandableCard(
                     modifier = Modifier.fillMaxWidth(),
                     title = {
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(end = AppDimens.Spacing.m),
-                            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l),
-                        ) {
-                            Input(
-                                modifier = Modifier.fillMaxWidth(),
-                                value = story.name,
-                                onValueChange = {
-                                    onEvent(
-                                        AgileContract.AgileEvent.StoryNameChanged(
-                                            storyId = story.id,
-                                            name = it,
-                                        )
+                        Input(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = story.name,
+                            onValueChange = {
+                                onEvent(
+                                    AgileContract.AgileEvent.StoryNameChanged(
+                                        storyId = story.id,
+                                        name = it,
                                     )
-                                },
-                                singleLine = true,
-                            )
-                        }
+                                )
+                            },
+                            singleLine = true,
+                        )
                     },
                 ) {
                     Column(
@@ -190,7 +183,7 @@ private fun TicketInput(
     var isSheetOpen by remember { mutableStateOf(false) }
 
     Input(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.padding(start = AppDimens.Spacing.xl3).fillMaxWidth(),
         value = ticket.name,
         onValueChange = onTicketNameChange,
         singleLine = true,
