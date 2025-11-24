@@ -123,6 +123,7 @@ class AgileRepository {
         name = "Team #$id",
         peopleCount = 5,
         capacity = 40,
+        riskFactor = Team.DEFAULT_RISK_FACTOR,
     )
 
     companion object {

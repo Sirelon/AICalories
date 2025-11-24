@@ -8,4 +8,9 @@ data class Team(
     val name: String,
     val peopleCount: Int,
     val capacity: Int,
-)
+    val riskFactor: Double = DEFAULT_RISK_FACTOR,
+) {
+    companion object {
+        const val DEFAULT_RISK_FACTOR = 0.2
+    }
+}
