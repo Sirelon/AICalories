@@ -19,9 +19,18 @@ internal class TeamPickerViewModel(
 
     init {
         viewModelScope.launch {
-            repository.observeTeams().collectLatest { teams ->
+            repository.observeTeamsWithStories().collectLatest { teams ->
+                val teamItems = teams.map { teamWithStories ->
+                    TeamPickerContract.TeamListItem(
+                        team = teamWithStories.team,
+                        storiesCount = teamWithStories.stories.size,
+                        ticketsCount = teamWithStories.stories.sumOf { story ->
+                            story.tickets.size
+                        },
+                    )
+                }
                 setState { currentState ->
-                    currentState.copy(teams = teams)
+                    currentState.copy(teams = teamItems)
                 }
             }
         }
