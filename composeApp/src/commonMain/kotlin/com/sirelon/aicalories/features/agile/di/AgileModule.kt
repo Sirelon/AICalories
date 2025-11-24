@@ -11,12 +11,9 @@ import org.koin.dsl.module
 
 val agileModule = module {
     singleOf(::AgileRepository)
+
     factoryOf(::EstimationCalculator)
+
     viewModelOf(::AgileViewModel)
-    viewModel { (teamId: Int) ->
-        TeamViewModel(
-            teamId = teamId,
-            repository = get(),
-        )
-    }
+    viewModelOf(::TeamViewModel)
 }
