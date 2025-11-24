@@ -52,25 +52,7 @@ fun AgileScreen(
     AgileScreenContent(
         state = state,
         onBack = onBack,
-        onAddUserStory = { viewModel.onEvent(AgileContract.AgileEvent.AddUserStory) },
-        onAddTicket = { storyId ->
-            viewModel.onEvent(AgileContract.AgileEvent.AddTicket(storyId))
-        },
-        onStoryNameChange = { storyId, name ->
-            viewModel.onEvent(AgileContract.AgileEvent.StoryNameChanged(storyId, name))
-        },
-        onTicketNameChange = { storyId, ticketId, name ->
-            viewModel.onEvent(AgileContract.AgileEvent.TicketNameChanged(storyId, ticketId, name))
-        },
-        onTicketEstimationChange = { storyId, ticketId, estimation ->
-            viewModel.onEvent(
-                AgileContract.AgileEvent.TicketEstimationChanged(
-                    storyId = storyId,
-                    ticketId = ticketId,
-                    estimation = estimation,
-                )
-            )
-        },
+        onEvent = viewModel::onEvent,
     )
 }
 
@@ -78,11 +60,7 @@ fun AgileScreen(
 private fun AgileScreenContent(
     state: AgileContract.AgileState,
     onBack: () -> Unit,
-    onAddUserStory: () -> Unit,
-    onAddTicket: (Int) -> Unit,
-    onStoryNameChange: (Int, String) -> Unit,
-    onTicketNameChange: (Int, Int, String) -> Unit,
-    onTicketEstimationChange: (Int, Int, Estimation) -> Unit,
+    onEvent: (AgileContract.AgileEvent) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -105,7 +83,7 @@ private fun AgileScreenContent(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = onAddUserStory,
+                onClick = { onEvent(AgileContract.AgileEvent.AddUserStory) },
                 text = { Text("Add User story") },
                 icon = {
                     Icon(Icons.Outlined.Add, contentDescription = null)
@@ -144,7 +122,14 @@ private fun AgileScreenContent(
                             Input(
                                 modifier = Modifier.fillMaxWidth(),
                                 value = story.name,
-                                onValueChange = { onStoryNameChange(story.id, it) },
+                                onValueChange = {
+                                    onEvent(
+                                        AgileContract.AgileEvent.StoryNameChanged(
+                                            storyId = story.id,
+                                            name = it,
+                                        )
+                                    )
+                                },
                                 singleLine = true,
                             )
                         }
@@ -157,14 +142,30 @@ private fun AgileScreenContent(
                         story.tickets.forEach { ticket ->
                             TicketInput(
                                 ticket = ticket,
-                                onTicketNameChange = { onTicketNameChange(story.id, ticket.id, it) },
+                                onTicketNameChange = { name ->
+                                    onEvent(
+                                        AgileContract.AgileEvent.TicketNameChanged(
+                                            storyId = story.id,
+                                            ticketId = ticket.id,
+                                            name = name,
+                                        )
+                                    )
+                                },
                                 onTicketEstimationChange = { estimationValue ->
-                                    onTicketEstimationChange(story.id, ticket.id, estimationValue)
+                                    onEvent(
+                                        AgileContract.AgileEvent.TicketEstimationChanged(
+                                            storyId = story.id,
+                                            ticketId = ticket.id,
+                                            estimation = estimationValue,
+                                        )
+                                    )
                                 },
                             )
                         }
                         TextButton(
-                            onClick = { onAddTicket(story.id) },
+                            onClick = {
+                                onEvent(AgileContract.AgileEvent.AddTicket(story.id))
+                            },
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Icon(Icons.Outlined.Add, contentDescription = null)
@@ -270,10 +271,6 @@ private fun AgileScreenPreview() {
             nextTicketId = 3,
         ),
         onBack = {},
-        onAddUserStory = {},
-        onAddTicket = { _ -> },
-        onStoryNameChange = { _, _ -> },
-        onTicketNameChange = { _, _, _ -> },
-        onTicketEstimationChange = { _, _, _ -> },
+        onEvent = {},
     )
 }
