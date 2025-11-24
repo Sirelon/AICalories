@@ -2,6 +2,7 @@ package com.sirelon.aicalories.features.agile.di
 
 import com.sirelon.aicalories.features.agile.EstimationCalculator
 import com.sirelon.aicalories.features.agile.data.AgileRepository
+import com.sirelon.aicalories.features.agile.capacity.CapacityResultViewModel
 import com.sirelon.aicalories.features.agile.presentation.AgileViewModel
 import com.sirelon.aicalories.features.agile.team.TeamViewModel
 import com.sirelon.aicalories.features.agile.teamlist.TeamPickerViewModel
@@ -18,4 +19,5 @@ val agileModule = module {
     viewModelOf(::AgileViewModel)
     viewModelOf(::TeamViewModel)
     viewModelOf(::TeamPickerViewModel)
+    viewModelOf(::CapacityResultViewModel)
 }
