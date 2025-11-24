@@ -31,6 +31,16 @@ fun AgileRoot(
     val pushDestination: (AgileDestination) -> Unit = { destination ->
         navBackStack.add(destination)
     }
+    val replaceTopDestination: (AgileDestination) -> Unit = { destination ->
+        if (navBackStack.isNotEmpty()) {
+            navBackStack[navBackStack.lastIndex] = destination
+        } else {
+            navBackStack.add(destination)
+        }
+    }
+    val removeTopDestination: () -> Unit = {
+        navBackStack.removeLastOrNull()
+    }
 
     NavDisplay(
         modifier = Modifier.fillMaxSize(),
@@ -51,13 +61,23 @@ fun AgileRoot(
             entry<AgileDestination.StoryBoard> { destination ->
                 AgileScreen(
                     onBack = popDestination,
-                    onOpenTeamSettings = { teamId ->
-                        pushDestination(AgileDestination.TeamSettings(teamId))
-                    },
+                    onOpenTeamPicker = { pushDestination(AgileDestination.TeamSwitcher) },
                     onOpenCapacityResult = { teamId ->
                         pushDestination(AgileDestination.CapacityResult(teamId))
                     },
                     teamId = destination.teamId,
+                )
+            }
+            entry<AgileDestination.TeamSwitcher> {
+                TeamPickerScreen(
+                    onBack = popDestination,
+                    onTeamSelected = { teamId ->
+                        removeTopDestination()
+                        replaceTopDestination(AgileDestination.StoryBoard(teamId))
+                    },
+                    onOpenTeamSettings = { teamId ->
+                        pushDestination(AgileDestination.TeamSettings(teamId))
+                    },
                 )
             }
             entry<AgileDestination.TeamSettings> { destination ->

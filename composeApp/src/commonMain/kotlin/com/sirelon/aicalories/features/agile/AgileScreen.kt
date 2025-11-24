@@ -14,7 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ExpandMore
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.PeopleOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -54,17 +54,18 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun AgileScreen(
     onBack: () -> Unit,
-    onOpenTeamSettings: (Int) -> Unit,
+    onOpenTeamPicker: () -> Unit,
     onOpenCapacityResult: (Int) -> Unit,
     teamId: Int = DEFAULT_TEAM_ID,
 ) {
-    val viewModel: AgileViewModel = koinViewModel(parameters = { parametersOf(teamId) })
+    val viewModel: AgileViewModel =
+        koinViewModel(key = teamId.toString(), parameters = { parametersOf(teamId) })
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     AgileScreenContent(
         state = state,
         onBack = onBack,
-        onOpenTeamSettings = onOpenTeamSettings,
+        onOpenTeamPicker = onOpenTeamPicker,
         onOpenCapacityResult = onOpenCapacityResult,
         onEvent = viewModel::onEvent,
     )
@@ -74,7 +75,7 @@ fun AgileScreen(
 private fun AgileScreenContent(
     state: AgileContract.AgileState,
     onBack: () -> Unit,
-    onOpenTeamSettings: (Int) -> Unit,
+    onOpenTeamPicker: () -> Unit,
     onOpenCapacityResult: (Int) -> Unit,
     onEvent: (AgileContract.AgileEvent) -> Unit,
 ) {
@@ -130,9 +131,9 @@ private fun AgileScreenContent(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
             item {
-                TeamSettingsEntry(
+                TeamPickerEntry(
                     teamId = state.teamId,
-                    onOpenTeamSettings = onOpenTeamSettings,
+                    onOpenTeamPicker = onOpenTeamPicker,
                 )
             }
 
@@ -193,10 +194,10 @@ private fun AgileScreenContent(
 private const val DEFAULT_TEAM_ID = 1
 
 @Composable
-private fun TeamSettingsEntry(teamId: Int, onOpenTeamSettings: (Int) -> Unit) {
+private fun TeamPickerEntry(teamId: Int, onOpenTeamPicker: () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        onClick = { onOpenTeamSettings(teamId) },
+        onClick = onOpenTeamPicker,
         shape = MaterialTheme.shapes.medium,
         tonalElevation = 1.dp,
     ) {
@@ -206,7 +207,7 @@ private fun TeamSettingsEntry(teamId: Int, onOpenTeamSettings: (Int) -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = Icons.Outlined.Settings,
+                imageVector = Icons.Outlined.PeopleOutline,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
             )
@@ -215,11 +216,11 @@ private fun TeamSettingsEntry(teamId: Int, onOpenTeamSettings: (Int) -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs),
             ) {
                 Text(
-                    text = "Team settings",
+                    text = "Team list",
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    text = "Capture team capacity before estimation.",
+                    text = "Currently showing Team #$teamId. Tap to switch teams.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -382,7 +383,7 @@ private fun AgileScreenPreview() {
             nextTicketId = 3,
         ),
         onBack = {},
-        onOpenTeamSettings = { _ -> },
+        onOpenTeamPicker = {},
         onOpenCapacityResult = {},
         onEvent = {},
     )
