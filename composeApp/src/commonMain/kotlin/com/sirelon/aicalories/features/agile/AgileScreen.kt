@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,7 +16,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.PeopleOutline
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.Input
+import com.sirelon.aicalories.designsystem.buttons.MagicGreenButton
 import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
 import com.sirelon.aicalories.features.agile.model.Ticket
 import com.sirelon.aicalories.features.agile.model.UserStory
@@ -85,11 +86,13 @@ private fun AgileScreenContent(
 
     // FAB expands only near the top
     val fabExpanded by remember {
-        derivedStateOf { listState.firstVisibleItemIndex == 0 }
+        derivedStateOf { scrollBehavior.state.collapsedFraction < 0.1f }
     }
 
+
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             AppLargeAppBar(
                 title = "Agile",
@@ -109,7 +112,7 @@ private fun AgileScreenContent(
             )
         },
         bottomBar = {
-            Button(
+            MagicGreenButton(
                 modifier = Modifier
                     .navigationBarsPadding()
                     .fillMaxWidth()
@@ -117,11 +120,11 @@ private fun AgileScreenContent(
                     .animateFloatingActionButton(
                         visible = fabExpanded,
                         alignment = Alignment.BottomCenter,
-                    ),
-                onClick = { onOpenCapacityResult(state.teamId) }
-            ) {
-                Text("Calculate capacity")
-            }
+                    )
+                    .height(AppDimens.Size.xl19),
+                onClick = { onOpenCapacityResult(state.teamId) },
+                text = "Calculate capacity",
+            )
         }
     ) {
         LazyColumn(
