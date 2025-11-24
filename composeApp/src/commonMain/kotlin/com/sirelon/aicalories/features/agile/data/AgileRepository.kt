@@ -18,6 +18,16 @@ class AgileRepository {
 
     private val teams = MutableStateFlow<Map<Int, Team>>(emptyMap())
     private val teamStories = MutableStateFlow<Map<Int, List<UserStory>>>(emptyMap())
+    private var nextTeamId = 1
+
+    init {
+        ensureTeam(DEFAULT_TEAM_ID)
+    }
+
+    fun observeTeams(): Flow<List<Team>> =
+        teams.map { teamMap ->
+            teamMap.values.sortedBy { it.id }
+        }.distinctUntilChanged()
 
     fun observeTeam(teamId: Int): Flow<Team> {
         ensureTeam(teamId)
@@ -59,12 +69,44 @@ class AgileRepository {
         }
     }
 
+    fun createTeam(): Team {
+        val id = generateTeamId()
+        val team = defaultTeam(id)
+        teams.update { existing ->
+            existing + (id to team)
+        }
+        return team
+    }
+
+    fun removeTeam(teamId: Int) {
+        teams.update { existing ->
+            existing - teamId
+        }
+        teamStories.update { existing ->
+            existing - teamId
+        }
+        if (teams.value.isEmpty()) {
+            ensureTeam(DEFAULT_TEAM_ID)
+        }
+    }
+
     private fun ensureTeam(teamId: Int): Team =
         teams.value[teamId] ?: defaultTeam(teamId).also { team ->
             teams.update { existing ->
                 existing + (teamId to team)
             }
+            synchronized(this) {
+                if (teamId >= nextTeamId) {
+                    nextTeamId = teamId + 1
+                }
+            }
         }
+
+    private fun generateTeamId(): Int = synchronized(this) {
+        val id = nextTeamId
+        nextTeamId += 1
+        id
+    }
 
     private fun defaultTeam(id: Int) = Team(
         id = id,
@@ -72,4 +114,8 @@ class AgileRepository {
         peopleCount = 5,
         capacity = 40,
     )
+
+    companion object {
+        private const val DEFAULT_TEAM_ID = 1
+    }
 }

@@ -10,13 +10,14 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.sirelon.aicalories.features.agile.navigation.AgileDestination
 import com.sirelon.aicalories.features.agile.team.TeamScreen
+import com.sirelon.aicalories.features.agile.teamlist.TeamPickerScreen
 
 @Composable
 fun AgileRoot(
     onExit: () -> Unit,
 ) {
     val navBackStack = remember {
-        mutableStateListOf<AgileDestination>(AgileDestination.StoryBoard)
+        mutableStateListOf<AgileDestination>(AgileDestination.TeamPicker)
     }
 
     val popDestination: () -> Unit = {
@@ -35,12 +36,24 @@ fun AgileRoot(
         backStack = navBackStack,
         entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AgileDestination>()),
         entryProvider = entryProvider<AgileDestination> {
-            entry<AgileDestination.StoryBoard> {
+            entry<AgileDestination.TeamPicker> {
+                TeamPickerScreen(
+                    onBack = onExit,
+                    onTeamSelected = { teamId ->
+                        pushDestination(AgileDestination.StoryBoard(teamId))
+                    },
+                    onOpenTeamSettings = { teamId ->
+                        pushDestination(AgileDestination.TeamSettings(teamId))
+                    },
+                )
+            }
+            entry<AgileDestination.StoryBoard> { destination ->
                 AgileScreen(
                     onBack = popDestination,
                     onOpenTeamSettings = { teamId ->
                         pushDestination(AgileDestination.TeamSettings(teamId))
                     },
+                    teamId = destination.teamId,
                 )
             }
             entry<AgileDestination.TeamSettings> { destination ->
