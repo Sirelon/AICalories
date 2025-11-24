@@ -56,7 +56,8 @@ fun AgileScreen(
     onOpenTeamPicker: () -> Unit,
     teamId: Int = DEFAULT_TEAM_ID,
 ) {
-    val viewModel: AgileViewModel = koinViewModel(parameters = { parametersOf(teamId) })
+    val viewModel: AgileViewModel =
+        koinViewModel(key = teamId.toString(), parameters = { parametersOf(teamId) })
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     AgileScreenContent(
