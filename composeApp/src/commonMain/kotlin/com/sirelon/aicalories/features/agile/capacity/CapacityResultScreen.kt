@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -36,13 +37,17 @@ import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.features.agile.Estimation
 import com.sirelon.aicalories.features.agile.EstimationResult
 import com.sirelon.aicalories.features.agile.FeasibleTicketVariant
-import com.sirelon.aicalories.features.agile.estimationCalculatorExample
-import com.sirelon.aicalories.features.agile.model.Ticket
-import com.sirelon.aicalories.features.agile.team.Team
 import com.sirelon.aicalories.features.agile.capacity.CapacityResultContract.CapacityResultEvent
 import com.sirelon.aicalories.features.agile.capacity.CapacityResultContract.CapacityResultState
+import com.sirelon.aicalories.features.agile.code
+import com.sirelon.aicalories.features.agile.color
+import com.sirelon.aicalories.features.agile.estimationCalculatorExample
+import com.sirelon.aicalories.features.agile.icon
+import com.sirelon.aicalories.features.agile.model.Ticket
+import com.sirelon.aicalories.features.agile.team.Team
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import kotlin.math.abs
 
 @Composable
 internal fun CapacityResultScreen(
@@ -149,7 +154,7 @@ private fun ResultSummaryCard(
             "Everything fits this sprint."
         }
     } else {
-        "You need ${kotlin.math.abs(remaining)} more points."
+        "You need ${abs(remaining)} more points."
     }
     val detailText = if (result.canCloseAll) {
         if (remaining > 0) {
@@ -199,7 +204,7 @@ private fun ResultSummaryCard(
                     ),
                 )
                 val balanceLabel = if (isOverCapacity) {
-                    "Over by ${kotlin.math.abs(remaining)}"
+                    "Over by ${abs(remaining)}"
                 } else {
                     "Remaining $remaining"
                 }
@@ -329,7 +334,7 @@ private fun VariantCard(
     val slackLabel = when {
         slack == 0 -> "Exact fit"
         slack > 0 -> "$slack free"
-        else -> "Over by ${kotlin.math.abs(slack)}"
+        else -> "Over by ${abs(slack)}"
     }
 
     Surface(
@@ -393,7 +398,7 @@ private fun TicketChip(ticket: Ticket) {
 
 @Composable
 private fun EstimationIcon(estimation: Estimation) {
-    androidx.compose.material3.Icon(
+    Icon(
         painter = estimation.icon(),
         contentDescription = null,
         tint = estimation.color(),
@@ -404,13 +409,14 @@ private fun EstimationIcon(estimation: Estimation) {
 @Composable
 private fun CapacityResultPreview() {
     CapacityResultContent(
-        state = CapacityResultContract.CapacityResultState(
+        state = CapacityResultState(
             teamId = 1,
             team = Team(id = 1, name = "Platform Team", peopleCount = 6, capacity = 26),
             result = estimationCalculatorExample(),
         ),
         onDismiss = {},
         modifier = Modifier.fillMaxSize(),
+        onEvent = { },
     )
 }
 
