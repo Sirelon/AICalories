@@ -9,6 +9,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.sirelon.aicalories.features.agile.navigation.AgileDestination
+import com.sirelon.aicalories.features.agile.team.TeamScreen
 
 @Composable
 fun AgileRoot(
@@ -25,6 +26,9 @@ fun AgileRoot(
             onExit()
         }
     }
+    val pushDestination: (AgileDestination) -> Unit = { destination ->
+        navBackStack.add(destination)
+    }
 
     NavDisplay(
         modifier = Modifier.fillMaxSize(),
@@ -32,7 +36,18 @@ fun AgileRoot(
         entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AgileDestination>()),
         entryProvider = entryProvider<AgileDestination> {
             entry<AgileDestination.StoryBoard> {
-                AgileScreen(onBack = popDestination)
+                AgileScreen(
+                    onBack = popDestination,
+                    onOpenTeamSettings = { teamId ->
+                        pushDestination(AgileDestination.TeamSettings(teamId))
+                    },
+                )
+            }
+            entry<AgileDestination.TeamSettings> { destination ->
+                TeamScreen(
+                    onBack = popDestination,
+                    teamId = destination.teamId,
+                )
             }
         },
     )
