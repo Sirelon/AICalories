@@ -54,6 +54,7 @@ import org.koin.core.parameter.parametersOf
 
 @Composable
 fun AgileScreen(
+    modifier: Modifier = Modifier,
     onBack: () -> Unit,
     onOpenTeamPicker: () -> Unit,
     onOpenCapacityResult: (Int) -> Unit,
@@ -69,12 +70,14 @@ fun AgileScreen(
         onOpenTeamPicker = onOpenTeamPicker,
         onOpenCapacityResult = onOpenCapacityResult,
         onEvent = viewModel::onEvent,
+        modifier = modifier,
     )
 }
 
 @Composable
 private fun AgileScreenContent(
     state: AgileContract.AgileState,
+    modifier: Modifier = Modifier,
     onBack: () -> Unit,
     onOpenTeamPicker: () -> Unit,
     onOpenCapacityResult: (Int) -> Unit,
@@ -91,7 +94,7 @@ private fun AgileScreenContent(
 
 
     Scaffold(
-        modifier = Modifier
+        modifier = modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             AppLargeAppBar(
