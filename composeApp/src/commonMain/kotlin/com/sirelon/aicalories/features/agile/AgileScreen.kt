@@ -1,5 +1,6 @@
 package com.sirelon.aicalories.features.agile
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,10 +10,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -22,9 +25,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -129,32 +132,10 @@ private fun AgileScreenContent(
                     },
                 ) {
                     Column(
-                        modifier = Modifier.alpha(0.85f),
-                        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
+                        modifier = Modifier.alpha(0.85f).animateContentSize(),
+                        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl)
                     ) {
-                        story.tickets.forEach { ticket ->
-                            TicketInput(
-                                ticket = ticket,
-                                onTicketNameChange = { name ->
-                                    onEvent(
-                                        AgileContract.AgileEvent.TicketNameChanged(
-                                            storyId = story.id,
-                                            ticketId = ticket.id,
-                                            name = name,
-                                        )
-                                    )
-                                },
-                                onTicketEstimationChange = { estimationValue ->
-                                    onEvent(
-                                        AgileContract.AgileEvent.TicketEstimationChanged(
-                                            storyId = story.id,
-                                            ticketId = ticket.id,
-                                            estimation = estimationValue,
-                                        )
-                                    )
-                                },
-                            )
-                        }
+                        TicketsList(story = story, onEvent = onEvent)
                         TextButton(
                             onClick = {
                                 onEvent(AgileContract.AgileEvent.AddTicket(story.id))
@@ -175,24 +156,73 @@ private fun AgileScreenContent(
 }
 
 @Composable
+private fun TicketsList(
+    story: UserStory,
+    onEvent: (AgileContract.AgileEvent) -> Unit
+) {
+    story.tickets.forEach { ticket ->
+        key(ticket.id) {
+            TicketInput(
+                modifier = Modifier
+                    .padding(start = AppDimens.Spacing.xl3),
+                ticket = ticket,
+                onTicketNameChange = { name ->
+                    onEvent(
+                        AgileContract.AgileEvent.TicketNameChanged(
+                            storyId = story.id,
+                            ticketId = ticket.id,
+                            name = name,
+                        )
+                    )
+                },
+                onTicketEstimationChange = { estimationValue ->
+                    onEvent(
+                        AgileContract.AgileEvent.TicketEstimationChanged(
+                            storyId = story.id,
+                            ticketId = ticket.id,
+                            estimation = estimationValue,
+                        )
+                    )
+                },
+                onTicketRemoved = {
+                    onEvent(
+                        AgileContract.AgileEvent.TicketRemoved(
+                            storyId = story.id,
+                            ticketId = ticket.id,
+                        )
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
 private fun TicketInput(
     ticket: Ticket,
     onTicketNameChange: (String) -> Unit,
     onTicketEstimationChange: (Estimation) -> Unit,
+    onTicketRemoved: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    var isSheetOpen by remember { mutableStateOf(false) }
+    val (isSheetOpen, setSheetVisible) = remember { mutableStateOf(false) }
 
     Input(
-        modifier = Modifier.padding(start = AppDimens.Spacing.xl3).fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         value = ticket.name,
         onValueChange = onTicketNameChange,
         singleLine = true,
-        trailingIcon = {
+        suffix = {
             TicketEstimationTrailing(
                 estimation = ticket.estimation,
-                onClick = { isSheetOpen = true },
+                onClick = { setSheetVisible(true) },
             )
         },
+        trailingIcon = {
+            IconButton(onClick = onTicketRemoved) {
+                Icon(Icons.Default.Delete, contentDescription = null)
+            }
+        }
     )
 
     if (isSheetOpen) {
@@ -200,9 +230,9 @@ private fun TicketInput(
             selected = ticket.estimation,
             onSelected = {
                 onTicketEstimationChange(it)
-                isSheetOpen = false
+                setSheetVisible(false)
             },
-            onDismissRequest = { isSheetOpen = false },
+            onDismissRequest = { setSheetVisible(false) },
         )
     }
 }

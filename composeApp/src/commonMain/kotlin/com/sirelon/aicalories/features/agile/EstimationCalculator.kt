@@ -23,15 +23,9 @@ data class EstimationResult(
 /**
  * Calculates whether a list of tickets fits into a numeric capacity and proposes alternative subsets that do.
  */
-class EstimationCalculator(
-    private val estimationWeights: Map<Estimation, Int> = defaultWeights,
-) {
+class EstimationCalculator() {
 
-    init {
-        require(estimationWeights.keys.containsAll(Estimation.entries)) {
-            "Every estimation must have a weight"
-        }
-    }
+    private val estimationWeights: Map<Estimation, Int> = defaultWeights
 
     /**
      * Evaluates the given tickets against the provided [capacity].
@@ -42,7 +36,8 @@ class EstimationCalculator(
     ): EstimationResult {
         require(capacity >= 0) { "Capacity cannot be negative" }
 
-        val orderedTickets = tickets.toList() // enforce determinism regardless of original list implementation
+        val orderedTickets =
+            tickets.toList() // enforce determinism regardless of original list implementation
         val totalEffort = orderedTickets.sumOf { effortOf(it.estimation) }
 
         val feasibleVariants = buildFeasibleVariants(orderedTickets, capacity)
@@ -69,9 +64,14 @@ class EstimationCalculator(
 
             if (currentSelection.isNotEmpty()) {
                 val selectionKey = currentSelection.map { it.id }
-                uniqueVariants.putIfAbsent(
-                    selectionKey,
-                    FeasibleTicketVariant(currentSelection.toList(), currentEffort),
+                uniqueVariants.getOrPut(
+                    key = selectionKey,
+                    defaultValue = {
+                        FeasibleTicketVariant(
+                            currentSelection.toList(),
+                            currentEffort
+                        )
+                    },
                 )
             }
 
