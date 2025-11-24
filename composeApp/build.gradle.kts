@@ -80,7 +80,9 @@ kotlin {
             implementation(libs.compose.components.resources)
             implementation(libs.compose.preview)
             implementation(libs.material3)
+            implementation(libs.material3.adaptive)
             implementation(libs.material3.adaptive.navigation.suite)
+            implementation(libs.material3.adaptive.navigation)
             implementation(libs.material.icons.extended)
 
             implementation(libs.androidx.lifecycle.viewmodelCompose)
@@ -102,6 +104,8 @@ kotlin {
             implementation(libs.ktor.client.logging)
             implementation(projects.shared)
             implementation(libs.androidx.navigation3.runtime)
+            implementation(libs.androidx.navigation3.ui)
+            implementation(libs.androidx.navigation3.viewmodel)
 
             implementation(libs.navigation3.ui)
 //
