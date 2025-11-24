@@ -8,8 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Assessment
+import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.outlined.PeopleOutline
+import androidx.compose.material.icons.outlined.TrendingDown
+import androidx.compose.material.icons.outlined.TrendingUp
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +38,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sirelon.aicalories.designsystem.AppChip
+import com.sirelon.aicalories.designsystem.AppChipDefaults
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.features.agile.Estimation
@@ -186,86 +194,71 @@ private fun ResultSummaryCard(
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
                 verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.s),
             ) {
-                AssistChip(
-                    onClick = {},
-                    enabled = false,
-                    label = { Text("Capacity ${capacity.pessimistic}-${capacity.optimistic}") },
+                AppChip(
+                    text = "Capacity ${capacity.pessimistic}-${capacity.optimistic}",
+                    icon = Icons.Outlined.Assessment,
+                    colors = AppChipDefaults.primaryColors(),
                 )
-                AssistChip(
-                    onClick = {},
-                    enabled = false,
-                    label = { Text("Base ${capacity.base}") },
+                AppChip(
+                    text = "Base ${capacity.base}",
+                    icon = Icons.Outlined.Tune,
                 )
-                AssistChip(
-                    onClick = {},
-                    enabled = false,
-                    label = { Text("Risk ±$riskPercent%") },
+                AppChip(
+                    text = "Risk ±$riskPercent%",
+                    icon = Icons.Outlined.Warning,
+                    colors = AppChipDefaults.errorColors(),
                 )
-                AssistChip(
-                    onClick = {},
-                    enabled = false,
-                    label = { Text("Effort ${result.totalEffort}") },
-                    colors = AssistChipDefaults.assistChipColors(
-                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                        disabledLabelColor = MaterialTheme.colorScheme.primary,
-                    ),
+                AppChip(
+                    text = "Effort ${result.totalEffort}",
+                    icon = Icons.Outlined.TrendingUp,
+                    colors = AppChipDefaults.primaryColors(),
                 )
                 val pessimisticBalance = if (pessimisticRemaining < 0) {
                     "Pessimistic over ${abs(pessimisticRemaining)}"
                 } else {
                     "Pessimistic slack $pessimisticRemaining"
                 }
-                AssistChip(
-                    onClick = {},
-                    enabled = false,
-                    label = { Text(pessimisticBalance) },
-                    colors = AssistChipDefaults.assistChipColors(
-                        disabledContainerColor = if (pessimisticRemaining < 0) {
-                            MaterialTheme.colorScheme.errorContainer
-                        } else {
-                            MaterialTheme.colorScheme.secondaryContainer
-                        },
-                        disabledLabelColor = if (pessimisticRemaining < 0) {
-                            MaterialTheme.colorScheme.onErrorContainer
-                        } else {
-                            MaterialTheme.colorScheme.onSecondaryContainer
-                        },
-                    ),
+                AppChip(
+                    text = pessimisticBalance,
+                    icon = if (pessimisticRemaining < 0) {
+                        Icons.Outlined.TrendingDown
+                    } else {
+                        Icons.Outlined.TrendingUp
+                    },
+                    colors = if (pessimisticRemaining < 0) {
+                        AppChipDefaults.errorColors()
+                    } else {
+                        AppChipDefaults.successColors()
+                    },
                 )
                 val optimisticBalance = if (optimisticRemaining < 0) {
                     "Optimistic over ${abs(optimisticRemaining)}"
                 } else {
                     "Optimistic slack $optimisticRemaining"
                 }
-                AssistChip(
-                    onClick = {},
-                    enabled = false,
-                    label = { Text(optimisticBalance) },
-                    colors = AssistChipDefaults.assistChipColors(
-                        disabledContainerColor = if (optimisticRemaining < 0) {
-                            MaterialTheme.colorScheme.errorContainer
-                        } else {
-                            MaterialTheme.colorScheme.secondaryContainer
-                        },
-                        disabledLabelColor = if (optimisticRemaining < 0) {
-                            MaterialTheme.colorScheme.onErrorContainer
-                        } else {
-                            MaterialTheme.colorScheme.onSecondaryContainer
-                        },
-                    ),
+                AppChip(
+                    text = optimisticBalance,
+                    icon = if (optimisticRemaining < 0) {
+                        Icons.Outlined.TrendingDown
+                    } else {
+                        Icons.Outlined.TrendingUp
+                    },
+                    colors = if (optimisticRemaining < 0) {
+                        AppChipDefaults.errorColors()
+                    } else {
+                        AppChipDefaults.successColors()
+                    },
                 )
                 if (result.totalVariants > 0) {
-                    AssistChip(
-                        onClick = {},
-                        enabled = false,
-                        label = { Text("${result.totalVariants} variants") },
+                    AppChip(
+                        text = "${result.totalVariants} variants",
+                        icon = Icons.Outlined.GridView,
                     )
                 }
                 team?.peopleCount?.takeIf { it > 0 }?.let { people ->
-                    AssistChip(
-                        onClick = {},
-                        enabled = false,
-                        label = { Text("$people people") },
+                    AppChip(
+                        text = "$people people",
+                        icon = Icons.Outlined.PeopleOutline,
                     )
                 }
             }
@@ -421,18 +414,12 @@ private fun VariantCard(
 
 @Composable
 private fun TicketChip(ticket: Ticket) {
-    AssistChip(
-        onClick = {},
-        enabled = false,
-        label = {
-            Text("${ticket.name} (${ticket.estimation.code()})")
-        },
+    AppChip(
+        text = "${ticket.name} (${ticket.estimation.code()})",
         leadingIcon = {
             EstimationIcon(estimation = ticket.estimation)
         },
-        colors = AssistChipDefaults.assistChipColors(
-            disabledLeadingIconContentColor = ticket.estimation.color(),
-        ),
+        colors = AppChipDefaults.accentColors(ticket.estimation.color()),
     )
 }
 

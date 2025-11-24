@@ -6,15 +6,20 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.Cached
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Event
+import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.PeopleOutline
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import com.sirelon.aicalories.designsystem.AppChip
+import com.sirelon.aicalories.designsystem.AppChipDefaults
 import com.sirelon.aicalories.designsystem.AppDimens
 import kotlin.math.roundToInt
 
@@ -46,52 +51,39 @@ fun TeamSummary(
             horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
         ) {
-            AssistChip(
-                onClick = {},
-                enabled = false,
-                label = { Text(team.name) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.PeopleOutline,
-                        contentDescription = null,
-                    )
-                },
-                colors = AssistChipDefaults.assistChipColors(
-                    leadingIconContentColor = MaterialTheme.colorScheme.primary,
-                ),
+            AppChip(
+                text = team.name,
+                icon = Icons.Outlined.PeopleOutline,
+                colors = AppChipDefaults.primaryColors(),
             )
-            AssistChip(
-                onClick = {},
-                enabled = false,
-                label = { Text("${team.peopleCount} people") },
+            AppChip(
+                text = "${team.peopleCount} people",
+                icon = Icons.Outlined.Group,
             )
-            AssistChip(
-                onClick = {},
-                enabled = false,
-                label = { Text("Capacity ${team.capacity}") },
+            AppChip(
+                text = "Capacity ${team.capacity}",
+                icon = Icons.Outlined.Event,
+                colors = AppChipDefaults.primaryColors(),
             )
-            AssistChip(
-                onClick = {},
-                enabled = false,
-                label = { Text("Risk ±$riskPercentage%") },
+            AppChip(
+                text = "Risk ±$riskPercentage%",
+                icon = Icons.Outlined.Warning,
+                colors = AppChipDefaults.errorColors(),
             )
-            AssistChip(
-                onClick = {},
-                enabled = false,
-                label = { Text("Range $pessimisticCapacity-$optimisticCapacity") },
+            AppChip(
+                text = "Range $pessimisticCapacity-$optimisticCapacity",
+                icon = Icons.Outlined.Cached,
             )
             storiesCount?.let { count ->
-                AssistChip(
-                    onClick = {},
-                    enabled = false,
-                    label = { Text("$count user stories") },
+                AppChip(
+                    text = "$count user stories",
+                    icon = Icons.Outlined.Description,
                 )
             }
             ticketsCount?.let { count ->
-                AssistChip(
-                    onClick = {},
-                    enabled = false,
-                    label = { Text("$count tickets") },
+                AppChip(
+                    text = "$count tickets",
+                    icon = Icons.Outlined.BugReport,
                 )
             }
         }
