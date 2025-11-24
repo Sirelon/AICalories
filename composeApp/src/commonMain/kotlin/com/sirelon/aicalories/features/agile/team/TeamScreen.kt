@@ -6,11 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.PeopleOutline
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -19,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppDimens
@@ -72,11 +66,7 @@ private fun TeamScreenContent(
                 .padding(horizontal = AppDimens.Spacing.xl3),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
-            TeamSummary(
-                teamName = team.name,
-                totalPeople = totalPeople,
-                totalCapacity = totalCapacity,
-            )
+            TeamSummary(team = team)
 
             AppExpandableCard(
                 modifier = Modifier.fillMaxWidth(),
@@ -161,52 +151,5 @@ private fun TeamFields(
                 keyboardType = KeyboardType.Number,
             ),
         )
-    }
-}
-
-@Composable
-private fun TeamSummary(
-    teamName: String,
-    totalPeople: Int,
-    totalCapacity: Int,
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = AppDimens.Spacing.xl),
-    ) {
-        Text(
-            text = "$teamName overview",
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-        )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-        ) {
-            AssistChip(
-                onClick = {},
-                enabled = false,
-                label = { Text(teamName) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.PeopleOutline,
-                        contentDescription = null,
-                    )
-                },
-                colors = AssistChipDefaults.assistChipColors(
-                    leadingIconContentColor = MaterialTheme.colorScheme.primary,
-                ),
-            )
-            AssistChip(
-                onClick = {},
-                enabled = false,
-                label = { Text("$totalPeople people") },
-            )
-            AssistChip(
-                onClick = {},
-                enabled = false,
-                label = { Text("Capacity $totalCapacity") },
-            )
-        }
     }
 }
