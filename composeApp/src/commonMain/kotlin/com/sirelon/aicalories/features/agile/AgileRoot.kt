@@ -9,6 +9,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.sirelon.aicalories.features.agile.navigation.AgileDestination
+import com.sirelon.aicalories.features.agile.capacity.CapacityResultScreen
 import com.sirelon.aicalories.features.agile.team.TeamScreen
 import com.sirelon.aicalories.features.agile.teamlist.TeamPickerScreen
 
@@ -53,11 +54,20 @@ fun AgileRoot(
                     onOpenTeamSettings = { teamId ->
                         pushDestination(AgileDestination.TeamSettings(teamId))
                     },
+                    onOpenCapacityResult = { teamId ->
+                        pushDestination(AgileDestination.CapacityResult(teamId))
+                    },
                     teamId = destination.teamId,
                 )
             }
             entry<AgileDestination.TeamSettings> { destination ->
                 TeamScreen(
+                    onBack = popDestination,
+                    teamId = destination.teamId,
+                )
+            }
+            entry<AgileDestination.CapacityResult> { destination ->
+                CapacityResultScreen(
                     onBack = popDestination,
                     teamId = destination.teamId,
                 )

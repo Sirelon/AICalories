@@ -16,4 +16,7 @@ sealed interface AgileDestination : NavKey {
 
     @Serializable
     data class TeamSettings(val teamId: Int) : AgileDestination
+
+    @Serializable
+    data class CapacityResult(val teamId: Int) : AgileDestination
 }

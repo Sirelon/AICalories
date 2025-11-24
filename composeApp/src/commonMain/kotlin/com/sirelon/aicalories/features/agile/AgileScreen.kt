@@ -47,6 +47,7 @@ import com.sirelon.aicalories.features.agile.model.Ticket
 import com.sirelon.aicalories.features.agile.model.UserStory
 import com.sirelon.aicalories.features.agile.presentation.AgileContract
 import com.sirelon.aicalories.features.agile.presentation.AgileViewModel
+import com.sirelon.aicalories.features.agile.team.Team
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -54,6 +55,7 @@ import org.koin.core.parameter.parametersOf
 fun AgileScreen(
     onBack: () -> Unit,
     onOpenTeamSettings: (Int) -> Unit,
+    onOpenCapacityResult: (Int) -> Unit,
     teamId: Int = DEFAULT_TEAM_ID,
 ) {
     val viewModel: AgileViewModel = koinViewModel(parameters = { parametersOf(teamId) })
@@ -63,6 +65,7 @@ fun AgileScreen(
         state = state,
         onBack = onBack,
         onOpenTeamSettings = onOpenTeamSettings,
+        onOpenCapacityResult = onOpenCapacityResult,
         onEvent = viewModel::onEvent,
     )
 }
@@ -72,6 +75,7 @@ private fun AgileScreenContent(
     state: AgileContract.AgileState,
     onBack: () -> Unit,
     onOpenTeamSettings: (Int) -> Unit,
+    onOpenCapacityResult: (Int) -> Unit,
     onEvent: (AgileContract.AgileEvent) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -113,7 +117,7 @@ private fun AgileScreenContent(
                         visible = fabExpanded,
                         alignment = Alignment.BottomCenter,
                     ),
-                onClick = { onEvent(AgileContract.AgileEvent.CalculateCapacity) }
+                onClick = { onOpenCapacityResult(state.teamId) }
             ) {
                 Text("Calculate capacity")
             }
@@ -358,6 +362,7 @@ private fun AgileScreenPreview() {
     AgileScreenContent(
         state = AgileContract.AgileState(
             teamId = DEFAULT_TEAM_ID,
+            team = Team(id = DEFAULT_TEAM_ID, name = "Team #1", peopleCount = 5, capacity = 40),
             stories = listOf(
                 UserStory(
                     id = 1,
@@ -378,6 +383,7 @@ private fun AgileScreenPreview() {
         ),
         onBack = {},
         onOpenTeamSettings = { _ -> },
+        onOpenCapacityResult = {},
         onEvent = {},
     )
 }

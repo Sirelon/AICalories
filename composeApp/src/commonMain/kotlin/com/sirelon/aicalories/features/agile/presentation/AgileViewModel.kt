@@ -1,7 +1,6 @@
 package com.sirelon.aicalories.features.agile.presentation
 
 import com.sirelon.aicalories.features.agile.Estimation
-import com.sirelon.aicalories.features.agile.EstimationCalculator
 import com.sirelon.aicalories.features.agile.data.AgileRepository
 import com.sirelon.aicalories.features.agile.model.Ticket
 import com.sirelon.aicalories.features.agile.model.UserStory
@@ -13,11 +12,18 @@ import kotlinx.coroutines.launch
 internal class AgileViewModel(
     private val teamId: Int,
     private val repository: AgileRepository,
-    private val calculator: EstimationCalculator,
 ) : BaseViewModel<AgileContract.AgileState, AgileContract.AgileEvent, AgileContract.AgileEffect>() {
 
     override fun initialState(): AgileContract.AgileState {
-        return AgileContract.AgileState(teamId = teamId)
+        val team = repository.getOrCreateTeam(teamId)
+        val stories = repository.getTeamStories(teamId)
+        return AgileContract.AgileState(
+            teamId = teamId,
+            team = team,
+            stories = stories,
+            nextStoryId = calculateNextStoryId(stories),
+            nextTicketId = calculateNextTicketId(stories),
+        )
     }
 
     init {
@@ -28,6 +34,7 @@ internal class AgileViewModel(
                     setState { currentState ->
                         currentState.copy(
                             teamId = teamId,
+                            team = teamWithStories.team,
                             stories = stories,
                             nextStoryId = calculateNextStoryId(stories),
                             nextTicketId = calculateNextTicketId(stories),
@@ -56,16 +63,7 @@ internal class AgileViewModel(
                 updateTicketEstimation(event.storyId, event.ticketId, event.estimation)
 
             is AgileContract.AgileEvent.TicketRemoved -> removeTicket(event.storyId, event.ticketId)
-            AgileContract.AgileEvent.CalculateCapacity -> calculateCapacity()
         }
-    }
-
-    private fun calculateCapacity() {
-        // TODO: get capacity from team
-        val tickets = state.value.stories.flatMap { it.tickets }
-        val result = calculator.evaluate(tickets = tickets, capacity = 40)
-
-        print("calculateCapacity result: $result")
     }
 
     private fun addUserStory() {
@@ -176,7 +174,9 @@ internal class AgileViewModel(
         updatedStories: List<UserStory>,
     ): AgileContract.AgileState {
         persistStories(updatedStories)
-        return copy(stories = updatedStories)
+        return copy(
+            stories = updatedStories,
+        )
     }
 
     private fun persistStories(stories: List<UserStory>) {
