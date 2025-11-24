@@ -2,26 +2,39 @@ package com.sirelon.aicalories.features.agile.presentation
 
 import com.sirelon.aicalories.features.agile.Estimation
 import com.sirelon.aicalories.features.agile.EstimationCalculator
+import com.sirelon.aicalories.features.agile.data.AgileRepository
 import com.sirelon.aicalories.features.agile.model.Ticket
 import com.sirelon.aicalories.features.agile.model.UserStory
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 internal class AgileViewModel(
+    private val teamId: Int,
+    private val repository: AgileRepository,
     private val calculator: EstimationCalculator,
 ) : BaseViewModel<AgileContract.AgileState, AgileContract.AgileEvent, AgileContract.AgileEffect>() {
 
     override fun initialState(): AgileContract.AgileState {
-        val initialStoryId = 1
-        val initialStory = UserStory(
-            id = initialStoryId,
-            name = userStoryName(initialStoryId),
-            tickets = emptyList(),
-        )
-        return AgileContract.AgileState(
-            stories = listOf(initialStory),
-            nextStoryId = initialStoryId + 1,
-            nextTicketId = 1,
-        )
+        return AgileContract.AgileState(teamId = teamId)
+    }
+
+    init {
+        viewModelScope.launch {
+            repository.observeTeamWithStories(teamId)
+                .collectLatest { teamWithStories ->
+                    val stories = teamWithStories.stories.ifEmpty { createAndPersistDefaultStory() }
+                    setState { currentState ->
+                        currentState.copy(
+                            teamId = teamId,
+                            stories = stories,
+                            nextStoryId = calculateNextStoryId(stories),
+                            nextTicketId = calculateNextTicketId(stories),
+                        )
+                    }
+                }
+        }
     }
 
     override fun onEvent(event: AgileContract.AgileEvent) {
@@ -63,24 +76,23 @@ internal class AgileViewModel(
                 name = userStoryName(storyId),
                 tickets = emptyList(),
             )
-            currentState.copy(
-                stories = currentState.stories + newStory,
-                nextStoryId = storyId + 1,
-            )
+            val updatedStories = currentState.stories + newStory
+            currentState
+                .persistAndUpdateStories(updatedStories)
+                .copy(nextStoryId = storyId + 1)
         }
     }
 
     private fun removeTicket(storyId: Int, ticketId: Int) {
         setState { currentState ->
-            currentState.copy(
-                stories = currentState.stories.map {
-                    if (it.id == storyId) {
-                        it.copy(tickets = it.tickets.filter { it.id != ticketId })
-                    } else {
-                        it
-                    }
+            val updatedStories = currentState.stories.map {
+                if (it.id == storyId) {
+                    it.copy(tickets = it.tickets.filter { it.id != ticketId })
+                } else {
+                    it
                 }
-            )
+            }
+            currentState.persistAndUpdateStories(updatedStories)
         }
     }
 
@@ -101,10 +113,9 @@ internal class AgileViewModel(
                 }
             }
 
-            currentState.copy(
-                stories = updatedStories,
-                nextTicketId = ticketId + 1,
-            )
+            currentState
+                .persistAndUpdateStories(updatedStories)
+                .copy(nextTicketId = ticketId + 1)
         }
     }
 
@@ -117,7 +128,7 @@ internal class AgileViewModel(
                     story
                 }
             }
-            currentState.copy(stories = updatedStories)
+            currentState.persistAndUpdateStories(updatedStories)
         }
     }
 
@@ -137,7 +148,7 @@ internal class AgileViewModel(
                     story
                 }
             }
-            currentState.copy(stories = updatedStories)
+            currentState.persistAndUpdateStories(updatedStories)
         }
     }
 
@@ -157,9 +168,38 @@ internal class AgileViewModel(
                     story
                 }
             }
-            currentState.copy(stories = updatedStories)
+            currentState.persistAndUpdateStories(updatedStories)
         }
     }
+
+    private fun AgileContract.AgileState.persistAndUpdateStories(
+        updatedStories: List<UserStory>,
+    ): AgileContract.AgileState {
+        persistStories(updatedStories)
+        return copy(stories = updatedStories)
+    }
+
+    private fun persistStories(stories: List<UserStory>) {
+        repository.saveStories(teamId, stories)
+    }
+
+    private fun createAndPersistDefaultStory(): List<UserStory> {
+        val initialStoryId = 1
+        val initialStory = UserStory(
+            id = initialStoryId,
+            name = userStoryName(initialStoryId),
+            tickets = emptyList(),
+        )
+        val defaultStories = listOf(initialStory)
+        persistStories(defaultStories)
+        return defaultStories
+    }
+
+    private fun calculateNextStoryId(stories: List<UserStory>) =
+        (stories.maxOfOrNull { it.id } ?: 0) + 1
+
+    private fun calculateNextTicketId(stories: List<UserStory>) =
+        (stories.flatMap { it.tickets }.maxOfOrNull { it.id } ?: 0) + 1
 
     private fun userStoryName(id: Int) = "User Story #$id"
 

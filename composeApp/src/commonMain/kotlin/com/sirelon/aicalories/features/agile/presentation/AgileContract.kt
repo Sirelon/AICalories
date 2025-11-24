@@ -6,6 +6,7 @@ import com.sirelon.aicalories.features.agile.model.UserStory
 interface AgileContract {
 
     data class AgileState(
+        val teamId: Int = 1,
         val stories: List<UserStory> = emptyList(),
         val nextStoryId: Int = 1,
         val nextTicketId: Int = 1,

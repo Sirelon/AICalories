@@ -48,13 +48,15 @@ import com.sirelon.aicalories.features.agile.model.UserStory
 import com.sirelon.aicalories.features.agile.presentation.AgileContract
 import com.sirelon.aicalories.features.agile.presentation.AgileViewModel
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun AgileScreen(
     onBack: () -> Unit,
     onOpenTeamSettings: (Int) -> Unit,
+    teamId: Int = DEFAULT_TEAM_ID,
 ) {
-    val viewModel: AgileViewModel = koinViewModel()
+    val viewModel: AgileViewModel = koinViewModel(parameters = { parametersOf(teamId) })
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     AgileScreenContent(
@@ -124,7 +126,10 @@ private fun AgileScreenContent(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
             item {
-                TeamSettingsEntry(onOpenTeamSettings = onOpenTeamSettings)
+                TeamSettingsEntry(
+                    teamId = state.teamId,
+                    onOpenTeamSettings = onOpenTeamSettings,
+                )
             }
 
             item {
@@ -184,10 +189,10 @@ private fun AgileScreenContent(
 private const val DEFAULT_TEAM_ID = 1
 
 @Composable
-private fun TeamSettingsEntry(onOpenTeamSettings: (Int) -> Unit) {
+private fun TeamSettingsEntry(teamId: Int, onOpenTeamSettings: (Int) -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        onClick = { onOpenTeamSettings(DEFAULT_TEAM_ID) },
+        onClick = { onOpenTeamSettings(teamId) },
         shape = MaterialTheme.shapes.medium,
         tonalElevation = 1.dp,
     ) {
@@ -352,6 +357,7 @@ private fun TicketEstimationTrailing(
 private fun AgileScreenPreview() {
     AgileScreenContent(
         state = AgileContract.AgileState(
+            teamId = DEFAULT_TEAM_ID,
             stories = listOf(
                 UserStory(
                     id = 1,
