@@ -29,6 +29,16 @@ class AgileRepository {
             teamMap.values.sortedBy { it.id }
         }.distinctUntilChanged()
 
+    fun observeTeamsWithStories(): Flow<List<TeamWithStories>> =
+        combine(teams, teamStories) { teamMap, storiesMap ->
+            teamMap.values.sortedBy { it.id }.map { team ->
+                TeamWithStories(
+                    team = team,
+                    stories = storiesMap[team.id].orEmpty(),
+                )
+            }
+        }.distinctUntilChanged()
+
     fun observeTeam(teamId: Int): Flow<Team> {
         ensureTeam(teamId)
         return teams.map { it[teamId] ?: defaultTeam(teamId) }.distinctUntilChanged()

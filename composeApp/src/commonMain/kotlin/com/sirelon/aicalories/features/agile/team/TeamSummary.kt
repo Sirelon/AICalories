@@ -18,7 +18,11 @@ import androidx.compose.ui.text.font.FontWeight
 import com.sirelon.aicalories.designsystem.AppDimens
 
 @Composable
-fun TeamSummary(team: Team) {
+fun TeamSummary(
+    team: Team,
+    storiesCount: Int? = null,
+    ticketsCount: Int? = null,
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
         modifier = Modifier
@@ -57,6 +61,20 @@ fun TeamSummary(team: Team) {
                 enabled = false,
                 label = { Text("Capacity ${team.capacity}") },
             )
+            storiesCount?.let { count ->
+                AssistChip(
+                    onClick = {},
+                    enabled = false,
+                    label = { Text("$count user stories") },
+                )
+            }
+            ticketsCount?.let { count ->
+                AssistChip(
+                    onClick = {},
+                    enabled = false,
+                    label = { Text("$count tickets") },
+                )
+            }
         }
     }
 }

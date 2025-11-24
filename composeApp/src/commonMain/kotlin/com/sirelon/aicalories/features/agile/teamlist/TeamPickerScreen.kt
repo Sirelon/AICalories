@@ -98,16 +98,17 @@ private fun TeamPickerContent(
         ) {
             items(
                 items = state.teams,
-                key = { it.id },
+                key = { it.team.id },
             ) { team ->
+                val teamId = team.team.id
                 TeamRow(
                     modifier = Modifier.animateItem(),
                     team = team,
                     canRemoveTeam = state.teams.size > 1,
-                    onSelect = { onTeamSelected(team.id) },
-                    onOpenSettings = { onOpenTeamSettings(team.id) },
+                    onSelect = { onTeamSelected(teamId) },
+                    onOpenSettings = { onOpenTeamSettings(teamId) },
                     onRemove = {
-                        onEvent(TeamPickerContract.TeamPickerEvent.RemoveTeam(team.id))
+                        onEvent(TeamPickerContract.TeamPickerEvent.RemoveTeam(teamId))
                     },
                 )
             }
@@ -118,7 +119,7 @@ private fun TeamPickerContent(
 @Composable
 private fun TeamRow(
     modifier: Modifier,
-    team: Team,
+    team: TeamPickerContract.TeamListItem,
     canRemoveTeam: Boolean,
     onSelect: () -> Unit,
     onOpenSettings: () -> Unit,
@@ -176,10 +177,14 @@ private fun TeamRow(
             content = {
                 ListItem(
                     headlineContent = {
-                        Text(text = team.name)
+                        Text(text = team.team.name)
                     },
                     supportingContent = {
-                        TeamSummary(team = team)
+                        TeamSummary(
+                            team = team.team,
+                            storiesCount = team.storiesCount,
+                            ticketsCount = team.ticketsCount,
+                        )
                     },
                 )
             }
@@ -220,8 +225,16 @@ private fun TeamPickerPreview() {
     TeamPickerContent(
         state = TeamPickerContract.TeamPickerState(
             teams = listOf(
-                Team(id = 1, name = "Team #1", peopleCount = 5, capacity = 40),
-                Team(id = 2, name = "Team #2", peopleCount = 7, capacity = 35),
+                TeamPickerContract.TeamListItem(
+                    team = Team(id = 1, name = "Team #1", peopleCount = 5, capacity = 40),
+                    storiesCount = 2,
+                    ticketsCount = 5,
+                ),
+                TeamPickerContract.TeamListItem(
+                    team = Team(id = 2, name = "Team #2", peopleCount = 7, capacity = 35),
+                    storiesCount = 1,
+                    ticketsCount = 2,
+                ),
             )
         ),
         onBack = {},

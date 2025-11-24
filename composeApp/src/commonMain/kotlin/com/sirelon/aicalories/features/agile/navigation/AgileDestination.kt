@@ -12,6 +12,9 @@ sealed interface AgileDestination : NavKey {
     data object TeamPicker : AgileDestination
 
     @Serializable
+    data object TeamSwitcher : AgileDestination
+
+    @Serializable
     data class StoryBoard(val teamId: Int) : AgileDestination
 
     @Serializable
