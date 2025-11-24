@@ -2,8 +2,13 @@ package com.sirelon.aicalories
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
@@ -14,13 +19,7 @@ import com.sirelon.aicalories.features.agile.AgileRoot
 import com.sirelon.aicalories.features.analyze.ui.AnalyzeScreen
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRoute
 import com.sirelon.aicalories.navigation.AppDestination
-import com.sirelon.aicalories.navigation.AppNavigationLayout
 import org.koin.compose.KoinApplication
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.ui.NavDisplay
 
 @Composable
 @Preview
@@ -60,10 +59,11 @@ fun App() {
                 }
             }
 
-            AppNavigationLayout(
-                currentDestination = navBackStack.last(),
-                onNavigate = navigateTo,
-            ) {
+            // TODO: Enable it later
+//            AppNavigationLayout(
+//                currentDestination = navBackStack.last(),
+//                onNavigate = navigateTo,
+//            ) {
                 NavDisplay(
                     modifier = Modifier.fillMaxSize(),
                     backStack = navBackStack,
@@ -87,7 +87,7 @@ fun App() {
                         }
                     },
                 )
-            }
+//            }
         }
     }
 }

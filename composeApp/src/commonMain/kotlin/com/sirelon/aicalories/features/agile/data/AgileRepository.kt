@@ -21,7 +21,7 @@ class AgileRepository {
     private var nextTeamId = 1
 
     init {
-        ensureTeam(DEFAULT_TEAM_ID)
+        ensureTeam(Team.DEFAULT_TEAM_ID)
     }
 
     fun observeTeams(): Flow<List<Team>> =
@@ -96,7 +96,7 @@ class AgileRepository {
             existing - teamId
         }
         if (teams.value.isEmpty()) {
-            ensureTeam(DEFAULT_TEAM_ID)
+            ensureTeam(Team.DEFAULT_TEAM_ID)
         }
     }
 
@@ -105,28 +105,16 @@ class AgileRepository {
             teams.update { existing ->
                 existing + (teamId to team)
             }
-            synchronized(this) {
-                if (teamId >= nextTeamId) {
-                    nextTeamId = teamId + 1
-                }
+            if (teamId >= nextTeamId) {
+                nextTeamId = teamId + 1
             }
         }
 
-    private fun generateTeamId(): Int = synchronized(this) {
+    private fun generateTeamId(): Int {
         val id = nextTeamId
         nextTeamId += 1
-        id
+        return id
     }
 
-    private fun defaultTeam(id: Int) = Team(
-        id = id,
-        name = "Team #$id",
-        peopleCount = 5,
-        capacity = 40,
-        riskFactor = Team.DEFAULT_RISK_FACTOR,
-    )
-
-    companion object {
-        private const val DEFAULT_TEAM_ID = 1
-    }
+    private fun defaultTeam(id: Int) = Team.default(id)
 }

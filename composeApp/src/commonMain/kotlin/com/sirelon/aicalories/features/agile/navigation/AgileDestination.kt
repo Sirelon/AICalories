@@ -10,10 +10,6 @@ import kotlinx.serialization.Serializable
 sealed interface AgileDestination : NavKey {
     @Serializable
     data object TeamPicker : AgileDestination
-
-    @Serializable
-    data object TeamSwitcher : AgileDestination
-
     @Serializable
     data class StoryBoard(val teamId: Int) : AgileDestination
 
