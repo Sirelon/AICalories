@@ -2,13 +2,8 @@ package com.sirelon.aicalories
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
@@ -19,7 +14,13 @@ import com.sirelon.aicalories.features.agile.AgileRoot
 import com.sirelon.aicalories.features.analyze.ui.AnalyzeScreen
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRoute
 import com.sirelon.aicalories.navigation.AppDestination
+import com.sirelon.aicalories.navigation.AppNavigationLayout
 import org.koin.compose.KoinApplication
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 
 @Composable
 @Preview
@@ -37,9 +38,7 @@ fun App() {
     ) {
         AppTheme {
             val navBackStack = remember {
-                val startDestination = AppDestination.Agile
-
-                mutableStateListOf<AppDestination>(startDestination)
+                mutableStateListOf<AppDestination>(AppDestination.Agile)
             }
 
             val popDestination: () -> Unit = {
@@ -47,9 +46,9 @@ fun App() {
                     navBackStack.removeLastOrNull()
                 }
             }
-            val showBackButton: Boolean = navBackStack.size > 1
 
-            fun navigateTo(destination: AppDestination) {
+            val showBackButton: Boolean = navBackStack.size > 1
+            val navigateTo: (AppDestination) -> Unit = { destination ->
                 if (navBackStack.lastOrNull() != destination) {
                     navBackStack.add(destination)
                 }
@@ -61,29 +60,34 @@ fun App() {
                 }
             }
 
-            NavDisplay(
-                modifier = Modifier.fillMaxSize(),
-                backStack = navBackStack,
-                entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AppDestination>()),
-                entryProvider = entryProvider<AppDestination> {
-                    entry<AppDestination.Agile> {
-                        AgileRoot(onExit = popDestination)
-                    }
+            AppNavigationLayout(
+                currentDestination = navBackStack.last(),
+                onNavigate = navigateTo,
+            ) {
+                NavDisplay(
+                    modifier = Modifier.fillMaxSize(),
+                    backStack = navBackStack,
+                    entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AppDestination>()),
+                    entryProvider = entryProvider<AppDestination> {
+                        entry<AppDestination.Agile> {
+                            AgileRoot(onExit = popDestination)
+                        }
 
-                    entry<AppDestination.Analyze> {
-                        AnalyzeScreen(
-                            onBack = if (showBackButton) popDestination else null,
-                            onResultConfirmed = { navigateTo(AppDestination.History) },
-                        )
-                    }
-                    entry<AppDestination.History> {
-                        HistoryScreenRoute(
-                            onBack = popDestination.takeIf { showBackButton },
-                            onCaptureNewMeal = { popToAnalyze() },
-                        )
-                    }
-                },
-            )
+                        entry<AppDestination.Analyze> {
+                            AnalyzeScreen(
+                                onBack = if (showBackButton) popDestination else null,
+                                onResultConfirmed = { navigateTo(AppDestination.History) },
+                            )
+                        }
+                        entry<AppDestination.History> {
+                            HistoryScreenRoute(
+                                onBack = popDestination.takeIf { showBackButton },
+                                onCaptureNewMeal = { popToAnalyze() },
+                            )
+                        }
+                    },
+                )
+            }
         }
     }
 }
