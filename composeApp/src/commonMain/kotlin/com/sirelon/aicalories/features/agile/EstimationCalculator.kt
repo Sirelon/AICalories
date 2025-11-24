@@ -24,10 +24,10 @@ data class EstimationResult(
 /**
  * Calculates whether a list of tickets fits into a numeric capacity and proposes alternative subsets that do.
  */
-class EstimationCalculator(
-    private val estimationWeights: Map<Estimation, Int> = defaultWeights,
-    private val maxVariantsToKeep: Int = DEFAULT_MAX_VARIANTS,
-) {
+class EstimationCalculator() {
+
+    private val estimationWeights: Map<Estimation, Int> = defaultWeights
+    private val maxVariantsToKeep: Int = DEFAULT_MAX_VARIANTS
 
     init {
         require(maxVariantsToKeep > 0) { "maxVariantsToKeep must be positive" }
