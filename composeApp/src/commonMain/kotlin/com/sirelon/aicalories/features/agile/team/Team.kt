@@ -11,6 +11,19 @@ data class Team(
     val riskFactor: Double = DEFAULT_RISK_FACTOR,
 ) {
     companion object {
+        const val DEFAULT_TEAM_ID = 1
         const val DEFAULT_RISK_FACTOR = 0.2
+        const val DEFAULT_TEAM_CAPACITY = 10
+        const val DEFAULT_TEAM_PEOPLE_COUNT = 5
+
+        fun default(id: Int = DEFAULT_TEAM_ID): Team {
+            return Team(
+                id = id,
+                name = "Team #$id",
+                peopleCount = DEFAULT_TEAM_PEOPLE_COUNT,
+                capacity = DEFAULT_TEAM_CAPACITY,
+                riskFactor = DEFAULT_RISK_FACTOR,
+            )
+        }
     }
 }
