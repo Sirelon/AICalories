@@ -18,6 +18,7 @@ data class EstimationResult(
     val totalEffort: Int,
     val capacity: Int,
     val feasibleVariants: List<FeasibleTicketVariant>,
+    val totalVariants: Int = feasibleVariants.size,
 )
 
 /**
@@ -26,6 +27,16 @@ data class EstimationResult(
 class EstimationCalculator() {
 
     private val estimationWeights: Map<Estimation, Int> = defaultWeights
+    private val maxVariantsToKeep: Int = DEFAULT_MAX_VARIANTS
+
+    init {
+        require(maxVariantsToKeep > 0) { "maxVariantsToKeep must be positive" }
+    }
+
+    private val variantComparator: Comparator<FeasibleTicketVariant> =
+        compareByDescending<FeasibleTicketVariant> { it.totalEffort }
+            .thenByDescending { it.tickets.size }
+            .thenBy { it.tickets.minOfOrNull(Ticket::id) ?: 0 }
 
     /**
      * Evaluates the given tickets against the provided [capacity].
@@ -40,39 +51,47 @@ class EstimationCalculator() {
             tickets.toList() // enforce determinism regardless of original list implementation
         val totalEffort = orderedTickets.sumOf { effortOf(it.estimation) }
 
-        val feasibleVariants = buildFeasibleVariants(orderedTickets, capacity)
+        val (feasibleVariants, totalVariants) = buildFeasibleVariants(orderedTickets, capacity)
 
         return EstimationResult(
             canCloseAll = totalEffort <= capacity,
             totalEffort = totalEffort,
             capacity = capacity,
             feasibleVariants = feasibleVariants,
+            totalVariants = totalVariants,
         )
     }
 
     private fun buildFeasibleVariants(
         tickets: List<Ticket>,
         capacity: Int,
-    ): List<FeasibleTicketVariant> {
-        if (tickets.isEmpty() || capacity == 0) return emptyList()
+    ): Pair<List<FeasibleTicketVariant>, Int> {
+        if (tickets.isEmpty() || capacity == 0) return emptyList<FeasibleTicketVariant>() to 0
 
-        val uniqueVariants = LinkedHashMap<List<Int>, FeasibleTicketVariant>()
+        val storedVariants = mutableListOf<FeasibleTicketVariant>()
+        var totalVariants = 0
         val currentSelection = mutableListOf<Ticket>()
 
         fun backtrack(startIndex: Int, currentEffort: Int) {
             if (currentEffort > capacity) return
 
             if (currentSelection.isNotEmpty()) {
-                val selectionKey = currentSelection.map { it.id }
-                uniqueVariants.getOrPut(
-                    key = selectionKey,
-                    defaultValue = {
-                        FeasibleTicketVariant(
-                            currentSelection.toList(),
-                            currentEffort
-                        )
-                    },
+                val variant = FeasibleTicketVariant(
+                    tickets = currentSelection.toList(),
+                    totalEffort = currentEffort,
                 )
+                totalVariants += 1
+                if (storedVariants.size < maxVariantsToKeep) {
+                    storedVariants.add(variant)
+                } else {
+                    val worstVariant = storedVariants.minWithOrNull(variantComparator)
+                    if (worstVariant != null && variantComparator.compare(variant, worstVariant) > 0) {
+                        val replaceIndex = storedVariants.indexOf(worstVariant)
+                        if (replaceIndex >= 0) {
+                            storedVariants[replaceIndex] = variant
+                        }
+                    }
+                }
             }
 
             for (index in startIndex until tickets.size) {
@@ -87,7 +106,8 @@ class EstimationCalculator() {
         }
 
         backtrack(startIndex = 0, currentEffort = 0)
-        return uniqueVariants.values.toList()
+        val rankedVariants = storedVariants.sortedWith(variantComparator)
+        return rankedVariants to totalVariants
     }
 
     private fun effortOf(estimation: Estimation): Int =
@@ -105,6 +125,8 @@ class EstimationCalculator() {
             Estimation.L to 5,
             Estimation.XL to 8,
         )
+
+        private const val DEFAULT_MAX_VARIANTS = 120
     }
 }
 
