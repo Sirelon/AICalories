@@ -64,6 +64,13 @@ kotlin {
                 composeOptInAnnotations.forEach { optIn(it) }
             }
         }
+        val jsWasmMain by creating {
+            dependsOn(getByName("commonMain"))
+            dependencies {
+                implementation(libs.ktor.client.js)
+            }
+        }
+
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.core.ktx)
@@ -125,12 +132,8 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
-        webMain.dependencies {
-            implementation(libs.ktor.client.js)
-        }
-        wasmJsMain.dependencies {
-            implementation(libs.ktor.client.js)
-        }
+        getByName("jsMain").dependsOn(jsWasmMain)
+        getByName("wasmJsMain").dependsOn(jsWasmMain)
     }
 }
 
