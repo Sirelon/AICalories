@@ -1,6 +1,5 @@
 package com.sirelon.aicalories.navigation
 
-import androidx.compose.animation.animateBounds
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

@@ -1,11 +1,11 @@
 package com.sirelon.aicalories.features.agile
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -41,8 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
+import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.Input
-import com.sirelon.aicalories.designsystem.buttons.MagicGreenButton
+import com.sirelon.aicalories.designsystem.buttons.MagicBlueButton
 import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
 import com.sirelon.aicalories.features.agile.model.Ticket
 import com.sirelon.aicalories.features.agile.model.UserStory
@@ -116,16 +117,16 @@ private fun AgileScreenContent(
             )
         },
         bottomBar = {
-            MagicGreenButton(
+            MagicBlueButton(
                 modifier = Modifier
                     .navigationBarsPadding()
                     .fillMaxWidth()
                     .padding(horizontal = AppDimens.Spacing.xl3)
+                    .background(AppTheme.colors.background)
                     .animateFloatingActionButton(
                         visible = fabExpanded,
                         alignment = Alignment.BottomCenter,
-                    )
-                    .height(AppDimens.Size.xl19),
+                    ),
                 onClick = { onOpenCapacityResult(state.teamId) },
                 text = "Calculate capacity",
             )

@@ -1,15 +1,10 @@
 package com.sirelon.aicalories.features.agile
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
@@ -67,7 +62,16 @@ fun AgileRoot(
                     },
                     onOpenTeamSettings = { teamId ->
                         pushDestination(AgileDestination.TeamSettings(teamId))
+                        replaceTopDestination(AgileDestination.TeamSettings(teamId))
                     },
+                )
+            }
+            entry<AgileDestination.TeamSettings>(
+                metadata = ListDetailSceneStrategy.listPane()
+            ) { destination ->
+                TeamScreen(
+                    onBack = popDestination,
+                    teamId = destination.teamId,
                 )
             }
 
@@ -80,12 +84,6 @@ fun AgileRoot(
                     onOpenCapacityResult = { teamId ->
                         pushDestination(AgileDestination.CapacityResult(teamId))
                     },
-                    teamId = destination.teamId,
-                )
-            }
-            entry<AgileDestination.TeamSettings> { destination ->
-                TeamScreen(
-                    onBack = popDestination,
                     teamId = destination.teamId,
                 )
             }
