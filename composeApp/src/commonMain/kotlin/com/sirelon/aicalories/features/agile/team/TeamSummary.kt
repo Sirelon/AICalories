@@ -36,6 +36,11 @@ fun TeamSummary(
         .coerceAtLeast(0)
     val optimisticCapacity = (team.capacity + team.capacity * boundedRisk)
         .roundToInt()
+    val neutralChipColors = AppChipDefaults.neutralColors()
+    val capacityChipColors = AppChipDefaults.capacityColors(
+        fitsPessimistic = riskPercentage < 60,
+        fitsOptimistic = riskPercentage < 25,
+    )
 
     Column(
         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
@@ -59,11 +64,12 @@ fun TeamSummary(
             AppChip(
                 text = "${team.peopleCount} people",
                 icon = Icons.Outlined.Group,
+                colors = neutralChipColors,
             )
             AppChip(
                 text = "Capacity ${team.capacity}",
                 icon = Icons.Outlined.Event,
-                colors = AppChipDefaults.primaryColors(),
+                colors = capacityChipColors,
             )
             AppChip(
                 text = "Risk ±$riskPercentage%",
@@ -73,17 +79,20 @@ fun TeamSummary(
             AppChip(
                 text = "Range $pessimisticCapacity-$optimisticCapacity",
                 icon = Icons.Outlined.Cached,
+                colors = AppChipDefaults.primaryColors(),
             )
             storiesCount?.let { count ->
                 AppChip(
                     text = "$count user stories",
                     icon = Icons.Outlined.Description,
+                    colors = neutralChipColors,
                 )
             }
             ticketsCount?.let { count ->
                 AppChip(
                     text = "$count tickets",
                     icon = Icons.Outlined.BugReport,
+                    colors = neutralChipColors,
                 )
             }
         }

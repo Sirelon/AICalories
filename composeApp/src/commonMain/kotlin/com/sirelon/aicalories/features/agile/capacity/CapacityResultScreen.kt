@@ -160,6 +160,8 @@ private fun ResultSummaryCard(
     } else {
         MaterialTheme.colorScheme.error
     }
+    val scenarioChipColors = AppChipDefaults.capacityColors(fitsPessimistic, fitsOptimistic)
+    val metadataChipColors = AppChipDefaults.neutralColors()
     val statusText = when {
         fitsPessimistic -> "Everything fits even with the pessimistic capacity."
         fitsOptimistic -> "Scope fits only in the optimistic scenario."
@@ -197,11 +199,12 @@ private fun ResultSummaryCard(
                 AppChip(
                     text = "Capacity ${capacity.pessimistic}-${capacity.optimistic}",
                     icon = Icons.Outlined.Assessment,
-                    colors = AppChipDefaults.primaryColors(),
+                    colors = scenarioChipColors,
                 )
                 AppChip(
                     text = "Base ${capacity.base}",
                     icon = Icons.Outlined.Tune,
+                    colors = metadataChipColors,
                 )
                 AppChip(
                     text = "Risk ±$riskPercent%",
@@ -211,7 +214,7 @@ private fun ResultSummaryCard(
                 AppChip(
                     text = "Effort ${result.totalEffort}",
                     icon = Icons.Outlined.TrendingUp,
-                    colors = AppChipDefaults.primaryColors(),
+                    colors = scenarioChipColors,
                 )
                 val pessimisticBalance = if (pessimisticRemaining < 0) {
                     "Pessimistic over ${abs(pessimisticRemaining)}"
@@ -253,12 +256,14 @@ private fun ResultSummaryCard(
                     AppChip(
                         text = "${result.totalVariants} variants",
                         icon = Icons.Outlined.GridView,
+                        colors = metadataChipColors,
                     )
                 }
                 team?.peopleCount?.takeIf { it > 0 }?.let { people ->
                     AppChip(
                         text = "$people people",
                         icon = Icons.Outlined.PeopleOutline,
+                        colors = metadataChipColors,
                     )
                 }
             }
