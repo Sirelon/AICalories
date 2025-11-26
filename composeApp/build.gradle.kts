@@ -70,6 +70,9 @@ kotlin {
                 implementation(libs.ktor.client.js)
             }
         }
+        val iosMain by creating {
+            dependsOn(getByName("commonMain"))
+        }
 
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
@@ -132,6 +135,8 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
+        getByName("iosArm64Main").dependsOn(iosMain)
+        getByName("iosSimulatorArm64Main").dependsOn(iosMain)
         getByName("jsMain").dependsOn(jsWasmMain)
         getByName("wasmJsMain").dependsOn(jsWasmMain)
     }

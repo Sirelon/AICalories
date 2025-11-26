@@ -18,20 +18,22 @@ internal class TeamPickerViewModel(
         TeamPickerContract.TeamPickerState()
 
     init {
+        println("[TeamPickerViewModel] init collecting teams")
+
         viewModelScope.launch {
             repository.observeTeamsWithStories().collectLatest { teams ->
+                println("[TeamPickerViewModel] teams emitted size=${teams.size}")
                 val teamItems = teams.map { teamWithStories ->
                     TeamPickerContract.TeamListItem(
                         team = teamWithStories.team,
                         storiesCount = teamWithStories.stories.size,
-                        ticketsCount = teamWithStories.stories.sumOf { story ->
-                            story.tickets.size
-                        },
+                        ticketsCount = teamWithStories.stories.sumOf { story -> story.tickets.size },
                     )
                 }
                 setState { currentState ->
                     currentState.copy(teams = teamItems)
                 }
+                println("[TeamPickerViewModel] state updated size=${teamItems.size}")
             }
         }
     }
@@ -43,6 +45,7 @@ internal class TeamPickerViewModel(
             is TeamPickerContract.TeamPickerEvent.RemoveTeam -> {
                 if (state.value.teams.size > 1) {
                     repository.removeTeam(event.teamId)
+                    println("[TeamPickerViewModel] remove team ${event.teamId}")
                 }
             }
         }

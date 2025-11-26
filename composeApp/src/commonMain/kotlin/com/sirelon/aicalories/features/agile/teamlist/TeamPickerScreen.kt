@@ -2,8 +2,10 @@ package com.sirelon.aicalories.features.agile.teamlist
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -71,7 +73,9 @@ private fun TeamPickerContent(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             AppLargeAppBar(
                 title = "Teams",
@@ -93,7 +97,8 @@ private fun TeamPickerContent(
             modifier = Modifier
                 .padding(paddingValues)
                 .padding(AppDimens.Spacing.xl3)
-                .fillMaxSize(),
+                .fillMaxWidth()
+                .heightIn(min = AppDimens.Spacing.xl6),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl2),
         ) {
             items(
