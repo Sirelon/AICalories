@@ -4,8 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipColors
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.ChipColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -16,8 +16,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
@@ -69,7 +69,7 @@ fun AppChip(
         },
         colors = colors.toChipColors(),
         border = borderStroke,
-        elevation = AssistChipDefaults.assistChipElevation(elevation = 1.dp),
+        elevation = AssistChipDefaults.assistChipElevation(elevation = 0.dp),
     )
 }
 
@@ -154,7 +154,7 @@ object AppChipDefaults {
 }
 
 @Composable
-private fun AppChipColors.toChipColors(): AssistChipColors {
+private fun AppChipColors.toChipColors(): ChipColors {
     val scheme = MaterialTheme.colorScheme
     val disabledContainer = lerp(containerColor, scheme.surfaceVariant, 0.65f)
     val disabledLabel = lerp(labelColor, scheme.onSurfaceVariant, 0.65f)

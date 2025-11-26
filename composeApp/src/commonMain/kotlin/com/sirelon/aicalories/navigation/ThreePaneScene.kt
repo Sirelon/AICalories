@@ -17,18 +17,15 @@ import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 import com.sirelon.aicalories.designsystem.AppTheme
 
-// --- ListDetailScene ---
-/**
- * A [Scene] that displays a list and a detail [NavEntry] side-by-side in a 40/60 split.
- *
- */
-class ListDetailScene<T : Any>(
+class ThreePaneScene<T : Any>(
     override val key: Any,
     override val previousEntries: List<NavEntry<T>>,
-    val listEntry: NavEntry<T>,
-    val detailEntry: NavEntry<T>,
+    val firstEntry: NavEntry<T>,
+    val secondEntry: NavEntry<T>,
+    val thirdEntry: NavEntry<T>?,
 ) : Scene<T> {
-    override val entries: List<NavEntry<T>> = listOf(listEntry, detailEntry)
+    override val entries: List<NavEntry<T>> = listOfNotNull(firstEntry, secondEntry, thirdEntry)
+
     override val content: @Composable (() -> Unit) = {
         Row(
             modifier = Modifier
@@ -37,30 +34,31 @@ class ListDetailScene<T : Any>(
                 .animateContentSize(),
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                listEntry.Content()
+                firstEntry.Content()
             }
             Column(modifier = Modifier.weight(1f)) {
-                detailEntry.Content()
+                secondEntry.Content()
+            }
+
+            thirdEntry?.let {
+                Column(modifier = Modifier.weight(1f)) {
+                    thirdEntry.Content()
+                }
             }
         }
     }
 }
 
 @Composable
-fun <T : Any> rememberListDetailSceneStrategy(): ListDetailSceneStrategy<T> {
+fun <T : Any> rememberThreePaneSceneStrategy(): ThreePaneSceneStrategy<T> {
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 
     return remember(windowSizeClass) {
-        ListDetailSceneStrategy(windowSizeClass)
+        ThreePaneSceneStrategy(windowSizeClass)
     }
 }
 
-// --- ListDetailSceneStrategy ---
-/**
- * A [SceneStrategy] that returns a [ThreePaneScene] if the window is wide enough, the last item
- * is the backstack is a detail, and before it, at any point in the backstack is a list.
- */
-class ListDetailSceneStrategy<T : Any>(val windowSizeClass: WindowSizeClass) : SceneStrategy<T> {
+class ThreePaneSceneStrategy<T : Any>(val windowSizeClass: WindowSizeClass) : SceneStrategy<T> {
 
     override fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T>? {
 
@@ -68,37 +66,34 @@ class ListDetailSceneStrategy<T : Any>(val windowSizeClass: WindowSizeClass) : S
             return null
         }
 
-        val detailEntry =
-            entries.lastOrNull()?.takeIf { it.metadata.containsKey(DETAIL_KEY) } ?: return null
-        val listEntry = entries.findLast { it.metadata.containsKey(LIST_KEY) } ?: return null
+        val thirdEntry = entries.lastOrNull()?.takeIf { it.metadata.containsKey(THIRD_KEY) }
+        val secondEntry = entries.findLast { it.metadata.containsKey(SECOND_KEY) } ?: return null
+        val firstEntry = entries.findLast { it.metadata.containsKey(FIRST_KEY) } ?: return null
 
         // We use the list's contentKey to uniquely identify the scene.
         // This allows the detail panes to be displayed instantly through recomposition, rather than
         // having NavDisplay animate the whole scene out when the selected detail item changes.
-        val sceneKey = listEntry.contentKey
+        val sceneKey = firstEntry.contentKey
 
-        return ListDetailScene(
+        return ThreePaneScene(
             key = sceneKey,
             previousEntries = entries.dropLast(1),
-            listEntry = listEntry,
-            detailEntry = detailEntry
+            thirdEntry = thirdEntry,
+            secondEntry = secondEntry,
+            firstEntry = firstEntry,
         )
     }
 
     companion object {
-        internal const val LIST_KEY = "ListDetailScene-List"
-        internal const val DETAIL_KEY = "ListDetailScene-Detail"
+        internal const val FIRST_KEY = "ThreePaneSceneStrategy-First"
+        internal const val SECOND_KEY = "ThreePaneSceneStrategy-Second"
 
-        /**
-         * Helper function to add metadata to a [NavEntry] indicating it can be displayed
-         * as a list in the [ThreePaneScene].
-         */
-        fun listPane() = mapOf(LIST_KEY to true)
+        internal const val THIRD_KEY = "ThreePaneSceneStrategy-Third"
 
-        /**
-         * Helper function to add metadata to a [NavEntry] indicating it can be displayed
-         * as a list in the [ThreePaneScene].
-         */
-        fun detailPane() = mapOf(DETAIL_KEY to true)
+        fun firstPane() = mapOf(FIRST_KEY to true)
+
+        fun secondPane() = mapOf(SECOND_KEY to true)
+
+        fun thirdPane() = mapOf(THIRD_KEY to true)
     }
 }

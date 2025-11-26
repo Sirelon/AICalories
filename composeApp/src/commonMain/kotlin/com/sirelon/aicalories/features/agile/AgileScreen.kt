@@ -1,7 +1,6 @@
 package com.sirelon.aicalories.features.agile
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +15,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.PeopleOutline
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,7 +25,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -41,9 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
-import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.Input
-import com.sirelon.aicalories.designsystem.buttons.MagicBlueButton
 import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
 import com.sirelon.aicalories.features.agile.model.Ticket
 import com.sirelon.aicalories.features.agile.model.UserStory
@@ -117,18 +114,15 @@ private fun AgileScreenContent(
             )
         },
         bottomBar = {
-            MagicBlueButton(
+            Button(
                 modifier = Modifier
                     .navigationBarsPadding()
                     .fillMaxWidth()
-                    .padding(horizontal = AppDimens.Spacing.xl3)
-                    .background(AppTheme.colors.background)
-                    .animateFloatingActionButton(
-                        visible = fabExpanded,
-                        alignment = Alignment.BottomCenter,
-                    ),
+                    .padding(horizontal = AppDimens.Spacing.xl3),
                 onClick = { onOpenCapacityResult(state.teamId) },
-                text = "Calculate capacity",
+                content = {
+                    Text(text = "Calculate capacity")
+                }
             )
         }
     ) {
@@ -369,7 +363,12 @@ private fun AgileScreenPreview() {
     AgileScreenContent(
         state = AgileContract.AgileState(
             teamId = Team.DEFAULT_TEAM_ID,
-            team = Team(id = Team.DEFAULT_TEAM_ID, name = "Team #1", peopleCount = 5, capacity = 40),
+            team = Team(
+                id = Team.DEFAULT_TEAM_ID,
+                name = "Team #1",
+                peopleCount = 5,
+                capacity = 40
+            ),
             stories = listOf(
                 UserStory(
                     id = 1,

@@ -13,7 +13,8 @@ import com.sirelon.aicalories.features.agile.navigation.AgileDestination
 import com.sirelon.aicalories.features.agile.team.TeamScreen
 import com.sirelon.aicalories.features.agile.teamlist.TeamPickerScreen
 import com.sirelon.aicalories.navigation.ListDetailSceneStrategy
-import com.sirelon.aicalories.navigation.rememberListDetailSceneStrategy
+import com.sirelon.aicalories.navigation.ThreePaneSceneStrategy
+import com.sirelon.aicalories.navigation.rememberThreePaneSceneStrategy
 
 @Composable
 fun AgileRoot(
@@ -24,7 +25,12 @@ fun AgileRoot(
         mutableStateListOf<AgileDestination>(AgileDestination.TeamPicker)
     }
 
-    val listDetailStrategy = rememberListDetailSceneStrategy<AgileDestination>()
+//    val listDetailStrategy = rememberListDetailSceneStrategy<AgileDestination>()
+//        .then(
+//            rememberThreePaneSceneStrategy<AgileDestination>()
+//        )
+    val listDetailStrategy = rememberThreePaneSceneStrategy<AgileDestination>()
+
 
     val popDestination: () -> Unit = {
         if (navBackStack.size > 1) {
@@ -52,7 +58,7 @@ fun AgileRoot(
         entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AgileDestination>()),
         entryProvider = entryProvider<AgileDestination> {
             entry<AgileDestination.TeamPicker>(
-                metadata = ListDetailSceneStrategy.listPane()
+                metadata = ListDetailSceneStrategy.listPane() + ThreePaneSceneStrategy.firstPane()
             ) {
                 TeamPickerScreen(
                     onBack = onExit,
@@ -66,7 +72,7 @@ fun AgileRoot(
                 )
             }
             entry<AgileDestination.TeamSettings>(
-                metadata = ListDetailSceneStrategy.listPane()
+                metadata = ListDetailSceneStrategy.detailPane()
             ) { destination ->
                 TeamScreen(
                     onBack = popDestination,
@@ -75,7 +81,7 @@ fun AgileRoot(
             }
 
             entry<AgileDestination.StoryBoard>(
-                metadata = ListDetailSceneStrategy.detailPane()
+                metadata = ThreePaneSceneStrategy.secondPane()
             ) { destination ->
                 AgileScreen(
                     onBack = popDestination,
@@ -87,7 +93,7 @@ fun AgileRoot(
                 )
             }
             entry<AgileDestination.CapacityResult>(
-                metadata = ListDetailSceneStrategy.detailPane()
+                metadata = ThreePaneSceneStrategy.thirdPane()
             ) { destination ->
                 CapacityResultScreen(
                     onBack = popDestination,
