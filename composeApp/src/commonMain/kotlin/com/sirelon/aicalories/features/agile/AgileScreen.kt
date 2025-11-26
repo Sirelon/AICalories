@@ -58,6 +58,7 @@ fun AgileScreen(
     onOpenTeamPicker: () -> Unit,
     onOpenCapacityResult: (Int) -> Unit,
     teamId: Int = DEFAULT_TEAM_ID,
+    showCalculateCapacityButton: Boolean = true,
 ) {
     val viewModel: AgileViewModel =
         koinViewModel(key = teamId.toString(), parameters = { parametersOf(teamId) })
@@ -70,6 +71,7 @@ fun AgileScreen(
         onOpenCapacityResult = onOpenCapacityResult,
         onEvent = viewModel::onEvent,
         modifier = modifier,
+        showCalculateCapacityButton = showCalculateCapacityButton,
     )
 }
 
@@ -81,6 +83,7 @@ private fun AgileScreenContent(
     onOpenTeamPicker: () -> Unit,
     onOpenCapacityResult: (Int) -> Unit,
     onEvent: (AgileContract.AgileEvent) -> Unit,
+    showCalculateCapacityButton: Boolean,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -114,16 +117,18 @@ private fun AgileScreenContent(
             )
         },
         bottomBar = {
-            Button(
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .fillMaxWidth()
-                    .padding(horizontal = AppDimens.Spacing.xl3),
-                onClick = { onOpenCapacityResult(state.teamId) },
-                content = {
-                    Text(text = "Calculate capacity")
-                }
-            )
+            if (showCalculateCapacityButton) {
+                Button(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .fillMaxWidth()
+                        .padding(horizontal = AppDimens.Spacing.xl3),
+                    onClick = { onOpenCapacityResult(state.teamId) },
+                    content = {
+                        Text(text = "Calculate capacity")
+                    }
+                )
+            }
         }
     ) {
         LazyColumn(
@@ -391,5 +396,6 @@ private fun AgileScreenPreview() {
         onOpenTeamPicker = {},
         onOpenCapacityResult = {},
         onEvent = {},
+        showCalculateCapacityButton = true,
     )
 }
