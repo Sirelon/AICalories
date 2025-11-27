@@ -58,7 +58,7 @@ fun AgileScreen(
     onOpenTeamPicker: () -> Unit,
     onOpenCapacityResult: (Int) -> Unit,
     teamId: Int = DEFAULT_TEAM_ID,
-    showCalculateCapacityButton: Boolean = true,
+    showCalculateCapacityButton: Boolean,
 ) {
     val viewModel: AgileViewModel =
         koinViewModel(key = teamId.toString(), parameters = { parametersOf(teamId) })
