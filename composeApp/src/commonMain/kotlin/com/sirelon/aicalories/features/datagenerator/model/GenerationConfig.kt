@@ -25,5 +25,5 @@ data class GenerationConfig(
     val teamCapacity: IntRange = IntRange(min = 8, max = 15),
     val teamPeopleCount: IntRange = IntRange(min = 3, max = 8),
     val teamRiskFactor: DoubleRange = DoubleRange(min = 0.1, max = 0.3),
-    val clearExistingData: Boolean = false
+    val clearExistingData: Boolean = true
 )

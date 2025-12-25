@@ -63,7 +63,10 @@ internal fun CapacityResultScreen(
     onBack: () -> Unit,
     teamId: Int,
 ) {
-    val viewModel: CapacityResultViewModel = koinViewModel(parameters = { parametersOf(teamId) })
+    val viewModel: CapacityResultViewModel = koinViewModel(
+        key = "capacity_result_$teamId",
+        parameters = { parametersOf(teamId) },
+    )
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     CapacityResultContent(
