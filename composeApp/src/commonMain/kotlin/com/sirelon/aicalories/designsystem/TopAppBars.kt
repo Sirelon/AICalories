@@ -8,6 +8,7 @@ import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.RowScope
 
 @Composable
 fun AppLargeAppBar(
@@ -15,6 +16,7 @@ fun AppLargeAppBar(
     subtitle: String?,
     onBack: (() -> Unit)?,
     scrollBehavior: TopAppBarScrollBehavior,
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     LargeFlexibleTopAppBar(
         subtitle = if (subtitle != null) {
@@ -35,6 +37,7 @@ fun AppLargeAppBar(
                 }
             }
         },
+        actions = actions,
         scrollBehavior = scrollBehavior,
     )
 }

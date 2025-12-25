@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
@@ -146,6 +147,7 @@ private val topLevelDestinations = listOf(
     AppNavItem(AppDestination.Analyze, "Analyze", Icons.Filled.Search),
     AppNavItem(AppDestination.History, "History", Icons.Filled.History),
     AppNavItem(AppDestination.Agile, "Agile", Icons.Filled.Dashboard),
+    AppNavItem(AppDestination.DataGenerator, "Generator", Icons.Filled.AutoAwesome),
 )
 
 private data class AppNavItem(

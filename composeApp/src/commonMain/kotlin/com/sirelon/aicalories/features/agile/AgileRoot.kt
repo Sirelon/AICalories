@@ -30,6 +30,7 @@ import com.sirelon.aicalories.navigation.rememberThreePaneSceneStrategy
 @Composable
 fun AgileRoot(
     onExit: () -> Unit,
+    onOpenDataGenerator: () -> Unit,
 ) {
 
     val navBackStack = remember {
@@ -103,6 +104,7 @@ fun AgileRoot(
                         onOpenTeamSettings = { teamId ->
                             pushDestination(AgileDestination.TeamSettings(teamId))
                         },
+                        onOpenDataGenerator = onOpenDataGenerator,
                     )
                 }
                 entry<AgileDestination.TeamSettings>(
