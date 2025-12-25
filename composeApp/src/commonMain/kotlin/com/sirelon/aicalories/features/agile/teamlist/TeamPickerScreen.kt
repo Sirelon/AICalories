@@ -1,13 +1,10 @@
 package com.sirelon.aicalories.features.agile.teamlist
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,7 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.Scaffold
+import com.sirelon.aicalories.designsystem.AppScaffold
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -73,11 +70,8 @@ private fun TeamPickerContent(
     onOpenDataGenerator: () -> Unit,
     onEvent: (TeamPickerContract.TeamPickerEvent) -> Unit,
 ) {
-    Scaffold(
+    AppScaffold(
         modifier = Modifier.fillMaxSize(),
-        contentWindowInsets = WindowInsets.safeDrawing.only(
-            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-        ),
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 modifier = Modifier.navigationBarsPadding(),

@@ -20,7 +20,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import com.sirelon.aicalories.designsystem.AppScaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -49,9 +49,6 @@ import com.sirelon.aicalories.features.agile.team.Team.Companion.DEFAULT_TEAM_ID
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.only
 
 @Composable
 fun AgileScreen(
@@ -96,11 +93,8 @@ private fun AgileScreenContent(
     }
 
 
-    Scaffold(
+    AppScaffold(
         modifier = modifier,
-        contentWindowInsets = WindowInsets.safeDrawing.only(
-            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-        ),
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { onEvent(AgileContract.AgileEvent.AddUserStory) },
