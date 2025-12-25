@@ -65,12 +65,15 @@ fun MagicBlueButton(
     animationEasing: Easing = EaseOut,
     enabled: Boolean = true,
     interaction: MutableInteractionSource = remember { MutableInteractionSource() },
+    enabled: Boolean = true,
 ) {
     val mainBgColor = Color(0xB2CCFF)
 
     val pressed by interaction.collectIsPressedAsState()
 
-    val transition = updateTransition(targetState = pressed, label = "BlueButtonPressedAnimation")
+    val isPressed = enabled && pressed
+
+    val transition = updateTransition(targetState = isPressed, label = "BlueButtonPressedAnimation")
 
     val transitionSpecFunc: @Composable Transition.Segment<Boolean>.() -> FiniteAnimationSpec<Float> =
         { tween(animationDuration, easing = animationEasing) }
@@ -141,7 +144,7 @@ fun MagicBlueButton(
                 role = Role.Button
             }
             .clickable(
-                enabled = true,
+                enabled = enabled,
                 onClick = onClick,
                 indication = null,
                 interactionSource = interaction,
@@ -164,6 +167,7 @@ fun MagicBlueButton(
         val innerShadowRadius = 1.dp * scale
         val strokeWidth = 1.dp * scale
         val textSize = (18f * scale).sp
+        val contentAlpha = if (enabled) 1f else 0.5f
 
         val translationY by transition.animateDp(
             label = "translationY",
@@ -176,6 +180,7 @@ fun MagicBlueButton(
                 .matchParentSize()
                 .graphicsLayer {
                     this.translationY = translationY.toPx()
+                    this.alpha = contentAlpha
                 }
         ) {
             ShadowLayer(
