@@ -1,11 +1,14 @@
 package com.sirelon.aicalories.features.agile.teamlist
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,7 +26,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,11 +36,10 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppDimens
-import com.sirelon.aicalories.designsystem.AppLargeAppBar
+import com.sirelon.aicalories.designsystem.AppSectionHeader
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.features.agile.team.Team
 import com.sirelon.aicalories.features.agile.team.TeamSummary
@@ -48,7 +49,6 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun TeamPickerScreen(
-    onBack: () -> Unit,
     onTeamSelected: (Int) -> Unit,
     onOpenTeamSettings: (Int) -> Unit,
     onOpenDataGenerator: () -> Unit,
@@ -58,7 +58,6 @@ fun TeamPickerScreen(
 
     TeamPickerContent(
         state = state,
-        onBack = onBack,
         onTeamSelected = onTeamSelected,
         onOpenTeamSettings = onOpenTeamSettings,
         onOpenDataGenerator = onOpenDataGenerator,
@@ -69,34 +68,16 @@ fun TeamPickerScreen(
 @Composable
 private fun TeamPickerContent(
     state: TeamPickerContract.TeamPickerState,
-    onBack: () -> Unit,
     onTeamSelected: (Int) -> Unit,
     onOpenTeamSettings: (Int) -> Unit,
     onOpenDataGenerator: () -> Unit,
     onEvent: (TeamPickerContract.TeamPickerEvent) -> Unit,
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            AppLargeAppBar(
-                title = "Teams",
-                subtitle = "Select or manage a team",
-                onBack = onBack,
-                scrollBehavior = scrollBehavior,
-                actions = {
-                    IconButton(onClick = onOpenDataGenerator) {
-                        Icon(
-                            imageVector = Icons.Filled.AutoAwesome,
-                            contentDescription = "Open data generator"
-                        )
-                    }
-                }
-            )
-        },
+        modifier = Modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets.safeDrawing.only(
+            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+        ),
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 modifier = Modifier.navigationBarsPadding(),
@@ -114,6 +95,20 @@ private fun TeamPickerContent(
                 .heightIn(min = AppDimens.Spacing.xl6),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl2),
         ) {
+            item {
+                AppSectionHeader(
+                    title = "Teams",
+                    subtitle = "Select or manage a team",
+                    actions = {
+                        IconButton(onClick = onOpenDataGenerator) {
+                            Icon(
+                                imageVector = Icons.Filled.AutoAwesome,
+                                contentDescription = "Open data generator",
+                            )
+                        }
+                    },
+                )
+            }
             items(
                 items = state.teams,
                 key = { it.team.id },
@@ -255,7 +250,6 @@ private fun TeamPickerPreview() {
                 ),
             )
         ),
-        onBack = {},
         onTeamSelected = {},
         onOpenTeamSettings = {},
         onOpenDataGenerator = {},

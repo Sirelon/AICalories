@@ -24,7 +24,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -34,12 +33,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppDimens
-import com.sirelon.aicalories.designsystem.AppLargeAppBar
+import com.sirelon.aicalories.designsystem.AppSectionHeader
 import com.sirelon.aicalories.designsystem.Input
 import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
 import com.sirelon.aicalories.features.agile.model.Ticket
@@ -50,11 +48,14 @@ import com.sirelon.aicalories.features.agile.team.Team
 import com.sirelon.aicalories.features.agile.team.Team.Companion.DEFAULT_TEAM_ID
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
 
 @Composable
 fun AgileScreen(
     modifier: Modifier = Modifier,
-    onBack: () -> Unit,
     onOpenTeamPicker: () -> Unit,
     onOpenCapacityResult: (Int) -> Unit,
     teamId: Int = DEFAULT_TEAM_ID,
@@ -66,7 +67,6 @@ fun AgileScreen(
 
     AgileScreenContent(
         state = state,
-        onBack = onBack,
         onOpenTeamPicker = onOpenTeamPicker,
         onOpenCapacityResult = onOpenCapacityResult,
         onEvent = viewModel::onEvent,
@@ -79,33 +79,28 @@ fun AgileScreen(
 private fun AgileScreenContent(
     state: AgileContract.AgileState,
     modifier: Modifier = Modifier,
-    onBack: () -> Unit,
     onOpenTeamPicker: () -> Unit,
     onOpenCapacityResult: (Int) -> Unit,
     onEvent: (AgileContract.AgileEvent) -> Unit,
     showCalculateCapacityButton: Boolean,
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
     val listState = rememberLazyListState()
+    val expandThresholdPx = with(LocalDensity.current) { AppDimens.Spacing.xl3.roundToPx() }
 
     // FAB expands only near the top
-    val fabExpanded by remember {
-        derivedStateOf { scrollBehavior.state.collapsedFraction < 0.1f }
+    val fabExpanded by remember(expandThresholdPx) {
+        derivedStateOf {
+            listState.firstVisibleItemIndex == 0 &&
+                listState.firstVisibleItemScrollOffset < expandThresholdPx
+        }
     }
 
 
     Scaffold(
-        modifier = modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            AppLargeAppBar(
-                title = "Agile",
-                onBack = onBack,
-                subtitle = "Calculation logic",
-                scrollBehavior = scrollBehavior,
-            )
-        },
+        modifier = modifier,
+        contentWindowInsets = WindowInsets.safeDrawing.only(
+            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+        ),
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { onEvent(AgileContract.AgileEvent.AddUserStory) },
@@ -137,6 +132,12 @@ private fun AgileScreenContent(
             contentPadding = it,
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
+            item {
+                AppSectionHeader(
+                    title = "Agile",
+                    subtitle = "Calculation logic",
+                )
+            }
             item {
                 TeamPickerEntry(
                     teamId = state.teamId,
@@ -392,7 +393,6 @@ private fun AgileScreenPreview() {
             nextStoryId = 3,
             nextTicketId = 3,
         ),
-        onBack = {},
         onOpenTeamPicker = {},
         onOpenCapacityResult = {},
         onEvent = {},
