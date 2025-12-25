@@ -42,6 +42,7 @@ import com.sirelon.aicalories.features.datagenerator.model.DoubleRange
 import com.sirelon.aicalories.features.datagenerator.model.IntRange
 import com.sirelon.aicalories.features.datagenerator.presentation.DataGeneratorContract
 import kotlinx.coroutines.flow.Flow
+import kotlin.math.roundToInt
 
 @Composable
 internal fun DataGeneratorScreenContent(
@@ -139,115 +140,68 @@ internal fun DataGeneratorScreenContent(
                 label = "Number of Teams"
             )
 
-            Row(
+            RangeSelector(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
-            ) {
-                NumberedInput(
-                    modifier = Modifier.weight(1f),
-                    value = state.config.teamPeopleCount.min.toString(),
-                    onValueChange = { value ->
-                        updateIntRangeMin(state.config.teamPeopleCount, value)
-                            ?.let {
-                                onEvent(
-                                    DataGeneratorContract.DataGeneratorEvent.TeamPeopleCountRangeChanged(
-                                        it
-                                    )
-                                )
-                            }
-                    },
-                    label = "Min People"
-                )
-                NumberedInput(
-                    modifier = Modifier.weight(1f),
-                    value = state.config.teamPeopleCount.max.toString(),
-                    onValueChange = { value ->
-                        updateIntRangeMax(state.config.teamPeopleCount, value)
-                            ?.let {
-                                onEvent(
-                                    DataGeneratorContract.DataGeneratorEvent.TeamPeopleCountRangeChanged(
-                                        it
-                                    )
-                                )
-                            }
-                    },
-                    label = "Max People"
-                )
-            }
+                label = "People per Team",
+                min = state.config.teamPeopleCount.min.toDouble().coerceIn(1.0, 50.0),
+                max = state.config.teamPeopleCount.max.toDouble().coerceIn(1.0, 50.0),
+                bounds = 1.0..50.0,
+                step = 1.0,
+                allowNull = false,
+                onRangeChange = { newMin, newMax ->
+                    if (newMin != null && newMax != null) {
+                        val clampedMin = newMin.roundToInt().coerceIn(1, 50)
+                        val clampedMax = newMax.roundToInt().coerceIn(1, 50)
+                        onEvent(
+                            DataGeneratorContract.DataGeneratorEvent.TeamPeopleCountRangeChanged(
+                                IntRange(clampedMin, clampedMax)
+                            )
+                        )
+                    }
+                }
+            )
 
-            Row(
+            RangeSelector(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
-            ) {
-                NumberedInput(
-                    modifier = Modifier.weight(1f),
-                    value = state.config.teamCapacity.min.toString(),
-                    onValueChange = { value ->
-                        updateIntRangeMin(state.config.teamCapacity, value)
-                            ?.let {
-                                onEvent(
-                                    DataGeneratorContract.DataGeneratorEvent.TeamCapacityRangeChanged(
-                                        it
-                                    )
-                                )
-                            }
-                    },
-                    label = "Min Capacity"
-                )
-                NumberedInput(
-                    modifier = Modifier.weight(1f),
-                    value = state.config.teamCapacity.max.toString(),
-                    onValueChange = { value ->
-                        updateIntRangeMax(state.config.teamCapacity, value)
-                            ?.let {
-                                onEvent(
-                                    DataGeneratorContract.DataGeneratorEvent.TeamCapacityRangeChanged(
-                                        it
-                                    )
-                                )
-                            }
-                    },
-                    label = "Max Capacity"
-                )
-            }
+                label = "Team Capacity",
+                min = state.config.teamCapacity.min.toDouble().coerceIn(1.0, 100.0),
+                max = state.config.teamCapacity.max.toDouble().coerceIn(1.0, 100.0),
+                bounds = 1.0..100.0,
+                step = 1.0,
+                allowNull = false,
+                onRangeChange = { newMin, newMax ->
+                    if (newMin != null && newMax != null) {
+                        val clampedMin = newMin.roundToInt().coerceIn(1, 100)
+                        val clampedMax = newMax.roundToInt().coerceIn(1, 100)
+                        onEvent(
+                            DataGeneratorContract.DataGeneratorEvent.TeamCapacityRangeChanged(
+                                IntRange(clampedMin, clampedMax)
+                            )
+                        )
+                    }
+                }
+            )
 
-            Row(
+            RangeSelector(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
-            ) {
-                NumberedInput(
-                    modifier = Modifier.weight(1f),
-                    value = state.config.teamRiskFactor.min.toString(),
-                    onValueChange = { value ->
-                        updateDoubleRangeMin(state.config.teamRiskFactor, value)
-                            ?.let {
-                                onEvent(
-                                    DataGeneratorContract.DataGeneratorEvent.TeamRiskFactorRangeChanged(
-                                        it
-                                    )
-                                )
-                            }
-                    },
-                    label = "Min Risk (0.0-1.0)",
-                    keyboardType = KeyboardType.Decimal
-                )
-                NumberedInput(
-                    modifier = Modifier.weight(1f),
-                    value = state.config.teamRiskFactor.max.toString(),
-                    onValueChange = { value ->
-                        updateDoubleRangeMax(state.config.teamRiskFactor, value)
-                            ?.let {
-                                onEvent(
-                                    DataGeneratorContract.DataGeneratorEvent.TeamRiskFactorRangeChanged(
-                                        it
-                                    )
-                                )
-                            }
-                    },
-                    label = "Max Risk (0.0-1.0)",
-                    keyboardType = KeyboardType.Decimal
-                )
-            }
+                label = "Risk Factor",
+                min = state.config.teamRiskFactor.min.coerceIn(0.0, 1.0),
+                max = state.config.teamRiskFactor.max.coerceIn(0.0, 1.0),
+                bounds = 0.0..1.0,
+                step = 0.01,
+                allowNull = false,
+                onRangeChange = { newMin, newMax ->
+                    if (newMin != null && newMax != null) {
+                        val clampedMin = newMin.coerceIn(0.0, 1.0)
+                        val clampedMax = newMax.coerceIn(0.0, 1.0)
+                        onEvent(
+                            DataGeneratorContract.DataGeneratorEvent.TeamRiskFactorRangeChanged(
+                                DoubleRange(clampedMin, clampedMax)
+                            )
+                        )
+                    }
+                }
+            )
 
             HorizontalDivider()
 
@@ -271,41 +225,26 @@ internal fun DataGeneratorScreenContent(
                 label = "Stories per Team"
             )
 
-            Row(
+            RangeSelector(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
-            ) {
-                NumberedInput(
-                    modifier = Modifier.weight(1f),
-                    value = state.config.ticketsPerStory.min.toString(),
-                    onValueChange = { value ->
-                        updateIntRangeMin(state.config.ticketsPerStory, value)
-                            ?.let {
-                                onEvent(
-                                    DataGeneratorContract.DataGeneratorEvent.TicketsPerStoryRangeChanged(
-                                        it
-                                    )
-                                )
-                            }
-                    },
-                    label = "Min Tickets per Story"
-                )
-                NumberedInput(
-                    modifier = Modifier.weight(1f),
-                    value = state.config.ticketsPerStory.max.toString(),
-                    onValueChange = { value ->
-                        updateIntRangeMax(state.config.ticketsPerStory, value)
-                            ?.let {
-                                onEvent(
-                                    DataGeneratorContract.DataGeneratorEvent.TicketsPerStoryRangeChanged(
-                                        it
-                                    )
-                                )
-                            }
-                    },
-                    label = "Max Tickets per Story"
-                )
-            }
+                label = "Tickets per Story",
+                min = state.config.ticketsPerStory.min.toDouble().coerceIn(1.0, 50.0),
+                max = state.config.ticketsPerStory.max.toDouble().coerceIn(1.0, 50.0),
+                bounds = 1.0..50.0,
+                step = 1.0,
+                allowNull = false,
+                onRangeChange = { newMin, newMax ->
+                    if (newMin != null && newMax != null) {
+                        val clampedMin = newMin.roundToInt().coerceIn(1, 50)
+                        val clampedMax = newMax.roundToInt().coerceIn(1, 50)
+                        onEvent(
+                            DataGeneratorContract.DataGeneratorEvent.TicketsPerStoryRangeChanged(
+                                IntRange(clampedMin, clampedMax)
+                            )
+                        )
+                    }
+                }
+            )
 
             HorizontalDivider()
 
@@ -383,24 +322,4 @@ private fun NumberedInput(
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
     )
-}
-
-private fun updateIntRangeMin(current: IntRange, newMinText: String): IntRange? {
-    val newMin = newMinText.toIntOrNull() ?: return null
-    return if (newMin <= current.max) current.copy(min = newMin) else null
-}
-
-private fun updateIntRangeMax(current: IntRange, newMaxText: String): IntRange? {
-    val newMax = newMaxText.toIntOrNull() ?: return null
-    return if (newMax >= current.min) current.copy(max = newMax) else null
-}
-
-private fun updateDoubleRangeMin(current: DoubleRange, newMinText: String): DoubleRange? {
-    val newMin = newMinText.toDoubleOrNull() ?: return null
-    return if (newMin <= current.max) current.copy(min = newMin) else null
-}
-
-private fun updateDoubleRangeMax(current: DoubleRange, newMaxText: String): DoubleRange? {
-    val newMax = newMaxText.toDoubleOrNull() ?: return null
-    return if (newMax >= current.min) current.copy(max = newMax) else null
 }
