@@ -29,7 +29,10 @@ fun TeamScreen(
     onBack: () -> Unit,
     teamId: Int,
 ) {
-    val viewModel: TeamViewModel = koinViewModel(parameters = { parametersOf(teamId) })
+    val viewModel: TeamViewModel = koinViewModel(
+        key = "team_settings_$teamId",
+        parameters = { parametersOf(teamId) },
+    )
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     TeamScreenContent(
