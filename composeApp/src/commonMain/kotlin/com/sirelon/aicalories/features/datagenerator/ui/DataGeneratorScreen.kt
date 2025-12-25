@@ -11,11 +11,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -24,7 +26,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,7 +43,6 @@ import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.Input
-import com.sirelon.aicalories.designsystem.buttons.MagicBlueButton
 import com.sirelon.aicalories.designsystem.buttons.MagicGreenButton
 import com.sirelon.aicalories.features.datagenerator.model.DoubleRange
 import com.sirelon.aicalories.features.datagenerator.model.IntRange
@@ -53,12 +59,18 @@ internal fun DataGeneratorScreenContent(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
-
+    val blankInputs = remember { mutableStateMapOf<String, Boolean>() }
+    val hasBlankInput by remember { derivedStateOf { blankInputs.values.any { it } } }
     LaunchedEffect(effects) {
         effects.collect { effect ->
             when (effect) {
-                is DataGeneratorContract.DataGeneratorEffect.DataGenerated ->
-                    snackbarHostState.showSnackbar("Random data generated successfully!")
+                is DataGeneratorContract.DataGeneratorEffect.DataGenerated -> {
+                    if (onBack != null) {
+                        onBack()
+                    } else {
+                        snackbarHostState.showSnackbar("Random data generated successfully!")
+                    }
+                }
 
                 is DataGeneratorContract.DataGeneratorEffect.DataCleared ->
                     snackbarHostState.showSnackbar("All data cleared!")
@@ -76,13 +88,28 @@ internal fun DataGeneratorScreenContent(
                 title = "Data Generator",
                 subtitle = "Generate random agile test data",
                 onBack = onBack,
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                actions = {
+                    IconButton(
+                        enabled = !state.isGenerating && state.existingTeamsCount > 0,
+                        onClick = { onEvent(DataGeneratorContract.DataGeneratorEvent.ResetToEmpty) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DeleteSweep,
+                            contentDescription = "Reset to Empty"
+                        )
+                    }
+                }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             // Action buttons
-            ActionButtons(state, onEvent)
+            ActionButtons(
+                state = state,
+                onEvent = onEvent,
+                hasBlankInput = hasBlankInput
+            )
         }
     ) { paddingValues ->
         Column(
@@ -137,7 +164,8 @@ internal fun DataGeneratorScreenContent(
                         )
                     )
                 },
-                label = "Number of Teams"
+                label = "Number of Teams",
+                onBlankChanged = { blankInputs["teamsCount"] = it }
             )
 
             RangeSelector(
@@ -222,7 +250,8 @@ internal fun DataGeneratorScreenContent(
                         )
                     )
                 },
-                label = "Stories per Team"
+                label = "Stories per Team",
+                onBlankChanged = { blankInputs["storiesPerTeam"] = it }
             )
 
             RangeSelector(
@@ -247,7 +276,6 @@ internal fun DataGeneratorScreenContent(
             )
 
             HorizontalDivider()
-
             if (state.isGenerating) {
                 LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth()
@@ -260,7 +288,8 @@ internal fun DataGeneratorScreenContent(
 @Composable
 private fun ActionButtons(
     state: DataGeneratorContract.DataGeneratorState,
-    onEvent: (DataGeneratorContract.DataGeneratorEvent) -> Unit
+    onEvent: (DataGeneratorContract.DataGeneratorEvent) -> Unit,
+    hasBlankInput: Boolean
 ) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = AppDimens.Spacing.xl3),
@@ -269,15 +298,8 @@ private fun ActionButtons(
         MagicGreenButton(
             modifier = Modifier.fillMaxWidth().height(AppDimens.Size.xl12),
             text = "Generate Random Data",
-            enabled = !state.isGenerating,
+            enabled = !state.isGenerating && !hasBlankInput,
             onClick = { onEvent(DataGeneratorContract.DataGeneratorEvent.GenerateRandomData) }
-        )
-
-        MagicBlueButton(
-            modifier = Modifier.fillMaxWidth().height(AppDimens.Size.xl12),
-            text = "Reset to Empty",
-            enabled = !state.isGenerating && state.existingTeamsCount > 0,
-            onClick = { onEvent(DataGeneratorContract.DataGeneratorEvent.ResetToEmpty) }
         )
     }
 }
@@ -313,12 +335,30 @@ private fun NumberedInput(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Number,
+    onBlankChanged: (Boolean) -> Unit = {},
 ) {
+    var text by remember { mutableStateOf(value) }
+
+    LaunchedEffect(value) {
+        text = value
+    }
+
+    LaunchedEffect(text) {
+        onBlankChanged(text.isBlank())
+    }
+
     Input(
         modifier = modifier,
-        value = value,
-        onValueChange = onValueChange,
+        value = text,
+        onValueChange = { newValue ->
+            text = newValue
+            if (newValue.isNotBlank()) {
+                onValueChange(newValue)
+            }
+        },
         label = label,
+        supportingText = if (text.isBlank()) "Required" else null,
+        isError = text.isBlank(),
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
     )

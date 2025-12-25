@@ -12,21 +12,21 @@ sealed interface AgileDestination : NavKey {
 
     @Serializable
     data object TeamPicker : AgileDestination {
-        override val title: String = "Team Picker"
+        override val title: String = "Teams"
     }
 
     @Serializable
     data class StoryBoard(val teamId: Int) : AgileDestination {
-        override val title: String = "Story Board"
+        override val title: String = "Agile"
     }
 
     @Serializable
     data class TeamSettings(val teamId: Int) : AgileDestination {
-        override val title: String = "Team Settings"
+        override val title: String = "Team settings"
     }
 
     @Serializable
     data class CapacityResult(val teamId: Int) : AgileDestination {
-        override val title: String = "Capacity Result"
+        override val title: String = "Capacity result"
     }
 }

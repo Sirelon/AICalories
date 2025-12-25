@@ -73,16 +73,14 @@ fun AgileRoot(
 
     Scaffold(
         topBar = {
-            if (currentDestination != AgileDestination.TeamPicker) {
-                TopAppBar(
-                    title = { Text(currentDestination.title) },
-                    navigationIcon = {
-                        IconButton(onClick = popDestination) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                        }
+            TopAppBar(
+                title = { Text(currentDestination.title) },
+                navigationIcon = {
+                    IconButton(onClick = popDestination) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                )
-            }
+                }
+            )
         }
     ) { paddingValues ->
         NavDisplay(
@@ -96,7 +94,6 @@ fun AgileRoot(
                     metadata = ListDetailSceneStrategy.listPane() + ThreePaneSceneStrategy.firstPane()
                 ) {
                     TeamPickerScreen(
-                        onBack = onExit,
                         onTeamSelected = { teamId ->
                             pushDestination(AgileDestination.StoryBoard(teamId))
                             replaceTopDestination(AgileDestination.StoryBoard(teamId))
@@ -111,7 +108,6 @@ fun AgileRoot(
                     metadata = ListDetailSceneStrategy.detailPane()
                 ) { destination ->
                     TeamScreen(
-                        onBack = popDestination,
                         teamId = destination.teamId,
                     )
                 }
@@ -119,7 +115,6 @@ fun AgileRoot(
                     metadata = ThreePaneSceneStrategy.secondPane()
                 ) { destination ->
                     AgileScreen(
-                        onBack = popDestination,
                         onOpenTeamPicker = { replaceTopDestination(AgileDestination.TeamPicker) },
                         onOpenCapacityResult = { teamId ->
                             pushDestination(AgileDestination.CapacityResult(teamId))
@@ -131,7 +126,6 @@ fun AgileRoot(
                     metadata = ThreePaneSceneStrategy.thirdPane()
                 ) { destination ->
                     CapacityResultScreen(
-                        onBack = popDestination,
                         teamId = destination.teamId,
                     )
                 }

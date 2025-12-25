@@ -3,21 +3,22 @@ package com.sirelon.aicalories.features.agile.team
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppDimens
-import com.sirelon.aicalories.designsystem.AppLargeAppBar
+import com.sirelon.aicalories.designsystem.AppSectionHeader
 import com.sirelon.aicalories.designsystem.Input
 import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
 import org.koin.compose.viewmodel.koinViewModel
@@ -26,15 +27,16 @@ import kotlin.math.roundToInt
 
 @Composable
 fun TeamScreen(
-    onBack: () -> Unit,
     teamId: Int,
 ) {
-    val viewModel: TeamViewModel = koinViewModel(parameters = { parametersOf(teamId) })
+    val viewModel: TeamViewModel = koinViewModel(
+        key = "team_settings_$teamId",
+        parameters = { parametersOf(teamId) },
+    )
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     TeamScreenContent(
         state = state,
-        onBack = onBack,
         onEvent = viewModel::onEvent,
     )
 }
@@ -42,30 +44,27 @@ fun TeamScreen(
 @Composable
 private fun TeamScreenContent(
     state: TeamContract.TeamState,
-    onBack: () -> Unit,
     onEvent: (TeamContract.TeamEvent) -> Unit,
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val team = state.team
     val riskPercentage = (team.riskFactor.coerceIn(0.0, 1.0) * 100).roundToInt()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            AppLargeAppBar(
-                title = "Team settings",
-                subtitle = "Team size & capacity",
-                onBack = onBack,
-                scrollBehavior = scrollBehavior,
-            )
-        },
+        modifier = Modifier,
+        contentWindowInsets = WindowInsets.safeDrawing.only(
+            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+        ),
     ) {
         Column(
             modifier = Modifier
                 .padding(it)
-                .padding(horizontal = AppDimens.Spacing.xl3),
+                .padding(horizontal = AppDimens.Spacing.xl3, vertical = AppDimens.Spacing.xl3),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
+            AppSectionHeader(
+                title = "Team settings",
+                subtitle = "Team size & capacity",
+            )
             TeamSummary(team = team)
 
             AppExpandableCard(

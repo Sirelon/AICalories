@@ -4,8 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -23,7 +26,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,7 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppChip
 import com.sirelon.aicalories.designsystem.AppChipDefaults
 import com.sirelon.aicalories.designsystem.AppDimens
-import com.sirelon.aicalories.designsystem.AppLargeAppBar
+import com.sirelon.aicalories.designsystem.AppSectionHeader
 import com.sirelon.aicalories.features.agile.Estimation
 import com.sirelon.aicalories.features.agile.EstimationResult
 import com.sirelon.aicalories.features.agile.FeasibleTicketVariant
@@ -60,15 +61,16 @@ import kotlin.math.roundToInt
 
 @Composable
 internal fun CapacityResultScreen(
-    onBack: () -> Unit,
     teamId: Int,
 ) {
-    val viewModel: CapacityResultViewModel = koinViewModel(parameters = { parametersOf(teamId) })
+    val viewModel: CapacityResultViewModel = koinViewModel(
+        key = "capacity_result_$teamId",
+        parameters = { parametersOf(teamId) },
+    )
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     CapacityResultContent(
         state = state,
-        onDismiss = onBack,
         onEvent = viewModel::onEvent,
     )
 }
@@ -76,11 +78,9 @@ internal fun CapacityResultScreen(
 @Composable
 private fun CapacityResultContent(
     state: CapacityResultState,
-    onDismiss: () -> Unit,
     onEvent: (CapacityResultEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val result = state.result
 
     Surface(
@@ -88,34 +88,39 @@ private fun CapacityResultContent(
         color = MaterialTheme.colorScheme.surface,
     ) {
         Scaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            topBar = {
-                AppLargeAppBar(
-                    title = "Capacity result",
-                    subtitle = state.team?.name ?: "Estimation outcome",
-                    onBack = onDismiss,
-                    scrollBehavior = scrollBehavior,
-                )
-            },
+            modifier = Modifier.fillMaxSize(),
+            contentWindowInsets = WindowInsets.safeDrawing.only(
+                WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+            ),
         ) { paddingValues ->
             if (result == null) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                        .padding(paddingValues)
+                        .padding(horizontal = AppDimens.Spacing.xl3, vertical = AppDimens.Spacing.xl3),
+                    verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
                 ) {
-                    CircularProgressIndicator()
-                    Text(
-                        text = "Crunching numbers...",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(top = AppDimens.Spacing.m),
+                    AppSectionHeader(
+                        title = "Capacity result",
+                        subtitle = state.team?.name ?: "Estimation outcome",
                     )
-                    TextButton(onClick = { onEvent(CapacityResultEvent.Refresh) }) {
-                        Text("Retry")
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        CircularProgressIndicator()
+                        Text(
+                            text = "Crunching numbers...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(top = AppDimens.Spacing.m),
+                        )
+                        TextButton(onClick = { onEvent(CapacityResultEvent.Refresh) }) {
+                            Text("Retry")
+                        }
                     }
                 }
             } else {
@@ -123,9 +128,15 @@ private fun CapacityResultContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .padding(horizontal = AppDimens.Spacing.xl3),
+                        .padding(horizontal = AppDimens.Spacing.xl3, vertical = AppDimens.Spacing.xl3),
                     verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
                 ) {
+                    item {
+                        AppSectionHeader(
+                            title = "Capacity result",
+                            subtitle = state.team?.name ?: "Estimation outcome",
+                        )
+                    }
                     item {
                         ResultSummaryCard(
                             result = result,
@@ -446,7 +457,6 @@ private fun CapacityResultPreview() {
             team = Team(id = 1, name = "Platform Team", peopleCount = 6, capacity = 26),
             result = estimationCalculatorExample(),
         ),
-        onDismiss = {},
         modifier = Modifier.fillMaxSize(),
         onEvent = { },
     )
