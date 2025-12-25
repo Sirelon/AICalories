@@ -17,6 +17,7 @@ import com.sirelon.aicalories.di.appModule
 import com.sirelon.aicalories.di.networkModule
 import com.sirelon.aicalories.features.agile.AgileRoot
 import com.sirelon.aicalories.features.analyze.ui.AnalyzeScreen
+import com.sirelon.aicalories.features.datagenerator.ui.DataGeneratorScreen
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRoute
 import com.sirelon.aicalories.navigation.AppDestination
 import org.koin.compose.KoinApplication
@@ -70,7 +71,10 @@ fun App() {
                     entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AppDestination>()),
                     entryProvider = entryProvider<AppDestination> {
                         entry<AppDestination.Agile> {
-                            AgileRoot(onExit = popDestination)
+                            AgileRoot(
+                                onExit = popDestination,
+                                onOpenDataGenerator = { navigateTo(AppDestination.DataGenerator) }
+                            )
                         }
 
                         entry<AppDestination.Analyze> {
@@ -84,6 +88,9 @@ fun App() {
                                 onBack = popDestination.takeIf { showBackButton },
                                 onCaptureNewMeal = { popToAnalyze() },
                             )
+                        }
+                        entry<AppDestination.DataGenerator> {
+                            DataGeneratorScreen(onBack = popDestination.takeIf { showBackButton })
                         }
                     },
                 )

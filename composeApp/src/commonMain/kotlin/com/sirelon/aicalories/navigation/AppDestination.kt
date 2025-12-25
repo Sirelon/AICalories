@@ -17,4 +17,7 @@ sealed interface AppDestination : NavKey {
 
     @Serializable
     data object Agile : AppDestination
+
+    @Serializable
+    data object DataGenerator : AppDestination
 }

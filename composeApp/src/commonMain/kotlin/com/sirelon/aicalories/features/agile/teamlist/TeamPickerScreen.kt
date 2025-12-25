@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
@@ -49,6 +51,7 @@ fun TeamPickerScreen(
     onBack: () -> Unit,
     onTeamSelected: (Int) -> Unit,
     onOpenTeamSettings: (Int) -> Unit,
+    onOpenDataGenerator: () -> Unit,
 ) {
     val viewModel: TeamPickerViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -58,6 +61,7 @@ fun TeamPickerScreen(
         onBack = onBack,
         onTeamSelected = onTeamSelected,
         onOpenTeamSettings = onOpenTeamSettings,
+        onOpenDataGenerator = onOpenDataGenerator,
         onEvent = viewModel::onEvent,
     )
 }
@@ -68,6 +72,7 @@ private fun TeamPickerContent(
     onBack: () -> Unit,
     onTeamSelected: (Int) -> Unit,
     onOpenTeamSettings: (Int) -> Unit,
+    onOpenDataGenerator: () -> Unit,
     onEvent: (TeamPickerContract.TeamPickerEvent) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -82,6 +87,14 @@ private fun TeamPickerContent(
                 subtitle = "Select or manage a team",
                 onBack = onBack,
                 scrollBehavior = scrollBehavior,
+                actions = {
+                    IconButton(onClick = onOpenDataGenerator) {
+                        Icon(
+                            imageVector = Icons.Filled.AutoAwesome,
+                            contentDescription = "Open data generator"
+                        )
+                    }
+                }
             )
         },
         floatingActionButton = {
@@ -245,6 +258,7 @@ private fun TeamPickerPreview() {
         onBack = {},
         onTeamSelected = {},
         onOpenTeamSettings = {},
+        onOpenDataGenerator = {},
         onEvent = {},
     )
 }
