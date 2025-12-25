@@ -5,13 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -79,7 +78,11 @@ internal fun DataGeneratorScreenContent(
                 scrollBehavior = scrollBehavior
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            // Action buttons
+            ActionButtons(state, onEvent)
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -126,7 +129,13 @@ internal fun DataGeneratorScreenContent(
             NumberedInput(
                 modifier = Modifier.fillMaxWidth(),
                 value = state.config.teamsCount.toString(),
-                onValueChange = { onEvent(DataGeneratorContract.DataGeneratorEvent.TeamsCountChanged(it)) },
+                onValueChange = {
+                    onEvent(
+                        DataGeneratorContract.DataGeneratorEvent.TeamsCountChanged(
+                            it
+                        )
+                    )
+                },
                 label = "Number of Teams"
             )
 
@@ -139,7 +148,13 @@ internal fun DataGeneratorScreenContent(
                     value = state.config.teamPeopleCount.min.toString(),
                     onValueChange = { value ->
                         updateIntRangeMin(state.config.teamPeopleCount, value)
-                            ?.let { onEvent(DataGeneratorContract.DataGeneratorEvent.TeamPeopleCountRangeChanged(it)) }
+                            ?.let {
+                                onEvent(
+                                    DataGeneratorContract.DataGeneratorEvent.TeamPeopleCountRangeChanged(
+                                        it
+                                    )
+                                )
+                            }
                     },
                     label = "Min People"
                 )
@@ -148,7 +163,13 @@ internal fun DataGeneratorScreenContent(
                     value = state.config.teamPeopleCount.max.toString(),
                     onValueChange = { value ->
                         updateIntRangeMax(state.config.teamPeopleCount, value)
-                            ?.let { onEvent(DataGeneratorContract.DataGeneratorEvent.TeamPeopleCountRangeChanged(it)) }
+                            ?.let {
+                                onEvent(
+                                    DataGeneratorContract.DataGeneratorEvent.TeamPeopleCountRangeChanged(
+                                        it
+                                    )
+                                )
+                            }
                     },
                     label = "Max People"
                 )
@@ -163,7 +184,13 @@ internal fun DataGeneratorScreenContent(
                     value = state.config.teamCapacity.min.toString(),
                     onValueChange = { value ->
                         updateIntRangeMin(state.config.teamCapacity, value)
-                            ?.let { onEvent(DataGeneratorContract.DataGeneratorEvent.TeamCapacityRangeChanged(it)) }
+                            ?.let {
+                                onEvent(
+                                    DataGeneratorContract.DataGeneratorEvent.TeamCapacityRangeChanged(
+                                        it
+                                    )
+                                )
+                            }
                     },
                     label = "Min Capacity"
                 )
@@ -172,7 +199,13 @@ internal fun DataGeneratorScreenContent(
                     value = state.config.teamCapacity.max.toString(),
                     onValueChange = { value ->
                         updateIntRangeMax(state.config.teamCapacity, value)
-                            ?.let { onEvent(DataGeneratorContract.DataGeneratorEvent.TeamCapacityRangeChanged(it)) }
+                            ?.let {
+                                onEvent(
+                                    DataGeneratorContract.DataGeneratorEvent.TeamCapacityRangeChanged(
+                                        it
+                                    )
+                                )
+                            }
                     },
                     label = "Max Capacity"
                 )
@@ -187,7 +220,13 @@ internal fun DataGeneratorScreenContent(
                     value = state.config.teamRiskFactor.min.toString(),
                     onValueChange = { value ->
                         updateDoubleRangeMin(state.config.teamRiskFactor, value)
-                            ?.let { onEvent(DataGeneratorContract.DataGeneratorEvent.TeamRiskFactorRangeChanged(it)) }
+                            ?.let {
+                                onEvent(
+                                    DataGeneratorContract.DataGeneratorEvent.TeamRiskFactorRangeChanged(
+                                        it
+                                    )
+                                )
+                            }
                     },
                     label = "Min Risk (0.0-1.0)",
                     keyboardType = KeyboardType.Decimal
@@ -197,7 +236,13 @@ internal fun DataGeneratorScreenContent(
                     value = state.config.teamRiskFactor.max.toString(),
                     onValueChange = { value ->
                         updateDoubleRangeMax(state.config.teamRiskFactor, value)
-                            ?.let { onEvent(DataGeneratorContract.DataGeneratorEvent.TeamRiskFactorRangeChanged(it)) }
+                            ?.let {
+                                onEvent(
+                                    DataGeneratorContract.DataGeneratorEvent.TeamRiskFactorRangeChanged(
+                                        it
+                                    )
+                                )
+                            }
                     },
                     label = "Max Risk (0.0-1.0)",
                     keyboardType = KeyboardType.Decimal
@@ -216,7 +261,13 @@ internal fun DataGeneratorScreenContent(
             NumberedInput(
                 modifier = Modifier.fillMaxWidth(),
                 value = state.config.storiesPerTeamCount.toString(),
-                onValueChange = { onEvent(DataGeneratorContract.DataGeneratorEvent.StoriesPerTeamChanged(it)) },
+                onValueChange = {
+                    onEvent(
+                        DataGeneratorContract.DataGeneratorEvent.StoriesPerTeamChanged(
+                            it
+                        )
+                    )
+                },
                 label = "Stories per Team"
             )
 
@@ -229,7 +280,13 @@ internal fun DataGeneratorScreenContent(
                     value = state.config.ticketsPerStory.min.toString(),
                     onValueChange = { value ->
                         updateIntRangeMin(state.config.ticketsPerStory, value)
-                            ?.let { onEvent(DataGeneratorContract.DataGeneratorEvent.TicketsPerStoryRangeChanged(it)) }
+                            ?.let {
+                                onEvent(
+                                    DataGeneratorContract.DataGeneratorEvent.TicketsPerStoryRangeChanged(
+                                        it
+                                    )
+                                )
+                            }
                     },
                     label = "Min Tickets per Story"
                 )
@@ -238,7 +295,13 @@ internal fun DataGeneratorScreenContent(
                     value = state.config.ticketsPerStory.max.toString(),
                     onValueChange = { value ->
                         updateIntRangeMax(state.config.ticketsPerStory, value)
-                            ?.let { onEvent(DataGeneratorContract.DataGeneratorEvent.TicketsPerStoryRangeChanged(it)) }
+                            ?.let {
+                                onEvent(
+                                    DataGeneratorContract.DataGeneratorEvent.TicketsPerStoryRangeChanged(
+                                        it
+                                    )
+                                )
+                            }
                     },
                     label = "Max Tickets per Story"
                 )
@@ -246,34 +309,37 @@ internal fun DataGeneratorScreenContent(
 
             HorizontalDivider()
 
-            // Action buttons
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
-            ) {
-                MagicGreenButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = "Generate Random Data",
-                    icon = Icons.Default.AutoAwesome,
-                    enabled = !state.isGenerating,
-                    onClick = { onEvent(DataGeneratorContract.DataGeneratorEvent.GenerateRandomData) }
-                )
-
-                MagicBlueButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = "Reset to Empty",
-                    icon = Icons.Default.DeleteSweep,
-                    enabled = !state.isGenerating && state.existingTeamsCount > 0,
-                    onClick = { onEvent(DataGeneratorContract.DataGeneratorEvent.ResetToEmpty) }
-                )
-            }
-
             if (state.isGenerating) {
                 LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun ActionButtons(
+    state: DataGeneratorContract.DataGeneratorState,
+    onEvent: (DataGeneratorContract.DataGeneratorEvent) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = AppDimens.Spacing.xl3),
+        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
+    ) {
+        MagicGreenButton(
+            modifier = Modifier.fillMaxWidth().height(AppDimens.Size.xl12),
+            text = "Generate Random Data",
+            enabled = !state.isGenerating,
+            onClick = { onEvent(DataGeneratorContract.DataGeneratorEvent.GenerateRandomData) }
+        )
+
+        MagicBlueButton(
+            modifier = Modifier.fillMaxWidth().height(AppDimens.Size.xl12),
+            text = "Reset to Empty",
+            enabled = !state.isGenerating && state.existingTeamsCount > 0,
+            onClick = { onEvent(DataGeneratorContract.DataGeneratorEvent.ResetToEmpty) }
+        )
     }
 }
 

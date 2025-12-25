@@ -13,11 +13,10 @@ import kotlinx.coroutines.launch
 internal class DataGeneratorViewModel(
     private val repository: AgileRepository,
     private val dataGenerator: RandomDataGenerator
-) : BaseViewModel<
-    DataGeneratorContract.DataGeneratorState,
-    DataGeneratorContract.DataGeneratorEvent,
-    DataGeneratorContract.DataGeneratorEffect
-    >() {
+) : BaseViewModel<DataGeneratorContract.DataGeneratorState,
+        DataGeneratorContract.DataGeneratorEvent,
+        DataGeneratorContract.DataGeneratorEffect
+        >() {
 
     override fun initialState(): DataGeneratorContract.DataGeneratorState {
         return DataGeneratorContract.DataGeneratorState()
@@ -26,7 +25,7 @@ internal class DataGeneratorViewModel(
     init {
         repository.observeTeams()
             .onEach { teams ->
-                setState { copy(existingTeamsCount = teams.size) }
+                setState { it.copy(existingTeamsCount = teams.size) }
             }
             .launchIn(viewModelScope)
     }
@@ -37,7 +36,11 @@ internal class DataGeneratorViewModel(
                 updateConfig { copy(teamsCount = event.value.toIntOrNull() ?: teamsCount) }
 
             is DataGeneratorContract.DataGeneratorEvent.StoriesPerTeamChanged ->
-                updateConfig { copy(storiesPerTeamCount = event.value.toIntOrNull() ?: storiesPerTeamCount) }
+                updateConfig {
+                    copy(
+                        storiesPerTeamCount = event.value.toIntOrNull() ?: storiesPerTeamCount
+                    )
+                }
 
             is DataGeneratorContract.DataGeneratorEvent.TicketsPerStoryRangeChanged ->
                 updateConfig { copy(ticketsPerStory = event.range) }
@@ -60,7 +63,7 @@ internal class DataGeneratorViewModel(
     }
 
     private fun updateConfig(transform: GenerationConfig.() -> GenerationConfig) {
-        setState { copy(config = config.transform()) }
+        setState { it.copy(config = it.config.transform()) }
     }
 
     private fun generateData() {
@@ -72,7 +75,7 @@ internal class DataGeneratorViewModel(
             return
         }
 
-        setState { copy(isGenerating = true) }
+        setState { it.copy(isGenerating = true) }
 
         viewModelScope.launch {
             try {
@@ -86,23 +89,31 @@ internal class DataGeneratorViewModel(
 
                 postEffect(DataGeneratorContract.DataGeneratorEffect.DataGenerated)
             } catch (e: Exception) {
-                postEffect(DataGeneratorContract.DataGeneratorEffect.ShowError(e.message ?: "Generation failed"))
+                postEffect(
+                    DataGeneratorContract.DataGeneratorEffect.ShowError(
+                        e.message ?: "Generation failed"
+                    )
+                )
             } finally {
-                setState { copy(isGenerating = false) }
+                setState { it.copy(isGenerating = false) }
             }
         }
     }
 
     private fun resetData() {
-        setState { copy(isGenerating = true) }
+        setState { it.copy(isGenerating = true) }
         viewModelScope.launch {
             try {
                 clearAllData()
                 postEffect(DataGeneratorContract.DataGeneratorEffect.DataCleared)
             } catch (e: Exception) {
-                postEffect(DataGeneratorContract.DataGeneratorEffect.ShowError(e.message ?: "Reset failed"))
+                postEffect(
+                    DataGeneratorContract.DataGeneratorEffect.ShowError(
+                        e.message ?: "Reset failed"
+                    )
+                )
             } finally {
-                setState { copy(isGenerating = false) }
+                setState { it.copy(isGenerating = false) }
             }
         }
     }
@@ -121,12 +132,16 @@ internal class DataGeneratorViewModel(
             config.ticketsPerStory.min < 1 -> "Min tickets must be at least 1"
             config.ticketsPerStory.min > config.ticketsPerStory.max ->
                 "Min tickets cannot exceed max tickets"
+
             config.teamCapacity.min > config.teamCapacity.max ->
                 "Min capacity cannot exceed max capacity"
+
             config.teamPeopleCount.min > config.teamPeopleCount.max ->
                 "Min people count cannot exceed max"
+
             config.teamRiskFactor.min > config.teamRiskFactor.max ->
                 "Min risk factor cannot exceed max"
+
             else -> null
         }
     }

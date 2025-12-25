@@ -63,6 +63,7 @@ fun MagicBlueButton(
     modifier: Modifier = Modifier,
     animationDuration: Int = 150,
     animationEasing: Easing = EaseOut,
+    enabled: Boolean = true,
     interaction: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
     val mainBgColor = Color(0xB2CCFF)
