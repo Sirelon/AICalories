@@ -62,19 +62,21 @@ internal fun MagicGreenButton(
     val interaction = remember { MutableInteractionSource() }
 
     val pressed by interaction.collectIsPressedAsState()
+    val isPressed = enabled && pressed
 
     val topGradientColor by animateColorAsState(
         targetValue =
-            if (pressed) Color.White.copy(alpha = 0.065f) else Color.White.copy(alpha = 0.13f),
+            if (isPressed) Color.White.copy(alpha = 0.065f) else Color.White.copy(alpha = 0.13f),
         animationSpec = tween(durationMillis = 75, easing = LinearEasing),
     )
     val bottomGradientColor by animateColorAsState(
         targetValue =
-            if (pressed) Color.White.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.30f),
+            if (isPressed) Color.White.copy(alpha = 0.15f) else Color.White.copy(alpha = 0.30f),
         animationSpec = tween(durationMillis = 75, easing = LinearEasing),
     )
 
-    val shadowAlpha by animateFloatAsState(if (pressed) 0f else 1f)
+    val shadowAlpha by animateFloatAsState(if (isPressed) 0f else 1f)
+    val contentAlpha = if (enabled) 1f else 0.5f
 
     BoxWithConstraints(
         modifier = modifier
@@ -97,7 +99,7 @@ internal fun MagicGreenButton(
 
         val buttonDepth = 17.dp * scale
         val inset by animateDpAsState(
-            targetValue = if (pressed) buttonDepth else 0.dp,
+            targetValue = if (isPressed) buttonDepth else 0.dp,
             animationSpec = tween(durationMillis = 75, easing = LinearEasing),
         )
 
@@ -143,6 +145,7 @@ internal fun MagicGreenButton(
                 .padding(bottom = buttonDepth)
                 .graphicsLayer {
                     translationY = inset.toPx()
+                    alpha = contentAlpha
                 }
                 .clip(RoundedCornerShape(innerCorner))
                 .padding(innerPadding)
