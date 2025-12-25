@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
@@ -43,8 +44,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.min
 
 @Composable
 internal fun MagicGreenButton(
@@ -59,10 +62,6 @@ internal fun MagicGreenButton(
     val interaction = remember { MutableInteractionSource() }
 
     val pressed by interaction.collectIsPressedAsState()
-    val inset by animateDpAsState(
-        targetValue = if (pressed) 17.dp else 0.dp,
-        animationSpec = tween(durationMillis = 75, easing = LinearEasing),
-    )
 
     val topGradientColor by animateColorAsState(
         targetValue =
@@ -77,9 +76,7 @@ internal fun MagicGreenButton(
 
     val shadowAlpha by animateFloatAsState(if (pressed) 0f else 1f)
 
-    val outerRadius = 19.dp
-
-    Box(
+    BoxWithConstraints(
         modifier = modifier
             .semantics {
                 role = Role.Button
@@ -91,16 +88,38 @@ internal fun MagicGreenButton(
                 interactionSource = interaction,
             )
     ) {
+        val scale = calculateScale(
+            maxWidth = maxWidth,
+            maxHeight = maxHeight,
+            baseWidth = 224.dp,
+            baseHeight = 236.dp,
+        )
+
+        val buttonDepth = 17.dp * scale
+        val inset by animateDpAsState(
+            targetValue = if (pressed) buttonDepth else 0.dp,
+            animationSpec = tween(durationMillis = 75, easing = LinearEasing),
+        )
+
+        val outerRadius = 19.dp * scale
+        val innerCorner = 18.dp * scale
+        val innerPadding = 1.dp * scale
+        val borderWidth = 1.dp * scale
+        val shadowRadius = 3.dp * scale
+        val shadowOffset = 3.dp * scale
+        val textSize = (38f * scale).sp
+        val textShadowOffset = 1.dp * scale
+        val textShadowBlur = 2.dp * scale
+
         // shadow
-        val buttonDepth = 17.dp
         Box(
             modifier = Modifier
                 .matchParentSize()
                 .padding(top = buttonDepth)
                 .dropShadow(shape = RoundedCornerShape(outerRadius)) {
                     color = Color(0x29000000)
-                    radius = 3.dp.toPx()
-                    offset = Offset(0F, 3.dp.toPx())
+                    radius = shadowRadius.toPx()
+                    offset = Offset(0F, shadowOffset.toPx())
                     spread = 0F
                     alpha = shadowAlpha
                 },
@@ -118,7 +137,6 @@ internal fun MagicGreenButton(
                 }
         )
 
-        val innerCorner = 18.dp
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -127,7 +145,7 @@ internal fun MagicGreenButton(
                     translationY = inset.toPx()
                 }
                 .clip(RoundedCornerShape(innerCorner))
-                .padding(1.dp)
+                .padding(innerPadding)
                 .drawWithCache {
                     val cornerRadius = CornerRadius(innerCorner.toPx())
 
@@ -152,16 +170,22 @@ internal fun MagicGreenButton(
                         )
                     }
                 }
-                .border(innerCorner),
+                .border(innerCorner, borderWidth),
             contentAlignment = Alignment.Center,
         ) {
-            ButtonText(text = text, shadowColor = bgColor)
+            ButtonText(
+                text = text,
+                shadowColor = bgColor,
+                fontSize = textSize,
+                shadowOffset = textShadowOffset,
+                shadowBlur = textShadowBlur,
+            )
         }
     }
 }
 
-private fun Modifier.border(cornerRadiusDp: Dp) = this.drawWithCache {
-    val strokeWidth = 1.dp.toPx()
+private fun Modifier.border(cornerRadiusDp: Dp, strokeWidthDp: Dp) = this.drawWithCache {
+    val strokeWidth = strokeWidthDp.toPx()
 
     val borderGradient = Brush.verticalGradient(
         colors = listOf(
@@ -208,12 +232,18 @@ private fun Modifier.border(cornerRadiusDp: Dp) = this.drawWithCache {
 }
 
 @Composable
-private fun ButtonText(text: String, shadowColor: Color) {
+private fun ButtonText(
+    text: String,
+    shadowColor: Color,
+    fontSize: TextUnit,
+    shadowOffset: Dp,
+    shadowBlur: Dp,
+) {
     Text(
         text = text,
         style = TextStyle(
             fontWeight = FontWeight.W400,
-            fontSize = 38.sp,
+            fontSize = fontSize,
             textAlign = TextAlign.Center,
 //            fontFamily = Typography.ptSansFonts(),
             letterSpacing = 0.sp,
@@ -221,12 +251,24 @@ private fun ButtonText(text: String, shadowColor: Color) {
             shadow = with(LocalDensity.current) {
                 Shadow(
                     color = shadowColor,
-                    offset = Offset(x = 0f, y = 1.dp.toPx()),
-                    blurRadius = 2.dp.toPx(),
+                    offset = Offset(x = 0f, y = shadowOffset.toPx()),
+                    blurRadius = shadowBlur.toPx(),
                 )
             }
         )
     )
+}
+
+private fun calculateScale(
+    maxWidth: Dp,
+    maxHeight: Dp,
+    baseWidth: Dp,
+    baseHeight: Dp,
+): Float {
+    val widthScale = if (maxWidth.value.isFinite()) maxWidth / baseWidth else Float.POSITIVE_INFINITY
+    val heightScale = if (maxHeight.value.isFinite()) maxHeight / baseHeight else Float.POSITIVE_INFINITY
+    val rawScale = min(widthScale, heightScale)
+    return if (rawScale.isFinite() && rawScale > 0f) rawScale else 1f
 }
 
 
