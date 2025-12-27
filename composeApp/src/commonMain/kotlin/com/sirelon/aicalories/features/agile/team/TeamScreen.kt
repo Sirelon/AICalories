@@ -3,15 +3,11 @@ package com.sirelon.aicalories.features.agile.team
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import com.sirelon.aicalories.designsystem.AppScaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -50,11 +46,8 @@ private fun TeamScreenContent(
     val team = state.team
     val riskPercentage = (team.riskFactor.coerceIn(0.0, 1.0) * 100).roundToInt()
 
-    Scaffold(
+    AppScaffold(
         modifier = Modifier,
-        contentWindowInsets = WindowInsets.safeDrawing.only(
-            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-        ),
     ) {
         Column(
             modifier = Modifier
