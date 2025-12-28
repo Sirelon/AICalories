@@ -12,7 +12,7 @@ val sharedOptInAnnotations = listOf(
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.buildKonfig)
 }
@@ -48,17 +48,25 @@ val defaultPassword =
         ?: "testMe"
 
 kotlin {
-    androidTarget {
+    androidLibrary {
+        namespace = "com.sirelon.aicalories.shared"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
             freeCompilerArgs.set(listOf("-Xannotation-default-target=param-property"))
+            jvmTarget.set(JvmTarget.JVM_11)
         }
     }
     
     iosArm64()
     iosSimulatorArm64()
     
-    jvm()
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
+    }
     
     js {
         browser()
@@ -86,18 +94,6 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
-    }
-}
-
-android {
-    namespace = "com.sirelon.aicalories.shared"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 }
 
