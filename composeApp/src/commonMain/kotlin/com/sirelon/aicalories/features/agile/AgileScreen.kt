@@ -4,13 +4,9 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -24,7 +20,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import com.sirelon.aicalories.designsystem.AppScaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -97,11 +93,8 @@ private fun AgileScreenContent(
     }
 
 
-    Scaffold(
+    AppScaffold(
         modifier = modifier,
-        contentWindowInsets = WindowInsets.safeDrawing.only(
-            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-        ),
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { onEvent(AgileContract.AgileEvent.AddUserStory) },

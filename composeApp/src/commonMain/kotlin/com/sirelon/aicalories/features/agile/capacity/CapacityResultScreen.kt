@@ -4,13 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Assessment
@@ -23,7 +19,7 @@ import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import com.sirelon.aicalories.designsystem.AppScaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -88,11 +84,8 @@ private fun CapacityResultContent(
         modifier = modifier.shadow(elevation = 8.dp),
         color = MaterialTheme.colorScheme.surface,
     ) {
-        Scaffold(
+        AppScaffold(
             modifier = Modifier.fillMaxSize(),
-            contentWindowInsets = WindowInsets.safeDrawing.only(
-                WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-            ),
         ) { paddingValues ->
             if (result == null) {
                 Column(
