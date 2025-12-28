@@ -416,8 +416,8 @@ private fun RangeSelectorDoublePreview() {
             step = 0.05,
             allowNull = true,
             onRangeChange = { newMin, newMax ->
-                min = newMin
-                max = newMax
+                min = newMin ?: 0.1
+                max = newMax ?: 0.45
             }
         )
     }
