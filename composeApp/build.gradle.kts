@@ -156,10 +156,6 @@ kotlin {
     }
 }
 
-dependencies {
-    add("debugImplementation", libs.compose.tooling)
-}
-
 compose.desktop {
     application {
         mainClass = "com.sirelon.aicalories.MainKt"
