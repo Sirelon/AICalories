@@ -6,6 +6,7 @@ import com.sirelon.aicalories.features.agile.model.UserStory
 import com.sirelon.aicalories.features.agile.team.Team
 import com.sirelon.aicalories.features.datagenerator.model.GenerationConfig
 import kotlin.random.Random
+import kotlin.time.Clock
 
 class RandomDataGenerator {
 
@@ -54,7 +55,7 @@ class RandomDataGenerator {
 
     fun generateTeams(config: GenerationConfig, startingTeamId: Int): List<Team> {
         val teams = mutableListOf<Team>()
-        val random = Random(System.currentTimeMillis())
+        val random = Random(Clock.System.now().toEpochMilliseconds())
         val usedNames = mutableSetOf<String>()
         val peopleCountRange = config.teamPeopleCount
         val capacityRange = config.teamCapacity
@@ -95,7 +96,7 @@ class RandomDataGenerator {
         startingTicketId: Int
     ): Pair<List<UserStory>, Int> {
         val stories = mutableListOf<UserStory>()
-        val random = Random(System.currentTimeMillis() + startingStoryId)
+        val random = Random(Clock.System.now().toEpochMilliseconds() + startingStoryId)
         var currentStoryId = startingStoryId
         var currentTicketId = startingTicketId
         val usedStoryNames = mutableSetOf<String>()
