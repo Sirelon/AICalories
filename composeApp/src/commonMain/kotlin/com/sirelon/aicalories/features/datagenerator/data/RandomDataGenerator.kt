@@ -6,7 +6,6 @@ import com.sirelon.aicalories.features.agile.model.UserStory
 import com.sirelon.aicalories.features.agile.team.Team
 import com.sirelon.aicalories.features.datagenerator.model.GenerationConfig
 import kotlin.random.Random
-import kotlin.system.getTimeMillis
 
 class RandomDataGenerator {
 
