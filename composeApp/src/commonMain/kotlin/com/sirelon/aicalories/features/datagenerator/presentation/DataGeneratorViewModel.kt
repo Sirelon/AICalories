@@ -5,6 +5,7 @@ import com.sirelon.aicalories.features.agile.data.AgileRepository
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.datagenerator.data.RandomDataGenerator
 import com.sirelon.aicalories.features.datagenerator.model.GenerationConfig
+import com.sirelon.aicalories.features.datagenerator.model.IntRange
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -19,7 +20,8 @@ internal class DataGeneratorViewModel(
         >() {
 
     override fun initialState(): DataGeneratorContract.DataGeneratorState {
-        return DataGeneratorContract.DataGeneratorState()
+        val normalized = normalizeConfig(GenerationConfig())
+        return buildState(normalized)
     }
 
     init {
@@ -63,7 +65,54 @@ internal class DataGeneratorViewModel(
     }
 
     private fun updateConfig(transform: GenerationConfig.() -> GenerationConfig) {
-        setState { it.copy(config = it.config.transform()) }
+        setState { current ->
+            val updated = current.config.transform()
+            val normalized = normalizeConfig(updated)
+            buildState(normalized, current)
+        }
+    }
+
+    private fun buildState(
+        config: GenerationConfig,
+        current: DataGeneratorContract.DataGeneratorState? = null
+    ): DataGeneratorContract.DataGeneratorState {
+        val peopleBounds = PEOPLE_PER_TEAM_BOUNDS
+        val capacityMax = (config.teamPeopleCount.max * 10).coerceAtLeast(1)
+        val capacityBounds = IntRange(min = 1, max = capacityMax)
+        return if (current == null) {
+            DataGeneratorContract.DataGeneratorState(
+                config = config,
+                peoplePerTeamBounds = peopleBounds,
+                teamCapacityBounds = capacityBounds
+            )
+        } else {
+            current.copy(
+                config = config,
+                peoplePerTeamBounds = peopleBounds,
+                teamCapacityBounds = capacityBounds
+            )
+        }
+    }
+
+    private fun normalizeConfig(config: GenerationConfig): GenerationConfig {
+        val peopleBounds = PEOPLE_PER_TEAM_BOUNDS
+        val peopleMin = config.teamPeopleCount.min.coerceIn(peopleBounds.min, peopleBounds.max)
+        val peopleMax = config.teamPeopleCount.max.coerceIn(peopleBounds.min, peopleBounds.max)
+        val normalizedPeopleMin = minOf(peopleMin, peopleMax)
+        val normalizedPeopleMax = maxOf(peopleMin, peopleMax)
+        val normalizedPeople = IntRange(normalizedPeopleMin, normalizedPeopleMax)
+
+        val capacityMaxAllowed = (normalizedPeopleMax * 10).coerceAtLeast(1)
+        val capacityMin = config.teamCapacity.min.coerceIn(1, capacityMaxAllowed)
+        val capacityMax = config.teamCapacity.max.coerceIn(1, capacityMaxAllowed)
+        val normalizedCapacityMin = minOf(capacityMin, capacityMax)
+        val normalizedCapacityMax = maxOf(capacityMin, capacityMax)
+        val normalizedCapacity = IntRange(normalizedCapacityMin, normalizedCapacityMax)
+
+        return config.copy(
+            teamPeopleCount = normalizedPeople,
+            teamCapacity = normalizedCapacity
+        )
     }
 
     private fun generateData() {
@@ -203,4 +252,8 @@ internal class DataGeneratorViewModel(
         val storyId: Int,
         val ticketId: Int,
     )
+
+    private companion object {
+        private val PEOPLE_PER_TEAM_BOUNDS = IntRange(min = 1, max = 12)
+    }
 }
