@@ -83,6 +83,12 @@ kotlin {
                 sharedOptInAnnotations.forEach { optIn(it) }
             }
         }
+        val iosMain by creating {
+            dependsOn(getByName("commonMain"))
+        }
+        val iosTest by creating {
+            dependsOn(getByName("commonTest"))
+        }
         commonMain.dependencies {
             implementation(libs.supabase.auth)
             implementation(libs.supabase.storage)
@@ -94,6 +100,10 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+        getByName("iosArm64Main").dependsOn(iosMain)
+        getByName("iosSimulatorArm64Main").dependsOn(iosMain)
+        getByName("iosArm64Test").dependsOn(iosTest)
+        getByName("iosSimulatorArm64Test").dependsOn(iosTest)
     }
 }
 
