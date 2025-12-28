@@ -14,6 +14,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberRangeSliderState
@@ -36,6 +37,77 @@ import kotlin.math.round
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SingleValueSelector(
+    label: String,
+    value: Double,
+    bounds: ClosedFloatingPointRange<Double>,
+    step: Double,
+    onValueChange: (Double) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val safeStep = if (step > 0.0) step else 1.0
+    val decimals = remember(safeStep) { decimalsForStep(safeStep) }
+    val clampedValue = value.coerceIn(bounds.start, bounds.endInclusive)
+    val displayValue = formatValue(clampedValue, decimals)
+    val sliderSteps = remember(bounds, safeStep) { calculateSliderSteps(bounds, safeStep) }
+    val canDecrease = clampedValue > bounds.start + 1e-6
+    val canIncrease = clampedValue < bounds.endInclusive - 1e-6
+
+    fun updateValue(nextValue: Double) {
+        val snapped = snapToStep(nextValue, bounds, safeStep)
+        if (!nearlyEqual(snapped, clampedValue)) {
+            onValueChange(snapped)
+        }
+    }
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
+    ) {
+        ValueHeaderRow(
+            label = label,
+            valueText = displayValue
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
+        ) {
+            StepIconButton(
+                enabled = canDecrease,
+                onClick = { updateValue(clampedValue - safeStep) },
+                icon = Icons.Default.Remove,
+                contentDescription = "Decrease value"
+            )
+
+            Slider(
+                value = clampedValue.toFloat(),
+                onValueChange = { updateValue(it.toDouble()) },
+                valueRange = bounds.start.toFloat()..bounds.endInclusive.toFloat(),
+                steps = sliderSteps,
+                modifier = Modifier.weight(1f),
+                colors = SliderDefaults.colors(
+                    activeTrackColor = AppTheme.colors.primary,
+                    activeTickColor = AppTheme.colors.primary.copy(alpha = 0.35f),
+                    inactiveTrackColor = AppTheme.colors.outline.copy(alpha = 0.25f),
+                    inactiveTickColor = AppTheme.colors.outline.copy(alpha = 0.2f),
+                    thumbColor = AppTheme.colors.primary
+                )
+            )
+
+            StepIconButton(
+                enabled = canIncrease,
+                onClick = { updateValue(clampedValue + safeStep) },
+                icon = Icons.Default.Add,
+                contentDescription = "Increase value"
+            )
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,41 +177,25 @@ fun RangeSelector(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = label,
-                style = AppTheme.typography.body,
-                color = AppTheme.colors.onSurface
-            )
-            Text(
-                text = displayRangeText,
-                style = AppTheme.typography.caption,
-                color = AppTheme.colors.onSurface.copy(alpha = 0.65f)
-            )
-        }
+        ValueHeaderRow(
+            label = label,
+            valueText = displayRangeText
+        )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
         ) {
-            FilledTonalIconButton(
+            StepIconButton(
+                enabled = minCanDecrease,
                 onClick = {
                     val nextMin = (min ?: bounds.start) - safeStep
                     applyRangeChange(nextMin, max)
                 },
-                modifier = Modifier.size(32.dp),
-                enabled = minCanDecrease
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Remove,
-                    contentDescription = "Decrease minimum"
-                )
-            }
+                icon = Icons.Default.Remove,
+                contentDescription = "Decrease minimum"
+            )
 
             RangeSlider(
                 state = sliderState,
@@ -153,19 +209,15 @@ fun RangeSelector(
                 )
             )
 
-            FilledTonalIconButton(
+            StepIconButton(
+                enabled = maxCanIncrease,
                 onClick = {
                     val nextMax = (max ?: bounds.endInclusive) + safeStep
                     applyRangeChange(min, nextMax)
                 },
-                modifier = Modifier.size(32.dp),
-                enabled = maxCanIncrease
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Increase maximum"
-                )
-            }
+                icon = Icons.Default.Add,
+                contentDescription = "Increase maximum"
+            )
         }
 
         AnimatedVisibility(visible = hintText != null) {
@@ -175,6 +227,49 @@ fun RangeSelector(
                 color = AppTheme.colors.onSurface.copy(alpha = 0.6f)
             )
         }
+    }
+}
+
+@Composable
+private fun StepIconButton(
+    enabled: Boolean,
+    onClick: () -> Unit,
+    icon: ImageVector,
+    contentDescription: String
+) {
+    FilledTonalIconButton(
+        onClick = onClick,
+        modifier = Modifier.size(32.dp),
+        enabled = enabled
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription
+        )
+    }
+}
+
+@Composable
+private fun ValueHeaderRow(
+    label: String,
+    valueText: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = AppTheme.typography.body,
+            color = AppTheme.colors.onSurface
+        )
+        Text(
+            text = valueText,
+            style = AppTheme.typography.caption,
+            color = AppTheme.colors.onSurface.copy(alpha = 0.65f)
+        )
     }
 }
 

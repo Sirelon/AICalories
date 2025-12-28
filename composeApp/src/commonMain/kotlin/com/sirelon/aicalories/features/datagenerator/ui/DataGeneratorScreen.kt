@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteSweep
@@ -26,23 +25,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.input.KeyboardType
 import com.sirelon.aicalories.designsystem.AppCheckboxRow
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppLargeAppBar
 import com.sirelon.aicalories.designsystem.AppTheme
-import com.sirelon.aicalories.designsystem.Input
 import com.sirelon.aicalories.designsystem.buttons.MagicGreenButton
 import com.sirelon.aicalories.features.datagenerator.model.DoubleRange
 import com.sirelon.aicalories.features.datagenerator.model.IntRange
@@ -59,8 +51,6 @@ internal fun DataGeneratorScreenContent(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
-    val blankInputs = remember { mutableStateMapOf<String, Boolean>() }
-    val hasBlankInput by remember { derivedStateOf { blankInputs.values.any { it } } }
     LaunchedEffect(effects) {
         effects.collect { effect ->
             when (effect) {
@@ -80,6 +70,8 @@ internal fun DataGeneratorScreenContent(
             }
         }
     }
+    val peopleRangeBounds = state.peoplePerTeamBounds
+    val capacityBounds = state.teamCapacityBounds
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -107,8 +99,7 @@ internal fun DataGeneratorScreenContent(
             // Action buttons
             ActionButtons(
                 state = state,
-                onEvent = onEvent,
-                hasBlankInput = hasBlankInput
+                onEvent = onEvent
             )
         }
     ) { paddingValues ->
@@ -154,32 +145,37 @@ internal fun DataGeneratorScreenContent(
                 color = AppTheme.colors.primary
             )
 
-            NumberedInput(
+            SingleValueSelector(
                 modifier = Modifier.fillMaxWidth(),
-                value = state.config.teamsCount.toString(),
-                onValueChange = {
+                label = "Number of Teams",
+                value = state.config.teamsCount.toDouble().coerceIn(1.0, 20.0),
+                bounds = 1.0..20.0,
+                step = 1.0,
+                onValueChange = { newValue ->
                     onEvent(
                         DataGeneratorContract.DataGeneratorEvent.TeamsCountChanged(
-                            it
+                            newValue.roundToInt().toString()
                         )
                     )
-                },
-                label = "Number of Teams",
-                onBlankChanged = { blankInputs["teamsCount"] = it }
+                }
             )
 
             RangeSelector(
                 modifier = Modifier.fillMaxWidth(),
                 label = "People per Team",
-                min = state.config.teamPeopleCount.min.toDouble().coerceIn(1.0, 50.0),
-                max = state.config.teamPeopleCount.max.toDouble().coerceIn(1.0, 50.0),
-                bounds = 1.0..50.0,
+                min = state.config.teamPeopleCount.min.toDouble()
+                    .coerceIn(peopleRangeBounds.min.toDouble(), peopleRangeBounds.max.toDouble()),
+                max = state.config.teamPeopleCount.max.toDouble()
+                    .coerceIn(peopleRangeBounds.min.toDouble(), peopleRangeBounds.max.toDouble()),
+                bounds = peopleRangeBounds.min.toDouble()..peopleRangeBounds.max.toDouble(),
                 step = 1.0,
                 allowNull = false,
                 onRangeChange = { newMin, newMax ->
                     if (newMin != null && newMax != null) {
-                        val clampedMin = newMin.roundToInt().coerceIn(1, 50)
-                        val clampedMax = newMax.roundToInt().coerceIn(1, 50)
+                        val clampedMin = newMin.roundToInt()
+                            .coerceIn(peopleRangeBounds.min, peopleRangeBounds.max)
+                        val clampedMax = newMax.roundToInt()
+                            .coerceIn(peopleRangeBounds.min, peopleRangeBounds.max)
                         onEvent(
                             DataGeneratorContract.DataGeneratorEvent.TeamPeopleCountRangeChanged(
                                 IntRange(clampedMin, clampedMax)
@@ -192,15 +188,19 @@ internal fun DataGeneratorScreenContent(
             RangeSelector(
                 modifier = Modifier.fillMaxWidth(),
                 label = "Team Capacity",
-                min = state.config.teamCapacity.min.toDouble().coerceIn(1.0, 100.0),
-                max = state.config.teamCapacity.max.toDouble().coerceIn(1.0, 100.0),
-                bounds = 1.0..100.0,
+                min = state.config.teamCapacity.min.toDouble()
+                    .coerceIn(capacityBounds.min.toDouble(), capacityBounds.max.toDouble()),
+                max = state.config.teamCapacity.max.toDouble()
+                    .coerceIn(capacityBounds.min.toDouble(), capacityBounds.max.toDouble()),
+                bounds = capacityBounds.min.toDouble()..capacityBounds.max.toDouble(),
                 step = 1.0,
                 allowNull = false,
                 onRangeChange = { newMin, newMax ->
                     if (newMin != null && newMax != null) {
-                        val clampedMin = newMin.roundToInt().coerceIn(1, 100)
-                        val clampedMax = newMax.roundToInt().coerceIn(1, 100)
+                        val clampedMin = newMin.roundToInt()
+                            .coerceIn(capacityBounds.min, capacityBounds.max)
+                        val clampedMax = newMax.roundToInt()
+                            .coerceIn(capacityBounds.min, capacityBounds.max)
                         onEvent(
                             DataGeneratorContract.DataGeneratorEvent.TeamCapacityRangeChanged(
                                 IntRange(clampedMin, clampedMax)
@@ -240,18 +240,19 @@ internal fun DataGeneratorScreenContent(
                 color = AppTheme.colors.primary
             )
 
-            NumberedInput(
+            SingleValueSelector(
                 modifier = Modifier.fillMaxWidth(),
-                value = state.config.storiesPerTeamCount.toString(),
-                onValueChange = {
+                label = "Stories per Team",
+                value = state.config.storiesPerTeamCount.toDouble().coerceIn(1.0, 20.0),
+                bounds = 1.0..20.0,
+                step = 1.0,
+                onValueChange = { newValue ->
                     onEvent(
                         DataGeneratorContract.DataGeneratorEvent.StoriesPerTeamChanged(
-                            it
+                            newValue.roundToInt().toString()
                         )
                     )
-                },
-                label = "Stories per Team",
-                onBlankChanged = { blankInputs["storiesPerTeam"] = it }
+                }
             )
 
             RangeSelector(
@@ -288,8 +289,7 @@ internal fun DataGeneratorScreenContent(
 @Composable
 private fun ActionButtons(
     state: DataGeneratorContract.DataGeneratorState,
-    onEvent: (DataGeneratorContract.DataGeneratorEvent) -> Unit,
-    hasBlankInput: Boolean
+    onEvent: (DataGeneratorContract.DataGeneratorEvent) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = AppDimens.Spacing.xl3),
@@ -298,7 +298,7 @@ private fun ActionButtons(
         MagicGreenButton(
             modifier = Modifier.fillMaxWidth().height(AppDimens.Size.xl12),
             text = "Generate Random Data",
-            enabled = !state.isGenerating && !hasBlankInput,
+            enabled = !state.isGenerating,
             onClick = { onEvent(DataGeneratorContract.DataGeneratorEvent.GenerateRandomData) }
         )
     }
@@ -326,40 +326,4 @@ private fun TextWithIcon(
             style = AppTheme.typography.body
         )
     }
-}
-
-@Composable
-private fun NumberedInput(
-    value: String,
-    label: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    keyboardType: KeyboardType = KeyboardType.Number,
-    onBlankChanged: (Boolean) -> Unit = {},
-) {
-    var text by remember { mutableStateOf(value) }
-
-    LaunchedEffect(value) {
-        text = value
-    }
-
-    LaunchedEffect(text) {
-        onBlankChanged(text.isBlank())
-    }
-
-    Input(
-        modifier = modifier,
-        value = text,
-        onValueChange = { newValue ->
-            text = newValue
-            if (newValue.isNotBlank()) {
-                onValueChange(newValue)
-            }
-        },
-        label = label,
-        supportingText = if (text.isBlank()) "Required" else null,
-        isError = text.isBlank(),
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
-    )
 }
