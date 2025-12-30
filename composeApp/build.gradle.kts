@@ -28,7 +28,7 @@ plugins {
 
 kotlin {
     androidLibrary {
-        namespace = "com.sirelon.aicalories"
+        namespace = "com.sirelon.aicalories.composeapp"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
