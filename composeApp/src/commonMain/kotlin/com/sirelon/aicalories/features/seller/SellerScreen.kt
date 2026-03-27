@@ -1,17 +1,5 @@
 package com.sirelon.aicalories.features.seller
 
-import com.sirelon.aicalories.composeapp.generated.resources.Res
-import com.sirelon.aicalories.composeapp.generated.resources.add_photo
-import com.sirelon.aicalories.composeapp.generated.resources.ic_snap_logo
-import com.sirelon.aicalories.composeapp.generated.resources.photos_count_limit
-import com.sirelon.aicalories.composeapp.generated.resources.sell_snap
-import com.sirelon.aicalories.composeapp.generated.resources.snap_photo_ad_desc
-import com.sirelon.aicalories.composeapp.generated.resources.take_photo
-import com.sirelon.aicalories.composeapp.generated.resources.tip_angles
-import com.sirelon.aicalories.composeapp.generated.resources.tip_defects
-import com.sirelon.aicalories.composeapp.generated.resources.tip_lighting
-import com.sirelon.aicalories.composeapp.generated.resources.tips_for_better_photos
-import com.sirelon.aicalories.composeapp.generated.resources.turn_stuff_into_olx_listings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,6 +41,18 @@ import androidx.compose.ui.unit.sp
 import com.mohamedrejeb.calf.core.LocalPlatformContext
 import com.mohamedrejeb.calf.permissions.Camera
 import com.mohamedrejeb.calf.permissions.Permission
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.add_photo
+import com.sirelon.aicalories.composeapp.generated.resources.ic_snap_logo
+import com.sirelon.aicalories.composeapp.generated.resources.photos_count_limit
+import com.sirelon.aicalories.composeapp.generated.resources.sell_snap
+import com.sirelon.aicalories.composeapp.generated.resources.snap_photo_ad_desc
+import com.sirelon.aicalories.composeapp.generated.resources.take_photo
+import com.sirelon.aicalories.composeapp.generated.resources.tip_angles
+import com.sirelon.aicalories.composeapp.generated.resources.tip_defects
+import com.sirelon.aicalories.composeapp.generated.resources.tip_lighting
+import com.sirelon.aicalories.composeapp.generated.resources.tips_for_better_photos
+import com.sirelon.aicalories.composeapp.generated.resources.turn_stuff_into_olx_listings
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController

@@ -282,3 +282,6 @@ render.experimental.xml
 google-services.json
 *.hprof
 /calf_sources.txt
+/composeApp/src/androidMain/assets/composeResources/com.sirelon.aicalories.composeapp.generated.resources/drawable/compose-multiplatform.xml
+/props.txt
+/composeApp/src/androidMain/assets/composeResources/com.sirelon.aicalories.composeapp.generated.resources/values/strings.commonMain.cvr
