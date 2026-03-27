@@ -21,6 +21,7 @@ import com.sirelon.aicalories.features.datagenerator.ui.DataGeneratorScreen
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRoute
 import com.sirelon.aicalories.navigation.AppDestination
 import org.koin.compose.KoinApplication
+import org.koin.dsl.koinConfiguration
 
 @Composable
 @Preview
@@ -34,11 +35,14 @@ fun App() {
     }
 
     KoinApplication(
-        application = { modules(appModule, networkModule) },
+        configuration = koinConfiguration {
+            modules(appModule, networkModule)
+        },
     ) {
         AppTheme {
             val navBackStack = remember {
-                mutableStateListOf<AppDestination>(AppDestination.Agile)
+//                mutableStateListOf<AppDestination>(AppDestination.Agile)
+                mutableStateListOf<AppDestination>(AppDestination.Analyze)
             }
 
             val popDestination: () -> Unit = {
@@ -65,35 +69,35 @@ fun App() {
 //                currentDestination = navBackStack.last(),
 //                onNavigate = navigateTo,
 //            ) {
-                NavDisplay(
-                    modifier = Modifier.fillMaxSize(),
-                    backStack = navBackStack,
-                    entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AppDestination>()),
-                    entryProvider = entryProvider<AppDestination> {
-                        entry<AppDestination.Agile> {
-                            AgileRoot(
-                                onExit = popDestination,
-                                onOpenDataGenerator = { navigateTo(AppDestination.DataGenerator) }
-                            )
-                        }
+            NavDisplay(
+                modifier = Modifier.fillMaxSize(),
+                backStack = navBackStack,
+                entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AppDestination>()),
+                entryProvider = entryProvider<AppDestination> {
+                    entry<AppDestination.Agile> {
+                        AgileRoot(
+                            onExit = popDestination,
+                            onOpenDataGenerator = { navigateTo(AppDestination.DataGenerator) }
+                        )
+                    }
 
-                        entry<AppDestination.Analyze> {
-                            AnalyzeScreen(
-                                onBack = if (showBackButton) popDestination else null,
-                                onResultConfirmed = { navigateTo(AppDestination.History) },
-                            )
-                        }
-                        entry<AppDestination.History> {
-                            HistoryScreenRoute(
-                                onBack = popDestination.takeIf { showBackButton },
-                                onCaptureNewMeal = { popToAnalyze() },
-                            )
-                        }
-                        entry<AppDestination.DataGenerator> {
-                            DataGeneratorScreen(onBack = popDestination.takeIf { showBackButton })
-                        }
-                    },
-                )
+                    entry<AppDestination.Analyze> {
+                        AnalyzeScreen(
+                            onBack = if (showBackButton) popDestination else null,
+                            onResultConfirmed = { navigateTo(AppDestination.History) },
+                        )
+                    }
+                    entry<AppDestination.History> {
+                        HistoryScreenRoute(
+                            onBack = popDestination.takeIf { showBackButton },
+                            onCaptureNewMeal = { popToAnalyze() },
+                        )
+                    }
+                    entry<AppDestination.DataGenerator> {
+                        DataGeneratorScreen(onBack = popDestination.takeIf { showBackButton })
+                    }
+                },
+            )
 //            }
         }
     }
