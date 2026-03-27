@@ -78,6 +78,7 @@ fun AnalyzeScreen(
     val platformContext = LocalPlatformContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val permissionController = rememberPermissionController(permission = Permission.Camera)
+
     val uploads = state.uploads
     val hasReport = state.hasReport
     val hasResultData = state.result?.hasContent == true
@@ -86,18 +87,17 @@ fun AnalyzeScreen(
     val canOpenPicker = canInteractWithPhotos && canAddMorePhotos
     val canSubmit = state.canSubmit && !hasReport
 
-    val photoPicker =
-        rememberPhotoPickerController(
-            permissionController = permissionController,
-            onResult = {
-                viewModel.onEvent(
-                    AnalyzeContract.AnalyzeEvent.UploadFilesResult(
-                        platformContext = platformContext,
-                        result = it,
-                    )
+    val photoPicker = rememberPhotoPickerController(
+        permissionController = permissionController,
+        onResult = {
+            viewModel.onEvent(
+                AnalyzeContract.AnalyzeEvent.UploadFilesResult(
+                    platformContext = platformContext,
+                    result = it,
                 )
-            },
-        )
+            )
+        },
+    )
     var showSourceDialog by remember { mutableStateOf(false) }
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 

@@ -1,5 +1,8 @@
 package com.sirelon.aicalories.network
 
+import com.aallam.openai.api.http.Timeout
+import com.aallam.openai.client.OpenAI
+import com.aallam.openai.client.OpenAIConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -10,6 +13,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import kotlin.time.Duration.Companion.minutes
 
 private const val API_BASE_URL = "https://api.openai.com/v1"
 
@@ -37,3 +41,8 @@ fun createHttpClient(tokenProvider: ApiTokenProvider): HttpClient =
             tokenProvider.token?.let { header(HttpHeaders.Authorization, "Bearer $it") }
         }
     }
+
+
+fun createOpenAI(tokenProvider: ApiTokenProvider): OpenAI = OpenAI(
+    config = OpenAIConfig(token = tokenProvider.token!!, timeout = Timeout(3.minutes))
+)

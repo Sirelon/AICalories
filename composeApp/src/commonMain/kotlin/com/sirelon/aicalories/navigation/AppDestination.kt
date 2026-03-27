@@ -8,6 +8,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 sealed interface AppDestination : NavKey {
+
+    @Serializable
+    data object Seller : AppDestination
+
     @Serializable
     data object Analyze : AppDestination
 

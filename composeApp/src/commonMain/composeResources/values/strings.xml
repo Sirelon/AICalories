@@ -1,0 +1,12 @@
+<resources>
+    <string name="sell_snap">SellSnap</string>
+    <string name="turn_stuff_into_olx_listings">Turn your stuff into OLX listings instantly</string>
+    <string name="snap_photo_ad_desc">Snap a photo and let AI create the perfect ad for you</string>
+    <string name="add_photo">Add Photo</string>
+    <string name="photos_count_limit">%1$d/%2$d photos</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="tips_for_better_photos">Tips for better photos</string>
+    <string name="tip_lighting">Good lighting improves results</string>
+    <string name="tip_angles">Include multiple angles</string>
+    <string name="tip_defects">Show any defects clearly</string>
+</resources>

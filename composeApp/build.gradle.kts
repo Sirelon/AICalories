@@ -1,4 +1,5 @@
 
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -26,8 +27,16 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
 }
 
+compose {
+    resources {
+        publicResClass = true
+        packageOfResClass = "com.sirelon.aicalories.composeapp.generated.resources"
+        generateResClass = auto
+    }
+}
+
 kotlin {
-    androidLibrary {
+    android {
         namespace = "com.sirelon.aicalories.composeapp"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
@@ -43,7 +52,27 @@ kotlin {
             }
         }
     }
-    
+
+    // Workaround for Compose Multiplatform resources missing in Android assets when using the new KMP Android Library plugin.
+    val copyComposeResourcesToAndroidAssets by tasks.registering(Copy::class) {
+        val resPackage = "com.sirelon.aicalories.composeapp.generated.resources"
+        from(layout.buildDirectory.dir("generated/compose/resourceGenerator/preparedResources/commonMain/composeResources"))
+        into(project.file("src/androidMain/assets/composeResources/$resPackage"))
+        dependsOn("prepareComposeResourcesTaskForCommonMain")
+    }
+
+    // Hook it up to the build process
+    tasks.matching { it.name == "preBuild" }.configureEach {
+        dependsOn(copyComposeResourcesToAndroidAssets)
+    }
+
+    // Disable the buggy plugin task if it exists to avoid build failures
+    tasks.matching { it.name == "copyAndroidMainComposeResourcesToAndroidAssets" }.configureEach {
+        enabled = false
+    }
+
+    kotlin.sourceSets.getByName("androidMain").resources.srcDirs("src/androidMain/assets")
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -73,6 +102,9 @@ kotlin {
     }
     
     sourceSets {
+        commonMain {
+            // No need to explicitly add this, it's the default
+        }
         all {
             languageSettings.apply {
                 composeOptInAnnotations.forEach { optIn(it) }
@@ -101,6 +133,7 @@ kotlin {
             implementation(libs.supabase.coil3.integration)
             implementation(libs.compose.runtime)
             implementation(libs.compose.ui)
+            implementation(libs.compose.foundation)
             implementation(libs.compose.components.resources)
             implementation(libs.compose.preview)
             implementation(libs.material3)
