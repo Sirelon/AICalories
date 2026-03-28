@@ -1,0 +1,95 @@
+package com.sirelon.aicalories.features.media.ui
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import com.mohamedrejeb.calf.io.KmpFile
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.add_photo
+import com.sirelon.aicalories.composeapp.generated.resources.photos_count_limit
+import com.sirelon.aicalories.composeapp.generated.resources.take_photo
+import com.sirelon.aicalories.designsystem.AppDimens
+import com.sirelon.aicalories.designsystem.AppTheme
+import com.sirelon.aicalories.designsystem.buttons.AppButton
+import com.sirelon.aicalories.designsystem.buttons.AppIconButton
+import com.sirelon.aicalories.features.media.upload.UploadingItem
+import org.jetbrains.compose.resources.stringResource
+
+@Composable
+fun PhotosSection(
+    files: Map<KmpFile, UploadingItem>,
+    onTakePhotoClick: () -> Unit,
+    onUploadClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    maxPhotos: Int = 5
+) {
+    val photoCount = files.size
+
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(AppDimens.BorderRadius.xl7),
+        color = AppTheme.colors.surface,
+        shadowElevation = AppDimens.Spacing.xs2
+    ) {
+        Column(
+            modifier = Modifier.padding(AppDimens.Spacing.xl6),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl5)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(Res.string.add_photo),
+                    fontSize = AppDimens.TextSize.xl5,
+                    fontWeight = FontWeight.Bold,
+                    color = AppTheme.colors.onSurface
+                )
+                Text(
+                    text = stringResource(Res.string.photos_count_limit, photoCount, maxPhotos),
+                    fontSize = AppDimens.TextSize.xl2,
+                    color = AppTheme.colors.onSurfaceSoft,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            val canAddMore = photoCount < maxPhotos
+            PhotosGridComponent(
+                files = files,
+                interactionEnabled = canAddMore,
+                onAddPhoto = onTakePhotoClick,
+                maxFiles = maxPhotos,
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl)
+            ) {
+                AppButton(
+                    modifier = Modifier.weight(1f),
+                    text = stringResource(Res.string.take_photo),
+                    onClick = onTakePhotoClick,
+                    icon = Icons.Default.CameraAlt,
+                )
+
+                AppIconButton(
+                    icon = Icons.Default.FileUpload,
+                    onClick = onUploadClick,
+                )
+            }
+        }
+    }
+}

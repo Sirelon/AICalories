@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -28,15 +27,12 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -44,7 +40,6 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mohamedrejeb.calf.core.LocalPlatformContext
-import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.permissions.Camera
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.designsystem.AppCard
@@ -61,10 +56,10 @@ import com.sirelon.aicalories.features.analyze.model.MealEntryUi
 import com.sirelon.aicalories.features.analyze.model.MealSummaryUi
 import com.sirelon.aicalories.features.analyze.presentation.AnalyzeContract
 import com.sirelon.aicalories.features.analyze.presentation.AnalyzeViewModel
-import com.sirelon.aicalories.features.analyze.presentation.UploadItem
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
+import com.sirelon.aicalories.features.media.ui.PhotosSection
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -82,9 +77,6 @@ fun AnalyzeScreen(
     val uploads = state.uploads
     val hasReport = state.hasReport
     val hasResultData = state.result?.hasContent == true
-    val canInteractWithPhotos = !hasReport && !state.isLoading
-    val canAddMorePhotos = uploads.size < MAX_PHOTO_COUNT
-    val canOpenPicker = canInteractWithPhotos && canAddMorePhotos
     val canSubmit = state.canSubmit && !hasReport
 
     val photoPicker = rememberPhotoPickerController(
@@ -98,7 +90,6 @@ fun AnalyzeScreen(
             )
         },
     )
-    var showSourceDialog by remember { mutableStateOf(false) }
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     LaunchedEffect(viewModel) {
@@ -108,12 +99,6 @@ fun AnalyzeScreen(
                     effect.message
                 )
             }
-        }
-    }
-
-    LaunchedEffect(hasReport) {
-        if (hasReport) {
-            showSourceDialog = false
         }
     }
 
@@ -156,14 +141,8 @@ fun AnalyzeScreen(
             item {
                 PhotosSection(
                     files = uploads,
-                    interactionEnabled = canInteractWithPhotos,
-                    canAddMore = canAddMorePhotos,
-                    hasResult = hasReport,
-                    onAddPhoto = {
-                        if (canOpenPicker) {
-                            showSourceDialog = true
-                        }
-                    },
+                    onTakePhotoClick = photoPicker::captureWithCamera,
+                    onUploadClick = photoPicker::pickFromGallery,
                 )
             }
 
@@ -220,21 +199,6 @@ fun AnalyzeScreen(
                 }
             }
         }
-    }
-
-    if (showSourceDialog) {
-        PhotoSourceDialog(
-            onDismiss = { showSourceDialog = false },
-            onPickFromGallery = {
-                showSourceDialog = false
-                photoPicker.pickFromGallery()
-            },
-            onCaptureWithCamera = {
-                showSourceDialog = false
-                photoPicker.captureWithCamera()
-            },
-            enabled = !state.isLoading,
-        )
     }
 
     PermissionDialogs(
@@ -327,56 +291,6 @@ private fun AnalyzeBottomBar(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun PhotosSection(
-    modifier: Modifier = Modifier,
-    files: Map<KmpFile, UploadItem>,
-    interactionEnabled: Boolean,
-    canAddMore: Boolean,
-    hasResult: Boolean,
-    onAddPhoto: () -> Unit,
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
-        color = AppTheme.colors.surface,
-        tonalElevation = AppDimens.Size.xs,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(AppDimens.Spacing.xl5),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl4),
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs),
-            ) {
-                Text(
-                    text = "Photos",
-                    style = AppTheme.typography.title,
-                )
-                val helperText = if (hasResult) {
-                    "Photos stay locked while this meal is being analyzed."
-                } else {
-                    "Tap to add images"
-                }
-                Text(
-                    text = helperText,
-                    style = AppTheme.typography.caption,
-                    color = AppTheme.colors.onSurface,
-                )
-            }
-
-            PhotosGridComponent(
-                files = files,
-                canAddMore = interactionEnabled && canAddMore,
-                interactionEnabled = interactionEnabled,
-                onAddPhoto = onAddPhoto,
-            )
         }
     }
 }
@@ -596,46 +510,3 @@ private fun ErrorMessage(
         )
     }
 }
-
-@Composable
-private fun PhotoSourceDialog(
-    onDismiss: () -> Unit,
-    onPickFromGallery: () -> Unit,
-    onCaptureWithCamera: () -> Unit,
-    enabled: Boolean,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Add meal photos",
-                style = AppTheme.typography.title,
-            )
-        },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-            ) {
-                TextButton(
-                    onClick = onPickFromGallery,
-                    enabled = enabled,
-                ) {
-                    Text("Pick from gallery")
-                }
-                TextButton(
-                    onClick = onCaptureWithCamera,
-                    enabled = enabled,
-                ) {
-                    Text("Take photo")
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Close")
-            }
-        },
-    )
-}
-
-private const val MAX_PHOTO_COUNT = 3

@@ -1,4 +1,4 @@
-package com.sirelon.aicalories.features.analyze.ui
+package com.sirelon.aicalories.features.media.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -22,17 +22,17 @@ import com.sirelon.aicalories.designsystem.AppAsyncImage
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.UploadStatusIndicator
-import com.sirelon.aicalories.features.analyze.presentation.UploadItem
+import com.sirelon.aicalories.features.media.upload.UploadingItem
 
 @Composable
 fun PhotosGridComponent(
-    files: Map<KmpFile, UploadItem>,
-    canAddMore: Boolean,
+    files: Map<KmpFile, UploadingItem>,
     interactionEnabled: Boolean,
     onAddPhoto: () -> Unit,
     gridSize: Int = 3,
+    maxFiles: Int = 5,
 ) {
-    val emptyItems = gridSize - files.size + if (canAddMore) 1 else 0
+    val emptyItems = maxFiles - files.size
     val spacing = AppDimens.Spacing.xl3
     val arrangement = Arrangement.spacedBy(spacing)
     BoxWithConstraints {

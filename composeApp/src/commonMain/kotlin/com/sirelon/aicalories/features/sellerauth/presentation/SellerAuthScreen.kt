@@ -114,23 +114,17 @@ fun SellerAuthScreen(
                             text = stringResource(Res.string.olx_auth_refresh_token),
                             onClick = { onEvent(SellerAuthContract.SellerAuthEvent.RefreshClicked) },
                             modifier = Modifier.weight(1f),
-                            containerColor = AppTheme.colors.warning,
-                            contentColor = AppTheme.colors.onPrimary,
                         )
                         AppButton(
                             text = stringResource(Res.string.olx_auth_test_me),
                             onClick = { onEvent(SellerAuthContract.SellerAuthEvent.TestMeClicked) },
                             modifier = Modifier.weight(1f),
-                            containerColor = AppTheme.colors.surfaceVariant,
-                            contentColor = AppTheme.colors.onSurface,
                         )
                     }
                     AppButton(
                         text = stringResource(Res.string.olx_auth_disconnect),
                         onClick = { onEvent(SellerAuthContract.SellerAuthEvent.DisconnectClicked) },
                         modifier = Modifier.fillMaxWidth(),
-                        containerColor = AppTheme.colors.error,
-                        contentColor = AppTheme.colors.onError,
                     )
                 }
             }
