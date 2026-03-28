@@ -104,5 +104,7 @@ object AppDimens {
         val xl4: TextUnit = 18.sp
         val xl5: TextUnit = 20.sp
         val xl6: TextUnit = 24.sp
+        val xl7: TextUnit = 32.sp
+        val xl8: TextUnit = 38.sp
     }
 }
