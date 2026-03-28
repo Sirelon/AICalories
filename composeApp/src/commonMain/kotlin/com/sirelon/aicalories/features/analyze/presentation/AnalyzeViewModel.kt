@@ -1,20 +1,14 @@
 package com.sirelon.aicalories.features.analyze.presentation
 
 import androidx.lifecycle.viewModelScope
-import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
-import com.mohamedrejeb.calf.io.getName
-import com.mohamedrejeb.calf.io.getPath
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository
 import com.sirelon.aicalories.features.analyze.data.ReportAnalysisUiMapper
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
-import com.sirelon.aicalories.features.media.ImageFormatConverter
-import com.sirelon.aicalories.features.media.upload.UploadedFile
+import com.sirelon.aicalories.features.media.upload.MediaUploadHelper
+import com.sirelon.aicalories.features.media.upload.MediaUploadUpdate
 import com.sirelon.aicalories.features.media.upload.UploadingItem
 import com.sirelon.aicalories.supabase.error.RemoteException
-import io.github.jan.supabase.storage.UploadStatus
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
@@ -24,12 +18,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 internal class AnalyzeViewModel(
     private val repository: AnalyzeRepository,
     private val mapper: ReportAnalysisUiMapper,
-    private val imageFormatConverter: ImageFormatConverter,
+    private val mediaUploadHelper: MediaUploadHelper,
 ) : BaseViewModel<AnalyzeContract.AnalyzeState, AnalyzeContract.AnalyzeEvent, AnalyzeContract.AnalyzeEffect>() {
 
     override fun initialState(): AnalyzeContract.AnalyzeState = AnalyzeContract.AnalyzeState()
@@ -72,7 +65,6 @@ internal class AnalyzeViewModel(
             .launchIn(viewModelScope)
     }
 
-
     override fun onEvent(event: AnalyzeContract.AnalyzeEvent) {
         when (event) {
             is AnalyzeContract.AnalyzeEvent.PromptChanged -> {
@@ -91,90 +83,52 @@ internal class AnalyzeViewModel(
 
     private fun onFileResult(event: AnalyzeContract.AnalyzeEvent.UploadFilesResult) {
         viewModelScope.launch {
-            val selectedFiles = event.result.getOrElse { error ->
-                showError(error.message ?: "Unable to access selected files.")
-                return@launch
-            }
-
-            if (selectedFiles.isEmpty()) {
-                showError("No files were selected.")
-                return@launch
-            }
-
-            val unsupportedFiles = selectedFiles.filterNot {
-                it.isSupportedOrConvertible(event.platformContext)
-            }
-
-            if (unsupportedFiles.isNotEmpty()) {
-                showError("Only JPG, PNG, or WEBP images are supported.")
-                return@launch
-            }
-
-            val processedFiles = runCatching {
-                withContext(Dispatchers.Default) {
-                    selectedFiles.map { file ->
-                        imageFormatConverter.convert(event.platformContext, file)
-                    }
+            mediaUploadHelper
+                .uploadSelectedFiles(
+                    platformContext = event.platformContext,
+                    selectionResult = event.result,
+                )
+                .catch { error ->
+                    showError(error.message ?: "Failed to upload file.")
                 }
-            }.getOrElse { error ->
-                showError(error.message ?: "Unable to process selected files.")
-                return@launch
-            }
-
-            setState { it.copy(errorMessage = null) }
-
-            processedFiles.forEach { file ->
-                addUploadPlaceholder(file)
-                viewModelScope.launch {
-                    uploadFileFlow(
-                        platformContext = event.platformContext,
-                        file = file,
-                    )
-                        .catch { error -> handleUploadFailure(file, error) }
-                        .collect()
-                }
-            }
+                .collect(::handleUploadUpdate)
         }
     }
 
-    private fun uploadFileFlow(
-        platformContext: PlatformContext,
-        file: KmpFile,
-    ): Flow<UploadStatus> = repository
-        .uploadFile(platformContext = platformContext, file = file)
-        .onEach { status ->
-            val percent = when (status) {
-                is UploadStatus.Progress -> {
-                    if (status.contentLength > 0) {
-                        (status.totalBytesSend.toDouble() / status.contentLength.toDouble()) * 100
-                    } else 0.0
-                }
-
-                is UploadStatus.Success -> 100.0
+    private fun handleUploadUpdate(update: MediaUploadUpdate) {
+        when (update) {
+            MediaUploadUpdate.Started -> {
+                setState { it.copy(errorMessage = null) }
             }
 
-            when (status) {
-                is UploadStatus.Progress -> updateUpload(
-                    file = file,
-                ) { item ->
-                    item.copy(progress = percent)
-                }
+            is MediaUploadUpdate.AddPlaceholder -> {
+                addUploadPlaceholder(update.file)
+            }
 
-                is UploadStatus.Success -> {
-                    updateUpload(
-                        file = file,
-                    ) { item ->
-                        item.copy(
-                            progress = percent,
-                            uploadedFile = UploadedFile(
-                                id = status.response.id,
-                                path = status.response.path,
-                            ),
-                        )
-                    }
+            is MediaUploadUpdate.Progress -> {
+                updateUpload(file = update.file) { item ->
+                    item.copy(progress = update.progress)
                 }
+            }
+
+            is MediaUploadUpdate.Success -> {
+                updateUpload(file = update.file) { item ->
+                    item.copy(
+                        progress = 100.0,
+                        uploadedFile = update.uploadedFile,
+                    )
+                }
+            }
+
+            is MediaUploadUpdate.Failure -> {
+                handleUploadFailure(file = update.file, message = update.message)
+            }
+
+            is MediaUploadUpdate.Error -> {
+                showError(update.message)
             }
         }
+    }
 
     private fun analyze() {
         val prompt = state.value.prompt.trim()
@@ -254,8 +208,7 @@ internal class AnalyzeViewModel(
         }
     }
 
-    private fun handleUploadFailure(file: KmpFile, error: Throwable) {
-        val message = error.message ?: "Failed to upload file."
+    private fun handleUploadFailure(file: KmpFile, message: String) {
         setState { current ->
             current.copy(
                 errorMessage = message,
@@ -281,20 +234,4 @@ internal class AnalyzeViewModel(
             )
         }
     }
-}
-
-private val SUPPORTED_IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "webp")
-private val CONVERTIBLE_IMAGE_EXTENSIONS = setOf("heic", "heif")
-
-private fun KmpFile.isSupportedOrConvertible(context: PlatformContext): Boolean {
-    val extension = getFileExtension(context) ?: return false
-    return extension in SUPPORTED_IMAGE_EXTENSIONS || extension in CONVERTIBLE_IMAGE_EXTENSIONS
-}
-
-private fun KmpFile.getFileExtension(context: PlatformContext): String? {
-    val candidate = getName(context)
-        ?: getPath(context)
-        ?: return null
-    val rawExt = candidate.substringAfterLast('.', missingDelimiterValue = "")
-    return rawExt.takeIf { it.isNotBlank() }?.lowercase()
 }
