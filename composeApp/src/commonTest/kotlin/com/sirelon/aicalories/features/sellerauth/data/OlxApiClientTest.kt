@@ -9,6 +9,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 
@@ -144,6 +146,69 @@ class OlxApiClientTest {
         assertTrue(result.isSuccess)
         assertEquals(listOf("Bearer stale-token", "Bearer refreshed-token"), seenAuthorizationHeaders)
         assertEquals("refreshed-token", tokenStore.read()?.accessToken)
+    }
+
+    @Test
+    fun `getAuthenticatedUser clears persisted tokens when refresh returns invalid_grant`() = runBlocking {
+        var refreshRequestCount = 0
+        val engine = MockEngine { request ->
+            when {
+                request.url.toString().contains("/partner/users/me") -> {
+                    respond(
+                        content = """
+                            {
+                              "error": "invalid_token",
+                              "error_description": "The access token provided is invalid"
+                            }
+                        """.trimIndent(),
+                        status = HttpStatusCode.Unauthorized,
+                        headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
+                    )
+                }
+
+                request.url.toString().contains("/open/oauth/token") -> {
+                    refreshRequestCount += 1
+                    respond(
+                        content = """
+                            {
+                              "error": "invalid_grant",
+                              "error_description": "Refresh token expired"
+                            }
+                        """.trimIndent(),
+                        status = HttpStatusCode.BadRequest,
+                        headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
+                    )
+                }
+
+                else -> error("Unexpected request: ${request.url}")
+            }
+        }
+        val tokenStore = InMemoryOlxTokenStore().apply {
+            write(
+                OlxTokens(
+                    accessToken = "stale-token",
+                    refreshToken = "bad-refresh-token",
+                    expiresInSeconds = 86_400,
+                    tokenType = "bearer",
+                    scope = "v2 read write",
+                    issuedAtEpochSeconds = 4_102_444_800,
+                ),
+            )
+        }
+        val apiClient = OlxApiClient(
+            createOlxAuthorizedHttpClient(
+                authRefreshClient = createOlxHttpClient(engine),
+                credentialsProvider = TestCredentialsProvider(),
+                tokenStore = tokenStore,
+                engine = engine,
+            ),
+        )
+
+        assertFailsWith<OlxApiException> {
+            apiClient.getAuthenticatedUser().getOrThrow()
+        }
+        assertEquals(1, refreshRequestCount)
+        assertNull(tokenStore.read())
     }
 
     private fun createRepository(
