@@ -1,20 +1,17 @@
 <resources>
-    <string name="sell_snap">SellSnap</string>
-    <string name="turn_stuff_into_olx_listings">Turn your stuff into OLX listings instantly</string>
+    <string name="turn_stuff_into_olx_listings">Turn your stuff into OLX listings instantly  </string>
     <string name="snap_photo_ad_desc">Snap a photo and let AI create the perfect ad for you</string>
     <string name="add_photo">Add Photo</string>
-    <string name="photos_count_limit">%1$d/%2$d photos</string>
     <string name="take_photo">Take Photo</string>
-    <string name="generate_ad_with_ai">Generate Ad with AI</string>
     <string name="tips_for_better_photos">Tips for better photos</string>
-    <string name="tip_lighting">Good lighting improves results</string>
-    <string name="tip_angles">Include multiple angles</string>
-    <string name="tip_defects">Show any defects clearly</string>
+    <string name="tip_lighting">Good lighting improves results  </string>
+    <string name="tip_angles">Include multiple angles  </string>
+    <string name="tip_defects">Show any defects clearly </string>
     <string name="olx_auth_screen_title">OLX Seller Auth</string>
-    <string name="olx_auth_screen_subtitle">Connect an OLX account now so seller API calls can be added on top later.</string>
-    <string name="olx_auth_connect">Connect OLX</string>
+    <string name="olx_auth_screen_subtitle">Connect an OLX account now so seller API calls can be added on top later. </string>
+    <string name="olx_auth_connect">Connect OLX </string>
     <string name="olx_auth_connected">OLX account connected</string>
-    <string name="olx_auth_refresh_token">Refresh token</string>
-    <string name="olx_auth_test_me">Test /users/me</string>
-    <string name="olx_auth_disconnect">Disconnect</string>
+    <string name="olx_auth_refresh_token">Refresh token  </string>
+    <string name="olx_auth_test_me">Test /users/me </string>
+    <string name="olx_auth_disconnect">Disconnect  </string>
 </resources>

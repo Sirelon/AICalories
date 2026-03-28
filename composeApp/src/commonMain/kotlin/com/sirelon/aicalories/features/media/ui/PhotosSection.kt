@@ -18,7 +18,6 @@ import androidx.compose.ui.text.font.FontWeight
 import com.mohamedrejeb.calf.io.KmpFile
 import com.sirelon.aicalories.composeapp.generated.resources.Res
 import com.sirelon.aicalories.composeapp.generated.resources.add_photo
-import com.sirelon.aicalories.composeapp.generated.resources.photos_count_limit
 import com.sirelon.aicalories.composeapp.generated.resources.take_photo
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
@@ -60,7 +59,7 @@ fun PhotosSection(
                     color = AppTheme.colors.onSurface
                 )
                 Text(
-                    text = stringResource(Res.string.photos_count_limit, photoCount, maxPhotos),
+                    text = "$photoCount/$maxPhotos photos",
                     fontSize = AppDimens.TextSize.xl2,
                     color = AppTheme.colors.onSurfaceSoft,
                     fontWeight = FontWeight.Medium

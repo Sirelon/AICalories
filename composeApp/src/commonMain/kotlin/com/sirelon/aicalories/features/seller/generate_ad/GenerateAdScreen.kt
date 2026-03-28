@@ -37,11 +37,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mohamedrejeb.calf.core.LocalPlatformContext
+import com.mohamedrejeb.calf.permissions.Camera
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.composeapp.generated.resources.Res
-import com.sirelon.aicalories.composeapp.generated.resources.generate_ad_with_ai
 import com.sirelon.aicalories.composeapp.generated.resources.ic_snap_logo
-import com.sirelon.aicalories.composeapp.generated.resources.sell_snap
 import com.sirelon.aicalories.composeapp.generated.resources.snap_photo_ad_desc
 import com.sirelon.aicalories.composeapp.generated.resources.tip_angles
 import com.sirelon.aicalories.composeapp.generated.resources.tip_defects
@@ -142,7 +141,7 @@ private fun GenerateAdScreenContent(
             AppButton(
                 modifier = Modifier.fillMaxWidth(),
                 style = AppButtonDefaults.primary(),
-                text = if (state.isLoading) "Generating..." else stringResource(Res.string.generate_ad_with_ai),
+                text = if (state.isLoading) "Generating..." else "Generate Ad with AI",
                 onClick = onSubmitClick,
                 icon = if (state.isLoading) null else Icons.Rounded.Star,
                 enabled = state.canSubmit,
@@ -283,7 +282,7 @@ private fun SellerHeader(
                     )
                 }
                 Text(
-                    text = stringResource(Res.string.sell_snap),
+                    text = "SellSnap",
                     color = AppTheme.colors.onPrimary,
                     fontSize = AppDimens.TextSize.xl6,
                     fontWeight = FontWeight.Bold
