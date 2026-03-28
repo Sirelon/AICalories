@@ -1,9 +1,9 @@
-package com.sirelon.aicalories.features.sellerauth.data
+package com.sirelon.aicalories.features.seller.auth.data
 
-import com.sirelon.aicalories.features.sellerauth.domain.OlxAuthCallback
-import com.sirelon.aicalories.features.sellerauth.domain.OlxLaunchResult
-import com.sirelon.aicalories.features.sellerauth.domain.OlxPendingAuthSession
-import com.sirelon.aicalories.features.sellerauth.domain.OlxTokens
+import com.sirelon.aicalories.features.seller.auth.domain.OlxAuthCallback
+import com.sirelon.aicalories.features.seller.auth.domain.OlxLaunchResult
+import com.sirelon.aicalories.features.seller.auth.domain.OlxPendingAuthSession
+import com.sirelon.aicalories.features.seller.auth.domain.OlxTokens
 import com.sirelon.aicalories.platform.PlatformTargets
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

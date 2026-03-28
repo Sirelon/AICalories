@@ -1,6 +1,6 @@
-package com.sirelon.aicalories.features.sellerauth.presentation
+package com.sirelon.aicalories.features.seller.auth.presentation
 
-import com.sirelon.aicalories.features.sellerauth.domain.OlxMeResponse
+import com.sirelon.aicalories.features.seller.auth.domain.OlxMeResponse
 
 interface SellerAuthContract {
 

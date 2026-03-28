@@ -1,6 +1,6 @@
-package com.sirelon.aicalories.features.sellerauth.data
+package com.sirelon.aicalories.features.seller.auth.data
 
-import com.sirelon.aicalories.features.sellerauth.domain.OlxAuthCallback
+import com.sirelon.aicalories.features.seller.auth.domain.OlxAuthCallback
 import com.sirelon.aicalories.platform.PlatformTargets
 import io.ktor.http.Url
 

@@ -1,4 +1,4 @@
-package com.sirelon.aicalories.features.sellerauth.data
+package com.sirelon.aicalories.features.seller.auth.data
 
 import com.sirelon.aicalories.config.AppConfig
 

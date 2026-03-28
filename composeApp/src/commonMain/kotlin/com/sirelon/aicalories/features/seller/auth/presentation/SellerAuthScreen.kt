@@ -1,4 +1,4 @@
-package com.sirelon.aicalories.features.sellerauth.presentation
+package com.sirelon.aicalories.features.seller.auth.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,11 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import com.sirelon.aicalories.designsystem.AppCard
-import com.sirelon.aicalories.designsystem.AppDimens
-import com.sirelon.aicalories.designsystem.AppScaffold
-import com.sirelon.aicalories.designsystem.AppTheme
-import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.composeapp.generated.resources.Res
 import com.sirelon.aicalories.composeapp.generated.resources.olx_auth_connect
 import com.sirelon.aicalories.composeapp.generated.resources.olx_auth_connected
@@ -30,6 +25,11 @@ import com.sirelon.aicalories.composeapp.generated.resources.olx_auth_refresh_to
 import com.sirelon.aicalories.composeapp.generated.resources.olx_auth_screen_subtitle
 import com.sirelon.aicalories.composeapp.generated.resources.olx_auth_screen_title
 import com.sirelon.aicalories.composeapp.generated.resources.olx_auth_test_me
+import com.sirelon.aicalories.designsystem.AppCard
+import com.sirelon.aicalories.designsystem.AppDimens
+import com.sirelon.aicalories.designsystem.AppScaffold
+import com.sirelon.aicalories.designsystem.AppTheme
+import com.sirelon.aicalories.designsystem.buttons.AppButton
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

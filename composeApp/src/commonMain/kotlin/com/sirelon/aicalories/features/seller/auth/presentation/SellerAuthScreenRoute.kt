@@ -1,4 +1,4 @@
-package com.sirelon.aicalories.features.sellerauth.presentation
+package com.sirelon.aicalories.features.seller.auth.presentation
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -8,9 +8,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.sirelon.aicalories.features.sellerauth.data.OlxAuthCallbackBridge
-import com.sirelon.aicalories.features.sellerauth.data.OlxExternalAuthLauncher
-import com.sirelon.aicalories.features.sellerauth.domain.OlxLaunchResult
+import com.sirelon.aicalories.features.seller.auth.data.OlxAuthCallbackBridge
+import com.sirelon.aicalories.features.seller.auth.data.OlxExternalAuthLauncher
+import com.sirelon.aicalories.features.seller.auth.domain.OlxLaunchResult
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable

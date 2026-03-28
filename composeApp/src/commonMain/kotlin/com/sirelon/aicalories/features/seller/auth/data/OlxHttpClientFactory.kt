@@ -1,8 +1,8 @@
-package com.sirelon.aicalories.features.sellerauth.data
+package com.sirelon.aicalories.features.seller.auth.data
 
-import com.sirelon.aicalories.features.sellerauth.domain.OlxApiError
-import com.sirelon.aicalories.features.sellerauth.domain.OlxApiException
-import com.sirelon.aicalories.features.sellerauth.domain.OlxTokens
+import com.sirelon.aicalories.features.seller.auth.domain.OlxApiError
+import com.sirelon.aicalories.features.seller.auth.domain.OlxApiException
+import com.sirelon.aicalories.features.seller.auth.domain.OlxTokens
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
@@ -26,6 +26,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlin.time.Clock
 
 fun createOlxHttpClient(engine: HttpClientEngine? = null): HttpClient {
     return if (engine != null) {
@@ -153,7 +154,7 @@ private class RefreshTokenResponse(
         expiresInSeconds = expiresInSeconds,
         tokenType = tokenType,
         scope = scope,
-        issuedAtEpochSeconds = kotlin.time.Clock.System.now().toEpochMilliseconds() / 1000,
+        issuedAtEpochSeconds = Clock.System.now().toEpochMilliseconds() / 1000,
     )
 }
 

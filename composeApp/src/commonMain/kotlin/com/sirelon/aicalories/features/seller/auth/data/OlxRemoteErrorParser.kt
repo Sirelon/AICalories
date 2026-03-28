@@ -1,7 +1,7 @@
-package com.sirelon.aicalories.features.sellerauth.data
+package com.sirelon.aicalories.features.seller.auth.data
 
-import com.sirelon.aicalories.features.sellerauth.domain.OlxApiError
-import com.sirelon.aicalories.features.sellerauth.domain.OlxApiException
+import com.sirelon.aicalories.features.seller.auth.domain.OlxApiError
+import com.sirelon.aicalories.features.seller.auth.domain.OlxApiException
 import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

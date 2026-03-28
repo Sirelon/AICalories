@@ -1,9 +1,9 @@
-package com.sirelon.aicalories.features.sellerauth.presentation
+package com.sirelon.aicalories.features.seller.auth.presentation
 
 import androidx.lifecycle.viewModelScope
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
-import com.sirelon.aicalories.features.sellerauth.data.OlxApiClient
-import com.sirelon.aicalories.features.sellerauth.data.OlxAuthRepository
+import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
+import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
 import kotlinx.coroutines.launch
 
 class SellerAuthViewModel(

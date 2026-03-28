@@ -1,4 +1,4 @@
-package com.sirelon.aicalories.features.seller
+package com.sirelon.aicalories.features.seller.generate_ad
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -34,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.mohamedrejeb.calf.permissions.Camera
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.generate_ad_with_ai
 import com.sirelon.aicalories.composeapp.generated.resources.ic_snap_logo
 import com.sirelon.aicalories.composeapp.generated.resources.sell_snap
 import com.sirelon.aicalories.composeapp.generated.resources.snap_photo_ad_desc
@@ -45,6 +47,8 @@ import com.sirelon.aicalories.composeapp.generated.resources.turn_stuff_into_olx
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.IconWithBackground
+import com.sirelon.aicalories.designsystem.buttons.AppButton
+import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
@@ -53,7 +57,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun SellerScreen(
+fun GenerateAdScreen(
     onBack: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -69,7 +73,16 @@ fun SellerScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            AppButton(
+                modifier = Modifier.fillMaxWidth(),
+                style = AppButtonDefaults.primary(),
+                text = stringResource(Res.string.generate_ad_with_ai),
+                onClick = { },
+                icon = Icons.Rounded.Star,
+            )
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -248,8 +261,8 @@ private fun TipItem(
 
 @Preview
 @Composable
-private fun SellerScreenPreview() {
+private fun GenerateAdScreenPreview() {
     AppTheme {
-        SellerScreen()
+        GenerateAdScreen()
     }
 }

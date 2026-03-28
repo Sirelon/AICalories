@@ -10,8 +10,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import com.sirelon.aicalories.designsystem.AppDimens
@@ -22,6 +24,7 @@ fun AppButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    style: AppButtonStyle = AppButtonDefaults.primary(),
     icon: ImageVector? = null,
 ) {
     Button(
@@ -29,8 +32,8 @@ fun AppButton(
         modifier = modifier.height(AppDimens.Size.xl8 + AppDimens.Size.xl7),
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl4),
         colors = ButtonDefaults.buttonColors(
-            containerColor = AppTheme.colors.warning,
-            contentColor = AppTheme.colors.onPrimary,
+            containerColor = style.backgroundColor,
+            contentColor = style.contentColor,
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = AppDimens.Size.xs),
     ) {
@@ -51,5 +54,32 @@ fun AppButton(
                 fontWeight = FontWeight.Bold,
             )
         }
+    }
+}
+
+data class AppButtonStyle(
+    val backgroundColor: Color,
+    val contentColor: Color,
+)
+
+data object AppButtonDefaults {
+
+
+    @Composable
+    @ReadOnlyComposable
+    fun primary(): AppButtonStyle {
+        return AppButtonStyle(
+            backgroundColor = AppTheme.colors.primary,
+            contentColor = AppTheme.colors.onPrimary,
+        )
+    }
+
+    @Composable
+    @ReadOnlyComposable
+    fun secondary(): AppButtonStyle {
+        return AppButtonStyle(
+            backgroundColor = AppTheme.colors.warning,
+            contentColor = AppTheme.colors.onPrimary,
+        )
     }
 }

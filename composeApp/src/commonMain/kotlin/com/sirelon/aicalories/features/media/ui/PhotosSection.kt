@@ -23,6 +23,7 @@ import com.sirelon.aicalories.composeapp.generated.resources.take_photo
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.buttons.AppButton
+import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.designsystem.buttons.AppIconButton
 import com.sirelon.aicalories.features.media.upload.UploadingItem
 import org.jetbrains.compose.resources.stringResource
@@ -80,6 +81,7 @@ fun PhotosSection(
             ) {
                 AppButton(
                     modifier = Modifier.weight(1f),
+                    style = AppButtonDefaults.secondary(),
                     text = stringResource(Res.string.take_photo),
                     onClick = onTakePhotoClick,
                     icon = Icons.Default.CameraAlt,

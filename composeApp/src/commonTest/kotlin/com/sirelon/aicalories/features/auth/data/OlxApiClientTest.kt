@@ -1,6 +1,16 @@
-package com.sirelon.aicalories.features.sellerauth.data
+package com.sirelon.aicalories.features.auth.data
 
-import com.sirelon.aicalories.features.sellerauth.domain.OlxTokens
+import com.sirelon.aicalories.features.seller.auth.data.InMemoryOlxAuthSessionStore
+import com.sirelon.aicalories.features.seller.auth.data.InMemoryOlxTokenStore
+import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
+import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
+import com.sirelon.aicalories.features.seller.auth.data.OlxCredentialsProvider
+import com.sirelon.aicalories.features.seller.auth.data.OlxRedirectHandler
+import com.sirelon.aicalories.features.seller.auth.data.OlxTokenStore
+import com.sirelon.aicalories.features.seller.auth.data.createOlxAuthorizedHttpClient
+import com.sirelon.aicalories.features.seller.auth.data.createOlxHttpClient
+import com.sirelon.aicalories.features.seller.auth.domain.OlxAuthCallback
+import com.sirelon.aicalories.features.seller.auth.domain.OlxTokens
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.http.ContentType
@@ -243,9 +253,9 @@ class OlxApiClientTest {
             return "aicalories://olx-auth/callback"
         }
 
-        override fun parseCallback(url: String): com.sirelon.aicalories.features.sellerauth.domain.OlxAuthCallback {
+        override fun parseCallback(url: String): OlxAuthCallback {
             val parsed = io.ktor.http.Url(url)
-            return com.sirelon.aicalories.features.sellerauth.domain.OlxAuthCallback(
+            return OlxAuthCallback(
                 code = parsed.parameters["code"],
                 state = parsed.parameters["state"],
                 error = parsed.parameters["error"],

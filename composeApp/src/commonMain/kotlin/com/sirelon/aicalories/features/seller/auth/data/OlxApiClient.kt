@@ -1,6 +1,6 @@
-package com.sirelon.aicalories.features.sellerauth.data
+package com.sirelon.aicalories.features.seller.auth.data
 
-import com.sirelon.aicalories.features.sellerauth.domain.OlxMeResponse
+import com.sirelon.aicalories.features.seller.auth.domain.OlxMeResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get

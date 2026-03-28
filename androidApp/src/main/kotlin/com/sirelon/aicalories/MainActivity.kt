@@ -7,7 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.sirelon.aicalories.features.sellerauth.data.OlxAuthCallbackBridge
+import com.sirelon.aicalories.features.seller.auth.data.OlxAuthCallbackBridge
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
