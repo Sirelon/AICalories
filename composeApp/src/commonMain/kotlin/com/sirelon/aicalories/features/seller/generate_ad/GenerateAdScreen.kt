@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -25,6 +26,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +35,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import com.mohamedrejeb.calf.permissions.Camera
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mohamedrejeb.calf.core.LocalPlatformContext
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.composeapp.generated.resources.Res
 import com.sirelon.aicalories.composeapp.generated.resources.generate_ad_with_ai
@@ -47,6 +51,7 @@ import com.sirelon.aicalories.composeapp.generated.resources.turn_stuff_into_olx
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.IconWithBackground
+import com.sirelon.aicalories.designsystem.Input
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.features.media.PermissionDialogs
@@ -55,22 +60,81 @@ import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.features.media.ui.PhotosSection
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun GenerateAdScreen(
     onBack: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val viewModel: GenerateAdViewModel = koinViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val platformContext = LocalPlatformContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val permissionController = rememberPermissionController(permission = Permission.Camera)
 
     val photoPicker = rememberPhotoPickerController(
         permissionController = permissionController,
-        onResult = {
-            // TODO: Handle photo result
+        onResult = { selectionResult ->
+            viewModel.onEvent(
+                GenerateAdContract.GenerateAdEvent.UploadFilesResult(
+                    platformContext = platformContext,
+                    result = selectionResult,
+                )
+            )
         },
     )
 
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is GenerateAdContract.GenerateAdEffect.ShowMessage -> {
+                    snackbarHostState.showSnackbar(effect.message)
+                }
+            }
+        }
+    }
+
+    GenerateAdScreenContent(
+        state = state,
+        snackbarHostState = snackbarHostState,
+        onPromptChanged = {
+            viewModel.onEvent(GenerateAdContract.GenerateAdEvent.PromptChanged(it))
+        },
+        onTakePhotoClick = {
+            if (!state.isLoading) {
+                photoPicker.captureWithCamera()
+            }
+        },
+        onUploadClick = {
+            if (!state.isLoading) {
+                photoPicker.pickFromGallery()
+            }
+        },
+        onSubmitClick = {
+            if (state.canSubmit) {
+                viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit)
+            }
+        },
+        modifier = modifier,
+    )
+
+    PermissionDialogs(
+        controller = permissionController,
+    )
+}
+
+@Composable
+private fun GenerateAdScreenContent(
+    state: GenerateAdContract.GenerateAdState,
+    snackbarHostState: SnackbarHostState,
+    onPromptChanged: (String) -> Unit,
+    onTakePhotoClick: () -> Unit,
+    onUploadClick: () -> Unit,
+    onSubmitClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -78,9 +142,10 @@ fun GenerateAdScreen(
             AppButton(
                 modifier = Modifier.fillMaxWidth(),
                 style = AppButtonDefaults.primary(),
-                text = stringResource(Res.string.generate_ad_with_ai),
-                onClick = { },
-                icon = Icons.Rounded.Star,
+                text = if (state.isLoading) "Generating..." else stringResource(Res.string.generate_ad_with_ai),
+                onClick = onSubmitClick,
+                icon = if (state.isLoading) null else Icons.Rounded.Star,
+                enabled = state.canSubmit,
             )
         }
     ) { padding ->
@@ -94,18 +159,70 @@ fun GenerateAdScreen(
         ) {
             SellerHeader()
             PhotosSection(
-                onTakePhotoClick = photoPicker::captureWithCamera,
-                onUploadClick = photoPicker::pickFromGallery,
-                // TODO:
-                files = emptyMap(),
+                onTakePhotoClick = onTakePhotoClick,
+                onUploadClick = onUploadClick,
+                files = state.uploads,
             )
+            PromptSection(
+                value = state.prompt,
+                enabled = !state.isLoading,
+                onValueChange = onPromptChanged,
+            )
+            state.errorMessage?.let { errorMessage ->
+                Text(
+                    text = errorMessage,
+                    color = AppTheme.colors.error,
+                    fontSize = AppDimens.TextSize.xl2,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
             TipsSection()
+            if (state.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .size(AppDimens.Size.xl8),
+                    color = AppTheme.colors.primary,
+                    strokeWidth = AppDimens.BorderWidth.s,
+                )
+            }
         }
     }
+}
 
-    PermissionDialogs(
-        controller = permissionController,
-    )
+@Composable
+private fun PromptSection(
+    value: String,
+    enabled: Boolean,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(AppDimens.BorderRadius.xl7),
+        color = AppTheme.colors.surface,
+    ) {
+        Column(
+            modifier = Modifier.padding(AppDimens.Spacing.xl6),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
+        ) {
+            Text(
+                text = "Describe your item",
+                fontSize = AppDimens.TextSize.xl5,
+                fontWeight = FontWeight.Bold,
+                color = AppTheme.colors.onSurface,
+            )
+            Input(
+                value = value,
+                onValueChange = onValueChange,
+                enabled = enabled,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = "Brand, condition, accessories, defects...",
+                minLines = 3,
+                maxLines = 5,
+            )
+        }
+    }
 }
 
 @Composable
@@ -263,6 +380,13 @@ private fun TipItem(
 @Composable
 private fun GenerateAdScreenPreview() {
     AppTheme {
-        GenerateAdScreen()
+        GenerateAdScreenContent(
+            state = GenerateAdContract.GenerateAdState(),
+            snackbarHostState = remember { SnackbarHostState() },
+            onPromptChanged = {},
+            onTakePhotoClick = {},
+            onUploadClick = {},
+            onSubmitClick = {},
+        )
     }
 }

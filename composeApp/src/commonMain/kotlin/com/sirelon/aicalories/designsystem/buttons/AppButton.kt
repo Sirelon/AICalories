@@ -26,14 +26,18 @@ fun AppButton(
     modifier: Modifier = Modifier,
     style: AppButtonStyle = AppButtonDefaults.primary(),
     icon: ImageVector? = null,
+    enabled: Boolean = true,
 ) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         modifier = modifier.height(AppDimens.Size.xl8 + AppDimens.Size.xl7),
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl4),
         colors = ButtonDefaults.buttonColors(
             containerColor = style.backgroundColor,
             contentColor = style.contentColor,
+            disabledContainerColor = style.backgroundColor.copy(alpha = 0.55f),
+            disabledContentColor = style.contentColor.copy(alpha = 0.7f),
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = AppDimens.Size.xs),
     ) {
