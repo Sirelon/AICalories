@@ -1,5 +1,7 @@
 package com.sirelon.aicalories.features.sellerauth.data
 
+import com.sirelon.aicalories.features.sellerauth.domain.OlxApiError
+import com.sirelon.aicalories.features.sellerauth.domain.OlxApiException
 import com.sirelon.aicalories.features.sellerauth.domain.OlxTokens
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -50,17 +52,24 @@ fun createOlxAuthorizedHttpClient(
                     request.url.toString().startsWith("${OlxConfig.apiBaseUrl}${OlxConfig.partnerApiBasePath}/")
                 }
                 refreshTokens {
-                    val refreshedTokens = refreshOlxBearerTokens(
-                        client = authRefreshClient,
-                        credentialsProvider = credentialsProvider,
-                        refreshToken = oldTokens?.refreshToken,
-                    )
-                    if (refreshedTokens == null) {
-                        tokenStore.clear()
-                        null
-                    } else {
-                        tokenStore.write(refreshedTokens)
-                        refreshedTokens.toBearerTokens()
+                    try {
+                        val refreshedTokens = refreshOlxBearerTokens(
+                            client = authRefreshClient,
+                            credentialsProvider = credentialsProvider,
+                            refreshToken = oldTokens?.refreshToken,
+                        )
+                        if (refreshedTokens == null) {
+                            tokenStore.clear()
+                            null
+                        } else {
+                            tokenStore.write(refreshedTokens)
+                            refreshedTokens.toBearerTokens()
+                        }
+                    } catch (exception: OlxApiException) {
+                        if (exception.error.isTerminalRefreshFailure()) {
+                            tokenStore.clear()
+                        }
+                        throw exception
                     }
                 }
             }
@@ -124,6 +133,11 @@ private fun OlxTokens.toBearerTokens(): BearerTokens = BearerTokens(
     accessToken = accessToken,
     refreshToken = refreshToken ?: "",
 )
+
+private fun OlxApiError.isTerminalRefreshFailure(): Boolean = when (this) {
+    is OlxApiError.InvalidGrant, is OlxApiError.InvalidToken -> true
+    else -> false
+}
 
 @Serializable
 private class RefreshTokenResponse(
