@@ -12,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import com.sirelon.aicalories.designsystem.AppDimens
@@ -24,16 +23,14 @@ fun AppButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    containerColor: Color = AppTheme.colors.primary,
-    contentColor: Color = AppTheme.colors.onPrimary,
 ) {
     Button(
         onClick = onClick,
         modifier = modifier.height(AppDimens.Size.xl8 + AppDimens.Size.xl7),
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl4),
         colors = ButtonDefaults.buttonColors(
-            containerColor = containerColor,
-            contentColor = contentColor,
+            containerColor = AppTheme.colors.warning,
+            contentColor = AppTheme.colors.onPrimary,
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = AppDimens.Size.xs),
     ) {

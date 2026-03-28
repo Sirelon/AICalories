@@ -2,8 +2,8 @@ package com.sirelon.aicalories.features.analyze.presentation
 
 import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
-import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository.UploadedFile
 import com.sirelon.aicalories.features.analyze.model.MealAnalysisUi
+import com.sirelon.aicalories.features.media.upload.UploadingItem
 
 interface AnalyzeContract {
 
@@ -13,7 +13,7 @@ interface AnalyzeContract {
         val result: MealAnalysisUi? = null,
         val hasReport: Boolean = false,
         val errorMessage: String? = null,
-        val uploads: Map<KmpFile, UploadItem> = emptyMap(),
+        val uploads: Map<KmpFile, UploadingItem> = emptyMap(),
     ) {
         val hasPendingUploads: Boolean
             get() = uploads.values.any { !it.isUploaded }
@@ -39,9 +39,3 @@ interface AnalyzeContract {
     }
 }
 
-data class UploadItem(
-    val progress: Double = 0.0,
-    val uploadedFile: UploadedFile? = null,
-) {
-    val isUploaded: Boolean get() = uploadedFile != null
-}

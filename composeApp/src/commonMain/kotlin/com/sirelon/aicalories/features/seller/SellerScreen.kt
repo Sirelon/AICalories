@@ -10,12 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -31,26 +31,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import com.mohamedrejeb.calf.permissions.Camera
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.composeapp.generated.resources.Res
-import com.sirelon.aicalories.composeapp.generated.resources.add_photo
 import com.sirelon.aicalories.composeapp.generated.resources.ic_snap_logo
-import com.sirelon.aicalories.composeapp.generated.resources.photos_count_limit
 import com.sirelon.aicalories.composeapp.generated.resources.sell_snap
 import com.sirelon.aicalories.composeapp.generated.resources.snap_photo_ad_desc
-import com.sirelon.aicalories.composeapp.generated.resources.take_photo
 import com.sirelon.aicalories.composeapp.generated.resources.tip_angles
 import com.sirelon.aicalories.composeapp.generated.resources.tip_defects
 import com.sirelon.aicalories.composeapp.generated.resources.tip_lighting
 import com.sirelon.aicalories.composeapp.generated.resources.tips_for_better_photos
 import com.sirelon.aicalories.composeapp.generated.resources.turn_stuff_into_olx_listings
 import com.sirelon.aicalories.designsystem.AppDimens
-import com.sirelon.aicalories.designsystem.IconWithBackground
 import com.sirelon.aicalories.designsystem.AppTheme
-import com.sirelon.aicalories.designsystem.buttons.AppButton
-import com.sirelon.aicalories.designsystem.buttons.AppIconButton
+import com.sirelon.aicalories.designsystem.IconWithBackground
+import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
+import com.sirelon.aicalories.features.media.ui.PhotosSection
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -71,28 +69,30 @@ fun SellerScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = AppTheme.colors.background,
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .padding(AppDimens.Spacing.xl3),
+                .padding(AppDimens.Spacing.xl3)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
         ) {
             SellerHeader()
-            AddPhotoSection(
-                onTakePhotoClick = {
-                    photoPicker.captureWithCamera()
-                },
-                onUploadClick = {
-                    photoPicker.pickFromGallery()
-                }
+            PhotosSection(
+                onTakePhotoClick = photoPicker::captureWithCamera,
+                onUploadClick = photoPicker::pickFromGallery,
+                // TODO:
+                files = emptyMap(),
             )
             TipsSection()
         }
     }
+
+    PermissionDialogs(
+        controller = permissionController,
+    )
 }
 
 @Composable
@@ -174,64 +174,6 @@ private fun SellerHeader(
                 fontSize = AppDimens.TextSize.xl3,
                 fontWeight = FontWeight.Medium
             )
-        }
-    }
-}
-
-@Composable
-private fun AddPhotoSection(
-    onTakePhotoClick: () -> Unit,
-    onUploadClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    photoCount: Int = 0,
-    maxPhotos: Int = 5
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(AppDimens.BorderRadius.xl7),
-        color = AppTheme.colors.surface,
-        shadowElevation = AppDimens.Spacing.xs2
-    ) {
-        Column(
-            modifier = Modifier.padding(AppDimens.Spacing.xl6),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl5)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(Res.string.add_photo),
-                    fontSize = AppDimens.TextSize.xl5,
-                    fontWeight = FontWeight.Bold,
-                    color = AppTheme.colors.onSurface
-                )
-                Text(
-                    text = stringResource(Res.string.photos_count_limit, photoCount, maxPhotos),
-                    fontSize = AppDimens.TextSize.xl2,
-                    color = AppTheme.colors.onSurfaceSoft,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl)
-            ) {
-                AppButton(
-                    text = stringResource(Res.string.take_photo),
-                    onClick = onTakePhotoClick,
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.CameraAlt,
-                    containerColor = AppTheme.colors.warning,
-                )
-
-                AppIconButton(
-                    icon = Icons.Default.FileUpload,
-                    onClick = onUploadClick,
-                )
-            }
         }
     }
 }

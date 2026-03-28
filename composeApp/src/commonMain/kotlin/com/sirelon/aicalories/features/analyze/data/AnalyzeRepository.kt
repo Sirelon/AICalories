@@ -5,6 +5,7 @@ import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.io.getName
 import com.mohamedrejeb.calf.io.getPath
 import com.mohamedrejeb.calf.io.readByteArray
+import com.sirelon.aicalories.features.media.upload.UploadedFile
 import com.sirelon.aicalories.supabase.SupabaseClient
 import com.sirelon.aicalories.supabase.model.AnalyseReportData
 import io.github.jan.supabase.storage.UploadStatus
@@ -19,11 +20,6 @@ import kotlin.uuid.Uuid
 class AnalyzeRepository(
     private val client: SupabaseClient,
 ) {
-
-    data class UploadedFile(
-        val id: String?,
-        val path: String,
-    )
 
     fun uploadFile(platformContext: PlatformContext, file: KmpFile): Flow<UploadStatus> {
         return flow {

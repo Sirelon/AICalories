@@ -6,10 +6,11 @@ import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.io.getName
 import com.mohamedrejeb.calf.io.getPath
 import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository
-import com.sirelon.aicalories.features.analyze.data.AnalyzeRepository.UploadedFile
 import com.sirelon.aicalories.features.analyze.data.ReportAnalysisUiMapper
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.media.ImageFormatConverter
+import com.sirelon.aicalories.features.media.upload.UploadedFile
+import com.sirelon.aicalories.features.media.upload.UploadingItem
 import com.sirelon.aicalories.supabase.error.RemoteException
 import io.github.jan.supabase.storage.UploadStatus
 import kotlinx.coroutines.Dispatchers
@@ -247,7 +248,7 @@ internal class AnalyzeViewModel(
                 current
             } else {
                 current.copy(
-                    uploads = current.uploads + (file to UploadItem())
+                    uploads = current.uploads + (file to UploadingItem())
                 )
             }
         }
@@ -271,7 +272,7 @@ internal class AnalyzeViewModel(
 
     private fun updateUpload(
         file: KmpFile,
-        reducer: (UploadItem) -> UploadItem,
+        reducer: (UploadingItem) -> UploadingItem,
     ) {
         setState { current ->
             val existing = current.uploads[file] ?: return@setState current
