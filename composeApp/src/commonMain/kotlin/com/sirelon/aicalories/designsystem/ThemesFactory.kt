@@ -16,6 +16,13 @@ object ThemesFactory {
         onError = Color(0xFFFFFFFF),
         success = Color(0xFF1B8E5A),
         outline = Color(0xFFCBD5E1),
+        warning = Color(0xFFE67E22),
+        warningVariant = Color(0xFFF28B44),
+        onSurfaceMuted = Color(0xFF475569),
+        onSurfaceSoft = Color(0xFF64748B),
+        surfaceSubtle = Color(0xFFF1F5F9),
+        infoSurface = Color(0xFFF0F4FF),
+        infoSurfaceVariant = Color(0xFFDCE4FF),
     )
 
     fun dark(): AppColors = AppColors(
@@ -30,6 +37,13 @@ object ThemesFactory {
         onError = Color(0xFF680003),
         success = Color(0xFF4FD28A),
         outline = Color(0xFF3F4753),
+        warning = Color(0xFFF59E0B),
+        warningVariant = Color(0xFFFBBF24),
+        onSurfaceMuted = Color(0xFF94A3B8),
+        onSurfaceSoft = Color(0xFFA8B6C7),
+        surfaceSubtle = Color(0xFF28313C),
+        infoSurface = Color(0xFF232B45),
+        infoSurfaceVariant = Color(0xFF33406A),
     )
 
 

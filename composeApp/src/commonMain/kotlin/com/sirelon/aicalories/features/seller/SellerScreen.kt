@@ -7,21 +7,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -33,13 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.mohamedrejeb.calf.core.LocalPlatformContext
-import com.mohamedrejeb.calf.permissions.Camera
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.composeapp.generated.resources.Res
 import com.sirelon.aicalories.composeapp.generated.resources.add_photo
@@ -53,7 +44,11 @@ import com.sirelon.aicalories.composeapp.generated.resources.tip_defects
 import com.sirelon.aicalories.composeapp.generated.resources.tip_lighting
 import com.sirelon.aicalories.composeapp.generated.resources.tips_for_better_photos
 import com.sirelon.aicalories.composeapp.generated.resources.turn_stuff_into_olx_listings
+import com.sirelon.aicalories.designsystem.AppDimens
+import com.sirelon.aicalories.designsystem.IconWithBackground
 import com.sirelon.aicalories.designsystem.AppTheme
+import com.sirelon.aicalories.designsystem.buttons.AppButton
+import com.sirelon.aicalories.designsystem.buttons.AppIconButton
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import org.jetbrains.compose.resources.painterResource
@@ -64,7 +59,6 @@ fun SellerScreen(
     onBack: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val platformContext = LocalPlatformContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val permissionController = rememberPermissionController(permission = Permission.Camera)
 
@@ -84,8 +78,8 @@ fun SellerScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(AppDimens.Spacing.xl3),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
         ) {
             SellerHeader()
             AddPhotoSection(
@@ -108,72 +102,76 @@ private fun SellerHeader(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(32.dp))
+            .clip(RoundedCornerShape(AppDimens.BorderRadius.xl11))
             .background(
                 Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFFF28B44),
-                        Color(0xFFE67E22)
+                        AppTheme.colors.warningVariant,
+                        AppTheme.colors.warning,
                     )
                 )
             )
-            .padding(24.dp)
+            .padding(AppDimens.Spacing.xl6)
     ) {
         // Decorative circles
         Box(
             modifier = Modifier
-                .size(140.dp)
+                .size(AppDimens.Size.xl21 + AppDimens.Size.xl)
                 .align(Alignment.TopEnd)
-                .offset(x = 40.dp, y = (-50).dp)
-                .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(70.dp))
+                .offset(
+                    x = AppDimens.Spacing.xl10,
+                    y = -(AppDimens.Size.xl8 + AppDimens.Size.xl4),
+                )
+                .background(AppTheme.colors.onPrimary.copy(alpha = 0.1f), CircleShape)
         )
         Box(
             modifier = Modifier
-                .size(100.dp)
+                .size(AppDimens.Size.xl14 + AppDimens.Size.xl9)
                 .align(Alignment.BottomStart)
-                .offset(x = (-30).dp, y = 30.dp)
-                .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(50.dp))
+                .offset(
+                    x = -(AppDimens.Spacing.xl5 + AppDimens.Spacing.l),
+                    y = AppDimens.Spacing.xl5 + AppDimens.Spacing.l,
+                )
+                .background(AppTheme.colors.onPrimary.copy(alpha = 0.1f), CircleShape)
         )
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl5)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl)
             ) {
-                Surface(
-                    modifier = Modifier.size(44.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color.White
+                IconWithBackground(
+                    modifier = Modifier.size(AppDimens.Size.xl11),
+                    backgroundColor = AppTheme.colors.onPrimary,
                 ) {
                     Icon(
                         painter = painterResource(Res.drawable.ic_snap_logo),
                         contentDescription = null,
-                        modifier = Modifier.padding(10.dp),
-                        tint = Color(0xFFE67E22)
+                        tint = AppTheme.colors.warning,
                     )
                 }
                 Text(
                     text = stringResource(Res.string.sell_snap),
-                    color = Color.White,
-                    fontSize = 22.sp,
+                    color = AppTheme.colors.onPrimary,
+                    fontSize = AppDimens.TextSize.xl6,
                     fontWeight = FontWeight.Bold
                 )
             }
 
             Text(
                 text = stringResource(Res.string.turn_stuff_into_olx_listings),
-                color = Color.White,
-                fontSize = 32.sp,
+                color = AppTheme.colors.onPrimary,
+                fontSize = AppDimens.TextSize.xl7,
                 fontWeight = FontWeight.ExtraBold,
-                lineHeight = 38.sp
+                lineHeight = AppDimens.TextSize.xl8
             )
 
             Text(
                 text = stringResource(Res.string.snap_photo_ad_desc),
-                color = Color.White.copy(alpha = 0.9f),
-                fontSize = 16.sp,
+                color = AppTheme.colors.onPrimary.copy(alpha = 0.9f),
+                fontSize = AppDimens.TextSize.xl3,
                 fontWeight = FontWeight.Medium
             )
         }
@@ -190,13 +188,13 @@ private fun AddPhotoSection(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        color = Color.White,
-        shadowElevation = 2.dp
+        shape = RoundedCornerShape(AppDimens.BorderRadius.xl7),
+        color = AppTheme.colors.surface,
+        shadowElevation = AppDimens.Spacing.xs2
     ) {
         Column(
-            modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            modifier = Modifier.padding(AppDimens.Spacing.xl6),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl5)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -205,65 +203,34 @@ private fun AddPhotoSection(
             ) {
                 Text(
                     text = stringResource(Res.string.add_photo),
-                    fontSize = 20.sp,
+                    fontSize = AppDimens.TextSize.xl5,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1F2933)
+                    color = AppTheme.colors.onSurface
                 )
                 Text(
                     text = stringResource(Res.string.photos_count_limit, photoCount, maxPhotos),
-                    fontSize = 15.sp,
-                    color = Color(0xFF64748B),
+                    fontSize = AppDimens.TextSize.xl2,
+                    color = AppTheme.colors.onSurfaceSoft,
                     fontWeight = FontWeight.Medium
                 )
             }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl)
             ) {
-                Button(
+                AppButton(
+                    text = stringResource(Res.string.take_photo),
                     onClick = onTakePhotoClick,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(60.dp),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFE67E22)
-                    ),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CameraAlt,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Text(
-                            text = stringResource(Res.string.take_photo),
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.CameraAlt,
+                    containerColor = AppTheme.colors.warning,
+                )
 
-                FilledIconButton(
+                AppIconButton(
+                    icon = Icons.Default.FileUpload,
                     onClick = onUploadClick,
-                    modifier = Modifier.size(60.dp),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = Color(0xFFF1F5F9),
-                        contentColor = Color(0xFF475569)
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FileUpload,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+                )
             }
         }
     }
@@ -275,34 +242,33 @@ private fun TipsSection(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        color = Color(0xFFF0F4FF)
+        shape = RoundedCornerShape(AppDimens.BorderRadius.xl7),
+        color = AppTheme.colors.infoSurface
     ) {
         Row(
-            modifier = Modifier.padding(20.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.padding(AppDimens.Spacing.xl5),
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
         ) {
-            Surface(
-                modifier = Modifier.size(44.dp),
-                shape = RoundedCornerShape(10.dp),
-                color = Color(0xFFDCE4FF)
+            IconWithBackground(
+                modifier = Modifier.size(AppDimens.Size.xl11),
+                backgroundColor = AppTheme.colors.infoSurfaceVariant,
+                shape = RoundedCornerShape(AppDimens.BorderRadius.l),
             ) {
                 Icon(
                     imageVector = Icons.Default.FlashOn,
                     contentDescription = null,
-                    modifier = Modifier.padding(10.dp),
-                    tint = Color(0xFF4F46E5)
+                    tint = AppTheme.colors.primary
                 )
             }
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l)
             ) {
                 Text(
                     text = stringResource(Res.string.tips_for_better_photos),
-                    fontSize = 18.sp,
+                    fontSize = AppDimens.TextSize.xl4,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1F2933)
+                    color = AppTheme.colors.onSurface
                 )
 
                 TipItem(text = stringResource(Res.string.tip_lighting))
@@ -321,18 +287,18 @@ private fun TipItem(
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
     ) {
         Icon(
             imageVector = Icons.Default.Check,
             contentDescription = null,
-            modifier = Modifier.size(18.dp),
-            tint = Color(0xFF10B981)
+            modifier = Modifier.size(AppDimens.Size.xl4),
+            tint = AppTheme.colors.success
         )
         Text(
             text = text,
-            fontSize = 15.sp,
-            color = Color(0xFF475569),
+            fontSize = AppDimens.TextSize.xl2,
+            color = AppTheme.colors.onSurfaceMuted,
             fontWeight = FontWeight.Medium
         )
     }

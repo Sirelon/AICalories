@@ -19,6 +19,13 @@ data class AppColors(
     val onError: Color,
     val success: Color,
     val outline: Color,
+    val warning: Color,
+    val warningVariant: Color,
+    val onSurfaceMuted: Color,
+    val onSurfaceSoft: Color,
+    val surfaceSubtle: Color,
+    val infoSurface: Color,
+    val infoSurfaceVariant: Color,
 )
 
 internal fun AppColors.toMaterial(darkTheme: Boolean): ColorScheme {
