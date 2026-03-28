@@ -20,6 +20,7 @@ import com.sirelon.aicalories.features.analyze.ui.AnalyzeScreen
 import com.sirelon.aicalories.features.datagenerator.ui.DataGeneratorScreen
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRoute
 import com.sirelon.aicalories.features.seller.SellerScreen
+import com.sirelon.aicalories.features.sellerauth.presentation.SellerAuthScreenRoute
 import com.sirelon.aicalories.navigation.AppDestination
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
@@ -44,7 +45,7 @@ fun App() {
             val navBackStack = remember {
 //                mutableStateListOf<AppDestination>(AppDestination.Agile)
 //                mutableStateListOf<AppDestination>(AppDestination.Analyze)
-                mutableStateListOf<AppDestination>(AppDestination.Seller)
+                mutableStateListOf<AppDestination>(AppDestination.SellerAuth)
             }
 
             val popDestination: () -> Unit = {
@@ -79,6 +80,10 @@ fun App() {
 
                     entry<AppDestination.Seller>{
                         SellerScreen(onBack = popDestination)
+                    }
+
+                    entry<AppDestination.SellerAuth> {
+                        SellerAuthScreenRoute()
                     }
 
                     entry<AppDestination.Agile> {

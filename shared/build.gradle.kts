@@ -47,6 +47,30 @@ val defaultPassword =
     resolveSecret("SUPABASE_DEFAULT_PASSWORD", "supabase.default.password")
         ?: "testMe"
 
+val olxClientId =
+    resolveSecret("OLX_CLIENT_ID", "olx.client.id")
+        ?: "olx-client-id"
+
+val olxClientSecret =
+    resolveSecret("OLX_CLIENT_SECRET", "olx.client.secret")
+        ?: "olx-client-secret"
+
+val olxScope =
+    resolveSecret("OLX_SCOPE", "olx.scope")
+        ?: "v2 read write"
+
+val olxAuthBaseUrl =
+    resolveSecret("OLX_AUTH_BASE_URL", "olx.auth.base.url")
+        ?: "https://www.olx.ua/oauth/authorize"
+
+val olxApiBaseUrl =
+    resolveSecret("OLX_API_BASE_URL", "olx.api.base.url")
+        ?: "https://www.olx.ua/api"
+
+val olxRedirectUri =
+    resolveSecret("OLX_REDIRECT_URI", "olx.redirect.uri")
+        ?: "aicalories://olx-auth/callback"
+
 kotlin {
     androidLibrary {
         namespace = "com.sirelon.aicalories.shared"
@@ -116,5 +140,11 @@ buildkonfig {
         buildConfigField(STRING, "SUPABASE_KEY", supabaseKey)
         buildConfigField(STRING, "SUPABASE_DEFAULT_EMAIL", defaultEmail)
         buildConfigField(STRING, "SUPABASE_DEFAULT_PASSWORD", defaultPassword)
+        buildConfigField(STRING, "OLX_CLIENT_ID", olxClientId)
+        buildConfigField(STRING, "OLX_CLIENT_SECRET", olxClientSecret)
+        buildConfigField(STRING, "OLX_SCOPE", olxScope)
+        buildConfigField(STRING, "OLX_AUTH_BASE_URL", olxAuthBaseUrl)
+        buildConfigField(STRING, "OLX_API_BASE_URL", olxApiBaseUrl)
+        buildConfigField(STRING, "OLX_REDIRECT_URI", olxRedirectUri)
     }
 }

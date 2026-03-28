@@ -9,4 +9,11 @@
     <string name="tip_lighting">Good lighting improves results</string>
     <string name="tip_angles">Include multiple angles</string>
     <string name="tip_defects">Show any defects clearly</string>
+    <string name="olx_auth_screen_title">OLX Seller Auth</string>
+    <string name="olx_auth_screen_subtitle">Connect an OLX account now so seller API calls can be added on top later.</string>
+    <string name="olx_auth_connect">Connect OLX</string>
+    <string name="olx_auth_connected">OLX account connected</string>
+    <string name="olx_auth_refresh_token">Refresh token</string>
+    <string name="olx_auth_test_me">Test /users/me</string>
+    <string name="olx_auth_disconnect">Disconnect</string>
 </resources>
