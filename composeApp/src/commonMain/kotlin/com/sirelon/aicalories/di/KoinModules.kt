@@ -6,6 +6,7 @@ import com.sirelon.aicalories.features.analyze.di.analyzeModule
 import com.sirelon.aicalories.features.datagenerator.di.dataGeneratorModule
 import com.sirelon.aicalories.features.history.di.historyModule
 import com.sirelon.aicalories.features.seller.auth.di.sellerAuthModule
+import com.sirelon.aicalories.features.seller.generate_ad.di.generateAdModule
 import com.sirelon.aicalories.features.media.di.mediaModule
 import com.sirelon.aicalories.network.ApiTokenProvider
 import com.sirelon.aicalories.network.createHttpClient
@@ -15,7 +16,15 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val appModule = module {
-    includes(agileModule, analyzeModule, historyModule, dataGeneratorModule, mediaModule, sellerAuthModule)
+    includes(
+        agileModule,
+        analyzeModule,
+        historyModule,
+        dataGeneratorModule,
+        mediaModule,
+        sellerAuthModule,
+        generateAdModule,
+    )
     single { Greeting() }
 }
 
