@@ -52,13 +52,13 @@ fun SellerAuthScreen(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
             Text(
-                text = stringResource(Res.string.olx_auth_screen_title),
+                text = "OLX Seller Auth",
                 fontSize = AppDimens.TextSize.xl7,
                 fontWeight = FontWeight.ExtraBold,
                 color = AppTheme.colors.onBackground,
             )
             Text(
-                text = stringResource(Res.string.olx_auth_screen_subtitle),
+                text = "Connect an OLX account now so seller API calls can be added on top later.",
                 fontSize = AppDimens.TextSize.xl3,
                 color = AppTheme.colors.onSurfaceSoft,
             )
@@ -71,7 +71,7 @@ fun SellerAuthScreen(
                     verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l),
                 ) {
                     Text(
-                        text = if (state.isAuthorized) stringResource(Res.string.olx_auth_connected) else state.statusLabel,
+                        text = if (state.isAuthorized) "OLX account connected" else state.statusLabel,
                         fontSize = AppDimens.TextSize.xl4,
                         fontWeight = FontWeight.Bold,
                     )
@@ -102,7 +102,7 @@ fun SellerAuthScreen(
                     verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l),
                 ) {
                     AppButton(
-                        text = stringResource(Res.string.olx_auth_connect),
+                        text = "Connect OLX",
                         onClick = { onEvent(SellerAuthContract.SellerAuthEvent.ConnectClicked) },
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -111,18 +111,18 @@ fun SellerAuthScreen(
                         horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l),
                     ) {
                         AppButton(
-                            text = stringResource(Res.string.olx_auth_refresh_token),
+                            text = "Refresh token",
                             onClick = { onEvent(SellerAuthContract.SellerAuthEvent.RefreshClicked) },
                             modifier = Modifier.weight(1f),
                         )
                         AppButton(
-                            text = stringResource(Res.string.olx_auth_test_me),
+                            text = "Test /users/me",
                             onClick = { onEvent(SellerAuthContract.SellerAuthEvent.TestMeClicked) },
                             modifier = Modifier.weight(1f),
                         )
                     }
                     AppButton(
-                        text = stringResource(Res.string.olx_auth_disconnect),
+                        text = "Disconnect",
                         onClick = { onEvent(SellerAuthContract.SellerAuthEvent.DisconnectClicked) },
                         modifier = Modifier.fillMaxWidth(),
                     )

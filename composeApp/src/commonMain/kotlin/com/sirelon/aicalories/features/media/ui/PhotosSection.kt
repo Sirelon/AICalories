@@ -53,7 +53,7 @@ fun PhotosSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(Res.string.add_photo),
+                    text = "Add Photo",
                     fontSize = AppDimens.TextSize.xl5,
                     fontWeight = FontWeight.Bold,
                     color = AppTheme.colors.onSurface
@@ -81,7 +81,7 @@ fun PhotosSection(
                 AppButton(
                     modifier = Modifier.weight(1f),
                     style = AppButtonDefaults.secondary(),
-                    text = stringResource(Res.string.take_photo),
+                    text = "Take Photo",
                     onClick = onTakePhotoClick,
                     icon = Icons.Default.CameraAlt,
                 )

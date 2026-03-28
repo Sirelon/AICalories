@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -41,12 +42,6 @@ import com.mohamedrejeb.calf.permissions.Camera
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.composeapp.generated.resources.Res
 import com.sirelon.aicalories.composeapp.generated.resources.ic_snap_logo
-import com.sirelon.aicalories.composeapp.generated.resources.snap_photo_ad_desc
-import com.sirelon.aicalories.composeapp.generated.resources.tip_angles
-import com.sirelon.aicalories.composeapp.generated.resources.tip_defects
-import com.sirelon.aicalories.composeapp.generated.resources.tip_lighting
-import com.sirelon.aicalories.composeapp.generated.resources.tips_for_better_photos
-import com.sirelon.aicalories.composeapp.generated.resources.turn_stuff_into_olx_listings
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.IconWithBackground
@@ -58,7 +53,6 @@ import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.features.media.ui.PhotosSection
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Suppress("UNUSED_PARAMETER")
@@ -139,7 +133,10 @@ private fun GenerateAdScreenContent(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             AppButton(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = AppDimens.Spacing.xl3),
                 style = AppButtonDefaults.primary(),
                 text = if (state.isLoading) "Generating..." else "Generate Ad with AI",
                 onClick = onSubmitClick,
@@ -290,7 +287,7 @@ private fun SellerHeader(
             }
 
             Text(
-                text = stringResource(Res.string.turn_stuff_into_olx_listings),
+                text = "Turn your stuff into OLX listings instantly",
                 color = AppTheme.colors.onPrimary,
                 fontSize = AppDimens.TextSize.xl7,
                 fontWeight = FontWeight.ExtraBold,
@@ -298,7 +295,7 @@ private fun SellerHeader(
             )
 
             Text(
-                text = stringResource(Res.string.snap_photo_ad_desc),
+                text = "Snap a photo and let AI create the perfect ad for you",
                 color = AppTheme.colors.onPrimary.copy(alpha = 0.9f),
                 fontSize = AppDimens.TextSize.xl3,
                 fontWeight = FontWeight.Medium
@@ -336,15 +333,15 @@ private fun TipsSection(
                 verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l)
             ) {
                 Text(
-                    text = stringResource(Res.string.tips_for_better_photos),
+                    text = "Tips for better photos",
                     fontSize = AppDimens.TextSize.xl4,
                     fontWeight = FontWeight.Bold,
                     color = AppTheme.colors.onSurface
                 )
 
-                TipItem(text = stringResource(Res.string.tip_lighting))
-                TipItem(text = stringResource(Res.string.tip_angles))
-                TipItem(text = stringResource(Res.string.tip_defects))
+                TipItem(text = "Good lighting improves results")
+                TipItem(text = "Include multiple angles")
+                TipItem(text = "Show any defects clearly")
             }
         }
     }
