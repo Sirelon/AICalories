@@ -16,7 +16,16 @@ class OpenAIClient(
                 input = ResponseInput("Write a haiku about Kotlin.")
             )
         )
-        return response.outputText
+
+        return response.outputText ?: response
+            .output
+            .joinToString(separator = "\n") {
+                it.content
+                    .orEmpty()
+                    .joinToString(separator = "\n") {
+                        it.text.orEmpty()
+                    }
+            }
     }
 
 }
