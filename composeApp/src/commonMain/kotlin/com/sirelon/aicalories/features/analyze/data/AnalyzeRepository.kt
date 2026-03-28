@@ -1,37 +1,16 @@
 package com.sirelon.aicalories.features.analyze.data
 
-import com.mohamedrejeb.calf.core.PlatformContext
-import com.mohamedrejeb.calf.io.KmpFile
-import com.mohamedrejeb.calf.io.getName
-import com.mohamedrejeb.calf.io.getPath
-import com.mohamedrejeb.calf.io.readByteArray
 import com.sirelon.aicalories.features.media.upload.UploadedFile
 import com.sirelon.aicalories.supabase.SupabaseClient
 import com.sirelon.aicalories.supabase.model.AnalyseReportData
-import io.github.jan.supabase.storage.UploadStatus
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlin.uuid.Uuid
 
 class AnalyzeRepository(
     private val client: SupabaseClient,
 ) {
-
-    fun uploadFile(platformContext: PlatformContext, file: KmpFile): Flow<UploadStatus> {
-        return flow {
-            val flow = client.uploadFile(
-                path = file.getName(platformContext)
-                    ?: file.getPath(platformContext)
-                    ?: Uuid.random().toString(),
-                byteArray = file.readByteArray(platformContext)
-            )
-            emitAll(flow)
-        }
-    }
 
     fun observeAnalysis(foodEntryId: Long): Flow<AnalyseReportData> {
         return client.observeReportSummary(foodEntryId)
