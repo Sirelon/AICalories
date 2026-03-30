@@ -16,16 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.mohamedrejeb.calf.io.KmpFile
-import com.sirelon.aicalories.composeapp.generated.resources.Res
-import com.sirelon.aicalories.composeapp.generated.resources.add_photo
-import com.sirelon.aicalories.composeapp.generated.resources.take_photo
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.designsystem.buttons.AppIconButton
 import com.sirelon.aicalories.features.media.upload.UploadingItem
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun PhotosSection(
@@ -83,7 +79,7 @@ fun PhotosSection(
                     style = AppButtonDefaults.secondary(),
                     text = "Take Photo",
                     onClick = onTakePhotoClick,
-                    icon = Icons.Default.CameraAlt,
+                    leadingIcon = Icons.Default.CameraAlt,
                 )
 
                 AppIconButton(

@@ -25,7 +25,8 @@ fun AppButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     style: AppButtonStyle = AppButtonDefaults.primary(),
-    icon: ImageVector? = null,
+    leadingIcon: ImageVector? = null,
+    trailingIcon: ImageVector? = null,
     enabled: Boolean = true,
 ) {
     Button(
@@ -45,7 +46,7 @@ fun AppButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
         ) {
-            icon?.let {
+            leadingIcon?.let {
                 Icon(
                     imageVector = it,
                     contentDescription = null,
@@ -57,6 +58,13 @@ fun AppButton(
                 fontSize = AppDimens.TextSize.xl3,
                 fontWeight = FontWeight.Bold,
             )
+            trailingIcon?.let {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    modifier = Modifier.size(AppDimens.Size.xl5),
+                )
+            }
         }
     }
 }

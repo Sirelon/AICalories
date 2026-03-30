@@ -1,0 +1,185 @@
+package com.sirelon.aicalories.features.seller.onboarding
+
+import androidx.compose.animation.animateBounds
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.LookaheadScope
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.compose_multiplatform
+import com.sirelon.aicalories.composeapp.generated.resources.ic_snap_logo
+import com.sirelon.aicalories.designsystem.AppDimens
+import com.sirelon.aicalories.designsystem.AppScaffold
+import com.sirelon.aicalories.designsystem.AppTheme
+import com.sirelon.aicalories.designsystem.IconWithBackground
+import com.sirelon.aicalories.designsystem.buttons.AppButton
+import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
+import com.sirelon.aicalories.designsystem.buttons.AppIconButton
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+
+private data class OnboardingItem(
+    val title: String,
+    val description: String,
+    val image: DrawableResource,
+    val icon: DrawableResource,
+)
+
+// TODO: replace images and icons
+private val items = listOf(
+    OnboardingItem(
+        title = "Snap a photo",
+        description = "Take a picture of anything you want to sell. Our AI will handle the rest!",
+        image = Res.drawable.compose_multiplatform,
+        icon = Res.drawable.ic_snap_logo
+    ),
+    OnboardingItem(
+        title = "AI Creates Your Ad",
+        description = "Get a catchy title, compelling description, and smart pricing in seconds.",
+        image = Res.drawable.compose_multiplatform,
+        icon = Res.drawable.ic_snap_logo
+    ),
+    OnboardingItem(
+        title = "Publish to OLX",
+        description = "One-tap publish to OLX marketplace. Reach thousands of buyers instantly!",
+        image = Res.drawable.compose_multiplatform,
+        icon = Res.drawable.ic_snap_logo
+    ),
+)
+
+@Composable
+fun OnboardingScreen(onClose: () -> Unit) {
+    val state = rememberPagerState { items.size }
+    val scope = rememberCoroutineScope()
+    AppScaffold(
+        bottomBar = {
+            LookaheadScope {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(AppDimens.Spacing.xl)
+                        .animateBounds(this)
+                        .navigationBarsPadding(),
+                    horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
+                ) {
+                    if (state.currentPage > 0) {
+                        AppIconButton(
+                            icon = Icons.AutoMirrored.Filled.ArrowBack,
+                            onClick = {
+                                scope.launch {
+                                    state.animateScrollToPage(state.currentPage - 1)
+                                }
+                            },
+                        )
+                    }
+
+                    val lastPage = state.currentPage == state.pageCount - 1
+                    val text = if (lastPage) {
+                        "Get Started"
+                    } else {
+                        "Next"
+                    }
+
+                    AppButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = text,
+                        style = AppButtonDefaults.secondary(),
+                        onClick = {
+                            if (lastPage) {
+                                onClose()
+                            } else {
+                                scope.launch {
+                                    state.animateScrollToPage(state.currentPage + 1)
+                                }
+                            }
+                        },
+                        trailingIcon = Icons.AutoMirrored.Filled.ArrowForward,
+                    )
+                }
+            }
+        }
+    ) {
+        HorizontalPager(state = state) {
+            val item = items[it]
+            Column(
+                modifier = Modifier.fillMaxSize().padding(AppDimens.Spacing.xl3),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(
+                    AppDimens.Spacing.xl3,
+                    Alignment.CenterVertically,
+                ),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .padding(horizontal = AppDimens.Spacing.xl9)
+                ) {
+                    Image(
+                        modifier = Modifier.clip(RoundedCornerShape(AppDimens.BorderRadius.l)),
+                        painter = painterResource(item.image), contentDescription = null
+                    )
+
+                    val iconSize = AppDimens.Size.xl11
+                    IconWithBackground(
+                        modifier = Modifier
+                            .size(iconSize)
+                            .align(Alignment.BottomEnd),
+                        backgroundColor = AppTheme.colors.infoSurfaceVariant,
+                    ) {
+                        Icon(
+                            painter = painterResource(item.icon),
+                            contentDescription = null,
+                            tint = AppTheme.colors.primary
+                        )
+                    }
+                }
+
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = item.title,
+                    style = AppTheme.typography.headline,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = item.description,
+                    style = AppTheme.typography.title,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun OnboardingScreenPreview() {
+    AppTheme {
+        OnboardingScreen {}
+    }
+}
+

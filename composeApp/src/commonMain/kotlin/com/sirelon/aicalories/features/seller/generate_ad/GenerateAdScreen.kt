@@ -140,7 +140,7 @@ private fun GenerateAdScreenContent(
                 style = AppButtonDefaults.primary(),
                 text = if (state.isLoading) "Generating..." else "Generate Ad with AI",
                 onClick = onSubmitClick,
-                icon = if (state.isLoading) null else Icons.Rounded.Star,
+                leadingIcon = if (state.isLoading) null else Icons.Rounded.Star,
                 enabled = state.canSubmit,
             )
         }
@@ -320,7 +320,6 @@ private fun TipsSection(
             IconWithBackground(
                 modifier = Modifier.size(AppDimens.Size.xl11),
                 backgroundColor = AppTheme.colors.infoSurfaceVariant,
-                shape = RoundedCornerShape(AppDimens.BorderRadius.l),
             ) {
                 Icon(
                     imageVector = Icons.Default.FlashOn,

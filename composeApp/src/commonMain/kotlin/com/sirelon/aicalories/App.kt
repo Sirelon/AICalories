@@ -21,6 +21,7 @@ import com.sirelon.aicalories.features.datagenerator.ui.DataGeneratorScreen
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRoute
 import com.sirelon.aicalories.features.seller.auth.presentation.SellerAuthScreenRoute
 import com.sirelon.aicalories.features.seller.generate_ad.GenerateAdScreen
+import com.sirelon.aicalories.features.seller.onboarding.OnboardingScreen
 import com.sirelon.aicalories.navigation.AppDestination
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
@@ -45,7 +46,9 @@ fun App() {
             val navBackStack = remember {
 //                mutableStateListOf<AppDestination>(AppDestination.Agile)
 //                mutableStateListOf<AppDestination>(AppDestination.Analyze)
-                mutableStateListOf<AppDestination>(AppDestination.Seller)
+//                mutableStateListOf<AppDestination>(AppDestination.Seller)
+                mutableStateListOf<AppDestination>(AppDestination.SellerOnboarding)
+//                mutableStateListOf<AppDestination>(AppDestination.SellerAuth)
             }
 
             val popDestination: () -> Unit = {
@@ -78,7 +81,14 @@ fun App() {
                 entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AppDestination>()),
                 entryProvider = entryProvider<AppDestination> {
 
-                    entry<AppDestination.Seller>{
+                    entry<AppDestination.SellerOnboarding> {
+                        OnboardingScreen {
+                            navigateTo(AppDestination.SellerAuth)
+                            navBackStack.remove(AppDestination.SellerOnboarding)
+                        }
+                    }
+
+                    entry<AppDestination.Seller> {
                         GenerateAdScreen(onBack = popDestination)
                     }
 
