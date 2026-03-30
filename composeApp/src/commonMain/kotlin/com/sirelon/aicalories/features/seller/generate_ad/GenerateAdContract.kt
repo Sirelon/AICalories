@@ -16,9 +16,9 @@ interface GenerateAdContract {
             get() = uploads.values.any { !it.isUploaded }
 
         val canSubmit: Boolean
-            get() = !isLoading &&
-                    (prompt.isNotBlank() || uploads.isNotEmpty()) &&
-                    !hasPendingUploads
+            get() = !isLoading
+                    && uploads.isNotEmpty()
+                    && !hasPendingUploads
     }
 
     sealed interface GenerateAdEvent {
