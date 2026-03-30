@@ -1,5 +1,6 @@
 package com.sirelon.aicalories.supabase
 
+import com.sirelon.aicalories.supabase.error.RemoteException
 import com.sirelon.aicalories.supabase.model.FoodEntryRecord
 import com.sirelon.aicalories.supabase.model.FoodEntryToFileInsert
 import com.sirelon.aicalories.supabase.model.StorageObjectRecord
@@ -10,7 +11,6 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.createSupabaseClient
-import com.sirelon.aicalories.supabase.error.RemoteException
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.functions.Functions
 import io.github.jan.supabase.functions.functions
@@ -41,7 +41,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import kotlin.uuid.Uuid
 
-private const val STORAGE_BUCKET_NAME = "aicalories"
+private const val STORAGE_BUCKET_NAME = "test"
 private const val ANALYZE_FUNCTION_NAME = "analize-food"
 private val remoteErrorParser = Json {
     ignoreUnknownKeys = true
