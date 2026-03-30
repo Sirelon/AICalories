@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -74,103 +75,115 @@ private val items = listOf(
 @Composable
 fun OnboardingScreen(onClose: () -> Unit) {
     val state = rememberPagerState { items.size }
-    val scope = rememberCoroutineScope()
     AppScaffold(
         bottomBar = {
-            LookaheadScope {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(AppDimens.Spacing.xl)
-                        .animateBounds(this)
-                        .navigationBarsPadding(),
-                    horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
-                ) {
-                    if (state.currentPage > 0) {
-                        AppIconButton(
-                            icon = Icons.AutoMirrored.Filled.ArrowBack,
-                            onClick = {
-                                scope.launch {
-                                    state.animateScrollToPage(state.currentPage - 1)
-                                }
-                            },
-                        )
-                    }
-
-                    val lastPage = state.currentPage == state.pageCount - 1
-                    val text = if (lastPage) {
-                        "Get Started"
-                    } else {
-                        "Next"
-                    }
-
-                    AppButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = text,
-                        style = AppButtonDefaults.secondary(),
-                        onClick = {
-                            if (lastPage) {
-                                onClose()
-                            } else {
-                                scope.launch {
-                                    state.animateScrollToPage(state.currentPage + 1)
-                                }
-                            }
-                        },
-                        trailingIcon = Icons.AutoMirrored.Filled.ArrowForward,
-                    )
-                }
-            }
+            BottomButtons(state = state, onClose = onClose)
         }
     ) {
         HorizontalPager(state = state) {
-            val item = items[it]
-            Column(
-                modifier = Modifier.fillMaxSize().padding(AppDimens.Spacing.xl3),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(
-                    AppDimens.Spacing.xl3,
-                    Alignment.CenterVertically,
-                ),
+            OnboardingPage(items[it])
+        }
+    }
+}
+
+@Composable
+private fun OnboardingPage(item: OnboardingItem) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(AppDimens.Spacing.xl3),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(
+            AppDimens.Spacing.xl3,
+            Alignment.CenterVertically,
+        ),
+    ) {
+        Box(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(horizontal = AppDimens.Spacing.xl9)
+        ) {
+            Image(
+                modifier = Modifier.clip(RoundedCornerShape(AppDimens.BorderRadius.l)),
+                painter = painterResource(item.image), contentDescription = null
+            )
+
+            val iconSize = AppDimens.Size.xl11
+            IconWithBackground(
+                modifier = Modifier
+                    .size(iconSize)
+                    .align(Alignment.BottomEnd),
+                backgroundColor = AppTheme.colors.infoSurfaceVariant,
             ) {
-                Box(
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .padding(horizontal = AppDimens.Spacing.xl9)
-                ) {
-                    Image(
-                        modifier = Modifier.clip(RoundedCornerShape(AppDimens.BorderRadius.l)),
-                        painter = painterResource(item.image), contentDescription = null
-                    )
-
-                    val iconSize = AppDimens.Size.xl11
-                    IconWithBackground(
-                        modifier = Modifier
-                            .size(iconSize)
-                            .align(Alignment.BottomEnd),
-                        backgroundColor = AppTheme.colors.infoSurfaceVariant,
-                    ) {
-                        Icon(
-                            painter = painterResource(item.icon),
-                            contentDescription = null,
-                            tint = AppTheme.colors.primary
-                        )
-                    }
-                }
-
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = item.title,
-                    style = AppTheme.typography.headline,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = item.description,
-                    style = AppTheme.typography.title,
-                    textAlign = TextAlign.Center,
+                Icon(
+                    painter = painterResource(item.icon),
+                    contentDescription = null,
+                    tint = AppTheme.colors.primary
                 )
             }
+        }
+
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = item.title,
+            style = AppTheme.typography.headline,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = item.description,
+            style = AppTheme.typography.title,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+private fun BottomButtons(
+    state: PagerState,
+    onClose: () -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    LookaheadScope {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppDimens.Spacing.xl)
+                .animateBounds(this)
+                .navigationBarsPadding(),
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
+        ) {
+            if (state.currentPage > 0) {
+                AppIconButton(
+                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    onClick = {
+                        scope.launch {
+                            state.animateScrollToPage(state.currentPage - 1)
+                        }
+                    },
+                )
+            }
+
+            val lastPage = state.currentPage == state.pageCount - 1
+            val text = if (lastPage) {
+                "Get Started"
+            } else {
+                "Next"
+            }
+
+            AppButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = text,
+                style = AppButtonDefaults.secondary(),
+                onClick = {
+                    if (lastPage) {
+                        onClose()
+                    } else {
+                        scope.launch {
+                            state.animateScrollToPage(state.currentPage + 1)
+                        }
+                    }
+                },
+                trailingIcon = Icons.AutoMirrored.Filled.ArrowForward,
+            )
         }
     }
 }
