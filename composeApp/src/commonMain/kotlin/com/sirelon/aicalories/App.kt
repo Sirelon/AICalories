@@ -94,7 +94,6 @@ fun App() {
                     entry<AppDestination.SellerLanding> {
                         val uriHandler = LocalUriHandler.current
                         SellerLandingScreen(
-                            onBackClick = popDestination,
                             onContinueWithOlx = {
                                 navigateTo(AppDestination.SellerAuth)
                             },

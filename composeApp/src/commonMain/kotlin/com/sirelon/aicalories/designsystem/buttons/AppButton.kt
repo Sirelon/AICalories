@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 
@@ -40,7 +42,7 @@ fun AppButton(
             disabledContainerColor = style.backgroundColor.copy(alpha = 0.55f),
             disabledContentColor = style.contentColor.copy(alpha = 0.7f),
         ),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = AppDimens.Size.xs),
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = style.elevation),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -72,6 +74,7 @@ fun AppButton(
 data class AppButtonStyle(
     val backgroundColor: Color,
     val contentColor: Color,
+    val elevation: Dp = AppDimens.Size.xs,
 )
 
 data object AppButtonDefaults {
@@ -101,6 +104,7 @@ data object AppButtonDefaults {
         return AppButtonStyle(
             backgroundColor = Color.Transparent,
             contentColor = AppTheme.colors.onBackground,
+            elevation = 0.dp,
         )
     }
 }

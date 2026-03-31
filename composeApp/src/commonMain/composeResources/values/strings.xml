@@ -21,7 +21,7 @@
     <string name="benefit_sync">Sync your listings automatically</string>
     <string name="benefit_manage">Manage all ads in one place</string>
     <string name="continue_as_guest">Continue as Guest</string>
-    <string name="guest_description">You can create ads and copy the content. You\'ll need to manually post to OLX.</string>
+    <string name="guest_description">You can create ads and copy the content. You'll need to manually post to OLX.</string>
     <string name="continue_with_olx">Continue with OLX</string>
     <string name="terms_privacy_prefix">By continuing, you agree to our </string>
     <string name="terms_of_service">Terms of Service</string>

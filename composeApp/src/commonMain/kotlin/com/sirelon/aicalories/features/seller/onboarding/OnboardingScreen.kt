@@ -20,14 +20,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.LookaheadScope
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.sirelon.aicalories.composeapp.generated.resources.Res
 import com.sirelon.aicalories.composeapp.generated.resources.compose_multiplatform
@@ -39,13 +37,14 @@ import com.sirelon.aicalories.designsystem.IconWithBackground
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.designsystem.buttons.AppIconButton
+import com.sirelon.aicalories.designsystem.templates.TitleWithSubtitle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 private data class OnboardingItem(
     val title: String,
-    val description: String,
+    val subtitle: String,
     val image: DrawableResource,
     val icon: DrawableResource,
 )
@@ -54,19 +53,19 @@ private data class OnboardingItem(
 private val items = listOf(
     OnboardingItem(
         title = "Snap a photo",
-        description = "Take a picture of anything you want to sell. Our AI will handle the rest!",
+        subtitle = "Take a picture of anything you want to sell. Our AI will handle the rest!",
         image = Res.drawable.compose_multiplatform,
         icon = Res.drawable.ic_snap_logo
     ),
     OnboardingItem(
         title = "AI Creates Your Ad",
-        description = "Get a catchy title, compelling description, and smart pricing in seconds.",
+        subtitle = "Get a catchy title, compelling description, and smart pricing in seconds.",
         image = Res.drawable.compose_multiplatform,
         icon = Res.drawable.ic_snap_logo
     ),
     OnboardingItem(
         title = "Publish to OLX",
-        description = "One-tap publish to OLX marketplace. Reach thousands of buyers instantly!",
+        subtitle = "One-tap publish to OLX marketplace. Reach thousands of buyers instantly!",
         image = Res.drawable.compose_multiplatform,
         icon = Res.drawable.ic_snap_logo
     ),
@@ -121,17 +120,9 @@ private fun OnboardingPage(item: OnboardingItem) {
             }
         }
 
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = item.title,
-            style = AppTheme.typography.headline,
-            textAlign = TextAlign.Center
-        )
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = item.description,
-            style = AppTheme.typography.title,
-            textAlign = TextAlign.Center,
+        TitleWithSubtitle(
+            title = item.title,
+            subtitle = item.subtitle,
         )
     }
 }
