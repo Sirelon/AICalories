@@ -14,4 +14,18 @@
     <string name="olx_auth_refresh_token">Refresh token  </string>
     <string name="olx_auth_test_me">Test /users/me </string>
     <string name="olx_auth_disconnect">Disconnect  </string>
+    <string name="welcome_to_sellsnap">Welcome to SellSnap</string>
+    <string name="welcome_subtitle">Create OLX ads in seconds with AI</string>
+    <string name="why_connect_olx">Why connect to OLX?</string>
+    <string name="benefit_publish">Publish ads directly to OLX</string>
+    <string name="benefit_sync">Sync your listings automatically</string>
+    <string name="benefit_manage">Manage all ads in one place</string>
+    <string name="continue_as_guest">Continue as Guest</string>
+    <string name="guest_description">You can create ads and copy the content. You\'ll need to manually post to OLX.</string>
+    <string name="continue_with_olx">Continue with OLX</string>
+    <string name="terms_privacy_prefix">By continuing, you agree to our </string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="step_format">Step %1$s of %2$s</string>
+    <string name="or_divider">or</string>
 </resources>

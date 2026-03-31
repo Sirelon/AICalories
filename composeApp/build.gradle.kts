@@ -1,5 +1,4 @@
 
-import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -134,7 +133,7 @@ kotlin {
             implementation(libs.compose.runtime)
             implementation(libs.compose.ui)
             implementation(libs.compose.foundation)
-            implementation(libs.compose.components.resources)
+            api(libs.compose.components.resources)
             implementation(libs.compose.preview)
             implementation(libs.material3)
             implementation(libs.material3.adaptive)

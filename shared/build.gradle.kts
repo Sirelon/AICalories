@@ -76,7 +76,7 @@ kotlin {
         namespace = "com.sirelon.aicalories.shared"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
-
+        androidResources.enable = true
         compilerOptions {
             freeCompilerArgs.set(listOf("-Xannotation-default-target=param-property"))
             jvmTarget.set(JvmTarget.JVM_11)

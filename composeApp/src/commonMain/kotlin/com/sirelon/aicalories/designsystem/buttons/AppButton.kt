@@ -94,4 +94,13 @@ data object AppButtonDefaults {
             contentColor = AppTheme.colors.onPrimary,
         )
     }
+
+    @Composable
+    @ReadOnlyComposable
+    fun outline(): AppButtonStyle {
+        return AppButtonStyle(
+            backgroundColor = Color.Transparent,
+            contentColor = AppTheme.colors.onBackground,
+        )
+    }
 }

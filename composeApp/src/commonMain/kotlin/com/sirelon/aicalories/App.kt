@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -20,6 +21,7 @@ import com.sirelon.aicalories.features.analyze.ui.AnalyzeScreen
 import com.sirelon.aicalories.features.datagenerator.ui.DataGeneratorScreen
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRoute
 import com.sirelon.aicalories.features.seller.auth.presentation.SellerAuthScreenRoute
+import com.sirelon.aicalories.features.seller.auth.presentation.SellerLandingScreen
 import com.sirelon.aicalories.features.seller.generate_ad.GenerateAdScreen
 import com.sirelon.aicalories.features.seller.onboarding.OnboardingScreen
 import com.sirelon.aicalories.navigation.AppDestination
@@ -47,7 +49,8 @@ fun App() {
 //                mutableStateListOf<AppDestination>(AppDestination.Agile)
 //                mutableStateListOf<AppDestination>(AppDestination.Analyze)
 //                mutableStateListOf<AppDestination>(AppDestination.Seller)
-                mutableStateListOf<AppDestination>(AppDestination.SellerOnboarding)
+//                mutableStateListOf<AppDestination>(AppDestination.SellerOnboarding)
+                mutableStateListOf<AppDestination>(AppDestination.SellerLanding)
 //                mutableStateListOf<AppDestination>(AppDestination.SellerAuth)
             }
 
@@ -83,9 +86,24 @@ fun App() {
 
                     entry<AppDestination.SellerOnboarding> {
                         OnboardingScreen {
-                            navigateTo(AppDestination.SellerAuth)
+                            navigateTo(AppDestination.SellerLanding)
                             navBackStack.remove(AppDestination.SellerOnboarding)
                         }
+                    }
+
+                    entry<AppDestination.SellerLanding> {
+                        val uriHandler = LocalUriHandler.current
+                        SellerLandingScreen(
+                            onBackClick = popDestination,
+                            onContinueWithOlx = {
+                                navigateTo(AppDestination.SellerAuth)
+                            },
+                            onContinueAsGuest = {
+                                navigateTo(AppDestination.Seller)
+                            },
+                            onTermsClick = { uriHandler.openUri("https://sellsnap.ai/terms") },
+                            onPrivacyClick = { uriHandler.openUri("https://sellsnap.ai/privacy") }
+                        )
                     }
 
                     entry<AppDestination.Seller> {
