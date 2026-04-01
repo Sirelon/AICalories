@@ -1,4 +1,4 @@
-package com.sirelon.aicalories.features.seller.preview_ad
+package com.sirelon.aicalories.features.seller.ad.preview_ad
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -1,4 +1,4 @@
-package com.sirelon.aicalories.features.seller.generate_ad
+package com.sirelon.aicalories.features.seller.ad.generate_ad
 
 import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile

@@ -1,4 +1,4 @@
-package com.sirelon.aicalories.features.seller.generate_ad
+package com.sirelon.aicalories.features.seller.ad.generate_ad
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -55,10 +55,10 @@ import com.sirelon.aicalories.features.media.ui.PhotosSection
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 
-@Suppress("UNUSED_PARAMETER")
 @Composable
 fun GenerateAdScreen(
-    onBack: () -> Unit = {},
+    onBack: () -> Unit,
+    openAdPreview: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: GenerateAdViewModel = koinViewModel()
@@ -106,9 +106,12 @@ fun GenerateAdScreen(
             }
         },
         onSubmitClick = {
-            if (state.canSubmit) {
-                viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit)
-            }
+            // TODO:
+            openAdPreview()
+
+//            if (state.canSubmit) {
+//                viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit)
+//            }
         },
         modifier = modifier,
     )
@@ -141,7 +144,8 @@ private fun GenerateAdScreenContent(
                 text = if (state.isLoading) "Generating..." else "Generate Ad with AI",
                 onClick = onSubmitClick,
                 leadingIcon = if (state.isLoading) null else Icons.Rounded.Star,
-                enabled = state.canSubmit,
+                // TODO:
+//                enabled = state.canSubmit,
             )
         }
     ) { padding ->

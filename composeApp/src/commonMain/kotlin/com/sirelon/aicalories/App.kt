@@ -20,11 +20,10 @@ import com.sirelon.aicalories.features.agile.AgileRoot
 import com.sirelon.aicalories.features.analyze.ui.AnalyzeScreen
 import com.sirelon.aicalories.features.datagenerator.ui.DataGeneratorScreen
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRoute
+import com.sirelon.aicalories.features.seller.ad.AdRootScreen
 import com.sirelon.aicalories.features.seller.auth.presentation.SellerAuthScreenRoute
 import com.sirelon.aicalories.features.seller.auth.presentation.SellerLandingScreen
-import com.sirelon.aicalories.features.seller.generate_ad.GenerateAdScreen
 import com.sirelon.aicalories.features.seller.onboarding.OnboardingScreen
-import com.sirelon.aicalories.features.seller.preview_ad.PreviewAdScreen
 import com.sirelon.aicalories.navigation.AppDestination
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
@@ -49,9 +48,8 @@ fun App() {
             val navBackStack = remember {
 //                mutableStateListOf<AppDestination>(AppDestination.Agile)
 //                mutableStateListOf<AppDestination>(AppDestination.Analyze)
-//                mutableStateListOf<AppDestination>(AppDestination.Seller)
-                mutableStateListOf<AppDestination>(AppDestination.SellerOnboarding)
-                mutableStateListOf<AppDestination>(AppDestination.AdPreview)
+                mutableStateListOf<AppDestination>(AppDestination.Seller)
+//                mutableStateListOf<AppDestination>(AppDestination.SellerOnboarding)
 //                mutableStateListOf<AppDestination>(AppDestination.SellerLanding)
 //                mutableStateListOf<AppDestination>(AppDestination.SellerAuth)
             }
@@ -83,12 +81,8 @@ fun App() {
             NavDisplay(
                 modifier = Modifier.fillMaxSize(),
                 backStack = navBackStack,
-                entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AppDestination>()),
+                entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AppDestination>(),),
                 entryProvider = entryProvider<AppDestination> {
-
-                    entry<AppDestination.AdPreview> {
-                        PreviewAdScreen()
-                    }
 
                     entry<AppDestination.SellerOnboarding> {
                         OnboardingScreen {
@@ -112,7 +106,7 @@ fun App() {
                     }
 
                     entry<AppDestination.Seller> {
-                        GenerateAdScreen(onBack = popDestination)
+                        AdRootScreen(onExit = popDestination)
                     }
 
                     entry<AppDestination.SellerAuth> {
