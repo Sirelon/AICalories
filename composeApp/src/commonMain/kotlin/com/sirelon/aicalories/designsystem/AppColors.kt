@@ -50,6 +50,7 @@ internal fun AppColors.toMaterial(darkTheme: Boolean): ColorScheme {
         surfaceVariant = surfaceVariant,
         onSurfaceVariant = onSurface,
         error = error,
+        surfaceContainerHighest = surface,
         onError = onError,
         errorContainer = error.copy(alpha = 0.2f),
         onErrorContainer = error,

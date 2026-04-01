@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Whatshot
+import androidx.compose.ui.graphics.Color
 import kotlin.random.Random
 
 object RandomData {
@@ -98,4 +99,14 @@ object RandomData {
 
         return options.shuffled(random).take(2)
     }
+}
+
+
+fun generateRandomColor(): Color {
+    return Color(
+        red = Random.nextFloat(),
+        green = Random.nextFloat(),
+        blue = Random.nextFloat(),
+        alpha = 1f
+    )
 }

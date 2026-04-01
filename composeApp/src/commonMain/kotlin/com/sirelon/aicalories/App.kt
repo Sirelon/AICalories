@@ -24,6 +24,7 @@ import com.sirelon.aicalories.features.seller.auth.presentation.SellerAuthScreen
 import com.sirelon.aicalories.features.seller.auth.presentation.SellerLandingScreen
 import com.sirelon.aicalories.features.seller.generate_ad.GenerateAdScreen
 import com.sirelon.aicalories.features.seller.onboarding.OnboardingScreen
+import com.sirelon.aicalories.features.seller.preview_ad.PreviewAdScreen
 import com.sirelon.aicalories.navigation.AppDestination
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
@@ -49,8 +50,9 @@ fun App() {
 //                mutableStateListOf<AppDestination>(AppDestination.Agile)
 //                mutableStateListOf<AppDestination>(AppDestination.Analyze)
 //                mutableStateListOf<AppDestination>(AppDestination.Seller)
-//                mutableStateListOf<AppDestination>(AppDestination.SellerOnboarding)
-                mutableStateListOf<AppDestination>(AppDestination.SellerLanding)
+                mutableStateListOf<AppDestination>(AppDestination.SellerOnboarding)
+                mutableStateListOf<AppDestination>(AppDestination.AdPreview)
+//                mutableStateListOf<AppDestination>(AppDestination.SellerLanding)
 //                mutableStateListOf<AppDestination>(AppDestination.SellerAuth)
             }
 
@@ -83,6 +85,10 @@ fun App() {
                 backStack = navBackStack,
                 entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AppDestination>()),
                 entryProvider = entryProvider<AppDestination> {
+
+                    entry<AppDestination.AdPreview> {
+                        PreviewAdScreen()
+                    }
 
                     entry<AppDestination.SellerOnboarding> {
                         OnboardingScreen {
