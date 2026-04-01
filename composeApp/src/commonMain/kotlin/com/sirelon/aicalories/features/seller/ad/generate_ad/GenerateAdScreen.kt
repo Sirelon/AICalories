@@ -1,5 +1,6 @@
 package com.sirelon.aicalories.features.seller.ad.generate_ad
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -89,29 +90,40 @@ fun GenerateAdScreen(
         }
     }
 
-    GenerateAdScreenContent(
-        state = state,
-        snackbarHostState = snackbarHostState,
-        onPromptChanged = {
-            viewModel.onEvent(GenerateAdContract.GenerateAdEvent.PromptChanged(it))
-        },
-        onTakePhotoClick = {
-            if (!state.isLoading) {
-                photoPicker.captureWithCamera()
+    AnimatedContent(state.isLoading) {
+        if (it) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
             }
-        },
-        onUploadClick = {
-            if (!state.isLoading) {
-                photoPicker.pickFromGallery()
-            }
-        },
-        onSubmitClick = {
-            if (state.canSubmit) {
-                viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit)
-            }
-        },
-        modifier = modifier,
-    )
+        } else {
+            GenerateAdScreenContent(
+                state = state,
+                snackbarHostState = snackbarHostState,
+                onPromptChanged = {
+                    viewModel.onEvent(GenerateAdContract.GenerateAdEvent.PromptChanged(it))
+                },
+                onTakePhotoClick = {
+                    if (!state.isLoading) {
+                        photoPicker.captureWithCamera()
+                    }
+                },
+                onUploadClick = {
+                    if (!state.isLoading) {
+                        photoPicker.pickFromGallery()
+                    }
+                },
+                onSubmitClick = {
+                    if (state.canSubmit) {
+                        viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit)
+                    }
+                },
+                modifier = modifier,
+            )
+        }
+    }
 
     PermissionDialogs(
         controller = permissionController,
@@ -171,15 +183,6 @@ private fun GenerateAdScreenContent(
                     color = AppTheme.colors.error,
                     fontSize = AppDimens.TextSize.xl2,
                     fontWeight = FontWeight.Medium,
-                )
-            }
-            if (state.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .size(AppDimens.Size.xl8),
-                    color = AppTheme.colors.primary,
-                    strokeWidth = AppDimens.BorderWidth.s,
                 )
             }
         }

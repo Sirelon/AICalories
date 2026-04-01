@@ -32,14 +32,24 @@ class GenerateAdViewModel(
 
             GenerateAdContract.GenerateAdEvent.Submit -> {
                 viewModelScope.launch {
-                    val result = openAi.analyzeThing(
-                        listOf("https://qosvjukxtnvtvarxnklv.supabase.co/storage/v1/object/public/test/JPG%20to%20WEBP%20temp%20image.webp")
-                    )
                     setState {
-                        it.copy(prompt = result.toString())
+                        it.copy(isLoading = true)
+                    }
+                    runCatching {
+                        val result = openAi.analyzeThing(
+                            listOf("https://qosvjukxtnvtvarxnklv.supabase.co/storage/v1/object/public/test/JPG%20to%20WEBP%20temp%20image.webp")
+                        )
+                        setState {
+                            it.copy(prompt = result.toString(), isLoading = false)
+                        }
+                    }.onFailure { error ->
+                        setState {
+                            it.copy(isLoading = false, errorMessage = error.message)
+                        }
                     }
                 }
-            } //
+            }
+
             is GenerateAdContract.GenerateAdEvent.UploadFilesResult -> onFileResult(event)
         }
     }

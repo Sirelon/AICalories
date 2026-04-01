@@ -67,7 +67,7 @@ class OpenAIClient(
             }
 
         val generatedAd = json.decodeFromString<GeneratedAd>(jsonString)
-        return mapper.mapToDomain(generatedAd)
+        return mapper.mapToDomain(generatedAd, images)
     }
 
     private fun promptInput(): ResponseInputItem = ResponseInputItem(

@@ -3,6 +3,7 @@ package com.sirelon.aicalories.features.seller.ad
 data class Advertisement(
     val title: String,
     val description: String,
+    val images: List<String>,
     val suggestedPrice: Double,
     val minPrice: Double,
     val maxPrice: Double,

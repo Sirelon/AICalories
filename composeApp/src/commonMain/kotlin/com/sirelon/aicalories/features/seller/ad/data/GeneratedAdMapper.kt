@@ -7,7 +7,7 @@ import com.sirelon.aicalories.network.responses.GeneratedAd
 
 class GeneratedAdMapper {
 
-    fun mapToDomain(generatedAd: GeneratedAd): Advertisement {
+    fun mapToDomain(generatedAd: GeneratedAd, images: List<String>): Advertisement {
         return Advertisement(
             title = generatedAd.title,
             description = generatedAd.description,
@@ -16,6 +16,7 @@ class GeneratedAdMapper {
             maxPrice = generatedAd.maxPrice,
             category = generatedAd.category,
             condition = generatedAd.condition.toDomain(),
+            images = images,
         )
     }
 
