@@ -4,7 +4,6 @@ import com.sirelon.aicalories.Greeting
 import com.sirelon.aicalories.features.seller.auth.di.sellerAuthModule
 import com.sirelon.aicalories.features.seller.ad.generate_ad.di.generateAdModule
 import com.sirelon.aicalories.features.seller.auth.di.sellerAuthModule
-import com.sirelon.aicalories.network.OpenAIClient
 import com.sirelon.aicalories.features.agile.di.agileModule
 import com.sirelon.aicalories.features.analyze.di.analyzeModule
 import com.sirelon.aicalories.features.datagenerator.di.dataGeneratorModule
