@@ -68,6 +68,12 @@ class GenerateAdViewModel(
                 addUploadPlaceholder(update.file)
             }
 
+            is MediaUploadUpdate.UploadStarted -> {
+                updateUpload(file = update.file) { item ->
+                    item.copy(isUploading = true)
+                }
+            }
+
             is MediaUploadUpdate.Progress -> {
                 updateUpload(file = update.file) { item ->
                     item.copy(progress = update.progress)

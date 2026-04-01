@@ -58,7 +58,9 @@ fun PhotosGridComponent(
                             model = file,
                         )
 
-                        UploadStatusIndicator(progress = upload.progress)
+                        if (upload.isUploading) {
+                            UploadStatusIndicator(progress = upload.progress)
+                        }
                     }
                 )
             }
