@@ -5,6 +5,10 @@ import com.aallam.openai.api.response.ResponseInput
 import com.aallam.openai.api.response.ResponseInputItem
 import com.aallam.openai.api.response.ResponseRequest
 import com.aallam.openai.client.OpenAI
+import com.sirelon.aicalories.features.seller.ad.Advertisement
+import com.sirelon.aicalories.features.seller.ad.data.GeneratedAdMapper
+import com.sirelon.aicalories.network.responses.GeneratedAd
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -17,9 +21,11 @@ Return ONLY valid JSON:
 {
   "title": "...",
   "description": "...",
-  "price": number,
+  "suggestedPrice": number,
+  "minPrice": number,
+  "maxPrice": number,
   "category": "...",
-  "condition": "new|like new|good|fair|poor"
+  "condition": "new|like_new|good|fair|poor"
 }
 
 Rules:
@@ -28,13 +34,16 @@ Rules:
 - Keep description short (2–3 sentences)
 - Combine details from all images
 - Write all text in Ukrainian
-- No text outside JSON"""
+- No text outside JSON. Don't add any markdown formatting like ```json ... ```. Just return raw JSON."""
 
 class OpenAIClient(
     private val openAI: OpenAI,
+    private val json: Json,
 ) {
 
-    suspend fun analyzeThing(images: List<String>): String {
+    private val mapper = GeneratedAdMapper()
+
+    suspend fun analyzeThing(images: List<String>): Advertisement {
         val response = openAI.response(
             request = ResponseRequest(
                 model = ModelId("gpt-4.1"),
@@ -47,7 +56,7 @@ class OpenAIClient(
             )
         )
 
-        return response.outputText ?: response
+        val jsonString = response.outputText ?: response
             .output
             .joinToString(separator = "\n") {
                 it.content
@@ -56,6 +65,9 @@ class OpenAIClient(
                         it.text.orEmpty()
                     }
             }
+
+        val generatedAd = json.decodeFromString<GeneratedAd>(jsonString)
+        return mapper.mapToDomain(generatedAd)
     }
 
     private fun promptInput(): ResponseInputItem = ResponseInputItem(

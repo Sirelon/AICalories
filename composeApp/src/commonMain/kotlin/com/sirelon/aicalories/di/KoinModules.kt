@@ -16,6 +16,7 @@ import com.sirelon.aicalories.network.ApiTokenProvider
 import com.sirelon.aicalories.network.createHttpClient
 import com.sirelon.aicalories.network.createOpenAI
 import com.sirelon.aicalories.supabase.SupabaseClient
+import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
@@ -38,6 +39,13 @@ val networkModule = module {
             .apply { token = "TODO" }
     }
     single { createHttpClient(get()) }
+    single {
+        Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            encodeDefaults = true
+        }
+    }
     single { createOpenAI(get()) }
     singleOf(::OpenAIClient)
     singleOf(::SupabaseClient)
