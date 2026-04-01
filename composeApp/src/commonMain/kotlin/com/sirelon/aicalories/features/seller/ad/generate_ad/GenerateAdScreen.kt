@@ -106,12 +106,9 @@ fun GenerateAdScreen(
             }
         },
         onSubmitClick = {
-            // TODO:
-            openAdPreview()
-
-//            if (state.canSubmit) {
-//                viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit)
-//            }
+            if (state.canSubmit) {
+                viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit)
+            }
         },
         modifier = modifier,
     )
@@ -144,8 +141,7 @@ private fun GenerateAdScreenContent(
                 text = if (state.isLoading) "Generating..." else "Generate Ad with AI",
                 onClick = onSubmitClick,
                 leadingIcon = if (state.isLoading) null else Icons.Rounded.Star,
-                // TODO:
-//                enabled = state.canSubmit,
+                enabled = state.canSubmit,
             )
         }
     ) { padding ->
@@ -163,6 +159,7 @@ private fun GenerateAdScreenContent(
                 onUploadClick = onUploadClick,
                 files = state.uploads,
             )
+            TipsSection()
             PromptSection(
                 value = state.prompt,
                 enabled = !state.isLoading,
@@ -176,7 +173,6 @@ private fun GenerateAdScreenContent(
                     fontWeight = FontWeight.Medium,
                 )
             }
-            TipsSection()
             if (state.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier
