@@ -52,8 +52,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sirelon.aicalories.designsystem.AppDimens
+import com.sirelon.aicalories.designsystem.AppTheme
 import kotlin.math.min
 
 @Composable
@@ -66,7 +67,7 @@ fun MagicBlueButton(
     interaction: MutableInteractionSource = remember { MutableInteractionSource() },
     enabled: Boolean = true,
 ) {
-    val mainBgColor = Color(0xB2CCFF)
+    val mainBgColor = AppTheme.colors.primary.copy(alpha = 0.7f)
 
     val pressed by interaction.collectIsPressedAsState()
 
@@ -129,9 +130,9 @@ fun MagicBlueButton(
         }
     )
 
-    val baseWidth = 150.dp
-    val baseHeight = 52.dp
-    val baseOuterPadding = 8.dp
+    val baseWidth = AppDimens.Size.xl21 + AppDimens.Size.xl3
+    val baseHeight = AppDimens.Size.xl12 + AppDimens.Size.xs
+    val baseOuterPadding = AppDimens.Spacing.m
 
     BoxWithConstraints(
         modifier = modifier
@@ -156,22 +157,22 @@ fun MagicBlueButton(
             baseHeight = baseHeight,
         )
 
-        val radiusDp = 16.dp * scale
+        val radiusDp = AppDimens.Size.xl3 * scale
         val shape = RoundedCornerShape(radiusDp)
         val outerPadding = baseOuterPadding * scale
-        val shadowRadius = 4.dp * scale
-        val shadowOffset = 4.dp * scale
-        val shadowSpread = -2.dp * scale
-        val innerShadowOffset = 2.dp * scale
-        val innerShadowRadius = 1.dp * scale
-        val strokeWidth = 1.dp * scale
+        val shadowRadius = AppDimens.Size.xs * scale
+        val shadowOffset = AppDimens.Size.xs * scale
+        val shadowSpread = -AppDimens.Spacing.xs2 * scale
+        val innerShadowOffset = AppDimens.Spacing.xs2 * scale
+        val innerShadowRadius = AppDimens.Spacing.xs3 * scale
+        val strokeWidth = AppDimens.Spacing.xs3 * scale
         val textSize = (18f * scale).sp
         val contentAlpha = if (enabled) 1f else 0.5f
 
         val translationY by transition.animateDp(
             label = "translationY",
             transitionSpec = { tween(animationDuration, easing = animationEasing) },
-            targetValueByState = { if (it) 2.dp * scale else 0.dp },
+            targetValueByState = { if (it) AppDimens.Spacing.xs2 * scale else AppDimens.Spacing.xs4 },
         )
 
         Box(
@@ -225,7 +226,7 @@ fun MagicBlueButton(
 
                         val outerBorderSize = Size(size.width + strokeWidthPx, size.height + strokeWidthPx)
                         val outerBorderOffset = Offset(-strokeWidthPx / 2, -strokeWidthPx / 2)
-                        val pressedBorderColor = Color(0xFF000000)
+                        val pressedBorderColor = AppTheme.colors.onSurface
 
                         onDrawBehind {
                             // Dark Border that is visible when btn is in pressed state
@@ -259,7 +260,7 @@ fun MagicBlueButton(
                         this.offset = Offset(x = 0f, y = innerShadowOffset.toPx())
                         this.radius = innerShadowRadius.toPx()
                         this.alpha = innerShadowAlpha
-                        this.color = Color(0xFF0D1626)
+                        this.color = AppTheme.colors.onSurface.copy(alpha = 0.85f)
                     }
             ) {
                 ButtonText(
@@ -294,7 +295,7 @@ private fun BoxScope.ShadowLayer(
             .dropShadow(shape = shape) {
                 this.radius = shadowRadius.toPx()
                 this.offset = Offset(x = 0f, y = shadowOffset.toPx())
-                this.color = Color(0xFF000000)
+                this.color = AppTheme.colors.onSurface
                 this.alpha = outerShadow1Alpha
             }
             .dropShadow(shape = shape) {
@@ -302,11 +303,11 @@ private fun BoxScope.ShadowLayer(
                 this.spread = shadowSpread.toPx()
                 this.offset = Offset(x = 0f, y = shadowOffset.toPx())
 
-                this.color = Color(0xFF000000)
+                this.color = AppTheme.colors.onSurface
                 this.alpha = outerShadow2Alpha
             }
             .dropShadow(shape = shape) {
-                this.color = Color(0xFF0D0F1A)
+                this.color = AppTheme.colors.onSurface.copy(alpha = 0.9f)
                 this.alpha = pressedShadow
             }
             .drawBehind {
@@ -329,7 +330,7 @@ private fun ButtonText(text: String, modifier: Modifier, fontSize: TextUnit) {
         style = TextStyle(
             fontWeight = FontWeight.W600,
             fontSize = fontSize,
-            color = Color.White,
+            color = AppTheme.colors.onPrimary,
             textAlign = TextAlign.Center,
         )
     )
@@ -360,11 +361,11 @@ private fun MagicBlueButtonPreview() {
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .background(Color(0xFF4A5B7C))
-                .blur(50.dp)
+                .background(AppTheme.colors.primary.copy(alpha = 0.5f))
+                .blur(AppDimens.Size.xl12 + AppDimens.Spacing.xs2)
         )
 
-        Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl6)) {
             MagicBlueButton("Cancel", onClick = {})
         }
     }

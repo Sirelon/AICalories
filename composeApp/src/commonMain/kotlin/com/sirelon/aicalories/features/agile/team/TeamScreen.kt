@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.MaterialTheme
 import com.sirelon.aicalories.designsystem.AppScaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +15,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppSectionHeader
+import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.Input
 import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
 import org.koin.compose.viewmodel.koinViewModel
@@ -72,12 +72,12 @@ private fun TeamScreenContent(
                     ) {
                         Text(
                             text = team.name,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = AppTheme.typography.title,
                         )
                         Text(
                             text = "People: ${team.peopleCount} | Capacity: ${team.capacity} | Risk: $riskPercentage%",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = AppTheme.typography.caption,
+                            color = AppTheme.colors.onSurfaceMuted,
                         )
                     }
                 },

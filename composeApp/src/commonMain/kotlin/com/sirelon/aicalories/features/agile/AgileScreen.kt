@@ -35,11 +35,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppSectionHeader
 import com.sirelon.aicalories.designsystem.Input
+import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
 import com.sirelon.aicalories.features.agile.model.Ticket
 import com.sirelon.aicalories.features.agile.model.UserStory
@@ -199,7 +199,7 @@ private fun TeamPickerEntry(teamId: Int, onOpenTeamPicker: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         onClick = onOpenTeamPicker,
         shape = MaterialTheme.shapes.medium,
-        tonalElevation = 1.dp,
+        tonalElevation = AppDimens.BorderWidth.s,
     ) {
         Row(
             modifier = Modifier.padding(AppDimens.Spacing.xl3),
@@ -209,7 +209,7 @@ private fun TeamPickerEntry(teamId: Int, onOpenTeamPicker: () -> Unit) {
             Icon(
                 imageVector = Icons.Outlined.PeopleOutline,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = AppTheme.colors.primary,
             )
             Column(
                 modifier = Modifier.weight(1f),
@@ -217,18 +217,18 @@ private fun TeamPickerEntry(teamId: Int, onOpenTeamPicker: () -> Unit) {
             ) {
                 Text(
                     text = "Team list",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = AppTheme.typography.title,
                 )
                 Text(
                     text = "Currently showing Team #$teamId. Tap to switch teams.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = AppTheme.typography.body,
+                    color = AppTheme.colors.onSurfaceMuted,
                 )
             }
             Icon(
                 imageVector = Icons.Outlined.ExpandMore,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = AppTheme.colors.onSurfaceMuted,
             )
         }
     }
@@ -305,7 +305,7 @@ private fun TicketInput(
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error
+                        tint = AppTheme.colors.error
                     )
                 }
             }
@@ -332,7 +332,7 @@ private fun TicketEstimationTrailing(
     Surface(
         onClick = onClick,
         shape = MaterialTheme.shapes.small,
-        tonalElevation = 0.dp,
+        tonalElevation = AppDimens.Spacing.xs4,
         color = estimation.color().copy(alpha = 0.15f),
     ) {
         Row(
@@ -345,13 +345,13 @@ private fun TicketEstimationTrailing(
         ) {
             Text(
                 text = estimation.code(),
-                style = MaterialTheme.typography.labelLarge,
+                style = AppTheme.typography.label,
                 color = estimation.color(),
             )
             Icon(
                 imageVector = Icons.Outlined.ExpandMore,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = AppTheme.colors.onSurfaceMuted,
             )
         }
     }

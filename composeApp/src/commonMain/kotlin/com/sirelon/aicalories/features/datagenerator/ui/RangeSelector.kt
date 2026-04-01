@@ -240,7 +240,7 @@ private fun StepIconButton(
 ) {
     FilledTonalIconButton(
         onClick = onClick,
-        modifier = Modifier.size(32.dp),
+        modifier = Modifier.size(AppDimens.Size.xl8),
         enabled = enabled
     ) {
         Icon(
@@ -383,7 +383,7 @@ private fun RangeSelectorIntPreview() {
     var min by remember { mutableStateOf(3.0) }
     var max by remember { mutableStateOf(8.0) }
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.padding(AppDimens.Spacing.xl3)) {
         RangeSelector(
             label = "People per team",
             min = min,
@@ -407,7 +407,7 @@ private fun RangeSelectorDoublePreview() {
     var min by remember { mutableStateOf(0.1) }
     var max by remember { mutableStateOf(0.45) }
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.padding(AppDimens.Spacing.xl3)) {
         RangeSelector(
             label = "Risk factor",
             min = min,

@@ -607,7 +607,7 @@ private fun AttachmentsRow(
 }
 
 @Composable
-private fun surfaceVariantColor(): Color = MaterialTheme.colorScheme.surfaceVariant
+private fun surfaceVariantColor(): Color = AppTheme.colors.surfaceVariant
 
 @Preview
 @Composable

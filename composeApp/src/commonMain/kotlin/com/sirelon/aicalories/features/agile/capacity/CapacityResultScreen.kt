@@ -34,12 +34,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppChip
 import com.sirelon.aicalories.designsystem.AppChipDefaults
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppSectionHeader
+import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.features.agile.Estimation
 import com.sirelon.aicalories.features.agile.EstimationResult
 import com.sirelon.aicalories.features.agile.FeasibleTicketVariant
@@ -81,8 +81,8 @@ private fun CapacityResultContent(
     val result = state.result
 
     Surface(
-        modifier = modifier.shadow(elevation = 8.dp),
-        color = MaterialTheme.colorScheme.surface,
+        modifier = modifier.shadow(elevation = AppDimens.Size.m),
+        color = AppTheme.colors.surface,
     ) {
         AppScaffold(
             modifier = Modifier.fillMaxSize(),
@@ -109,7 +109,7 @@ private fun CapacityResultContent(
                         CircularProgressIndicator()
                         Text(
                             text = "Crunching numbers...",
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = AppTheme.typography.body,
                             modifier = Modifier.padding(top = AppDimens.Spacing.m),
                         )
                         TextButton(onClick = { onEvent(CapacityResultEvent.Refresh) }) {
@@ -161,9 +161,9 @@ private fun ResultSummaryCard(
     val fitsPessimistic = pessimisticRemaining >= 0
     val fitsOptimistic = optimisticRemaining >= 0
     val statusColor = if (fitsOptimistic) {
-        MaterialTheme.colorScheme.primary
+        AppTheme.colors.primary
     } else {
-        MaterialTheme.colorScheme.error
+        AppTheme.colors.error
     }
     val scenarioChipColors = AppChipDefaults.capacityColors(fitsPessimistic, fitsOptimistic)
     val metadataChipColors = AppChipDefaults.neutralColors()
@@ -180,7 +180,7 @@ private fun ResultSummaryCard(
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        tonalElevation = 1.dp,
+        tonalElevation = AppDimens.BorderWidth.s,
         shape = MaterialTheme.shapes.medium,
     ) {
         Column(
@@ -189,13 +189,13 @@ private fun ResultSummaryCard(
         ) {
             Text(
                 text = statusText,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                style = AppTheme.typography.title.copy(fontWeight = FontWeight.SemiBold),
                 color = statusColor,
             )
             Text(
                 text = detailText,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = AppTheme.typography.body,
+                color = AppTheme.colors.onSurfaceMuted,
             )
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
@@ -291,20 +291,20 @@ private fun FeasibleVariantsSection(
         ) {
             Text(
                 text = "Feasible ticket variants",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                style = AppTheme.typography.title.copy(fontWeight = FontWeight.SemiBold),
             )
             Text(
                 text = "Sorted by best fit to the pessimistic capacity.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = AppTheme.typography.body,
+                color = AppTheme.colors.onSurfaceMuted,
             )
         }
 
         if (result.canCloseAll) {
             Text(
                 text = "All tickets fit into the optimistic capacity, so no alternative subsets are needed.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = AppTheme.typography.body,
+                color = AppTheme.colors.onSurfaceMuted,
             )
             return@Column
         }
@@ -327,8 +327,8 @@ private fun FeasibleVariantsSection(
                 } else {
                     "No combination of tickets fits the current pessimistic capacity. Trim scope or increase capacity."
                 },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
+                style = AppTheme.typography.body,
+                color = AppTheme.colors.error,
             )
             return@Column
         }
@@ -355,8 +355,8 @@ private fun FeasibleVariantsSection(
                     } else {
                         "Showing top $COLLAPSED_VARIANTS of $totalVariants variants."
                     },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = AppTheme.typography.caption,
+                    color = AppTheme.colors.onSurfaceMuted,
                     modifier = Modifier.weight(1f),
                 )
                 TextButton(onClick = { showAll = !showAll }) {
@@ -382,7 +382,7 @@ private fun VariantCard(
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        tonalElevation = 1.dp,
+        tonalElevation = AppDimens.BorderWidth.s,
         shape = MaterialTheme.shapes.medium,
     ) {
         Column(
@@ -396,19 +396,19 @@ private fun VariantCard(
             ) {
                 Text(
                     text = "Variant #${index + 1}",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    style = AppTheme.typography.label.copy(fontWeight = FontWeight.SemiBold),
                     modifier = Modifier.weight(1f),
                 )
                 Text(
                     text = "${variant.totalEffort} pts",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
+                    style = AppTheme.typography.label,
+                    color = AppTheme.colors.primary,
                 )
             }
             Text(
                 text = slackLabel,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = AppTheme.typography.caption,
+                color = AppTheme.colors.onSurfaceMuted,
             )
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),

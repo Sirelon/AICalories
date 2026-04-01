@@ -55,11 +55,11 @@ fun AppNavigationLayout(
             Surface(
                 modifier = Modifier.fillMaxHeight(),
                 color = containerColor,
-                tonalElevation = 0.dp,
+                tonalElevation = AppDimens.Spacing.xs4,
             ) {
                 NavigationRail(
                     modifier = Modifier
-                        .widthIn(min = 104.dp)
+                        .widthIn(min = AppDimens.Size.xl19)
                         .padding(vertical = AppDimens.Spacing.xl3),
                     header = {
                         Text(

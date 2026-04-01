@@ -31,5 +31,11 @@
   - `OLX_API_BASE_URL` or `olx.api.base.url`
   - `OLX_REDIRECT_URI` or `olx.redirect.uri`
 
+## UI Theming Conventions (Learned)
+- In `composeApp/src/commonMain/kotlin`, prefer `AppTheme.typography` and `AppTheme.colors` over `MaterialTheme.typography` / `MaterialTheme.colorScheme` for app UI.
+- Replace hardcoded `dp` in shared UI with `AppDimens` where reasonable, but keep explicit screen breakpoints as raw values (for example `720.dp`) when they represent layout thresholds.
+- For missing size tokens, add to `AppDimens.Size` only when needed and keep naming/value order consistent (`xlN` should not be smaller than earlier entries).
+- Prefer existing nearest `AppDimens` token over adding many one-off values; add new token only when exact value is important (e.g. `300.dp` hero height in preview carousel).
+
 ## TODO
 - Confirm the preferred test and lint commands once Gradle task listing can run in this environment; wrapper task inspection was blocked by sandbox access to `~/.gradle`.

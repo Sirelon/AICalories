@@ -29,13 +29,13 @@ fun AppSectionHeader(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
+                style = AppTheme.typography.title,
             )
             if (!subtitle.isNullOrBlank()) {
                 Text(
                     text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = AppTheme.typography.caption,
+                    color = AppTheme.colors.onSurfaceMuted,
                 )
             }
         }

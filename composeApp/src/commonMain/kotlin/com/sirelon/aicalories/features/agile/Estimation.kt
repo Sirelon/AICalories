@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import com.sirelon.aicalories.designsystem.AppTheme
 
 enum class Estimation {
     XS,
@@ -35,12 +36,13 @@ fun Estimation.description(): String = when (this) {
     Estimation.XL -> "Extra Large"
 }
 
+@Composable
 fun Estimation.color(): Color = when (this) {
-    Estimation.XS -> Color(0xFF66BB6A)
-    Estimation.S -> Color(0xFF26C6DA)
-    Estimation.M -> Color(0xFFFFCA28)
-    Estimation.L -> Color(0xFFFFA726)
-    Estimation.XL -> Color(0xFFEF5350)
+    Estimation.XS -> AppTheme.colors.success
+    Estimation.S -> AppTheme.colors.primary
+    Estimation.M -> AppTheme.colors.warning
+    Estimation.L -> AppTheme.colors.warningVariant
+    Estimation.XL -> AppTheme.colors.error
 }
 
 @Composable

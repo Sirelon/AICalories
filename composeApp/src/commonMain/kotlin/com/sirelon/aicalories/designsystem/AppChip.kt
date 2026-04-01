@@ -8,7 +8,6 @@ import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ChipColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -19,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 
 @Composable
 fun AppChip(
@@ -69,7 +67,7 @@ fun AppChip(
         },
         colors = colors.toChipColors(),
         border = borderStroke,
-        elevation = AssistChipDefaults.assistChipElevation(elevation = 0.dp),
+        elevation = AssistChipDefaults.assistChipElevation(elevation = AppDimens.Spacing.xs4),
     )
 }
 
@@ -86,12 +84,12 @@ object AppChipDefaults {
     @Composable
     @ReadOnlyComposable
     fun neutralColors(): AppChipColors {
-        val scheme = MaterialTheme.colorScheme
+        val scheme = AppTheme.colors
         return AppChipColors(
             containerColor = scheme.surfaceVariant,
-            labelColor = scheme.onSurfaceVariant,
+            labelColor = scheme.onSurfaceMuted,
             leadingIconColor = scheme.primary,
-            borderColor = scheme.outlineVariant,
+            borderColor = scheme.outline.copy(alpha = 0.6f),
         )
     }
 
@@ -128,7 +126,7 @@ object AppChipDefaults {
         accent: Color,
         onAccent: Color = accent,
     ): AppChipColors {
-        val scheme = MaterialTheme.colorScheme
+        val scheme = AppTheme.colors
         val containerColor = lerp(scheme.surfaceVariant, accent, 0.35f)
         val borderColor = lerp(containerColor, accent, 0.6f)
         return AppChipColors(
@@ -155,10 +153,10 @@ object AppChipDefaults {
 
 @Composable
 private fun AppChipColors.toChipColors(): ChipColors {
-    val scheme = MaterialTheme.colorScheme
+    val scheme = AppTheme.colors
     val disabledContainer = lerp(containerColor, scheme.surfaceVariant, 0.65f)
-    val disabledLabel = lerp(labelColor, scheme.onSurfaceVariant, 0.65f)
-    val disabledIcon = lerp(leadingIconColor, scheme.onSurfaceVariant, 0.65f)
+    val disabledLabel = lerp(labelColor, scheme.onSurfaceMuted, 0.65f)
+    val disabledIcon = lerp(leadingIconColor, scheme.onSurfaceMuted, 0.65f)
 
     return AssistChipDefaults.assistChipColors(
         containerColor = containerColor,
