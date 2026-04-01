@@ -194,6 +194,8 @@ fun MagicBlueButton(
                 shadowSpread = shadowSpread,
             )
 
+            val pressedBorderColor = AppTheme.colors.onSurface
+            val onSurfaceAlpha = AppTheme.colors.onSurface.copy(alpha = 0.85f)
             Box(
                 modifier = Modifier
                     .matchParentSize()
@@ -226,7 +228,6 @@ fun MagicBlueButton(
 
                         val outerBorderSize = Size(size.width + strokeWidthPx, size.height + strokeWidthPx)
                         val outerBorderOffset = Offset(-strokeWidthPx / 2, -strokeWidthPx / 2)
-                        val pressedBorderColor = AppTheme.colors.onSurface
 
                         onDrawBehind {
                             // Dark Border that is visible when btn is in pressed state
@@ -260,7 +261,7 @@ fun MagicBlueButton(
                         this.offset = Offset(x = 0f, y = innerShadowOffset.toPx())
                         this.radius = innerShadowRadius.toPx()
                         this.alpha = innerShadowAlpha
-                        this.color = AppTheme.colors.onSurface.copy(alpha = 0.85f)
+                        this.color = onSurfaceAlpha
                     }
             ) {
                 ButtonText(
@@ -285,6 +286,7 @@ private fun BoxScope.ShadowLayer(
     shadowSpread: Dp,
 ) {
     val shape = RoundedCornerShape(radiusDp)
+    val shadowColor = AppTheme.colors.onSurface
     Box(
         modifier = Modifier
             .matchParentSize()
@@ -295,7 +297,7 @@ private fun BoxScope.ShadowLayer(
             .dropShadow(shape = shape) {
                 this.radius = shadowRadius.toPx()
                 this.offset = Offset(x = 0f, y = shadowOffset.toPx())
-                this.color = AppTheme.colors.onSurface
+                this.color = shadowColor
                 this.alpha = outerShadow1Alpha
             }
             .dropShadow(shape = shape) {
@@ -303,11 +305,11 @@ private fun BoxScope.ShadowLayer(
                 this.spread = shadowSpread.toPx()
                 this.offset = Offset(x = 0f, y = shadowOffset.toPx())
 
-                this.color = AppTheme.colors.onSurface
+                this.color = shadowColor
                 this.alpha = outerShadow2Alpha
             }
             .dropShadow(shape = shape) {
-                this.color = AppTheme.colors.onSurface.copy(alpha = 0.9f)
+                this.color = shadowColor.copy(alpha = 0.9f)
                 this.alpha = pressedShadow
             }
             .drawBehind {

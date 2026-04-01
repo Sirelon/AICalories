@@ -115,12 +115,13 @@ internal fun MagicGreenButton(
         val textShadowBlur = AppDimens.Spacing.xs2 * scale
 
         // shadow
+        val shadowColor = AppTheme.colors.onSurface.copy(alpha = 0.16f)
         Box(
             modifier = Modifier
                 .matchParentSize()
                 .padding(top = buttonDepth)
                 .dropShadow(shape = RoundedCornerShape(outerRadius)) {
-                    color = AppTheme.colors.onSurface.copy(alpha = 0.16f)
+                    color = shadowColor
                     radius = shadowRadius.toPx()
                     offset = Offset(0F, shadowOffset.toPx())
                     spread = 0F
