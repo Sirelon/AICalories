@@ -20,42 +20,54 @@ class MediaUploadHelper(
     private val repository: MediaUploadRepository,
 ) {
 
-    fun uploadSelectedFiles(
+    /**
+     * Validates and converts selected files without uploading them.
+     * Store the returned list in your ViewModel and call [uploadPreparedFiles] when ready.
+     */
+    suspend fun prepareFiles(
         platformContext: PlatformContext,
         selectionResult: Result<List<KmpFile>>,
-    ): Flow<MediaUploadUpdate> = channelFlow {
+    ): Result<List<KmpFile>> {
         val selectedFiles = selectionResult.getOrElse { error ->
-            send(MediaUploadUpdate.Error(error.message ?: "Unable to access selected files."))
-            return@channelFlow
+            return Result.failure(Exception(error.message ?: "Unable to access selected files."))
         }
 
         if (selectedFiles.isEmpty()) {
-            send(MediaUploadUpdate.Error("No files were selected."))
-            return@channelFlow
+            return Result.failure(Exception("No files were selected."))
         }
 
         val unsupportedFiles = selectedFiles.filterNot {
             it.isSupportedOrConvertible(platformContext)
         }
         if (unsupportedFiles.isNotEmpty()) {
-            send(MediaUploadUpdate.Error("Only JPG, PNG, or WEBP images are supported."))
-            return@channelFlow
+            return Result.failure(Exception("Only JPG, PNG, or WEBP images are supported."))
         }
 
-        val processedFiles = runCatching {
+        return runCatching {
             withContext(Dispatchers.Default) {
                 selectedFiles.map { file ->
                     imageFormatConverter.convert(platformContext, file)
                 }
             }
-        }.getOrElse { error ->
-            send(MediaUploadUpdate.Error(error.message ?: "Unable to process selected files."))
+        }
+    }
+
+    /**
+     * Uploads all previously prepared files to Supabase in parallel.
+     * Call this when the user confirms (e.g. taps a confirm button).
+     */
+    fun uploadPreparedFiles(
+        platformContext: PlatformContext,
+        files: List<KmpFile>,
+    ): Flow<MediaUploadUpdate> = channelFlow {
+        if (files.isEmpty()) {
+            send(MediaUploadUpdate.Error("No files to upload."))
             return@channelFlow
         }
 
         send(MediaUploadUpdate.Started)
-        processedFiles.forEach { file ->
-            send(MediaUploadUpdate.AddPlaceholder(file))
+        files.forEach { file ->
+            send(MediaUploadUpdate.UploadStarted(file))
             launch {
                 repository.uploadFile(platformContext, file)
                     .onEach { status ->
@@ -89,11 +101,26 @@ class MediaUploadHelper(
             }
         }
     }
+
+    fun uploadSelectedFiles(
+        platformContext: PlatformContext,
+        selectionResult: Result<List<KmpFile>>,
+    ): Flow<MediaUploadUpdate> = channelFlow {
+        val prepared = prepareFiles(platformContext, selectionResult)
+        val files = prepared.getOrElse { error ->
+            send(MediaUploadUpdate.Error(error.message ?: "Unable to process selected files."))
+            return@channelFlow
+        }
+
+        uploadPreparedFiles(platformContext, files).collect { send(it) }
+    }
 }
 
 sealed interface MediaUploadUpdate {
     data object Started : MediaUploadUpdate
     data class AddPlaceholder(val file: KmpFile) : MediaUploadUpdate
+    /** Emitted per file when batch upload begins. Flip item status to [UploadingStatus.Uploading]. */
+    data class UploadStarted(val file: KmpFile) : MediaUploadUpdate
     data class Progress(
         val file: KmpFile,
         val progress: Double,
