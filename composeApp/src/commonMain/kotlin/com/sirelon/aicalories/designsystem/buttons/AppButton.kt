@@ -104,7 +104,7 @@ data object AppButtonDefaults {
         return AppButtonStyle(
             backgroundColor = Color.Transparent,
             contentColor = AppTheme.colors.onBackground,
-            elevation = 0.dp,
+            elevation = AppDimens.Spacing.xs4,
         )
     }
 }

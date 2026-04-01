@@ -25,8 +25,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.sirelon.aicalories.designsystem.AppDimens
+import com.sirelon.aicalories.designsystem.AppTheme
 
 @Composable
 fun EstimationChooser(
@@ -42,11 +42,11 @@ fun EstimationChooser(
     ) {
         Text(
             text = "Estimation",
-            style = MaterialTheme.typography.titleMedium,
+            style = AppTheme.typography.title,
         )
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            tonalElevation = 1.dp,
+            tonalElevation = AppDimens.BorderWidth.s,
             shape = MaterialTheme.shapes.medium,
             onClick = { isSheetOpen = true },
         ) {
@@ -100,7 +100,7 @@ fun EstimationPickerSheet(
         ) {
             Text(
                 text = "Select estimation",
-                style = MaterialTheme.typography.titleLarge,
+                style = AppTheme.typography.title,
             )
             Estimation.entries.forEach { estimation ->
                 EstimationOption(
@@ -152,13 +152,13 @@ private fun EstimationContent(estimation: Estimation) {
         )
         Text(
             text = estimation.code(),
-            style = MaterialTheme.typography.titleMedium,
+            style = AppTheme.typography.title,
         )
         Spacer(modifier = Modifier.width(AppDimens.Spacing.xl))
         Text(
             text = estimation.description(),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = AppTheme.typography.body,
+            color = AppTheme.colors.onSurfaceMuted,
         )
     }
 }

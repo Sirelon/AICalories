@@ -35,6 +35,7 @@ object AppDimens {
         val xl21: Dp = 128.dp
         val xl22: Dp = 160.dp
         val xl23: Dp = 240.dp
+        val xl24: Dp = 300.dp
     }
 
     object Spacing {

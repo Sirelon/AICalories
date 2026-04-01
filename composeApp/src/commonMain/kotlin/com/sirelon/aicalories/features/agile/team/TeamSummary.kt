@@ -13,7 +13,6 @@ import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.PeopleOutline
 import androidx.compose.material.icons.outlined.Warning
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.sirelon.aicalories.designsystem.AppChip
 import com.sirelon.aicalories.designsystem.AppChipDefaults
 import com.sirelon.aicalories.designsystem.AppDimens
+import com.sirelon.aicalories.designsystem.AppTheme
 import kotlin.math.roundToInt
 
 @Composable
@@ -50,7 +50,7 @@ fun TeamSummary(
     ) {
         Text(
             text = "${team.name} overview",
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+            style = AppTheme.typography.title.copy(fontWeight = FontWeight.SemiBold),
         )
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),

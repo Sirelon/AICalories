@@ -45,8 +45,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sirelon.aicalories.designsystem.AppDimens
+import com.sirelon.aicalories.designsystem.AppTheme
 import kotlin.math.min
 
 @Composable
@@ -56,8 +57,8 @@ internal fun MagicGreenButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
-    val bgColor = Color(0xFF43A980)
-    val surfaceColor = Color(0xFF50B58D)
+    val bgColor = AppTheme.colors.success
+    val surfaceColor = AppTheme.colors.success.copy(alpha = 0.88f)
 
     val interaction = remember { MutableInteractionSource() }
 
@@ -93,25 +94,25 @@ internal fun MagicGreenButton(
         val scale = calculateScale(
             maxWidth = maxWidth,
             maxHeight = maxHeight,
-            baseWidth = 224.dp,
-            baseHeight = 236.dp,
+            baseWidth = AppDimens.Size.xl23 - AppDimens.Size.xl3,
+            baseHeight = AppDimens.Size.xl23 - AppDimens.Size.xs,
         )
 
-        val buttonDepth = 17.dp * scale
+        val buttonDepth = AppDimens.Size.xl3 * scale
         val inset by animateDpAsState(
-            targetValue = if (isPressed) buttonDepth else 0.dp,
+            targetValue = if (isPressed) buttonDepth else AppDimens.Spacing.xs4,
             animationSpec = tween(durationMillis = 75, easing = LinearEasing),
         )
 
-        val outerRadius = 19.dp * scale
-        val innerCorner = 18.dp * scale
-        val innerPadding = 1.dp * scale
-        val borderWidth = 1.dp * scale
-        val shadowRadius = 3.dp * scale
-        val shadowOffset = 3.dp * scale
+        val outerRadius = AppDimens.Size.xl4 * scale
+        val innerCorner = AppDimens.Size.xl4 * scale
+        val innerPadding = AppDimens.Spacing.xs3 * scale
+        val borderWidth = AppDimens.Spacing.xs3 * scale
+        val shadowRadius = AppDimens.Size.s * scale
+        val shadowOffset = AppDimens.Size.s * scale
         val textSize = (38f * scale).sp
-        val textShadowOffset = 1.dp * scale
-        val textShadowBlur = 2.dp * scale
+        val textShadowOffset = AppDimens.Spacing.xs3 * scale
+        val textShadowBlur = AppDimens.Spacing.xs2 * scale
 
         // shadow
         Box(
@@ -119,7 +120,7 @@ internal fun MagicGreenButton(
                 .matchParentSize()
                 .padding(top = buttonDepth)
                 .dropShadow(shape = RoundedCornerShape(outerRadius)) {
-                    color = Color(0x29000000)
+                    color = AppTheme.colors.onSurface.copy(alpha = 0.16f)
                     radius = shadowRadius.toPx()
                     offset = Offset(0F, shadowOffset.toPx())
                     spread = 0F
@@ -250,7 +251,7 @@ private fun ButtonText(
             textAlign = TextAlign.Center,
 //            fontFamily = Typography.ptSansFonts(),
             letterSpacing = 0.sp,
-            color = Color(0xFFFFFFFF),
+            color = AppTheme.colors.onPrimary,
             shadow = with(LocalDensity.current) {
                 Shadow(
                     color = shadowColor,
@@ -281,8 +282,8 @@ fun MagicGreenButtonPreview() {
     Box(modifier = Modifier.fillMaxSize().safeContentPadding()) {
         MagicGreenButton(
             modifier = Modifier.size(
-                width = 224.dp,
-                height = 236.dp,
+                width = AppDimens.Size.xl23 - AppDimens.Size.xl3,
+                height = AppDimens.Size.xl23 - AppDimens.Size.xs,
             ),
             text = "Старт",
             onClick = {},

@@ -23,10 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sirelon.aicalories.composeapp.generated.resources.Res
 import com.sirelon.aicalories.composeapp.generated.resources.benefit_manage
@@ -77,8 +75,8 @@ fun SellerLandingScreen(
             // Logo Section
             IconWithBackground(
                 backgroundColor = AppTheme.colors.warning,
-                modifier = Modifier.size(80.dp),
-                iconPadding = 20.dp
+                modifier = Modifier.size(AppDimens.Size.xl16),
+                iconPadding = AppDimens.Spacing.xl5
             ) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_snap_logo),
@@ -135,7 +133,7 @@ private fun ContinueWithOlxBlock(onContinueWithOlx: () -> Unit) {
         // Why connect to OLX card
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFBEB))// Light yellowish background
+            colors = CardDefaults.cardColors(containerColor = AppTheme.colors.warning.copy(alpha = 0.16f))
         ) {
             Column(
                 modifier = Modifier.padding(AppDimens.Spacing.xl6),
@@ -159,8 +157,8 @@ private fun ContinueWithOlxBlock(onContinueWithOlx: () -> Unit) {
             onClick = onContinueWithOlx,
             modifier = Modifier.fillMaxWidth(),
             style = AppButtonStyle(
-                backgroundColor = Color(0xFF5AB4C6), // OLX Teal
-                contentColor = Color.White
+                backgroundColor = AppTheme.colors.primary,
+                contentColor = AppTheme.colors.onPrimary,
             ),
             leadingIcon = null
         )
@@ -178,7 +176,7 @@ private fun ContinueAsGuestInfoBlock() {
     ) {
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(AppDimens.Size.xl12)
                 .clip(RoundedCornerShape(AppDimens.BorderRadius.m))
                 .background(AppTheme.colors.surfaceVariant),
             contentAlignment = Alignment.Center
@@ -190,7 +188,7 @@ private fun ContinueAsGuestInfoBlock() {
             )
         }
 
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs)) {
             Text(
                 text = stringResource(Res.string.continue_as_guest),
                 style = AppTheme.typography.title,
@@ -216,8 +214,8 @@ private fun BenefitItem(text: String) {
         Icon(
             imageVector = Icons.Default.Check,
             contentDescription = null,
-            tint = Color(0xFF1B8E5A),
-            modifier = Modifier.size(16.dp)
+            tint = AppTheme.colors.success,
+            modifier = Modifier.size(AppDimens.Size.xl3)
         )
         Text(
             text = text,

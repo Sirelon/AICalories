@@ -39,15 +39,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.dp
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppScaffold
+import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.generateRandomColor
 import kotlinx.coroutines.launch
 
@@ -58,13 +57,13 @@ fun PreviewAdScreen() {
             modifier = Modifier
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(bottom = AppDimens.Spacing.xl3),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
         ) {
             val state = rememberCarouselState { 5 }
 
             HorizontalCenteredHeroCarousel(
-                modifier = Modifier.height(300.dp),
+                modifier = Modifier.height(AppDimens.Size.xl24),
                 state = state,
             ) { pageIndex ->
                 val randomColor = remember(pageIndex) { generateRandomColor() }
@@ -77,8 +76,8 @@ fun PreviewAdScreen() {
             }
 
             Column(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl)
             ) {
                 AdTitleCard(title = "Vintage Leather Messenger Bag - Authent")
 
@@ -128,7 +127,7 @@ private fun PreviewSectionCard(
                 }
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.labelLarge,
+                    style = AppTheme.typography.label,
                 )
                 if (textFieldState != null) {
                     Spacer(modifier = Modifier.weight(1f))
@@ -145,7 +144,7 @@ private fun PreviewSectionCard(
                             modifier = Modifier.size(AppDimens.Size.xl3)
                         )
                         Spacer(modifier = Modifier.width(AppDimens.Spacing.l))
-                        Text("Copy", style = MaterialTheme.typography.labelMedium)
+                        Text("Copy", style = AppTheme.typography.label)
                     }
                 }
             }
@@ -181,8 +180,8 @@ private fun AdDescriptionCard(description: String) {
         Box {
             Text(
                 text = "${description.length} characters",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline,
+                style = AppTheme.typography.caption,
+                color = AppTheme.colors.outline,
                 modifier = Modifier.align(Alignment.BottomEnd)
             )
         }
@@ -202,41 +201,41 @@ private fun AdPriceCard(price: Int, originalPrice: Int, minPrice: Int, maxPrice:
                 // TODO: Currency
                 Text(
                     "€",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = AppTheme.typography.title,
                 )
                 Text(
                     text = currentPrice.toInt().toString(),
-                    style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold)
+                    style = AppTheme.typography.headline.copy(fontWeight = FontWeight.Bold)
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Box(
                     modifier = Modifier
-                        .background(Color(0xFFE8F5E9), shape = MaterialTheme.shapes.small)
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .background(AppTheme.colors.success.copy(alpha = 0.15f), shape = MaterialTheme.shapes.small)
+                        .padding(horizontal = AppDimens.Spacing.m, vertical = AppDimens.Spacing.xs)
                 ) {
                     val discount = ((1 - (currentPrice / originalPrice)) * 100).toInt()
                     Text(
                         text = "$discount% off",
-                        color = Color(0xFF2E7D32),
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                        color = AppTheme.colors.success,
+                        style = AppTheme.typography.label.copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }
             Text(
                 text = "Original: €$originalPrice",
-                style = MaterialTheme.typography.bodyMedium.copy(textDecoration = TextDecoration.LineThrough),
-                color = MaterialTheme.colorScheme.outline
+                style = AppTheme.typography.body.copy(textDecoration = TextDecoration.LineThrough),
+                color = AppTheme.colors.outline
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(AppDimens.Spacing.xl3))
 
             Slider(
                 value = currentPrice,
                 onValueChange = { currentPrice = it },
                 valueRange = minPrice.toFloat()..maxPrice.toFloat(),
                 colors = SliderDefaults.colors(
-                    thumbColor = Color(0xFFF4511E),
-                    activeTrackColor = Color(0xFFF4511E).copy(alpha = 0.24f)
+                    thumbColor = AppTheme.colors.warning,
+                    activeTrackColor = AppTheme.colors.warning.copy(alpha = 0.24f)
                 )
             )
 
@@ -246,13 +245,13 @@ private fun AdPriceCard(price: Int, originalPrice: Int, minPrice: Int, maxPrice:
             ) {
                 Text(
                     "€$minPrice",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.outline
+                    style = AppTheme.typography.label,
+                    color = AppTheme.colors.outline
                 )
                 Text(
                     "€$maxPrice",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.outline
+                    style = AppTheme.typography.label,
+                    color = AppTheme.colors.outline
                 )
             }
         }
@@ -263,13 +262,13 @@ private fun AdPriceCard(price: Int, originalPrice: Int, minPrice: Int, maxPrice:
 private fun AdCategoryCard(category: String) {
     PreviewSectionCard(label = "Category") {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = AppDimens.Spacing.m),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = category,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                style = AppTheme.typography.title.copy(fontWeight = FontWeight.Bold)
             )
             // TODO:
             TextButton(onClick = {}) {
