@@ -48,10 +48,11 @@ import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppScaffold
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.generateRandomColor
+import com.sirelon.aicalories.features.seller.ad.Advertisement
 import kotlinx.coroutines.launch
 
 @Composable
-fun PreviewAdScreen() {
+fun PreviewAdScreen(advertisement: Advertisement) {
     AppScaffold { paddingValues ->
         Column(
             modifier = Modifier
@@ -60,7 +61,7 @@ fun PreviewAdScreen() {
                 .padding(bottom = AppDimens.Spacing.xl3),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
         ) {
-            val state = rememberCarouselState { 5 }
+            val state = rememberCarouselState { advertisement.images.size }
 
             HorizontalCenteredHeroCarousel(
                 modifier = Modifier.height(AppDimens.Size.xl24),
@@ -79,20 +80,18 @@ fun PreviewAdScreen() {
                 modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
                 verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl)
             ) {
-                AdTitleCard(title = "Vintage Leather Messenger Bag - Authent")
+                AdTitleCard(title = advertisement.title)
 
-                AdDescriptionCard(
-                    description = "messenger bag. Rich patina develops with age. Spacious main compartment with laptop sleeve, multiple pockets for organization. Perfect for work or casual use. Very durable hardware."
-                )
+                AdDescriptionCard(description = advertisement.description)
 
                 AdPriceCard(
-                    price = 100,
-                    originalPrice = 220,
-                    minPrice = 43,
-                    maxPrice = 128
+                    price = advertisement.suggestedPrice,
+                    originalPrice = advertisement.suggestedPrice, // TODO:
+                    minPrice = advertisement.minPrice,
+                    maxPrice = advertisement.maxPrice,
                 )
 
-                AdCategoryCard(category = "Fashion")
+                AdCategoryCard(category = advertisement.category)
             }
         }
     }
@@ -189,7 +188,7 @@ private fun AdDescriptionCard(description: String) {
 }
 
 @Composable
-private fun AdPriceCard(price: Int, originalPrice: Int, minPrice: Int, maxPrice: Int) {
+private fun AdPriceCard(price: Double, originalPrice: Double, minPrice: Double, maxPrice: Double) {
     var currentPrice by remember { mutableStateOf(price.toFloat()) }
 
     PreviewSectionCard(
@@ -210,7 +209,10 @@ private fun AdPriceCard(price: Int, originalPrice: Int, minPrice: Int, maxPrice:
                 Spacer(modifier = Modifier.weight(1f))
                 Box(
                     modifier = Modifier
-                        .background(AppTheme.colors.success.copy(alpha = 0.15f), shape = MaterialTheme.shapes.small)
+                        .background(
+                            AppTheme.colors.success.copy(alpha = 0.15f),
+                            shape = MaterialTheme.shapes.small
+                        )
                         .padding(horizontal = AppDimens.Spacing.m, vertical = AppDimens.Spacing.xs)
                 ) {
                     val discount = ((1 - (currentPrice / originalPrice)) * 100).toInt()
@@ -271,7 +273,9 @@ private fun AdCategoryCard(category: String) {
                 style = AppTheme.typography.title.copy(fontWeight = FontWeight.Bold)
             )
             // TODO:
-            TextButton(onClick = {}) {
+            TextButton(onClick = {
+                // TODO:
+            }) {
                 Text(
                     text = "Change",
                 )

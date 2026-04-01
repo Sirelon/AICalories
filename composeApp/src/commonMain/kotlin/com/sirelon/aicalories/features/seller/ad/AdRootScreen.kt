@@ -22,7 +22,7 @@ sealed interface AdDestination {
     data object GenerateAd : AdDestination
 
     @Serializable
-    data object PreviewAd : AdDestination
+    data class PreviewAd(val advertisement: Advertisement) : AdDestination
 
 }
 
@@ -49,13 +49,13 @@ fun AdRootScreen(onExit: () -> Unit) {
         entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AdDestination>()),
         entryProvider = entryProvider {
             entry<AdDestination.PreviewAd> {
-                PreviewAdScreen()
+                PreviewAdScreen(it.advertisement)
             }
 
             entry<AdDestination.GenerateAd> {
                 GenerateAdScreen(
                     onBack = onExit,
-                    openAdPreview = { navBackStack.add(AdDestination.PreviewAd) },
+                    openAdPreview = { navBackStack.add(AdDestination.PreviewAd(it)) },
                 )
             }
         },

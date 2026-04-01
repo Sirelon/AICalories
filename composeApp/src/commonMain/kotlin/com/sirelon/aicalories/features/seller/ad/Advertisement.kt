@@ -1,5 +1,8 @@
 package com.sirelon.aicalories.features.seller.ad
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Advertisement(
     val title: String,
     val description: String,
