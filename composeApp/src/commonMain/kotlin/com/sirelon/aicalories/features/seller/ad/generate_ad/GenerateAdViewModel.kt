@@ -42,6 +42,8 @@ class GenerateAdViewModel(
                         setState {
                             it.copy(prompt = result.toString(), isLoading = false)
                         }
+                        postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(result))
+
                     }.onFailure { error ->
                         setState {
                             it.copy(isLoading = false, errorMessage = error.message)

@@ -53,13 +53,14 @@ import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.features.media.ui.PhotosSection
+import com.sirelon.aicalories.features.seller.ad.Advertisement
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun GenerateAdScreen(
     onBack: () -> Unit,
-    openAdPreview: () -> Unit,
+    openAdPreview: (Advertisement) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: GenerateAdViewModel = koinViewModel()
@@ -80,12 +81,15 @@ fun GenerateAdScreen(
         },
     )
 
+
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 is GenerateAdContract.GenerateAdEffect.ShowMessage -> {
                     snackbarHostState.showSnackbar(effect.message)
                 }
+
+                is GenerateAdContract.GenerateAdEffect.OpenAdPreview -> openAdPreview(effect.ad)
             }
         }
     }
