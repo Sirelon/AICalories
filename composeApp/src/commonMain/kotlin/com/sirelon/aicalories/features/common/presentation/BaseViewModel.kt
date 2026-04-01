@@ -1,10 +1,10 @@
 package com.sirelon.aicalories.features.common.presentation
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlin.LazyThreadSafetyMode
 
@@ -16,8 +16,8 @@ abstract class BaseViewModel<State, Event, Effect> : ViewModel() {
     val state: StateFlow<State>
         get() = _state
 
-    private val _effects = MutableSharedFlow<Effect>()
-    val effects = _effects.asSharedFlow()
+    private val _effects = Channel<Effect>(Channel.BUFFERED)
+    val effects = _effects.receiveAsFlow()
 
     abstract fun initialState(): State
 
@@ -28,6 +28,6 @@ abstract class BaseViewModel<State, Event, Effect> : ViewModel() {
     }
 
     fun postEffect(effect: Effect) {
-        _effects.tryEmit(effect)
+        _effects.trySend(effect)
     }
 }

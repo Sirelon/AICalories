@@ -28,7 +28,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,6 +43,7 @@ import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.composeapp.generated.resources.Res
 import com.sirelon.aicalories.composeapp.generated.resources.ic_snap_logo
 import com.sirelon.aicalories.designsystem.AppDimens
+import com.sirelon.aicalories.designsystem.ObserveAsEvents
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.IconWithBackground
 import com.sirelon.aicalories.designsystem.Input
@@ -80,12 +80,10 @@ fun GenerateAdScreen(
         },
     )
 
-    LaunchedEffect(viewModel) {
-        viewModel.effects.collect { effect ->
-            when (effect) {
-                is GenerateAdContract.GenerateAdEffect.ShowMessage -> {
-                    snackbarHostState.showSnackbar(effect.message)
-                }
+    ObserveAsEvents(viewModel.effects) { effect ->
+        when (effect) {
+            is GenerateAdContract.GenerateAdEffect.ShowMessage -> {
+                snackbarHostState.showSnackbar(effect.message)
             }
         }
     }

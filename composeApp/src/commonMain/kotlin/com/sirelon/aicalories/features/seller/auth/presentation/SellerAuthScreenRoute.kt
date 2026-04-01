@@ -3,11 +3,11 @@ package com.sirelon.aicalories.features.seller.auth.presentation
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sirelon.aicalories.designsystem.ObserveAsEvents
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthCallbackBridge
 import com.sirelon.aicalories.features.seller.auth.data.OlxExternalAuthLauncher
 import com.sirelon.aicalories.features.seller.auth.domain.OlxLaunchResult
@@ -31,21 +31,19 @@ fun SellerAuthScreenRoute() {
         }
     }
 
-    LaunchedEffect(viewModel, launcher) {
-        viewModel.effects.collect { effect ->
-            when (effect) {
-                is SellerAuthContract.SellerAuthEffect.LaunchBrowser -> {
-                    when (val result = launcher.launch(effect.url)) {
-                        OlxLaunchResult.Opened -> Unit
-                        is OlxLaunchResult.Unsupported -> {
-                            snackbarHostState.showSnackbar(result.reason)
-                        }
+    ObserveAsEvents(viewModel.effects) { effect ->
+        when (effect) {
+            is SellerAuthContract.SellerAuthEffect.LaunchBrowser -> {
+                when (val result = launcher.launch(effect.url)) {
+                    OlxLaunchResult.Opened -> Unit
+                    is OlxLaunchResult.Unsupported -> {
+                        snackbarHostState.showSnackbar(result.reason)
                     }
                 }
+            }
 
-                is SellerAuthContract.SellerAuthEffect.ShowMessage -> {
-                    snackbarHostState.showSnackbar(effect.message)
-                }
+            is SellerAuthContract.SellerAuthEffect.ShowMessage -> {
+                snackbarHostState.showSnackbar(effect.message)
             }
         }
     }
