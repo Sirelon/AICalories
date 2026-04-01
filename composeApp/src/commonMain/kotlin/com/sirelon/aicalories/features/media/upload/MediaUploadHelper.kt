@@ -67,6 +67,9 @@ class MediaUploadHelper(
 
         send(MediaUploadUpdate.Started)
         files.forEach { file ->
+            send(MediaUploadUpdate.AddPlaceholder(file))
+        }
+        files.forEach { file ->
             send(MediaUploadUpdate.UploadStarted(file))
             launch {
                 repository.uploadFile(platformContext, file)
