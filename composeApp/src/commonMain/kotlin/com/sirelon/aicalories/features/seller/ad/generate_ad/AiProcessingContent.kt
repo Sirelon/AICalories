@@ -1,0 +1,235 @@
+package com.sirelon.aicalories.features.seller.ad.generate_ad
+
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.sirelon.aicalories.designsystem.AppDimens
+import com.sirelon.aicalories.designsystem.AppTheme
+import com.sirelon.aicalories.designsystem.PulsingCircles
+import kotlinx.coroutines.delay
+
+private val processingSteps = listOf(
+    "Analyzing image",
+    "Generating title",
+    "Writing description",
+    "Calculating price",
+)
+
+@Composable
+fun AiProcessingContent(
+    modifier: Modifier = Modifier,
+) {
+    var completedSteps by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        for (i in 1..processingSteps.size) {
+            delay(800L)
+            completedSteps = i
+        }
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = AppDimens.Spacing.xl6),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        // Pulsing circles with spinning icon + bouncing badge
+        Box(contentAlignment = Alignment.Center) {
+            PulsingCircles {
+                SpinningIcon()
+            }
+            BouncingBadge(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = (-4).dp, y = (-4).dp),
+            )
+        }
+
+        Spacer(modifier = Modifier.height(AppDimens.Spacing.xl8))
+
+        Text(
+            text = "Creating Your Ad",
+            fontSize = AppDimens.TextSize.xl5,
+            fontWeight = FontWeight.Bold,
+            color = AppTheme.colors.onSurface,
+        )
+
+        Spacer(modifier = Modifier.height(AppDimens.Spacing.m))
+
+        Text(
+            text = "Our AI is analyzing your photo and crafting the perfect title, description, and price...",
+            fontSize = AppDimens.TextSize.xl2,
+            color = AppTheme.colors.onSurfaceMuted,
+            textAlign = TextAlign.Center,
+        )
+
+        Spacer(modifier = Modifier.height(AppDimens.Spacing.xl6))
+
+        ProcessingStepsList(completedSteps = completedSteps)
+    }
+}
+
+@Composable
+private fun SpinningIcon(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition()
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 3000),
+        ),
+    )
+
+    Icon(
+        imageVector = Icons.Rounded.Star,
+        contentDescription = null,
+        modifier = modifier
+            .size(AppDimens.Size.xl8)
+            .graphicsLayer { rotationZ = rotation },
+        tint = AppTheme.colors.onPrimary,
+    )
+}
+
+@Composable
+private fun BouncingBadge(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition()
+    val offsetY by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 600),
+            repeatMode = RepeatMode.Reverse,
+        ),
+    )
+
+    Box(
+        modifier = modifier
+            .offset(y = offsetY.dp)
+            .size(AppDimens.Size.xl8)
+            .background(AppTheme.colors.success, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Default.FlashOn,
+            contentDescription = null,
+            modifier = Modifier.size(AppDimens.Size.xl3),
+            tint = AppTheme.colors.onPrimary,
+        )
+    }
+}
+
+@Composable
+private fun ProcessingStepsList(
+    completedSteps: Int,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.width(AppDimens.Size.xl24),
+        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
+    ) {
+        processingSteps.forEachIndexed { index, stepText ->
+            val isDone = index < completedSteps
+            ProcessingStepItem(text = stepText, isDone = isDone)
+        }
+    }
+}
+
+@Composable
+private fun ProcessingStepItem(
+    text: String,
+    isDone: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isDone) AppTheme.colors.success else AppTheme.colors.onSurfaceSoft,
+        animationSpec = tween(durationMillis = 300),
+    )
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(AppDimens.Size.xl6)
+                .background(backgroundColor, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (isDone) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(AppDimens.Size.xl2),
+                    tint = AppTheme.colors.onPrimary,
+                )
+            } else {
+                PingingDot()
+            }
+        }
+
+        Text(
+            text = text,
+            fontSize = AppDimens.TextSize.xl2,
+            fontWeight = FontWeight.Medium,
+            color = if (isDone) AppTheme.colors.onSurface else AppTheme.colors.onSurfaceSoft,
+        )
+    }
+}
+
+@Composable
+private fun PingingDot(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition()
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 0.6f,
+        targetValue = 1.4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 800),
+            repeatMode = RepeatMode.Reverse,
+        ),
+    )
+
+    Box(
+        modifier = modifier
+            .size(AppDimens.Size.m)
+            .scale(scale)
+            .background(AppTheme.colors.onSurfaceMuted, CircleShape),
+    )
+}
