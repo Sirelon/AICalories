@@ -13,9 +13,11 @@ import com.sirelon.aicalories.features.media.di.mediaModule
 import com.sirelon.aicalories.features.seller.auth.di.sellerAuthModule
 import com.sirelon.aicalories.features.seller.ad.generate_ad.di.generateAdModule
 import com.sirelon.aicalories.network.ApiTokenProvider
+import com.sirelon.aicalories.network.OpenAIClient
 import com.sirelon.aicalories.network.createHttpClient
 import com.sirelon.aicalories.network.createOpenAI
 import com.sirelon.aicalories.supabase.SupabaseClient
+import com.sirelon.aicalories.supabase.SupabaseConfig
 import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -37,7 +39,7 @@ val appModule = module {
 val networkModule = module {
     single {
         ApiTokenProvider()
-            .apply { token = "TODO" }
+            .apply { token = SupabaseConfig.OPENAI_KEY }
     }
     single { createHttpClient(get()) }
     single {

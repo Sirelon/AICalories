@@ -29,12 +29,21 @@ Return ONLY valid JSON:
 }
 
 Rules:
-- Use only visible details
-- Do not invent brand or model
-- Keep description short (2–3 sentences)
-- Combine details from all images
-- Write all text in Ukrainian
-- No text outside JSON. Don't add any markdown formatting like ```json ... ```. Just return raw JSON."""
+- Use only information visible in the images
+- Do not invent brand, model, or specifications
+- If multiple images are provided, combine details from all of them
+- Title: short and clear, include brand/model only if visible
+- Description: 2–4 sentences, include condition, key details, and visible defects
+- Pricing: estimate realistic second-hand market value in USD
+  - suggestedPrice should be the best estimate
+  - minPrice and maxPrice should define a reasonable range
+- Condition must be exactly one of: new, like_new, good, fair, poor
+- Category should be a simple, common marketplace category (e.g., Electronics, Furniture, Clothing)
+
+Output:
+- Write all text fields in Ukrainian
+- Use numbers only for prices (no currency symbols, no text)
+- Do not include any text outside JSON"""
 
 class OpenAIClient(
     private val openAI: OpenAI,
