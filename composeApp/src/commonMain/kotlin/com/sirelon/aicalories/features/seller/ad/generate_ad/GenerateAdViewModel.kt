@@ -30,24 +30,50 @@ class GenerateAdViewModel(
                 }
             }
 
-            GenerateAdContract.GenerateAdEvent.Submit -> {
+            is GenerateAdContract.GenerateAdEvent.Submit -> {
                 viewModelScope.launch {
-                    setState {
-                        it.copy(isLoading = true)
-                    }
-                    runCatching {
-                        val result = openAi.analyzeThing(
-                            listOf("https://qosvjukxtnvtvarxnklv.supabase.co/storage/v1/object/public/test/JPG%20to%20WEBP%20temp%20image.webp")
-                        )
-                        setState {
-                            it.copy(prompt = result.toString(), isLoading = false)
-                        }
-                        postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(result))
+                    setState { it.copy(isLoading = true, errorMessage = null) }
 
+                    val platformContext = event.platformContext
+                    val pendingFiles = state.value.uploads
+                        .filter { (_, item) -> item.isPending }
+                        .keys.toList()
+
+                    var uploadFailed = false
+
+                    if (pendingFiles.isNotEmpty()) {
+                        mediaUploadHelper
+                            .uploadPreparedFiles(platformContext, pendingFiles)
+                            .catch { error ->
+                                uploadFailed = true
+                                setState { it.copy(isLoading = false) }
+                                showError(error.message ?: "Upload failed")
+                            }
+                            .collect { update ->
+                                handleUploadUpdate(update)
+                                when (update) {
+                                    is MediaUploadUpdate.Failure,
+                                    is MediaUploadUpdate.Error -> uploadFailed = true
+                                    else -> {}
+                                }
+                            }
+                    }
+
+                    if (uploadFailed) {
+                        setState { it.copy(isLoading = false) }
+                        return@launch
+                    }
+
+                    val uploadedUrls = state.value.uploads
+                        .filter { (_, item) -> item.uploadedFile != null }
+                        .mapNotNull { (_, item) -> item.uploadedFile?.path?.let { mediaUploadHelper.publicUrl(it) } }
+
+                    runCatching {
+                        val result = openAi.analyzeThing(uploadedUrls)
+                        setState { it.copy(isLoading = false) }
+                        postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(result))
                     }.onFailure { error ->
-                        setState {
-                            it.copy(isLoading = false, errorMessage = error.message)
-                        }
+                        setState { it.copy(isLoading = false, errorMessage = error.message) }
                     }
                 }
             }
@@ -59,14 +85,21 @@ class GenerateAdViewModel(
     private fun onFileResult(event: GenerateAdContract.GenerateAdEvent.UploadFilesResult) {
         viewModelScope.launch {
             mediaUploadHelper
-                .uploadSelectedFiles(
+                .prepareFiles(
                     platformContext = event.platformContext,
                     selectionResult = event.result,
                 )
-                .catch { error ->
-                    showError(error.message ?: "Failed to upload file.")
+                .onSuccess { files ->
+                    setState { current ->
+                        val newEntries = files
+                            .filter { file -> !current.uploads.containsKey(file) }
+                            .associateWith { UploadingItem() }
+                        current.copy(uploads = current.uploads + newEntries)
+                    }
                 }
-                .collect(::handleUploadUpdate)
+                .onFailure { error ->
+                    showError(error.message ?: "Failed to process selected files.")
+                }
         }
     }
 

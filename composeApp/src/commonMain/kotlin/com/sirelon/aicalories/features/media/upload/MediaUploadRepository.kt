@@ -16,6 +16,8 @@ class MediaUploadRepository(
     private val client: SupabaseClient,
 ) {
 
+    fun publicUrl(path: String): String = client.publicUrl(path)
+
     fun uploadFile(platformContext: PlatformContext, file: KmpFile): Flow<UploadStatus> = flow {
         emitAll(
             client.uploadFile(

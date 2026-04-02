@@ -68,6 +68,9 @@ class SupabaseClient {
         }
     }
 
+    fun publicUrl(path: String): String =
+        client.storage.from(STORAGE_BUCKET_NAME).publicUrl(path)
+
     fun uploadFile(path: String, byteArray: ByteArray): Flow<UploadStatus> {
         return flow {
             val userId = ensureAuthenticatedUserId()

@@ -17,9 +17,7 @@ interface GenerateAdContract {
             get() = uploads.values.any { !it.isUploaded }
 
         val canSubmit: Boolean
-            get() = !isLoading
-                    && uploads.isNotEmpty()
-                    && !hasPendingUploads
+            get() = !isLoading && uploads.isNotEmpty()
     }
 
     sealed interface GenerateAdEvent {
@@ -30,7 +28,7 @@ interface GenerateAdContract {
             val result: Result<List<KmpFile>>,
         ) : GenerateAdEvent
 
-        data object Submit : GenerateAdEvent
+        data class Submit(val platformContext: PlatformContext) : GenerateAdEvent
     }
 
     sealed interface GenerateAdEffect {
