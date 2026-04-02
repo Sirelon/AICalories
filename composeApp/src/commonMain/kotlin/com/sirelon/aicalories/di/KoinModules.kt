@@ -3,6 +3,7 @@ package com.sirelon.aicalories.di
 import com.sirelon.aicalories.Greeting
 import com.sirelon.aicalories.features.seller.auth.di.sellerAuthModule
 import com.sirelon.aicalories.features.seller.ad.generate_ad.di.generateAdModule
+import com.sirelon.aicalories.features.seller.ad.preview_ad.di.previewAdModule
 import com.sirelon.aicalories.features.seller.auth.di.sellerAuthModule
 import com.sirelon.aicalories.features.agile.di.agileModule
 import com.sirelon.aicalories.features.analyze.di.analyzeModule
@@ -28,6 +29,7 @@ val appModule = module {
         mediaModule,
         sellerAuthModule,
         generateAdModule,
+        previewAdModule,
     )
     single { Greeting() }
 }
