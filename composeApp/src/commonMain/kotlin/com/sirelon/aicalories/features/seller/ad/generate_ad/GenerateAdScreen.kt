@@ -112,7 +112,7 @@ fun GenerateAdScreen(
                 },
                 onSubmitClick = {
                     if (state.canSubmit) {
-                        viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit)
+                        viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit(platformContext))
                     }
                 },
                 modifier = modifier,

@@ -20,6 +20,8 @@ class MediaUploadHelper(
     private val repository: MediaUploadRepository,
 ) {
 
+    fun publicUrl(path: String): String = repository.publicUrl(path)
+
     /**
      * Validates and converts selected files without uploading them.
      * Store the returned list in your ViewModel and call [uploadPreparedFiles] when ready.
