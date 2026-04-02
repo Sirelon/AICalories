@@ -9,6 +9,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.RowScope
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AppLargeAppBar(
@@ -32,7 +35,7 @@ fun AppLargeAppBar(
                 IconButton(onClick = it) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(Res.string.back),
                     )
                 }
             }

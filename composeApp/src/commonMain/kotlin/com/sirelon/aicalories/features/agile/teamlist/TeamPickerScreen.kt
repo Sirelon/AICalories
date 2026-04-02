@@ -42,6 +42,9 @@ import com.sirelon.aicalories.features.agile.team.Team
 import com.sirelon.aicalories.features.agile.team.TeamSummary
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -77,7 +80,7 @@ private fun TeamPickerContent(
                 modifier = Modifier.navigationBarsPadding(),
                 onClick = { onEvent(TeamPickerContract.TeamPickerEvent.AddTeam) },
                 icon = { Icon(Icons.Outlined.Add, contentDescription = null) },
-                text = { Text("Add team") },
+                text = { Text(stringResource(Res.string.add_team)) },
             )
         }
     ) { paddingValues ->
@@ -91,13 +94,13 @@ private fun TeamPickerContent(
         ) {
             item {
                 AppSectionHeader(
-                    title = "Teams",
-                    subtitle = "Select or manage a team",
+                    title = stringResource(Res.string.teams_title),
+                    subtitle = stringResource(Res.string.teams_subtitle),
                     actions = {
                         IconButton(onClick = onOpenDataGenerator) {
                             Icon(
                                 imageVector = Icons.Filled.AutoAwesome,
-                                contentDescription = "Open data generator",
+                                contentDescription = stringResource(Res.string.data_generator_title),
                             )
                         }
                     },

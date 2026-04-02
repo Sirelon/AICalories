@@ -26,6 +26,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 
@@ -37,6 +40,7 @@ fun AppNavigationLayout(
 ) {
     val windowInfo = LocalWindowInfo.current
     val isWide = windowInfo.containerDpSize.width >= 720.dp
+    val destinations = topLevelDestinations()
     val gradient = Brush.verticalGradient(
         listOf(
             AppTheme.colors.background,
@@ -64,13 +68,13 @@ fun AppNavigationLayout(
                     header = {
                         Text(
                             modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
-                            text = "AI Calories",
+                            text = stringResource(Res.string.app_name),
                             style = AppTheme.typography.headline,
                             color = AppTheme.colors.onSurface,
                         )
                     },
                 ) {
-                    topLevelDestinations.forEach { item ->
+                    destinations.forEach { item ->
                         val isSelected = currentDestination == item.destination
                         NavigationRailItem(
                             selected = isSelected,
@@ -113,7 +117,7 @@ fun AppNavigationLayout(
                     NavigationBar(
                         containerColor = AppTheme.colors.surface.copy(alpha = 0.95f),
                     ) {
-                        topLevelDestinations.forEach { item ->
+                        destinations.forEach { item ->
                             val isSelected = currentDestination == item.destination
                             NavigationBarItem(
                                 selected = isSelected,
@@ -143,11 +147,12 @@ fun AppNavigationLayout(
     }
 }
 
-private val topLevelDestinations = listOf(
-    AppNavItem(AppDestination.Analyze, "Analyze", Icons.Filled.Search),
-    AppNavItem(AppDestination.History, "History", Icons.Filled.History),
-    AppNavItem(AppDestination.Agile, "Agile", Icons.Filled.Dashboard),
-    AppNavItem(AppDestination.DataGenerator, "Generator", Icons.Filled.AutoAwesome),
+@Composable
+private fun topLevelDestinations() = listOf(
+    AppNavItem(AppDestination.Analyze, stringResource(Res.string.nav_analyze), Icons.Filled.Search),
+    AppNavItem(AppDestination.History, stringResource(Res.string.nav_history), Icons.Filled.History),
+    AppNavItem(AppDestination.Agile, stringResource(Res.string.nav_agile), Icons.Filled.Dashboard),
+    AppNavItem(AppDestination.DataGenerator, stringResource(Res.string.nav_generator), Icons.Filled.AutoAwesome),
 )
 
 private data class AppNavItem(

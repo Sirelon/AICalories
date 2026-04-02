@@ -18,13 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.sirelon.aicalories.composeapp.generated.resources.Res
-import com.sirelon.aicalories.composeapp.generated.resources.olx_auth_connect
-import com.sirelon.aicalories.composeapp.generated.resources.olx_auth_connected
-import com.sirelon.aicalories.composeapp.generated.resources.olx_auth_disconnect
-import com.sirelon.aicalories.composeapp.generated.resources.olx_auth_refresh_token
-import com.sirelon.aicalories.composeapp.generated.resources.olx_auth_screen_subtitle
-import com.sirelon.aicalories.composeapp.generated.resources.olx_auth_screen_title
-import com.sirelon.aicalories.composeapp.generated.resources.olx_auth_test_me
+import com.sirelon.aicalories.composeapp.generated.resources.*
 import com.sirelon.aicalories.designsystem.AppCard
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppScaffold
@@ -52,13 +46,13 @@ fun SellerAuthScreen(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
             Text(
-                text = "OLX Seller Auth",
+                text = stringResource(Res.string.olx_auth_screen_title),
                 fontSize = AppDimens.TextSize.xl7,
                 fontWeight = FontWeight.ExtraBold,
                 color = AppTheme.colors.onBackground,
             )
             Text(
-                text = "Connect an OLX account now so seller API calls can be added on top later.",
+                text = stringResource(Res.string.olx_auth_screen_subtitle),
                 fontSize = AppDimens.TextSize.xl3,
                 color = AppTheme.colors.onSurfaceSoft,
             )
@@ -71,7 +65,7 @@ fun SellerAuthScreen(
                     verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l),
                 ) {
                     Text(
-                        text = if (state.isAuthorized) "OLX account connected" else state.statusLabel,
+                        text = if (state.isAuthorized) stringResource(Res.string.olx_auth_connected) else state.statusLabel,
                         fontSize = AppDimens.TextSize.xl4,
                         fontWeight = FontWeight.Bold,
                     )
@@ -81,7 +75,7 @@ fun SellerAuthScreen(
                     )
                     state.accessTokenExpiresAtEpochSeconds?.let { expiresAt ->
                         Text(
-                            text = "Token expires at epoch: $expiresAt",
+                            text = stringResource(Res.string.token_expires_at, expiresAt),
                             color = AppTheme.colors.onSurfaceSoft,
                         )
                     }
@@ -102,7 +96,7 @@ fun SellerAuthScreen(
                     verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l),
                 ) {
                     AppButton(
-                        text = "Connect OLX",
+                        text = stringResource(Res.string.olx_auth_connect),
                         onClick = { onEvent(SellerAuthContract.SellerAuthEvent.ConnectClicked) },
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -111,18 +105,18 @@ fun SellerAuthScreen(
                         horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l),
                     ) {
                         AppButton(
-                            text = "Refresh token",
+                            text = stringResource(Res.string.olx_auth_refresh_token),
                             onClick = { onEvent(SellerAuthContract.SellerAuthEvent.RefreshClicked) },
                             modifier = Modifier.weight(1f),
                         )
                         AppButton(
-                            text = "Test /users/me",
+                            text = stringResource(Res.string.olx_auth_test_me),
                             onClick = { onEvent(SellerAuthContract.SellerAuthEvent.TestMeClicked) },
                             modifier = Modifier.weight(1f),
                         )
                     }
                     AppButton(
-                        text = "Disconnect",
+                        text = stringResource(Res.string.olx_auth_disconnect),
                         onClick = { onEvent(SellerAuthContract.SellerAuthEvent.DisconnectClicked) },
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -138,17 +132,17 @@ fun SellerAuthScreen(
                         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
                     ) {
                         Text(
-                            text = "OLX /users/me",
+                            text = stringResource(Res.string.olx_users_me),
                             fontSize = AppDimens.TextSize.xl4,
                             fontWeight = FontWeight.Bold,
                         )
                         HorizontalDivider()
-                        ProfileRow(label = "ID", value = me.id.toString())
-                        ProfileRow(label = "Name", value = me.name)
-                        ProfileRow(label = "Email", value = me.email)
-                        ProfileRow(label = "Status", value = me.status)
-                        ProfileRow(label = "Phone", value = me.phone)
-                        ProfileRow(label = "Business", value = me.isBusiness?.toString())
+                        ProfileRow(label = stringResource(Res.string.profile_field_id), value = me.id.toString())
+                        ProfileRow(label = stringResource(Res.string.profile_field_name), value = me.name)
+                        ProfileRow(label = stringResource(Res.string.profile_field_email), value = me.email)
+                        ProfileRow(label = stringResource(Res.string.profile_field_status), value = me.status)
+                        ProfileRow(label = stringResource(Res.string.profile_field_phone), value = me.phone)
+                        ProfileRow(label = stringResource(Res.string.profile_field_business), value = me.isBusiness?.toString())
                     }
                 }
             }

@@ -41,6 +41,7 @@ import com.sirelon.aicalories.designsystem.templates.TitleWithSubtitle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 private data class OnboardingItem(
     val title: String,
@@ -50,22 +51,23 @@ private data class OnboardingItem(
 )
 
 // TODO: replace images and icons
-private val items = listOf(
+@Composable
+private fun onboardingItems() = listOf(
     OnboardingItem(
-        title = "Snap a photo",
-        subtitle = "Take a picture of anything you want to sell. Our AI will handle the rest!",
+        title = stringResource(Res.string.onboarding_step1_title),
+        subtitle = stringResource(Res.string.onboarding_step1_subtitle),
         image = Res.drawable.compose_multiplatform,
         icon = Res.drawable.ic_snap_logo
     ),
     OnboardingItem(
-        title = "AI Creates Your Ad",
-        subtitle = "Get a catchy title, compelling description, and smart pricing in seconds.",
+        title = stringResource(Res.string.onboarding_step2_title),
+        subtitle = stringResource(Res.string.onboarding_step2_subtitle),
         image = Res.drawable.compose_multiplatform,
         icon = Res.drawable.ic_snap_logo
     ),
     OnboardingItem(
-        title = "Publish to OLX",
-        subtitle = "One-tap publish to OLX marketplace. Reach thousands of buyers instantly!",
+        title = stringResource(Res.string.onboarding_step3_title),
+        subtitle = stringResource(Res.string.onboarding_step3_subtitle),
         image = Res.drawable.compose_multiplatform,
         icon = Res.drawable.ic_snap_logo
     ),
@@ -73,6 +75,7 @@ private val items = listOf(
 
 @Composable
 fun OnboardingScreen(onClose: () -> Unit) {
+    val items = onboardingItems()
     val state = rememberPagerState { items.size }
     AppScaffold(
         bottomBar = {
@@ -155,9 +158,9 @@ private fun BottomButtons(
 
             val lastPage = state.currentPage == state.pageCount - 1
             val text = if (lastPage) {
-                "Get Started"
+                stringResource(Res.string.get_started)
             } else {
-                "Next"
+                stringResource(Res.string.next)
             }
 
             AppButton(

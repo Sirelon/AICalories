@@ -18,6 +18,9 @@ import com.sirelon.aicalories.designsystem.AppSectionHeader
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.Input
 import com.sirelon.aicalories.designsystem.templates.AppExpandableCard
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.roundToInt
@@ -56,8 +59,8 @@ private fun TeamScreenContent(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
             AppSectionHeader(
-                title = "Team settings",
-                subtitle = "Team size & capacity",
+                title = stringResource(Res.string.team_settings_title),
+                subtitle = stringResource(Res.string.team_size_capacity),
             )
             TeamSummary(team = team)
 
@@ -75,7 +78,7 @@ private fun TeamScreenContent(
                             style = AppTheme.typography.title,
                         )
                         Text(
-                            text = "People: ${team.peopleCount} | Capacity: ${team.capacity} | Risk: $riskPercentage%",
+                            text = stringResource(Res.string.team_people_capacity_risk, team.peopleCount, team.capacity, riskPercentage),
                             style = AppTheme.typography.caption,
                             color = AppTheme.colors.onSurfaceMuted,
                         )
@@ -120,7 +123,7 @@ private fun TeamFields(
                     )
                 )
             },
-            label = "People",
+            label = stringResource(Res.string.people),
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
@@ -137,8 +140,8 @@ private fun TeamFields(
                     )
                 )
             },
-            label = "Capacity",
-            supportingText = "Story points per sprint",
+            label = stringResource(Res.string.capacity),
+            supportingText = stringResource(Res.string.story_points_per_sprint),
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
@@ -156,8 +159,8 @@ private fun TeamFields(
                 )
             )
         },
-        label = "Risk factor",
-        supportingText = "0.0 to 1.0 (20% risk = 0.2)",
+        label = stringResource(Res.string.risk_factor_label),
+        supportingText = stringResource(Res.string.risk_factor_hint),
         singleLine = true,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Decimal,

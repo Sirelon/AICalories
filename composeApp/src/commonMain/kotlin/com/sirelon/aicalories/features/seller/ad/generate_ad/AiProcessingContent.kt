@@ -38,26 +38,31 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.PulsingCircles
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.stringResource
 
-private val processingSteps = listOf(
-    "Analyzing image",
-    "Generating title",
-    "Writing description",
-    "Calculating price",
+@Composable
+private fun processingSteps() = listOf(
+    stringResource(Res.string.ai_step_analyzing_image),
+    stringResource(Res.string.ai_step_generating_title),
+    stringResource(Res.string.ai_step_writing_description),
+    stringResource(Res.string.ai_step_calculating_price),
 )
 
 @Composable
 fun AiProcessingContent(
     modifier: Modifier = Modifier,
 ) {
+    val steps = processingSteps()
     var completedSteps by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
-        for (i in 1..processingSteps.size) {
+        for (i in 1..steps.size) {
             delay(800L)
             completedSteps = i
         }
@@ -85,7 +90,7 @@ fun AiProcessingContent(
         Spacer(modifier = Modifier.height(AppDimens.Spacing.xl8))
 
         Text(
-            text = "Creating Your Ad",
+            text = stringResource(Res.string.ai_creating_ad_title),
             fontSize = AppDimens.TextSize.xl5,
             fontWeight = FontWeight.Bold,
             color = AppTheme.colors.onSurface,
@@ -94,7 +99,7 @@ fun AiProcessingContent(
         Spacer(modifier = Modifier.height(AppDimens.Spacing.m))
 
         Text(
-            text = "Our AI is analyzing your photo and crafting the perfect title, description, and price...",
+            text = stringResource(Res.string.ai_analyzing_photo),
             fontSize = AppDimens.TextSize.xl2,
             color = AppTheme.colors.onSurfaceMuted,
             textAlign = TextAlign.Center,
@@ -102,7 +107,7 @@ fun AiProcessingContent(
 
         Spacer(modifier = Modifier.height(AppDimens.Spacing.xl6))
 
-        ProcessingStepsList(completedSteps = completedSteps)
+        ProcessingStepsList(steps = steps, completedSteps = completedSteps)
     }
 }
 
@@ -157,6 +162,7 @@ private fun BouncingBadge(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ProcessingStepsList(
+    steps: List<String>,
     completedSteps: Int,
     modifier: Modifier = Modifier,
 ) {
@@ -164,7 +170,7 @@ private fun ProcessingStepsList(
         modifier = modifier.width(AppDimens.Size.xl24),
         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
     ) {
-        processingSteps.forEachIndexed { index, stepText ->
+        steps.forEachIndexed { index, stepText ->
             val isDone = index < completedSteps
             ProcessingStepItem(text = stepText, isDone = isDone)
         }

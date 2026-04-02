@@ -61,6 +61,9 @@ import com.sirelon.aicalories.features.seller.ad.Advertisement
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdState
 import kotlinx.coroutines.launch
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -87,7 +90,7 @@ fun PreviewAdScreen(advertisement: Advertisement) {
                     .navigationBarsPadding()
                     .padding(horizontal = AppDimens.Spacing.xl3),
                 style = AppButtonDefaults.secondary(),
-                text = "Publish to OLX",
+                text = stringResource(Res.string.publish_to_olx),
                 trailingIcon = Icons.AutoMirrored.Filled.ArrowForward,
                 onClick = { viewModel.onEvent(PreviewAdEvent.Publish) },
             )
@@ -195,7 +198,7 @@ private fun PreviewSectionCard(
                             modifier = Modifier.size(AppDimens.Size.xl3)
                         )
                         Spacer(modifier = Modifier.width(AppDimens.Spacing.l))
-                        Text("Copy", style = AppTheme.typography.label)
+                        Text(stringResource(Res.string.copy), style = AppTheme.typography.label)
                     }
                 }
             }
@@ -214,7 +217,7 @@ private fun PreviewSectionCard(
 
 @Composable
 private fun AdTitleCard(titleState: TextFieldState) {
-    PreviewSectionCard(icon = Icons.Default.LocalOffer, label = "Title", textFieldState = titleState) {
+    PreviewSectionCard(icon = Icons.Default.LocalOffer, label = stringResource(Res.string.ad_title_label), textFieldState = titleState) {
     }
 }
 
@@ -222,12 +225,12 @@ private fun AdTitleCard(titleState: TextFieldState) {
 private fun AdDescriptionCard(descriptionState: TextFieldState) {
     PreviewSectionCard(
         icon = Icons.Default.Description,
-        label = "Description",
+        label = stringResource(Res.string.ad_description_label),
         textFieldState = descriptionState,
     ) {
         Box {
             Text(
-                text = "${descriptionState.text.length} characters",
+                text = stringResource(Res.string.character_count, descriptionState.text.length),
                 style = AppTheme.typography.caption,
                 color = AppTheme.colors.outline,
                 modifier = Modifier.align(Alignment.BottomEnd)
@@ -246,7 +249,7 @@ private fun AdPriceCard(
 ) {
     PreviewSectionCard(
         icon = Icons.Default.AttachMoney,
-        label = "Your Price",
+        label = stringResource(Res.string.ad_your_price),
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -269,14 +272,14 @@ private fun AdPriceCard(
                 ) {
                     val discount = ((1 - (price / originalPrice)) * 100).toInt()
                     Text(
-                        text = "$discount% off",
+                        text = stringResource(Res.string.discount_percentage, discount),
                         color = AppTheme.colors.success,
                         style = AppTheme.typography.label.copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }
             Text(
-                text = "Original: €$originalPrice",
+                text = stringResource(Res.string.original_price, originalPrice),
                 style = AppTheme.typography.body.copy(textDecoration = TextDecoration.LineThrough),
                 color = AppTheme.colors.outline
             )
@@ -314,7 +317,7 @@ private fun AdPriceCard(
 
 @Composable
 private fun AdCategoryCard(category: String, onChangeClick: () -> Unit) {
-    PreviewSectionCard(label = "Category") {
+    PreviewSectionCard(label = stringResource(Res.string.ad_category_label)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = AppDimens.Spacing.m),
             verticalAlignment = Alignment.CenterVertically,
@@ -325,7 +328,7 @@ private fun AdCategoryCard(category: String, onChangeClick: () -> Unit) {
                 style = AppTheme.typography.title.copy(fontWeight = FontWeight.Bold)
             )
             TextButton(onClick = onChangeClick) {
-                Text(text = "Change")
+                Text(text = stringResource(Res.string.change_button))
             }
         }
     }
@@ -341,7 +344,7 @@ private fun CategoryPickerDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Category") },
+        title = { Text(stringResource(Res.string.select_category)) },
         text = {
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
@@ -358,7 +361,7 @@ private fun CategoryPickerDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(Res.string.cancel))
             }
         },
     )

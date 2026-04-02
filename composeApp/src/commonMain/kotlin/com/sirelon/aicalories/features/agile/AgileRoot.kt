@@ -21,6 +21,9 @@ import com.sirelon.aicalories.features.agile.capacity.CapacityResultScreen
 import com.sirelon.aicalories.features.agile.navigation.AgileDestination
 import com.sirelon.aicalories.features.agile.team.TeamScreen
 import com.sirelon.aicalories.features.agile.teamlist.TeamPickerScreen
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 import com.sirelon.aicalories.navigation.ListDetailSceneStrategy
 import com.sirelon.aicalories.navigation.ThreePaneSceneStrategy
 import com.sirelon.aicalories.navigation.rememberListDetailSceneStrategy
@@ -77,7 +80,7 @@ fun AgileRoot(
                 title = { Text(currentDestination.title) },
                 navigationIcon = {
                     IconButton(onClick = popDestination) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 }
             )

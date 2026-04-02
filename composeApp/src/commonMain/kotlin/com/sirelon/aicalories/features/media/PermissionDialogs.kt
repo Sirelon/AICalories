@@ -5,7 +5,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
 import com.sirelon.aicalories.platform.PlatformTargets
+import org.jetbrains.compose.resources.stringResource
 
 data class PermissionDialogContent(
     val title: String,
@@ -18,59 +21,60 @@ data class PermissionDialogContent(
 fun PermissionDialogs(
     controller: PermissionController,
     isIosDevice: Boolean = PlatformTargets.isIos(),
-    rationaleContent: PermissionDialogContent = PermissionDialogContent(
-        title = "Camera permission needed",
-        message = "We use the camera to capture meal photos. Please allow access so you can keep tracking.",
-        confirmText = "Retry",
-        dismissText = "Not now",
-    ),
-    settingsContentProvider: (Boolean) -> PermissionDialogContent = { ios ->
-        PermissionDialogContent(
-            title = "Allow camera access from settings",
-            message = if (ios) {
-                "Camera access is blocked. Open Settings > Privacy > Camera and enable AI Calories."
-            } else {
-                "Camera access is blocked. Please open the app settings and enable the camera permission."
-            },
-            confirmText = "Open settings",
-            dismissText = "Cancel",
-        )
-    },
+    rationaleContent: PermissionDialogContent? = null,
+    settingsContentProvider: ((Boolean) -> PermissionDialogContent)? = null,
 ) {
+    val resolvedRationaleContent = rationaleContent ?: PermissionDialogContent(
+        title = stringResource(Res.string.camera_rationale_title),
+        message = stringResource(Res.string.camera_rationale_message),
+        confirmText = stringResource(Res.string.retry),
+        dismissText = stringResource(Res.string.not_now),
+    )
+    val resolvedSettingsContent = (settingsContentProvider ?: { ios ->
+        PermissionDialogContent(
+            title = stringResource(Res.string.camera_settings_title),
+            message = if (ios) {
+                stringResource(Res.string.camera_settings_message_ios)
+            } else {
+                stringResource(Res.string.camera_settings_message_android)
+            },
+            confirmText = stringResource(Res.string.open_settings),
+            dismissText = stringResource(Res.string.cancel),
+        )
+    })(isIosDevice)
     val permissionState by controller.uiState
 
     if (permissionState.showRationale) {
         AlertDialog(
             onDismissRequest = controller::dismissRationale,
-            title = { Text(rationaleContent.title) },
-            text = { Text(rationaleContent.message) },
+            title = { Text(resolvedRationaleContent.title) },
+            text = { Text(resolvedRationaleContent.message) },
             confirmButton = {
                 TextButton(onClick = controller::retry) {
-                    Text(rationaleContent.confirmText)
+                    Text(resolvedRationaleContent.confirmText)
                 }
             },
             dismissButton = {
                 TextButton(onClick = controller::dismissRationale) {
-                    Text(rationaleContent.dismissText)
+                    Text(resolvedRationaleContent.dismissText)
                 }
             },
         )
     }
 
     if (permissionState.showSettings) {
-        val settingsContent = settingsContentProvider(isIosDevice)
         AlertDialog(
             onDismissRequest = controller::dismissSettings,
-            title = { Text(settingsContent.title) },
-            text = { Text(settingsContent.message) },
+            title = { Text(resolvedSettingsContent.title) },
+            text = { Text(resolvedSettingsContent.message) },
             confirmButton = {
                 TextButton(onClick = controller::openSettings) {
-                    Text(settingsContent.confirmText)
+                    Text(resolvedSettingsContent.confirmText)
                 }
             },
             dismissButton = {
                 TextButton(onClick = controller::dismissSettings) {
-                    Text(settingsContent.dismissText)
+                    Text(resolvedSettingsContent.dismissText)
                 }
             },
         )

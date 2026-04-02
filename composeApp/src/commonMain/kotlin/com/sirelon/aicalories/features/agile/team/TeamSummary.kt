@@ -21,6 +21,9 @@ import com.sirelon.aicalories.designsystem.AppChip
 import com.sirelon.aicalories.designsystem.AppChipDefaults
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 @Composable
@@ -49,7 +52,7 @@ fun TeamSummary(
             .padding(vertical = AppDimens.Spacing.xl),
     ) {
         Text(
-            text = "${team.name} overview",
+            text = stringResource(Res.string.team_overview_format, team.name),
             style = AppTheme.typography.title.copy(fontWeight = FontWeight.SemiBold),
         )
         FlowRow(
@@ -62,35 +65,35 @@ fun TeamSummary(
                 colors = AppChipDefaults.primaryColors(),
             )
             AppChip(
-                text = "${team.peopleCount} people",
+                text = stringResource(Res.string.people_format, team.peopleCount),
                 icon = Icons.Outlined.Group,
                 colors = neutralChipColors,
             )
             AppChip(
-                text = "Capacity ${team.capacity}",
+                text = stringResource(Res.string.capacity_format_simple, team.capacity),
                 icon = Icons.Outlined.Event,
                 colors = capacityChipColors,
             )
             AppChip(
-                text = "Risk ±$riskPercentage%",
+                text = stringResource(Res.string.risk_percentage_format, riskPercentage),
                 icon = Icons.Outlined.Warning,
                 colors = AppChipDefaults.errorColors(),
             )
             AppChip(
-                text = "Range $pessimisticCapacity-$optimisticCapacity",
+                text = stringResource(Res.string.capacity_range_format, pessimisticCapacity, optimisticCapacity),
                 icon = Icons.Outlined.Cached,
                 colors = AppChipDefaults.primaryColors(),
             )
             storiesCount?.let { count ->
                 AppChip(
-                    text = "$count user stories",
+                    text = stringResource(Res.string.user_stories_format, count),
                     icon = Icons.Outlined.Description,
                     colors = neutralChipColors,
                 )
             }
             ticketsCount?.let { count ->
                 AppChip(
-                    text = "$count tickets",
+                    text = stringResource(Res.string.tickets_format, count),
                     icon = Icons.Outlined.BugReport,
                     colors = neutralChipColors,
                 )
