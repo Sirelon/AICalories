@@ -39,7 +39,10 @@ import com.sirelon.aicalories.designsystem.buttons.MagicGreenButton
 import com.sirelon.aicalories.features.datagenerator.model.DoubleRange
 import com.sirelon.aicalories.features.datagenerator.model.IntRange
 import com.sirelon.aicalories.features.datagenerator.presentation.DataGeneratorContract
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 @Composable
@@ -51,6 +54,8 @@ internal fun DataGeneratorScreenContent(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
+    val randomDataGeneratedMsg = stringResource(Res.string.random_data_generated)
+    val allDataClearedMsg = stringResource(Res.string.all_data_cleared)
     LaunchedEffect(effects) {
         effects.collect { effect ->
             when (effect) {
@@ -58,12 +63,12 @@ internal fun DataGeneratorScreenContent(
                     if (onBack != null) {
                         onBack()
                     } else {
-                        snackbarHostState.showSnackbar("Random data generated successfully!")
+                        snackbarHostState.showSnackbar(randomDataGeneratedMsg)
                     }
                 }
 
                 is DataGeneratorContract.DataGeneratorEffect.DataCleared ->
-                    snackbarHostState.showSnackbar("All data cleared!")
+                    snackbarHostState.showSnackbar(allDataClearedMsg)
 
                 is DataGeneratorContract.DataGeneratorEffect.ShowError ->
                     snackbarHostState.showSnackbar(effect.message)
@@ -77,8 +82,8 @@ internal fun DataGeneratorScreenContent(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             AppLargeAppBar(
-                title = "Data Generator",
-                subtitle = "Generate random agile test data",
+                title = stringResource(Res.string.data_generator_title),
+                subtitle = stringResource(Res.string.data_generator_subtitle),
                 onBack = onBack,
                 scrollBehavior = scrollBehavior,
                 actions = {
@@ -88,7 +93,7 @@ internal fun DataGeneratorScreenContent(
                     ) {
                         Icon(
                             imageVector = Icons.Default.DeleteSweep,
-                            contentDescription = "Reset to Empty"
+                            contentDescription = stringResource(Res.string.reset_to_empty)
                         )
                     }
                 }
@@ -121,7 +126,7 @@ internal fun DataGeneratorScreenContent(
                     TextWithIcon(
                         modifier = Modifier.padding(AppDimens.Spacing.xl2),
                         icon = Icons.Default.Info,
-                        text = "Existing teams: ${state.existingTeamsCount}",
+                        text = stringResource(Res.string.existing_teams_format, state.existingTeamsCount),
                         tint = AppTheme.colors.primary
                     )
                 }
@@ -130,7 +135,7 @@ internal fun DataGeneratorScreenContent(
             // Clear existing data checkbox
             AppCheckboxRow(
                 checked = state.config.clearExistingData,
-                text = "Clear existing data before generating",
+                text = stringResource(Res.string.clear_existing_data),
                 onCheckedChange = {
                     onEvent(DataGeneratorContract.DataGeneratorEvent.ClearExistingDataChanged(it))
                 }
@@ -140,14 +145,14 @@ internal fun DataGeneratorScreenContent(
 
             // Teams configuration
             Text(
-                text = "Teams Configuration",
+                text = stringResource(Res.string.teams_configuration),
                 style = AppTheme.typography.headline,
                 color = AppTheme.colors.primary
             )
 
             SingleValueSelector(
                 modifier = Modifier.fillMaxWidth(),
-                label = "Number of Teams",
+                label = stringResource(Res.string.number_of_teams),
                 value = state.config.teamsCount.toDouble().coerceIn(1.0, 20.0),
                 bounds = 1.0..20.0,
                 step = 1.0,
@@ -162,7 +167,7 @@ internal fun DataGeneratorScreenContent(
 
             RangeSelector(
                 modifier = Modifier.fillMaxWidth(),
-                label = "People per Team",
+                label = stringResource(Res.string.people_per_team),
                 min = state.config.teamPeopleCount.min.toDouble()
                     .coerceIn(peopleRangeBounds.min.toDouble(), peopleRangeBounds.max.toDouble()),
                 max = state.config.teamPeopleCount.max.toDouble()
@@ -187,7 +192,7 @@ internal fun DataGeneratorScreenContent(
 
             RangeSelector(
                 modifier = Modifier.fillMaxWidth(),
-                label = "Team Capacity",
+                label = stringResource(Res.string.team_capacity_label),
                 min = state.config.teamCapacity.min.toDouble()
                     .coerceIn(capacityBounds.min.toDouble(), capacityBounds.max.toDouble()),
                 max = state.config.teamCapacity.max.toDouble()
@@ -212,7 +217,7 @@ internal fun DataGeneratorScreenContent(
 
             RangeSelector(
                 modifier = Modifier.fillMaxWidth(),
-                label = "Risk Factor",
+                label = stringResource(Res.string.risk_factor),
                 min = state.config.teamRiskFactor.min.coerceIn(0.0, 1.0),
                 max = state.config.teamRiskFactor.max.coerceIn(0.0, 1.0),
                 bounds = 0.0..1.0,
@@ -235,14 +240,14 @@ internal fun DataGeneratorScreenContent(
 
             // Stories configuration
             Text(
-                text = "Stories Configuration",
+                text = stringResource(Res.string.stories_configuration),
                 style = AppTheme.typography.headline,
                 color = AppTheme.colors.primary
             )
 
             SingleValueSelector(
                 modifier = Modifier.fillMaxWidth(),
-                label = "Stories per Team",
+                label = stringResource(Res.string.stories_per_team),
                 value = state.config.storiesPerTeamCount.toDouble().coerceIn(1.0, 20.0),
                 bounds = 1.0..20.0,
                 step = 1.0,
@@ -257,7 +262,7 @@ internal fun DataGeneratorScreenContent(
 
             RangeSelector(
                 modifier = Modifier.fillMaxWidth(),
-                label = "Tickets per Story",
+                label = stringResource(Res.string.tickets_per_story),
                 min = state.config.ticketsPerStory.min.toDouble().coerceIn(1.0, 50.0),
                 max = state.config.ticketsPerStory.max.toDouble().coerceIn(1.0, 50.0),
                 bounds = 1.0..50.0,
@@ -297,7 +302,7 @@ private fun ActionButtons(
     ) {
         MagicGreenButton(
             modifier = Modifier.fillMaxWidth().height(AppDimens.Size.xl12),
-            text = "Generate Random Data",
+            text = stringResource(Res.string.generate_random_data),
             enabled = !state.isGenerating,
             onClick = { onEvent(DataGeneratorContract.DataGeneratorEvent.GenerateRandomData) }
         )

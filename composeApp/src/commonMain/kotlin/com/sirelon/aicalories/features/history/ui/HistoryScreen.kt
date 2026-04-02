@@ -48,7 +48,10 @@ import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.ChipComponent
 import com.sirelon.aicalories.designsystem.TagGroup
 import com.sirelon.aicalories.designsystem.screens.EmptyScreen
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
 import com.sirelon.aicalories.features.history.presentation.HistorySampleDataProvider
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun HistoryScreen(
@@ -66,8 +69,8 @@ fun HistoryScreen(
         modifier = modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             AppLargeAppBar(
-                title = "History & Insights",
-                subtitle = "Track your analysed meals",
+                title = stringResource(Res.string.history_insights_title),
+                subtitle = stringResource(Res.string.track_analysed_meals),
                 onBack = onBack,
                 scrollBehavior = scrollBehavior,
             )
@@ -78,9 +81,9 @@ fun HistoryScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-                title = if (isLoading) "Loading history" else "No history yet",
-                description = if (isLoading) "Wait a moment" else "Your analysed meals will appear here once you capture and submit them.",
-                actionLabel = "Capture meal".takeUnless { isLoading },
+                title = if (isLoading) stringResource(Res.string.loading_history) else stringResource(Res.string.no_history_yet),
+                description = if (isLoading) stringResource(Res.string.loading_wait) else stringResource(Res.string.no_history_description),
+                actionLabel = stringResource(Res.string.capture_meal).takeUnless { isLoading },
                 onActionClick = onEmptyStateAction.takeUnless { isLoading },
             )
         } else {
@@ -98,7 +101,7 @@ fun HistoryScreen(
             ) {
                 item(key = "history_header") {
                     TagGroup(
-                        title = "Insights",
+                        title = stringResource(Res.string.insights),
                         tags = renderModel.insights,
                     )
                 }
@@ -398,7 +401,7 @@ private fun HistoryEntryCard(
             }
 
             TagGroup(
-                title = "Tags",
+                title = stringResource(Res.string.tags),
                 tags = entry.tags,
             )
         }
@@ -417,10 +420,10 @@ private fun MacroBreakdownRow(macros: MacroBreakdownRenderModel) {
                 .padding(AppDimens.Spacing.xl3),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            MacroItem(label = "Calories", value = macros.calories)
-            MacroItem(label = "Protein", value = macros.protein)
-            MacroItem(label = "Fat", value = macros.fat)
-            MacroItem(label = "Carbs", value = macros.carbs)
+            MacroItem(label = stringResource(Res.string.calories), value = macros.calories)
+            MacroItem(label = stringResource(Res.string.protein), value = macros.protein)
+            MacroItem(label = stringResource(Res.string.fat), value = macros.fat)
+            MacroItem(label = stringResource(Res.string.carbs), value = macros.carbs)
         }
     }
 }
@@ -457,21 +460,21 @@ private fun HistorySummarySection(summary: HistoryReportSummaryRenderModel) {
 
         if (summary.issues.isNotEmpty()) {
             TagGroup(
-                title = "Issues",
+                title = stringResource(Res.string.issues),
                 tags = summary.issues,
             )
         }
 
         if (summary.uncertainties.isNotEmpty()) {
             TagGroup(
-                title = "Uncertainties",
+                title = stringResource(Res.string.uncertainties),
                 tags = summary.uncertainties,
             )
         }
 
         if (summary.checklist.isNotEmpty()) {
             TagGroup(
-                title = "Checklist",
+                title = stringResource(Res.string.checklist),
                 tags = summary.checklist,
             )
         }

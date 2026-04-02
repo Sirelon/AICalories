@@ -47,6 +47,9 @@ import com.sirelon.aicalories.features.agile.presentation.AgileContract
 import com.sirelon.aicalories.features.agile.presentation.AgileViewModel
 import com.sirelon.aicalories.features.agile.team.Team
 import com.sirelon.aicalories.features.agile.team.Team.Companion.DEFAULT_TEAM_ID
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -98,7 +101,7 @@ private fun AgileScreenContent(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { onEvent(AgileContract.AgileEvent.AddUserStory) },
-                text = { Text("Add User story") },
+                text = { Text(stringResource(Res.string.add_user_story)) },
                 icon = {
                     Icon(Icons.Outlined.Add, contentDescription = null)
                 },
@@ -114,7 +117,7 @@ private fun AgileScreenContent(
                         .padding(horizontal = AppDimens.Spacing.xl3),
                     onClick = { onOpenCapacityResult(state.teamId) },
                     content = {
-                        Text(text = "Calculate capacity")
+                        Text(text = stringResource(Res.string.calculate_capacity))
                     }
                 )
             }
@@ -128,8 +131,8 @@ private fun AgileScreenContent(
         ) {
             item {
                 AppSectionHeader(
-                    title = "Agile",
-                    subtitle = "Calculation logic",
+                    title = stringResource(Res.string.agile_title),
+                    subtitle = stringResource(Res.string.agile_subtitle),
                 )
             }
             item {
@@ -142,7 +145,7 @@ private fun AgileScreenContent(
             item {
                 Text(
                     modifier = Modifier.padding(AppDimens.Spacing.xl3),
-                    text = "Count of user stories: ${state.stories.size}",
+                    text = stringResource(Res.string.count_user_stories, state.stories.size),
                 )
             }
 
@@ -183,7 +186,7 @@ private fun AgileScreenContent(
                             Icon(Icons.Outlined.Add, contentDescription = null)
                             Text(
                                 modifier = Modifier.padding(start = AppDimens.Spacing.m),
-                                text = "Add ticket",
+                                text = stringResource(Res.string.add_ticket),
                             )
                         }
                     }
@@ -216,11 +219,11 @@ private fun TeamPickerEntry(teamId: Int, onOpenTeamPicker: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs),
             ) {
                 Text(
-                    text = "Team list",
+                    text = stringResource(Res.string.team_list),
                     style = AppTheme.typography.title,
                 )
                 Text(
-                    text = "Currently showing Team #$teamId. Tap to switch teams.",
+                    text = stringResource(Res.string.showing_team_format, teamId),
                     style = AppTheme.typography.body,
                     color = AppTheme.colors.onSurfaceMuted,
                 )

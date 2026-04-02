@@ -16,6 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.mohamedrejeb.calf.io.KmpFile
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.buttons.AppButton
@@ -49,13 +52,13 @@ fun PhotosSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Add Photo",
+                    text = stringResource(Res.string.add_photos_title),
                     fontSize = AppDimens.TextSize.xl5,
                     fontWeight = FontWeight.Bold,
                     color = AppTheme.colors.onSurface
                 )
                 Text(
-                    text = "$photoCount/$maxPhotos photos",
+                    text = stringResource(Res.string.photos_count_format, photoCount, maxPhotos),
                     fontSize = AppDimens.TextSize.xl2,
                     color = AppTheme.colors.onSurfaceSoft,
                     fontWeight = FontWeight.Medium
@@ -77,7 +80,7 @@ fun PhotosSection(
                 AppButton(
                     modifier = Modifier.weight(1f),
                     style = AppButtonDefaults.secondary(),
-                    text = "Take Photo",
+                    text = stringResource(Res.string.take_photo),
                     onClick = onTakePhotoClick,
                     leadingIcon = Icons.Default.CameraAlt,
                 )

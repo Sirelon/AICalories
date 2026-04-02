@@ -25,6 +25,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -96,8 +99,8 @@ private fun CapacityResultContent(
                     verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
                 ) {
                     AppSectionHeader(
-                        title = "Capacity result",
-                        subtitle = state.team?.name ?: "Estimation outcome",
+                        title = stringResource(Res.string.capacity_result_title),
+                        subtitle = state.team?.name ?: stringResource(Res.string.estimation_outcome),
                     )
                     Column(
                         modifier = Modifier
@@ -108,12 +111,12 @@ private fun CapacityResultContent(
                     ) {
                         CircularProgressIndicator()
                         Text(
-                            text = "Crunching numbers...",
+                            text = stringResource(Res.string.crunching_numbers),
                             style = AppTheme.typography.body,
                             modifier = Modifier.padding(top = AppDimens.Spacing.m),
                         )
                         TextButton(onClick = { onEvent(CapacityResultEvent.Refresh) }) {
-                            Text("Retry")
+                            Text(stringResource(Res.string.retry))
                         }
                     }
                 }
@@ -127,8 +130,8 @@ private fun CapacityResultContent(
                 ) {
                     item {
                         AppSectionHeader(
-                            title = "Capacity result",
-                            subtitle = state.team?.name ?: "Estimation outcome",
+                            title = stringResource(Res.string.capacity_result_title),
+                            subtitle = state.team?.name ?: stringResource(Res.string.estimation_outcome),
                         )
                     }
                     item {
@@ -168,14 +171,14 @@ private fun ResultSummaryCard(
     val scenarioChipColors = AppChipDefaults.capacityColors(fitsPessimistic, fitsOptimistic)
     val metadataChipColors = AppChipDefaults.neutralColors()
     val statusText = when {
-        fitsPessimistic -> "Everything fits even with the pessimistic capacity."
-        fitsOptimistic -> "Scope fits only in the optimistic scenario."
-        else -> "You need ${abs(optimisticRemaining)} more points."
+        fitsPessimistic -> stringResource(Res.string.status_everything_fits)
+        fitsOptimistic -> stringResource(Res.string.status_scope_fits_optimistic)
+        else -> stringResource(Res.string.status_need_more_points, abs(optimisticRemaining))
     }
     val detailText = when {
-        fitsPessimistic -> "Effort ${result.totalEffort} vs capacity ${capacity.pessimistic}-${capacity.optimistic} (risk ±$riskPercent%)."
-        fitsOptimistic -> "Effort ${result.totalEffort} exceeds pessimistic capacity by ${abs(pessimisticRemaining)} but fits optimistic ${capacity.optimistic}."
-        else -> "Effort ${result.totalEffort} is above the optimistic capacity ${capacity.optimistic}."
+        fitsPessimistic -> stringResource(Res.string.detail_effort_vs_capacity, result.totalEffort, capacity.pessimistic, capacity.optimistic, riskPercent)
+        fitsOptimistic -> stringResource(Res.string.detail_effort_exceeds_pessimistic, result.totalEffort, abs(pessimisticRemaining), capacity.optimistic)
+        else -> stringResource(Res.string.detail_effort_above_optimistic, result.totalEffort, capacity.optimistic)
     }
 
     Surface(
@@ -202,29 +205,29 @@ private fun ResultSummaryCard(
                 verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.s),
             ) {
                 AppChip(
-                    text = "Capacity ${capacity.pessimistic}-${capacity.optimistic}",
+                    text = stringResource(Res.string.capacity_format, capacity.pessimistic, capacity.optimistic),
                     icon = Icons.Outlined.Assessment,
                     colors = scenarioChipColors,
                 )
                 AppChip(
-                    text = "Base ${capacity.base}",
+                    text = stringResource(Res.string.base_capacity, capacity.base),
                     icon = Icons.Outlined.Tune,
                     colors = metadataChipColors,
                 )
                 AppChip(
-                    text = "Risk ±$riskPercent%",
+                    text = stringResource(Res.string.risk_format, riskPercent),
                     icon = Icons.Outlined.Warning,
                     colors = AppChipDefaults.errorColors(),
                 )
                 AppChip(
-                    text = "Effort ${result.totalEffort}",
+                    text = stringResource(Res.string.total_effort, result.totalEffort),
                     icon = Icons.Outlined.TrendingUp,
                     colors = scenarioChipColors,
                 )
                 val pessimisticBalance = if (pessimisticRemaining < 0) {
-                    "Pessimistic over ${abs(pessimisticRemaining)}"
+                    stringResource(Res.string.pessimistic_over, abs(pessimisticRemaining))
                 } else {
-                    "Pessimistic slack $pessimisticRemaining"
+                    stringResource(Res.string.pessimistic_slack, pessimisticRemaining)
                 }
                 AppChip(
                     text = pessimisticBalance,
@@ -240,9 +243,9 @@ private fun ResultSummaryCard(
                     },
                 )
                 val optimisticBalance = if (optimisticRemaining < 0) {
-                    "Optimistic over ${abs(optimisticRemaining)}"
+                    stringResource(Res.string.optimistic_over, abs(optimisticRemaining))
                 } else {
-                    "Optimistic slack $optimisticRemaining"
+                    stringResource(Res.string.optimistic_slack, optimisticRemaining)
                 }
                 AppChip(
                     text = optimisticBalance,
@@ -259,14 +262,14 @@ private fun ResultSummaryCard(
                 )
                 if (result.totalVariants > 0) {
                     AppChip(
-                        text = "${result.totalVariants} variants",
+                        text = stringResource(Res.string.variants_count, result.totalVariants),
                         icon = Icons.Outlined.GridView,
                         colors = metadataChipColors,
                     )
                 }
                 team?.peopleCount?.takeIf { it > 0 }?.let { people ->
                     AppChip(
-                        text = "$people people",
+                        text = stringResource(Res.string.people_count, people),
                         icon = Icons.Outlined.PeopleOutline,
                         colors = metadataChipColors,
                     )
@@ -290,11 +293,11 @@ private fun FeasibleVariantsSection(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs),
         ) {
             Text(
-                text = "Feasible ticket variants",
+                text = stringResource(Res.string.feasible_ticket_variants),
                 style = AppTheme.typography.title.copy(fontWeight = FontWeight.SemiBold),
             )
             Text(
-                text = "Sorted by best fit to the pessimistic capacity.",
+                text = stringResource(Res.string.sorted_by_fit),
                 style = AppTheme.typography.body,
                 color = AppTheme.colors.onSurfaceMuted,
             )
@@ -302,7 +305,7 @@ private fun FeasibleVariantsSection(
 
         if (result.canCloseAll) {
             Text(
-                text = "All tickets fit into the optimistic capacity, so no alternative subsets are needed.",
+                text = stringResource(Res.string.all_tickets_fit),
                 style = AppTheme.typography.body,
                 color = AppTheme.colors.onSurfaceMuted,
             )
@@ -323,9 +326,9 @@ private fun FeasibleVariantsSection(
         if (totalVariants == 0 || sortedVariants.isEmpty()) {
             Text(
                 text = if (result.totalEffort == 0) {
-                    "Add tickets to see how they stack against the current risk-adjusted capacity."
+                    stringResource(Res.string.add_tickets_hint)
                 } else {
-                    "No combination of tickets fits the current pessimistic capacity. Trim scope or increase capacity."
+                    stringResource(Res.string.no_tickets_fit)
                 },
                 style = AppTheme.typography.body,
                 color = AppTheme.colors.error,
@@ -349,18 +352,18 @@ private fun FeasibleVariantsSection(
             ) {
                 Text(
                     text = if (isCapped && showAll) {
-                        "Showing best ${variantsToDisplay.size} of $totalVariants variants (top $MAX_VISIBLE_VARIANTS kept for readability)."
+                        stringResource(Res.string.showing_best_capped, variantsToDisplay.size, totalVariants, MAX_VISIBLE_VARIANTS)
                     } else if (showAll || !hasHidden) {
-                        "Showing best ${variantsToDisplay.size} of $totalVariants variants."
+                        stringResource(Res.string.showing_best, variantsToDisplay.size, totalVariants)
                     } else {
-                        "Showing top $COLLAPSED_VARIANTS of $totalVariants variants."
+                        stringResource(Res.string.showing_top, COLLAPSED_VARIANTS, totalVariants)
                     },
                     style = AppTheme.typography.caption,
                     color = AppTheme.colors.onSurfaceMuted,
                     modifier = Modifier.weight(1f),
                 )
                 TextButton(onClick = { showAll = !showAll }) {
-                    Text(if (showAll) "Collapse" else "Show more")
+                    Text(if (showAll) stringResource(Res.string.collapse) else stringResource(Res.string.show_more))
                 }
             }
         }
@@ -375,9 +378,9 @@ private fun VariantCard(
 ) {
     val slack = capacity - variant.totalEffort
     val slackLabel = when {
-        slack == 0 -> "Exact fit"
-        slack > 0 -> "$slack free"
-        else -> "Over by ${abs(slack)}"
+        slack == 0 -> stringResource(Res.string.exact_fit)
+        slack > 0 -> stringResource(Res.string.slack_free, slack)
+        else -> stringResource(Res.string.over_by, abs(slack))
     }
 
     Surface(
@@ -395,12 +398,12 @@ private fun VariantCard(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    text = "Variant #${index + 1}",
+                    text = stringResource(Res.string.variant_format, index + 1),
                     style = AppTheme.typography.label.copy(fontWeight = FontWeight.SemiBold),
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    text = "${variant.totalEffort} pts",
+                    text = stringResource(Res.string.effort_points, variant.totalEffort),
                     style = AppTheme.typography.label,
                     color = AppTheme.colors.primary,
                 )
@@ -425,7 +428,7 @@ private fun VariantCard(
 @Composable
 private fun TicketChip(ticket: Ticket) {
     AppChip(
-        text = "${ticket.name} (${ticket.estimation.code()})",
+        text = stringResource(Res.string.ticket_format, ticket.name, ticket.estimation.code()),
         leadingIcon = {
             EstimationIcon(estimation = ticket.estimation)
         },

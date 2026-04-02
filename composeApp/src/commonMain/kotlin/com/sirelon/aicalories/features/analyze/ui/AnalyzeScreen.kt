@@ -60,6 +60,9 @@ import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.features.media.ui.PhotosSection
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -152,7 +155,7 @@ fun AnalyzeScreen(
                     result.combinedMacroStats?.let {
                         item {
                             CardWithTitle(
-                                title = "Total nutrition:",
+                                title = stringResource(Res.string.total_nutrition),
                             ) {
                                 MacronutrientRow(stats = it)
                             }
@@ -161,7 +164,7 @@ fun AnalyzeScreen(
 
 
                     item {
-                        CardWithTitle(title = "Detected insights") {
+                        CardWithTitle(title = stringResource(Res.string.detected_insights)) {
                             SummaryCard(summary = result.summary)
                         }
                     }
@@ -208,8 +211,8 @@ private fun AnalyzeTopBar(
     onBack: (() -> Unit)?,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    val title = if (hasResult) "Analysis Result" else "Add Photos"
-    val subtitle = if (hasResult) "Review detected items" else "Upload 1-3 images"
+    val title = if (hasResult) stringResource(Res.string.analysis_result_title) else stringResource(Res.string.add_photos_title)
+    val subtitle = if (hasResult) stringResource(Res.string.review_detected_items) else stringResource(Res.string.upload_images_hint)
     AppLargeAppBar(
         title = title,
         subtitle = subtitle,
@@ -266,7 +269,7 @@ private fun AnalyzeBottomBar(
                     )
                     Spacer(modifier = Modifier.width(AppDimens.Spacing.xl3))
                     Text(
-                        text = "Confirm & Save",
+                        text = stringResource(Res.string.confirm_and_save),
                         style = AppTheme.typography.title,
                     )
                 } else if (isLoading) {
@@ -277,12 +280,12 @@ private fun AnalyzeBottomBar(
                     )
                     Spacer(modifier = Modifier.width(AppDimens.Spacing.xl3))
                     Text(
-                        text = if (hasResult) "Syncing…" else "Analyzing…",
+                        text = if (hasResult) stringResource(Res.string.syncing) else stringResource(Res.string.analyzing),
                         style = AppTheme.typography.title,
                     )
                 } else {
                     Text(
-                        text = "Analyze",
+                        text = stringResource(Res.string.analyze_button),
                         style = AppTheme.typography.title,
                     )
                 }
@@ -309,7 +312,7 @@ private fun DescriptionSection(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
             Text(
-                text = "Add description (optional)",
+                text = stringResource(Res.string.add_description),
                 style = AppTheme.typography.title,
             )
             Input(
@@ -318,7 +321,7 @@ private fun DescriptionSection(
                 onValueChange = onValueChange,
                 enabled = enabled,
                 minLines = 4,
-                label = "e.g., Breakfast at home, restaurant meal...",
+                label = stringResource(Res.string.description_placeholder),
             )
         }
     }
@@ -339,14 +342,14 @@ private fun PendingAnalysisCard(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
             Text(
-                text = if (isLoading) "Crunching the numbers…" else "No summary yet",
+                text = if (isLoading) stringResource(Res.string.crunching_numbers) else stringResource(Res.string.no_summary_yet),
                 style = AppTheme.typography.label,
             )
             Text(
                 text = if (isLoading) {
-                    "Hang tight while we read the report from Supabase."
+                    stringResource(Res.string.loading_report)
                 } else {
-                    "We’ll show the nutrition breakdown once the analysis is ready."
+                    stringResource(Res.string.nutrition_breakdown_loading)
                 },
                 style = AppTheme.typography.body,
             )
@@ -372,27 +375,26 @@ private fun SummaryCard(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
             Text(
-                text = "Summary",
+                text = stringResource(Res.string.summary),
                 style = AppTheme.typography.label,
             )
             Text(
-                text = summary.headline
-                    ?: "We’ll highlight key nutrition facts here once available.",
+                text = summary.headline ?: stringResource(Res.string.nutrition_facts_loading),
                 style = AppTheme.typography.body,
             )
             summary.qualityLabel?.let { label ->
                 SummaryInsightsRow(label)
             }
             SummaryListSection(
-                title = "Issues noted",
+                title = stringResource(Res.string.issues_noted),
                 items = summary.issues,
             )
             SummaryListSection(
-                title = "Checklist",
+                title = stringResource(Res.string.checklist),
                 items = summary.checklist,
             )
             SummaryListSection(
-                title = "Uncertainties",
+                title = stringResource(Res.string.uncertainties),
                 items = summary.uncertainties,
             )
         }
@@ -439,7 +441,7 @@ private fun SummaryListSection(
         ) {
             items.forEach { item ->
                 Text(
-                    text = "• $item",
+                    text = stringResource(Res.string.bullet_item, item),
                     style = AppTheme.typography.body,
                 )
             }
@@ -477,13 +479,13 @@ private fun EntryCard(entry: MealEntryUi) {
             }
             entry.quantityText?.let { qty ->
                 Text(
-                    text = "Quantity: $qty",
+                    text = stringResource(Res.string.quantity_format, qty),
                     style = AppTheme.typography.caption,
                 )
             }
             MacronutrientRow(stats = entry.macroStats)
 
-            TagGroup(title = "Tags", tags = entry.sourceTags)
+            TagGroup(title = stringResource(Res.string.tags), tags = entry.sourceTags)
         }
     )
 }

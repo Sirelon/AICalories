@@ -30,6 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import kotlinx.coroutines.delay
@@ -78,11 +81,12 @@ fun SingleValueSelector(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
         ) {
+            val decreaseDesc = stringResource(Res.string.decrease_value)
             StepIconButton(
                 enabled = canDecrease,
                 onClick = { updateValue(clampedValue - safeStep) },
                 icon = Icons.Default.Remove,
-                contentDescription = "Decrease value"
+                contentDescription = decreaseDesc
             )
 
             Slider(
@@ -100,11 +104,12 @@ fun SingleValueSelector(
                 )
             )
 
+            val increaseDesc = stringResource(Res.string.increase_value)
             StepIconButton(
                 enabled = canIncrease,
                 onClick = { updateValue(clampedValue + safeStep) },
                 icon = Icons.Default.Add,
-                contentDescription = "Increase value"
+                contentDescription = increaseDesc
             )
         }
     }
@@ -188,6 +193,7 @@ fun RangeSelector(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
         ) {
+            val decreaseMinDesc = stringResource(Res.string.decrease_minimum)
             StepIconButton(
                 enabled = minCanDecrease,
                 onClick = {
@@ -195,7 +201,7 @@ fun RangeSelector(
                     applyRangeChange(nextMin, max)
                 },
                 icon = Icons.Default.Remove,
-                contentDescription = "Decrease minimum"
+                contentDescription = decreaseMinDesc
             )
 
             RangeSlider(
@@ -210,6 +216,7 @@ fun RangeSelector(
                 )
             )
 
+            val increaseMaxDesc = stringResource(Res.string.increase_maximum)
             StepIconButton(
                 enabled = maxCanIncrease,
                 onClick = {
@@ -217,7 +224,7 @@ fun RangeSelector(
                     applyRangeChange(min, nextMax)
                 },
                 icon = Icons.Default.Add,
-                contentDescription = "Increase maximum"
+                contentDescription = increaseMaxDesc
             )
         }
 

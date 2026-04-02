@@ -54,6 +54,7 @@ import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.features.media.ui.PhotosSection
 import com.sirelon.aicalories.features.seller.ad.Advertisement
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -145,7 +146,7 @@ private fun GenerateAdScreenContent(
                     .navigationBarsPadding()
                     .padding(horizontal = AppDimens.Spacing.xl3),
                 style = AppButtonDefaults.primary(),
-                text = if (state.isLoading) "Generating..." else "Generate Ad with AI",
+                text = if (state.isLoading) stringResource(Res.string.generating) else stringResource(Res.string.generate_ad_with_ai),
                 onClick = onSubmitClick,
                 leadingIcon = if (state.isLoading) null else Icons.Rounded.Star,
                 enabled = state.canSubmit,
@@ -201,7 +202,7 @@ private fun PromptSection(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
             Text(
-                text = "Describe your item",
+                text = stringResource(Res.string.describe_your_item),
                 fontSize = AppDimens.TextSize.xl5,
                 fontWeight = FontWeight.Bold,
                 color = AppTheme.colors.onSurface,
@@ -211,7 +212,7 @@ private fun PromptSection(
                 onValueChange = onValueChange,
                 enabled = enabled,
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = "Brand, condition, accessories, defects...",
+                placeholder = stringResource(Res.string.describe_item_placeholder),
                 minLines = 3,
                 maxLines = 5,
             )
@@ -277,7 +278,7 @@ private fun SellerHeader(
                     )
                 }
                 Text(
-                    text = "SellSnap",
+                    text = stringResource(Res.string.sellsnap_title),
                     color = AppTheme.colors.onPrimary,
                     fontSize = AppDimens.TextSize.xl6,
                     fontWeight = FontWeight.Bold
@@ -285,7 +286,7 @@ private fun SellerHeader(
             }
 
             Text(
-                text = "Turn your stuff into OLX listings instantly",
+                text = stringResource(Res.string.turn_stuff_into_olx_listings),
                 color = AppTheme.colors.onPrimary,
                 fontSize = AppDimens.TextSize.xl7,
                 fontWeight = FontWeight.ExtraBold,
@@ -293,7 +294,7 @@ private fun SellerHeader(
             )
 
             Text(
-                text = "Snap a photo and let AI create the perfect ad for you",
+                text = stringResource(Res.string.snap_photo_ad_desc),
                 color = AppTheme.colors.onPrimary.copy(alpha = 0.9f),
                 fontSize = AppDimens.TextSize.xl3,
                 fontWeight = FontWeight.Medium
@@ -330,15 +331,15 @@ private fun TipsSection(
                 verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l)
             ) {
                 Text(
-                    text = "Tips for better photos",
+                    text = stringResource(Res.string.tips_for_better_photos),
                     fontSize = AppDimens.TextSize.xl4,
                     fontWeight = FontWeight.Bold,
                     color = AppTheme.colors.onSurface
                 )
 
-                TipItem(text = "Good lighting improves results")
-                TipItem(text = "Include multiple angles")
-                TipItem(text = "Show any defects clearly")
+                TipItem(text = stringResource(Res.string.tip_lighting))
+                TipItem(text = stringResource(Res.string.tip_angles))
+                TipItem(text = stringResource(Res.string.tip_defects))
             }
         }
     }

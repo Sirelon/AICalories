@@ -18,6 +18,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.mohamedrejeb.calf.io.KmpFile
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
+import org.jetbrains.compose.resources.stringResource
 import com.sirelon.aicalories.designsystem.AppAsyncImage
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
@@ -74,7 +77,7 @@ fun PhotosGridComponent(
                         Icon(
                             imageVector = Icons.Filled.Add,
                             tint = AppTheme.colors.onSurface.copy(alpha = 0.6f),
-                            contentDescription = "Add photo",
+                            contentDescription = stringResource(Res.string.add_photo_cd),
                             modifier = Modifier.size(AppDimens.Size.xl8),
                         )
                     }

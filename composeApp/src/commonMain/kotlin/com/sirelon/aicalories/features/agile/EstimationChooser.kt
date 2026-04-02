@@ -25,8 +25,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.sirelon.aicalories.composeapp.generated.resources.Res
+import com.sirelon.aicalories.composeapp.generated.resources.*
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun EstimationChooser(
@@ -41,7 +44,7 @@ fun EstimationChooser(
         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
     ) {
         Text(
-            text = "Estimation",
+            text = stringResource(Res.string.estimation),
             style = AppTheme.typography.title,
         )
         Surface(
@@ -99,7 +102,7 @@ fun EstimationPickerSheet(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
             Text(
-                text = "Select estimation",
+                text = stringResource(Res.string.select_estimation),
                 style = AppTheme.typography.title,
             )
             Estimation.entries.forEach { estimation ->
