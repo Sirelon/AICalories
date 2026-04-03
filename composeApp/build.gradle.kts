@@ -52,25 +52,16 @@ kotlin {
         }
     }
 
-    // Workaround for Compose Multiplatform resources missing in Android assets when using the new KMP Android Library plugin.
-    val copyComposeResourcesToAndroidAssets by tasks.registering(Copy::class) {
-        val resPackage = "com.sirelon.aicalories.composeapp.generated.resources"
+    // Workaround: The Compose Resources plugin doesn't properly wire assets for
+    // androidKotlinMultiplatformLibrary. Copy prepared resources to a build directory that
+    // the androidApp module will include as assets.
+    val resPackage = "com.sirelon.aicalories.composeapp.generated.resources"
+    tasks.register<Copy>("copyComposeResourcesToAndroidAssets") {
         from(layout.buildDirectory.dir("generated/compose/resourceGenerator/preparedResources/commonMain/composeResources"))
-        into(project.file("src/androidMain/assets/composeResources/$resPackage"))
+        from(layout.buildDirectory.dir("generated/compose/resourceGenerator/preparedResources/androidMain/composeResources"))
+        into(layout.buildDirectory.dir("generated/compose/androidAssets/composeResources/$resPackage"))
         dependsOn("prepareComposeResourcesTaskForCommonMain")
     }
-
-    // Hook it up to the build process
-    tasks.matching { it.name == "preBuild" }.configureEach {
-        dependsOn(copyComposeResourcesToAndroidAssets)
-    }
-
-    // Disable the buggy plugin task if it exists to avoid build failures
-    tasks.matching { it.name == "copyAndroidMainComposeResourcesToAndroidAssets" }.configureEach {
-        enabled = false
-    }
-
-    kotlin.sourceSets.getByName("androidMain").resources.srcDirs("src/androidMain/assets")
 
     listOf(
         iosArm64(),
