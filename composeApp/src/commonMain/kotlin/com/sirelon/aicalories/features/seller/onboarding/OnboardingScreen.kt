@@ -29,7 +29,15 @@ import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.tooling.preview.Preview
 import com.sirelon.aicalories.composeapp.generated.resources.Res
 import com.sirelon.aicalories.composeapp.generated.resources.compose_multiplatform
+import com.sirelon.aicalories.composeapp.generated.resources.get_started
 import com.sirelon.aicalories.composeapp.generated.resources.ic_snap_logo
+import com.sirelon.aicalories.composeapp.generated.resources.next
+import com.sirelon.aicalories.composeapp.generated.resources.onboarding_step1_subtitle
+import com.sirelon.aicalories.composeapp.generated.resources.onboarding_step1_title
+import com.sirelon.aicalories.composeapp.generated.resources.onboarding_step2_subtitle
+import com.sirelon.aicalories.composeapp.generated.resources.onboarding_step2_title
+import com.sirelon.aicalories.composeapp.generated.resources.onboarding_step3_subtitle
+import com.sirelon.aicalories.composeapp.generated.resources.onboarding_step3_title
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppScaffold
 import com.sirelon.aicalories.designsystem.AppTheme

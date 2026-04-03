@@ -6,15 +6,24 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import com.sirelon.aicalories.composeapp.generated.resources.Res
-import com.sirelon.aicalories.composeapp.generated.resources.*
+import com.sirelon.aicalories.composeapp.generated.resources.camera_rationale_message
+import com.sirelon.aicalories.composeapp.generated.resources.camera_rationale_title
+import com.sirelon.aicalories.composeapp.generated.resources.camera_settings_message_android
+import com.sirelon.aicalories.composeapp.generated.resources.camera_settings_message_ios
+import com.sirelon.aicalories.composeapp.generated.resources.camera_settings_title
+import com.sirelon.aicalories.composeapp.generated.resources.cancel
+import com.sirelon.aicalories.composeapp.generated.resources.not_now
+import com.sirelon.aicalories.composeapp.generated.resources.open_settings
+import com.sirelon.aicalories.composeapp.generated.resources.retry
 import com.sirelon.aicalories.platform.PlatformTargets
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 data class PermissionDialogContent(
-    val title: String,
-    val message: String,
-    val confirmText: String,
-    val dismissText: String,
+    val title: StringResource,
+    val message: StringResource,
+    val confirmText: StringResource,
+    val dismissText: StringResource,
 )
 
 @Composable
@@ -25,21 +34,21 @@ fun PermissionDialogs(
     settingsContentProvider: ((Boolean) -> PermissionDialogContent)? = null,
 ) {
     val resolvedRationaleContent = rationaleContent ?: PermissionDialogContent(
-        title = stringResource(Res.string.camera_rationale_title),
-        message = stringResource(Res.string.camera_rationale_message),
-        confirmText = stringResource(Res.string.retry),
-        dismissText = stringResource(Res.string.not_now),
+        title = Res.string.camera_rationale_title,
+        message = Res.string.camera_rationale_message,
+        confirmText = Res.string.retry,
+        dismissText = Res.string.not_now,
     )
     val resolvedSettingsContent = (settingsContentProvider ?: { ios ->
         PermissionDialogContent(
-            title = stringResource(Res.string.camera_settings_title),
+            title = Res.string.camera_settings_title,
             message = if (ios) {
-                stringResource(Res.string.camera_settings_message_ios)
+                Res.string.camera_settings_message_ios
             } else {
-                stringResource(Res.string.camera_settings_message_android)
+                Res.string.camera_settings_message_android
             },
-            confirmText = stringResource(Res.string.open_settings),
-            dismissText = stringResource(Res.string.cancel),
+            confirmText = Res.string.open_settings,
+            dismissText = Res.string.cancel,
         )
     })(isIosDevice)
     val permissionState by controller.uiState
@@ -47,16 +56,16 @@ fun PermissionDialogs(
     if (permissionState.showRationale) {
         AlertDialog(
             onDismissRequest = controller::dismissRationale,
-            title = { Text(resolvedRationaleContent.title) },
-            text = { Text(resolvedRationaleContent.message) },
+            title = { Text(stringResource(resolvedRationaleContent.title)) },
+            text = { Text(stringResource(resolvedRationaleContent.message)) },
             confirmButton = {
                 TextButton(onClick = controller::retry) {
-                    Text(resolvedRationaleContent.confirmText)
+                    Text(stringResource(resolvedRationaleContent.confirmText))
                 }
             },
             dismissButton = {
                 TextButton(onClick = controller::dismissRationale) {
-                    Text(resolvedRationaleContent.dismissText)
+                    Text(stringResource(resolvedRationaleContent.dismissText))
                 }
             },
         )
@@ -65,16 +74,16 @@ fun PermissionDialogs(
     if (permissionState.showSettings) {
         AlertDialog(
             onDismissRequest = controller::dismissSettings,
-            title = { Text(resolvedSettingsContent.title) },
-            text = { Text(resolvedSettingsContent.message) },
+            title = { Text(stringResource(resolvedSettingsContent.title)) },
+            text = { Text(stringResource(resolvedSettingsContent.message)) },
             confirmButton = {
                 TextButton(onClick = controller::openSettings) {
-                    Text(resolvedSettingsContent.confirmText)
+                    Text(stringResource(resolvedSettingsContent.confirmText))
                 }
             },
             dismissButton = {
                 TextButton(onClick = controller::dismissSettings) {
-                    Text(resolvedSettingsContent.dismissText)
+                    Text(stringResource(resolvedSettingsContent.dismissText))
                 }
             },
         )
