@@ -14,18 +14,44 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sirelon.aicalories.designsystem.AppDimens
+import com.sirelon.aicalories.designsystem.AppDivider
+import com.sirelon.aicalories.designsystem.AppScaffold
+import com.sirelon.aicalories.designsystem.AppTheme
+import com.sirelon.aicalories.designsystem.IconWithBackground
+import com.sirelon.aicalories.designsystem.ObserveAsEvents
+import com.sirelon.aicalories.designsystem.buttons.AppButton
+import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
+import com.sirelon.aicalories.designsystem.buttons.AppButtonStyle
+import com.sirelon.aicalories.designsystem.screens.LoadingOverlay
+import com.sirelon.aicalories.designsystem.templates.TermsAndPrivacy
+import com.sirelon.aicalories.designsystem.templates.TitleWithSubtitle
+import com.sirelon.aicalories.features.seller.auth.data.OlxConfig
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.benefit_manage
 import com.sirelon.aicalories.generated.resources.benefit_publish
@@ -38,29 +64,81 @@ import com.sirelon.aicalories.generated.resources.or_divider
 import com.sirelon.aicalories.generated.resources.welcome_subtitle
 import com.sirelon.aicalories.generated.resources.welcome_to_sellsnap
 import com.sirelon.aicalories.generated.resources.why_connect_olx
-import com.sirelon.aicalories.designsystem.AppDimens
-import com.sirelon.aicalories.designsystem.AppDivider
-import com.sirelon.aicalories.designsystem.AppScaffold
-import com.sirelon.aicalories.designsystem.AppTheme
-import com.sirelon.aicalories.designsystem.IconWithBackground
-import com.sirelon.aicalories.designsystem.buttons.AppButton
-import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
-import com.sirelon.aicalories.designsystem.buttons.AppButtonStyle
-import com.sirelon.aicalories.designsystem.templates.TermsAndPrivacy
-import com.sirelon.aicalories.designsystem.templates.TitleWithSubtitle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun SellerLandingScreen(
-    onContinueWithOlx: () -> Unit,
-    onContinueAsGuest: () -> Unit,
-    onTermsClick: () -> Unit,
-    onPrivacyClick: () -> Unit,
-    modifier: Modifier = Modifier,
+fun SellerLandingScreenRoute(openHome: () -> Unit) {
+    val viewModel: SellerAuthViewModel = koinViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    var webViewUrl by remember { mutableStateOf<String?>(null) }
+    val localUriHandler = LocalUriHandler.current
+
+    ObserveAsEvents(viewModel.effects) { effect ->
+        when (effect) {
+            is SellerAuthContract.SellerAuthEffect.LaunchOlxAuthFlow -> {
+                webViewUrl = effect.url
+            }
+
+            is SellerAuthContract.SellerAuthEffect.ShowMessage -> {
+                snackbarHostState.showSnackbar(effect.message)
+            }
+
+            is SellerAuthContract.SellerAuthEffect.LaunchBrowser -> {
+                localUriHandler.openUri(effect.url)
+            }
+
+            SellerAuthContract.SellerAuthEffect.OpenHome -> openHome()
+        }
+    }
+
+    LoadingOverlay(
+        isLoading = state.status == SellerAuthContract.SellerAuthStatus.Processing,
+        content = { SellerLandingScreen(state = state, onEvent = viewModel::onEvent) }
+    )
+
+    webViewUrl?.let { url ->
+        Dialog(
+            onDismissRequest = { webViewUrl = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text("Connect OLX Account") },
+                        navigationIcon = {
+                            IconButton(onClick = { webViewUrl = null }) {
+                                Icon(Icons.Default.Close, contentDescription = "Close")
+                            }
+                        },
+                    )
+                },
+            ) { paddingValues ->
+                OlxAuthWebView(
+                    url = url,
+                    redirectUri = OlxConfig.redirectUri,
+                    onUrlIntercepted = { callbackUrl ->
+                        webViewUrl = null
+                        viewModel.onCallbackReceived(callbackUrl)
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SellerLandingScreen(
+    state: SellerAuthContract.SellerAuthState,
+    onEvent: (SellerAuthContract.SellerAuthEvent) -> Unit
 ) {
     AppScaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
     ) { padding ->
         Column(
             modifier = Modifier
@@ -91,7 +169,11 @@ fun SellerLandingScreen(
                 subtitle = stringResource(Res.string.welcome_subtitle),
             )
 
-            ContinueWithOlxBlock(onContinueWithOlx = onContinueWithOlx)
+            ContinueWithOlxBlock(
+                onContinueWithOlx = {
+                    onEvent(SellerAuthContract.SellerAuthEvent.OlxAuthClicked)
+                },
+            )
 
             // Divider with "or"
             AppDivider(
@@ -105,9 +187,20 @@ fun SellerLandingScreen(
                 },
             )
 
-            ContinueAsGuestBlock(onContinueAsGuest = onContinueAsGuest)
+            ContinueAsGuestBlock(
+                onContinueAsGuest = {
+                    onEvent(SellerAuthContract.SellerAuthEvent.ContinueAsGuestClicked)
+                },
+            )
 
-            TermsAndPrivacy(onTermsClick = onTermsClick, onPrivacyClick = onPrivacyClick)
+            TermsAndPrivacy(
+                onTermsClick = {
+                    onEvent(SellerAuthContract.SellerAuthEvent.OnTermsClicked)
+                },
+                onPrivacyClick = {
+                    onEvent(SellerAuthContract.SellerAuthEvent.OnPrivacyClicked)
+                }
+            )
         }
     }
 }
@@ -230,10 +323,8 @@ private fun BenefitItem(text: String) {
 private fun SellerLandingScreenPreview() {
     AppTheme {
         SellerLandingScreen(
-            onContinueWithOlx = { },
-            onContinueAsGuest = { },
-            onTermsClick = { },
-            onPrivacyClick = { },
+            state = SellerAuthContract.SellerAuthState(),
+            onEvent = {},
         )
     }
 }

@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -21,8 +20,7 @@ import com.sirelon.aicalories.features.analyze.ui.AnalyzeScreen
 import com.sirelon.aicalories.features.datagenerator.ui.DataGeneratorScreen
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRoute
 import com.sirelon.aicalories.features.seller.ad.AdRootScreen
-import com.sirelon.aicalories.features.seller.auth.presentation.SellerAuthScreenRoute
-import com.sirelon.aicalories.features.seller.auth.presentation.SellerLandingScreen
+import com.sirelon.aicalories.features.seller.auth.presentation.SellerLandingScreenRoute
 import com.sirelon.aicalories.features.seller.onboarding.OnboardingScreen
 import com.sirelon.aicalories.navigation.AppDestination
 import org.koin.compose.KoinApplication
@@ -81,7 +79,7 @@ fun App() {
             NavDisplay(
                 modifier = Modifier.fillMaxSize(),
                 backStack = navBackStack,
-                entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AppDestination>(),),
+                entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AppDestination>()),
                 entryProvider = entryProvider<AppDestination> {
 
                     entry<AppDestination.SellerOnboarding> {
@@ -92,25 +90,15 @@ fun App() {
                     }
 
                     entry<AppDestination.SellerLanding> {
-                        val uriHandler = LocalUriHandler.current
-                        SellerLandingScreen(
-                            onContinueWithOlx = {
-                                navigateTo(AppDestination.SellerAuth)
-                            },
-                            onContinueAsGuest = {
+                        SellerLandingScreenRoute(
+                            openHome = {
                                 navigateTo(AppDestination.Seller)
                             },
-                            onTermsClick = { uriHandler.openUri("https://sellsnap.ai/terms") },
-                            onPrivacyClick = { uriHandler.openUri("https://sellsnap.ai/privacy") }
                         )
                     }
 
                     entry<AppDestination.Seller> {
                         AdRootScreen(onExit = popDestination)
-                    }
-
-                    entry<AppDestination.SellerAuth> {
-                        SellerAuthScreenRoute()
                     }
 
                     entry<AppDestination.Agile> {
