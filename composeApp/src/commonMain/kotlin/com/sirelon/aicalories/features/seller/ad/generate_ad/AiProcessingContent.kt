@@ -33,18 +33,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.sirelon.aicalories.generated.resources.Res
-import com.sirelon.aicalories.generated.resources.*
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.PulsingCircles
+import com.sirelon.aicalories.designsystem.templates.TitleWithSubtitle
+import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.ai_analyzing_photo
+import com.sirelon.aicalories.generated.resources.ai_creating_ad_title
+import com.sirelon.aicalories.generated.resources.ai_step_analyzing_image
+import com.sirelon.aicalories.generated.resources.ai_step_calculating_price
+import com.sirelon.aicalories.generated.resources.ai_step_generating_title
+import com.sirelon.aicalories.generated.resources.ai_step_writing_description
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
+import kotlin.random.Random
 
 @Composable
 private fun processingSteps() = listOf(
@@ -63,7 +69,7 @@ fun AiProcessingContent(
 
     LaunchedEffect(Unit) {
         for (i in 1..steps.size) {
-            delay(800L)
+            delay(Random.nextInt(500, 1200).toLong())
             completedSteps = i
         }
     }
@@ -89,20 +95,9 @@ fun AiProcessingContent(
 
         Spacer(modifier = Modifier.height(AppDimens.Spacing.xl8))
 
-        Text(
-            text = stringResource(Res.string.ai_creating_ad_title),
-            fontSize = AppDimens.TextSize.xl5,
-            fontWeight = FontWeight.Bold,
-            color = AppTheme.colors.onSurface,
-        )
-
-        Spacer(modifier = Modifier.height(AppDimens.Spacing.m))
-
-        Text(
-            text = stringResource(Res.string.ai_analyzing_photo),
-            fontSize = AppDimens.TextSize.xl2,
-            color = AppTheme.colors.onSurfaceMuted,
-            textAlign = TextAlign.Center,
+        TitleWithSubtitle(
+            title = stringResource(Res.string.ai_creating_ad_title),
+            subtitle = stringResource(Res.string.ai_analyzing_photo),
         )
 
         Spacer(modifier = Modifier.height(AppDimens.Spacing.xl6))
@@ -146,7 +141,9 @@ private fun BouncingBadge(modifier: Modifier = Modifier) {
 
     Box(
         modifier = modifier
-            .offset(y = offsetY.dp)
+            .graphicsLayer {
+                this.translationY = offsetY
+            }
             .size(AppDimens.Size.xl8)
             .background(AppTheme.colors.success, CircleShape),
         contentAlignment = Alignment.Center,
@@ -183,10 +180,18 @@ private fun ProcessingStepItem(
     isDone: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val successColor = AppTheme.colors.success
+    val idleColor = AppTheme.colors.onSurfaceSoft
+    val textDoneColor = AppTheme.colors.onSurface
+    val textIdleColor = AppTheme.colors.onSurfaceSoft
+
     val backgroundColor by animateColorAsState(
-        targetValue = if (isDone) AppTheme.colors.success else AppTheme.colors.onSurfaceSoft,
+        targetValue = if (isDone) successColor else idleColor,
         animationSpec = tween(durationMillis = 300),
+        label = "bg"
     )
+
+    val textColor = if (isDone) textDoneColor else textIdleColor
 
     Row(
         modifier = modifier,
@@ -196,7 +201,19 @@ private fun ProcessingStepItem(
         Box(
             modifier = Modifier
                 .size(AppDimens.Size.xl6)
-                .background(backgroundColor, CircleShape),
+                .graphicsLayer {
+                    clip = true
+                    shape = CircleShape
+                }
+                .drawWithCache {
+                    val radius = size.minDimension / 2f
+                    onDrawBehind {
+                        drawCircle(
+                            color = backgroundColor,
+                            radius = radius
+                        )
+                    }
+                },
             contentAlignment = Alignment.Center,
         ) {
             if (isDone) {
@@ -215,7 +232,7 @@ private fun ProcessingStepItem(
             text = text,
             fontSize = AppDimens.TextSize.xl2,
             fontWeight = FontWeight.Medium,
-            color = if (isDone) AppTheme.colors.onSurface else AppTheme.colors.onSurfaceSoft,
+            color = textColor,
         )
     }
 }
@@ -235,7 +252,10 @@ private fun PingingDot(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .size(AppDimens.Size.m)
-            .scale(scale)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .background(AppTheme.colors.onSurfaceMuted, CircleShape),
     )
 }

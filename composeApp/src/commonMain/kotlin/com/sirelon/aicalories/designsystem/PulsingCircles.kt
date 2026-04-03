@@ -13,9 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 
 /**
  * Concentric pulsing circles with a center content slot.
@@ -45,7 +45,10 @@ fun PulsingCircles(
     Box(
         modifier = modifier
             .size(AppDimens.Size.xl21)
-            .scale(pulseScale)
+            .graphicsLayer(
+                scaleX = pulseScale,
+                scaleY = pulseScale,
+            )
             .background(outerColor, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
