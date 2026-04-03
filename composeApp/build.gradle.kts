@@ -89,6 +89,12 @@ kotlin {
                 composeOptInAnnotations.forEach { optIn(it) }
             }
         }
+        val dataStoreMain by creating {
+            dependsOn(commonMain.get())
+            dependencies {
+                implementation(libs.androidx.datastore.preferences)
+            }
+        }
         val jsWasmMain by creating {
             dependsOn(getByName("commonMain"))
             dependencies {
@@ -96,9 +102,11 @@ kotlin {
             }
         }
         val iosMain by creating {
-            dependsOn(getByName("commonMain"))
+            dependsOn(dataStoreMain)
         }
 
+        jvmMain.get().dependsOn(dataStoreMain)
+        androidMain.get().dependsOn(dataStoreMain)
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.core.ktx)
@@ -107,7 +115,6 @@ kotlin {
             implementation(libs.kotlinx.coroutines.android)
         }
         commonMain.dependencies {
-            implementation(libs.androidx.datastore.preferences)
             implementation(libs.supabase.compose.auth)
             implementation(libs.supabase.compose.auth.ui)
             implementation(libs.supabase.coil3.integration)
