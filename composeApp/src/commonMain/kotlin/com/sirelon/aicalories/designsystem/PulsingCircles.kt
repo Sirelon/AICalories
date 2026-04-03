@@ -45,10 +45,10 @@ fun PulsingCircles(
     Box(
         modifier = modifier
             .size(AppDimens.Size.xl21)
-            .graphicsLayer(
-                scaleX = pulseScale,
-                scaleY = pulseScale,
-            )
+            .graphicsLayer {
+                scaleX = pulseScale
+                scaleY = pulseScale
+            }
             .background(outerColor, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
