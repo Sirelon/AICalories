@@ -59,6 +59,11 @@ When checking Android/Google library versions, APIs, or usage:
 - This applies to any Google/Android library: Jetpack Compose, AndroidX, Material, Ktor Android, Google Play services, Firebase, etc.
 - Use it to verify correct API signatures, version compatibility, and migration guides before writing or recommending code.
 
+## Navigation Conventions
+
+- `App.kt` is an intentionally thin rendering shell — do not add navigation logic there.
+- New navigation actions go in `AppNavigationViewModel`; inject it via Koin instead of threading lambdas through composables.
+
 ## UI & Theming Conventions
 - Prefer `AppTheme.typography` and `AppTheme.colors` over `MaterialTheme.typography` / `MaterialTheme.colorScheme`.
 - Use `AppDimens` tokens instead of hardcoded `dp` values in shared UI. Keep raw values only for layout breakpoints (e.g. `720.dp`).
