@@ -49,6 +49,11 @@ data class OlxSessionState(
 
 @Serializable
 data class OlxMeResponse(
+    @SerialName("data") val user: OlxUserResponse
+)
+
+@Serializable
+data class OlxUserResponse(
     @SerialName("id") val id: Long,
     @SerialName("email") val email: String? = null,
     @SerialName("status") val status: String? = null,

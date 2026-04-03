@@ -1,6 +1,6 @@
 package com.sirelon.aicalories.features.seller.auth.presentation
 
-import com.sirelon.aicalories.features.seller.auth.domain.OlxMeResponse
+import com.sirelon.aicalories.features.seller.auth.domain.OlxUserResponse
 
 interface SellerAuthContract {
 
@@ -9,7 +9,7 @@ interface SellerAuthContract {
         val isAuthorized: Boolean = false,
         val statusMessage: String = "Connect your OLX account to prepare seller API access.",
         val accessTokenExpiresAtEpochSeconds: Long? = null,
-        val me: OlxMeResponse? = null,
+        val me: OlxUserResponse? = null,
         val errorMessage: String? = null,
     ) {
         val isBusy: Boolean
