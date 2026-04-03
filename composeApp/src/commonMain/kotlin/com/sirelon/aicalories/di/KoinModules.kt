@@ -12,6 +12,7 @@ import com.sirelon.aicalories.features.history.di.historyModule
 import com.sirelon.aicalories.features.media.di.mediaModule
 import com.sirelon.aicalories.features.seller.auth.di.sellerAuthModule
 import com.sirelon.aicalories.features.seller.ad.generate_ad.di.generateAdModule
+import com.sirelon.aicalories.startup.appStartupModule
 import com.sirelon.aicalories.network.ApiTokenProvider
 import com.sirelon.aicalories.network.OpenAIClient
 import com.sirelon.aicalories.network.createHttpClient
@@ -32,6 +33,7 @@ val appModule = module {
         sellerAuthModule,
         generateAdModule,
         previewAdModule,
+        appStartupModule,
     )
     single { Greeting() }
 }

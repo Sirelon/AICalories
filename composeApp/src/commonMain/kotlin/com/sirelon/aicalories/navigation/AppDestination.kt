@@ -9,6 +9,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface AppDestination : NavKey {
 
+    @Serializable
+    data object Splash : AppDestination
+
     data object SellerOnboarding : AppDestination
 
     @Serializable
