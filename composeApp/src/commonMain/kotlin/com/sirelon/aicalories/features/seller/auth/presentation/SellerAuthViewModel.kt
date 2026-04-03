@@ -48,7 +48,7 @@ class SellerAuthViewModel(
                             errorMessage = null,
                         )
                     }
-                    postEffect(SellerAuthContract.SellerAuthEffect.ShowMessage("OLX account connected."))
+                    postEffect(SellerAuthContract.SellerAuthEffect.OpenHome)
                 }
                 .onFailure { error ->
                     showError(error.message ?: "Failed to complete OLX authorization.")

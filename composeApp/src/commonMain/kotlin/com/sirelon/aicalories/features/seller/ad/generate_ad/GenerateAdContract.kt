@@ -9,13 +9,10 @@ interface GenerateAdContract {
 
     data class GenerateAdState(
         val prompt: String = "",
-        val isLoading: Boolean = true,
+        val isLoading: Boolean = false,
         val errorMessage: String? = null,
         val uploads: Map<KmpFile, UploadingItem> = emptyMap(),
     ) {
-        val hasPendingUploads: Boolean
-            get() = uploads.values.any { !it.isUploaded }
-
         val canSubmit: Boolean
             get() = !isLoading && uploads.isNotEmpty()
     }

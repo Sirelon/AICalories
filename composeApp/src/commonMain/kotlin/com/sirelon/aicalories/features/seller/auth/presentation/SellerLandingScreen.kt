@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -96,7 +97,9 @@ fun SellerLandingScreenRoute(openHome: () -> Unit) {
 
     LoadingOverlay(
         isLoading = state.status == SellerAuthContract.SellerAuthStatus.Processing,
-        content = { SellerLandingScreen(state = state, onEvent = viewModel::onEvent) }
+        content = {
+            SellerLandingScreen(state = state, onEvent = viewModel::onEvent)
+        }
     )
 
     webViewUrl?.let { url ->
@@ -168,6 +171,16 @@ private fun SellerLandingScreen(
                 title = stringResource(Res.string.welcome_to_sellsnap),
                 subtitle = stringResource(Res.string.welcome_subtitle),
             )
+
+            if (state.status == SellerAuthContract.SellerAuthStatus.Error) {
+                Text(
+                    modifier = Modifier.padding(top = AppDimens.Spacing.xl3).fillMaxWidth(),
+                    text = state.errorMessage ?: "Something went wrong. Try again.",
+                    color = AppTheme.colors.error,
+                    style = AppTheme.typography.body,
+                    textAlign = TextAlign.Center,
+                )
+            }
 
             ContinueWithOlxBlock(
                 onContinueWithOlx = {

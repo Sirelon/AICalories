@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 
@@ -102,7 +101,7 @@ data object AppButtonDefaults {
     @ReadOnlyComposable
     fun outline(): AppButtonStyle {
         return AppButtonStyle(
-            backgroundColor = Color.Transparent,
+            backgroundColor = AppTheme.colors.outline,
             contentColor = AppTheme.colors.onBackground,
             elevation = AppDimens.Spacing.xs4,
         )

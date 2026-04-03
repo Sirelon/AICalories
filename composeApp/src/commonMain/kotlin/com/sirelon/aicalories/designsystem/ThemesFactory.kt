@@ -7,7 +7,7 @@ object ThemesFactory {
     fun light(): AppColors = AppColors(
         primary = Color(0xFF4F46E5),
         onPrimary = Color(0xFFFFFFFF),
-        background = Color(0xFFF6F6F9),
+        background = Color(0xFFF8F9FA),
         onBackground = Color(0xFF1F2933),
         surface = Color(0xFFFFFFFF),
         onSurface = Color(0xFF1F2933),
@@ -15,7 +15,7 @@ object ThemesFactory {
         error = Color(0xFFBA1A1A),
         onError = Color(0xFFFFFFFF),
         success = Color(0xFF1B8E5A),
-        outline = Color(0xFFCBD5E1),
+        outline = Color(0xFFD8DADB),
         warning = Color(0xFFE67E22),
         warningVariant = Color(0xFFF28B44),
         onSurfaceMuted = Color(0xFF94A3B8),
