@@ -9,7 +9,7 @@ interface GenerateAdContract {
 
     data class GenerateAdState(
         val prompt: String = "",
-        val isLoading: Boolean = false,
+        val isLoading: Boolean = true,
         val errorMessage: String? = null,
         val uploads: Map<KmpFile, UploadingItem> = emptyMap(),
     ) {

@@ -48,9 +48,9 @@ fun App() {
             val navBackStack = remember {
 //                mutableStateListOf<AppDestination>(AppDestination.Agile)
 //                mutableStateListOf<AppDestination>(AppDestination.Analyze)
-                mutableStateListOf<AppDestination>(AppDestination.Seller)
+//                mutableStateListOf<AppDestination>(AppDestination.Seller)
 //                mutableStateListOf<AppDestination>(AppDestination.SellerOnboarding)
-//                mutableStateListOf<AppDestination>(AppDestination.SellerLanding)
+                mutableStateListOf<AppDestination>(AppDestination.SellerLanding)
 //                mutableStateListOf<AppDestination>(AppDestination.SellerAuth)
             }
 

@@ -18,7 +18,7 @@ object ThemesFactory {
         outline = Color(0xFFCBD5E1),
         warning = Color(0xFFE67E22),
         warningVariant = Color(0xFFF28B44),
-        onSurfaceMuted = Color(0xFF475569),
+        onSurfaceMuted = Color(0xFF94A3B8),
         onSurfaceSoft = Color(0xFF64748B),
         surfaceSubtle = Color(0xFFF1F5F9),
         infoSurface = Color(0xFFF0F4FF),
