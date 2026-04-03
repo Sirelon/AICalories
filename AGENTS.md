@@ -52,6 +52,13 @@ Resolved in `shared/build.gradle.kts` from Gradle properties, environment variab
 | `OLX_API_BASE_URL` / `olx.api.base.url` | OLX API base URL |
 | `OLX_REDIRECT_URI` / `olx.redirect.uri` | OLX redirect URI |
 
+## Library Documentation & Version Lookup
+
+When checking Android/Google library versions, APIs, or usage:
+- **Always use the `mcp__google-dev-knowledge__search_documents` / `mcp__google-dev-knowledge__get_documents` MCP tools** instead of relying on training-data knowledge or web search.
+- This applies to any Google/Android library: Jetpack Compose, AndroidX, Material, Ktor Android, Google Play services, Firebase, etc.
+- Use it to verify correct API signatures, version compatibility, and migration guides before writing or recommending code.
+
 ## UI & Theming Conventions
 - Prefer `AppTheme.typography` and `AppTheme.colors` over `MaterialTheme.typography` / `MaterialTheme.colorScheme`.
 - Use `AppDimens` tokens instead of hardcoded `dp` values in shared UI. Keep raw values only for layout breakpoints (e.g. `720.dp`).
