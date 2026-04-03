@@ -1,7 +1,5 @@
 package com.sirelon.aicalories.features.auth.data
 
-import com.sirelon.aicalories.features.seller.auth.data.InMemoryOlxAuthSessionStore
-import com.sirelon.aicalories.features.seller.auth.data.InMemoryOlxTokenStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthSessionStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxCredentialsProvider
@@ -31,7 +29,7 @@ class OlxAuthRepositoryTest {
 
     @Test
     fun `createAuthorizationRequest builds olx auth url and stores state`() = runBlocking {
-        val sessionStore = InMemoryOlxAuthSessionStore()
+        val sessionStore = OlxAuthSessionStore(InMemoryOlxKeyValueStore())
         val repository = createRepository(
             engine = MockEngine { error("No HTTP call expected.") },
             sessionStore = sessionStore,
@@ -97,7 +95,7 @@ class OlxAuthRepositoryTest {
     @Test
     fun `refreshIfNeeded sends refresh token request and replaces stored tokens`() = runBlocking {
         var requestBody = ""
-        val tokenStore = InMemoryOlxTokenStore().apply {
+        val tokenStore = OlxTokenStore(InMemoryOlxKeyValueStore()).apply {
             write(
                 OlxTokens(
                     accessToken = "expired-access-token",
@@ -141,7 +139,7 @@ class OlxAuthRepositoryTest {
 
     @Test
     fun `refreshIfNeeded clears stored tokens on invalid grant`() = runBlocking {
-        val tokenStore = InMemoryOlxTokenStore().apply {
+        val tokenStore = OlxTokenStore(InMemoryOlxKeyValueStore()).apply {
             write(
                 OlxTokens(
                     accessToken = "expired-access-token",
@@ -179,8 +177,8 @@ class OlxAuthRepositoryTest {
 
     private fun createRepository(
         engine: MockEngine,
-        tokenStore: OlxTokenStore = InMemoryOlxTokenStore(),
-        sessionStore: OlxAuthSessionStore = InMemoryOlxAuthSessionStore(),
+        tokenStore: OlxTokenStore = OlxTokenStore(InMemoryOlxKeyValueStore()),
+        sessionStore: OlxAuthSessionStore = OlxAuthSessionStore(InMemoryOlxKeyValueStore()),
     ): OlxAuthRepository {
         return OlxAuthRepository(
             httpClient = createOlxHttpClient(engine),
