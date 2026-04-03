@@ -73,7 +73,7 @@ val olxApiBaseUrl =
 
 val olxRedirectUri =
     resolveSecret("OLX_REDIRECT_URI", "olx.redirect.uri")
-        ?: "aicalories://olx-auth/callback"
+        ?: "selolxai://olx-auth/callback"
 
 kotlin {
     androidLibrary {

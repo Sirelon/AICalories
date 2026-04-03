@@ -91,7 +91,7 @@ class OlxAuthRepositoryTest {
         assertContains(requestBody, "\"client_id\":\"test-client-id\"")
         assertContains(requestBody, "\"client_secret\":\"test-client-secret\"")
         assertContains(requestBody, "\"code\":\"one-time-code\"")
-        assertContains(requestBody, "\"redirect_uri\":\"aicalories://olx-auth/callback\"")
+        assertContains(requestBody, "\"redirect_uri\":\"selolxai://olx-auth/callback\"")
     }
 
     @Test
@@ -199,7 +199,7 @@ class OlxAuthRepositoryTest {
 
     private class TestRedirectHandler : OlxRedirectHandler {
         override fun buildRedirectUri(platform: com.sirelon.aicalories.platform.PlatformTargets): String {
-            return "aicalories://olx-auth/callback"
+            return "selolxai://olx-auth/callback"
         }
 
         override fun parseCallback(url: String): OlxAuthCallback {

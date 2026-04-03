@@ -38,7 +38,7 @@
                 <data
                     android:host="olx-auth"
                     android:pathPrefix="/callback"
-                    android:scheme="aicalories" />
+                    android:scheme="selolxai" />
             </intent-filter>
         </activity>
     </application>
