@@ -12,7 +12,7 @@ class OlxApiClient(
     private val httpClient: HttpClient,
 ) {
     suspend fun getAuthenticatedUser(): Result<OlxUserResponse> = runCatching {
-        val response = httpClient.get("/partner/users/me")
+        val response = httpClient.get("users/me")
         if (!response.status.isSuccess()) {
             throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
         }
@@ -21,7 +21,7 @@ class OlxApiClient(
     }
 
     suspend fun loadCategories() {
-        val response = httpClient.get("/categories")
+        val response = httpClient.get("categories")
         val text = response.bodyAsText()
         println(text)
     }
