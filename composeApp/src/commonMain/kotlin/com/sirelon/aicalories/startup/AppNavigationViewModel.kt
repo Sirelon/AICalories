@@ -43,6 +43,10 @@ class AppNavigationViewModel(
         }
     }
 
+    fun replaceWith(destination: AppDestination) {
+        _backStack.value = listOf(destination)
+    }
+
     private suspend fun resolveStartupDestination() {
         val initial: AppDestination = if (!startupStore.hasSeenOnboarding()) {
             startupStore.markOnboardingSeen()

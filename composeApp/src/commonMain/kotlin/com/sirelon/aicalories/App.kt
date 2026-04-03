@@ -75,8 +75,7 @@ fun App() {
 
                     entry<AppDestination.SellerOnboarding> {
                         OnboardingScreen {
-                            navVm.navigateTo(AppDestination.SellerLanding)
-                            navVm.popDestination()
+                            navVm.replaceWith(AppDestination.SellerLanding)
                         }
                     }
 
