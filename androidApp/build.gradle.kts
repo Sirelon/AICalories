@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+val composeAppProject = project(":composeApp")
 android {
     namespace = "com.sirelon.aicalories"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -42,6 +43,20 @@ kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
     }
+}
+
+// Workaround: Include compose resources from composeApp as Android assets.
+// The Compose Resources plugin doesn't properly wire assets with androidKotlinMultiplatformLibrary.
+androidComponents {
+    onVariants { variant ->
+        variant.sources.assets?.addStaticSourceDirectory(
+            composeAppProject.layout.buildDirectory.dir("generated/compose/androidAssets").get().asFile.absolutePath
+        )
+    }
+}
+
+tasks.matching { it.name.contains("MergeAssets") || it.name.contains("mergeAssets") }.configureEach {
+    dependsOn(composeAppProject.tasks.named("copyComposeResourcesToAndroidAssets"))
 }
 
 dependencies {
