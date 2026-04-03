@@ -3,15 +3,17 @@ package com.sirelon.aicalories.features.seller.auth.data
 import com.sirelon.aicalories.features.seller.auth.domain.OlxApiError
 import com.sirelon.aicalories.features.seller.auth.domain.OlxApiException
 import com.sirelon.aicalories.features.seller.auth.domain.OlxTokens
+import com.sirelon.aicalories.supabase.SupabaseConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
-import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
@@ -50,7 +52,7 @@ fun createOlxAuthorizedHttpClient(
                     tokenStore.read()?.toBearerTokens()
                 }
                 sendWithoutRequest { request ->
-                    request.url.toString().startsWith("${OlxConfig.apiBaseUrl}${OlxConfig.partnerApiBasePath}/")
+                    request.url.toString().startsWith("${OlxConfig.apiBaseUrl}/partner/")
                 }
                 refreshTokens {
                     try {
@@ -102,6 +104,9 @@ private fun commonOlxHttpClientConfig(): HttpClientConfig<*>.() -> Unit = {
         header("Version", OlxConfig.apiVersion)
     }
     expectSuccess = false
+    defaultRequest {
+        url(SupabaseConfig.OLX_API_BASE_URL)
+    }
 }
 
 private suspend fun refreshOlxBearerTokens(

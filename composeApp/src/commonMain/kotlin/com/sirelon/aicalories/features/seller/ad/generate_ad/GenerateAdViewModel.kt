@@ -6,6 +6,7 @@ import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.media.upload.MediaUploadHelper
 import com.sirelon.aicalories.features.media.upload.MediaUploadUpdate
 import com.sirelon.aicalories.features.media.upload.UploadingItem
+import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.network.OpenAIClient
 import com.sirelon.aicalories.supabase.error.RemoteException
 import kotlinx.coroutines.flow.catch
@@ -14,7 +15,15 @@ import kotlinx.coroutines.launch
 class GenerateAdViewModel(
     private val mediaUploadHelper: MediaUploadHelper,
     private val openAi: OpenAIClient,
+    private val olxApiClient: OlxApiClient,
 ) : BaseViewModel<GenerateAdContract.GenerateAdState, GenerateAdContract.GenerateAdEvent, GenerateAdContract.GenerateAdEffect>() {
+
+    init {
+        viewModelScope.launch {
+            olxApiClient.getAuthenticatedUser()
+            olxApiClient.loadCategories()
+        }
+    }
 
     override fun initialState(): GenerateAdContract.GenerateAdState =
         GenerateAdContract.GenerateAdState()
