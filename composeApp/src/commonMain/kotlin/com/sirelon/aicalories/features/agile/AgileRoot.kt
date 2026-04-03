@@ -21,8 +21,8 @@ import com.sirelon.aicalories.features.agile.capacity.CapacityResultScreen
 import com.sirelon.aicalories.features.agile.navigation.AgileDestination
 import com.sirelon.aicalories.features.agile.team.TeamScreen
 import com.sirelon.aicalories.features.agile.teamlist.TeamPickerScreen
-import com.sirelon.aicalories.composeapp.generated.resources.Res
-import com.sirelon.aicalories.composeapp.generated.resources.*
+import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import com.sirelon.aicalories.navigation.ListDetailSceneStrategy
 import com.sirelon.aicalories.navigation.ThreePaneSceneStrategy

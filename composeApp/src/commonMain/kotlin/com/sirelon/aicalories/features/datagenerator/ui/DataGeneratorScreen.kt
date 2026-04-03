@@ -39,8 +39,8 @@ import com.sirelon.aicalories.designsystem.buttons.MagicGreenButton
 import com.sirelon.aicalories.features.datagenerator.model.DoubleRange
 import com.sirelon.aicalories.features.datagenerator.model.IntRange
 import com.sirelon.aicalories.features.datagenerator.presentation.DataGeneratorContract
-import com.sirelon.aicalories.composeapp.generated.resources.Res
-import com.sirelon.aicalories.composeapp.generated.resources.*
+import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.*
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt

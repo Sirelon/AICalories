@@ -11,16 +11,16 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.URLBuilder
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.http.takeFrom
-import io.ktor.client.statement.bodyAsText
-import kotlin.time.Clock
-import kotlin.uuid.Uuid
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
+import kotlin.uuid.Uuid
 
 class OlxAuthRepository(
     private val httpClient: HttpClient,
@@ -33,16 +33,20 @@ class OlxAuthRepository(
         val state = Uuid.random().toString()
         val redirectUri = redirectHandler.buildRedirectUri()
         val clientId = credentialsProvider.getClientId()
+        val url = URLBuilder().takeFrom(OlxConfig.authBaseUrl).apply {
+            parameters.apply {
+                append("client_id", clientId)
+                append("response_type", "code")
+                append("state", state)
+                append("scope", OlxConfig.scope)
+                append("redirect_uri", redirectUri)
+            }
+        }.buildString()
+
+        println("URL: $url")
+
         val request = OlxAuthorizationRequest(
-            url = URLBuilder().takeFrom(OlxConfig.authBaseUrl).apply {
-                parameters.apply {
-                    append("client_id", clientId)
-                    append("response_type", "code")
-                    append("state", state)
-                    append("scope", OlxConfig.scope)
-                    append("redirect_uri", redirectUri)
-                }
-            }.buildString(),
+            url = url,
             state = state,
             redirectUri = redirectUri,
             scope = OlxConfig.scope,

@@ -62,8 +62,8 @@ import com.sirelon.aicalories.designsystem.generateRandomColor
 import com.sirelon.aicalories.features.seller.ad.Advertisement
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import kotlinx.coroutines.launch
-import com.sirelon.aicalories.composeapp.generated.resources.Res
-import com.sirelon.aicalories.composeapp.generated.resources.*
+import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf

@@ -9,9 +9,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.RowScope
-import com.sirelon.aicalories.composeapp.generated.resources.Res
-import com.sirelon.aicalories.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
+import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.back
 
 @Composable
 fun AppLargeAppBar(

@@ -13,11 +13,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
-import com.sirelon.aicalories.composeapp.generated.resources.Res
-import com.sirelon.aicalories.composeapp.generated.resources.or_divider
-import com.sirelon.aicalories.composeapp.generated.resources.privacy_policy
-import com.sirelon.aicalories.composeapp.generated.resources.terms_of_service
-import com.sirelon.aicalories.composeapp.generated.resources.terms_privacy_prefix
+import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.or_divider
+import com.sirelon.aicalories.generated.resources.privacy_policy
+import com.sirelon.aicalories.generated.resources.terms_of_service
+import com.sirelon.aicalories.generated.resources.terms_privacy_prefix
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import org.jetbrains.compose.resources.stringResource

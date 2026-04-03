@@ -48,8 +48,8 @@ import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.ChipComponent
 import com.sirelon.aicalories.designsystem.TagGroup
 import com.sirelon.aicalories.designsystem.screens.EmptyScreen
-import com.sirelon.aicalories.composeapp.generated.resources.Res
-import com.sirelon.aicalories.composeapp.generated.resources.*
+import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.*
 import com.sirelon.aicalories.features.history.presentation.HistorySampleDataProvider
 import org.jetbrains.compose.resources.stringResource
 

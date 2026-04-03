@@ -29,8 +29,8 @@ plugins {
 compose {
     resources {
         publicResClass = true
-        packageOfResClass = "com.sirelon.aicalories.composeapp.generated.resources"
-        generateResClass = auto
+        packageOfResClass = "com.sirelon.aicalories.generated.resources"
+        generateResClass = always
     }
 }
 
@@ -39,7 +39,7 @@ kotlin {
         namespace = "com.sirelon.aicalories.composeapp"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
-
+        androidResources.enable = true
         compilerOptions {
             freeCompilerArgs.set(listOf("-Xannotation-default-target=param-property"))
             jvmTarget.set(JvmTarget.JVM_11)
@@ -50,17 +50,6 @@ kotlin {
                 excludes += "/META-INF/{AL2.0,LGPL2.1}"
             }
         }
-    }
-
-    // Workaround: The Compose Resources plugin doesn't properly wire assets for
-    // androidKotlinMultiplatformLibrary. Copy prepared resources to a build directory that
-    // the androidApp module will include as assets.
-    val resPackage = "com.sirelon.aicalories.composeapp.generated.resources"
-    tasks.register<Copy>("copyComposeResourcesToAndroidAssets") {
-        from(layout.buildDirectory.dir("generated/compose/resourceGenerator/preparedResources/commonMain/composeResources"))
-        from(layout.buildDirectory.dir("generated/compose/resourceGenerator/preparedResources/androidMain/composeResources"))
-        into(layout.buildDirectory.dir("generated/compose/androidAssets/composeResources/$resPackage"))
-        dependsOn("prepareComposeResourcesTaskForCommonMain")
     }
 
     listOf(

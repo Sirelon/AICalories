@@ -45,20 +45,6 @@ kotlin {
     }
 }
 
-// Workaround: Include compose resources from composeApp as Android assets.
-// The Compose Resources plugin doesn't properly wire assets with androidKotlinMultiplatformLibrary.
-androidComponents {
-    onVariants { variant ->
-        variant.sources.assets?.addStaticSourceDirectory(
-            composeAppProject.layout.buildDirectory.dir("generated/compose/androidAssets").get().asFile.absolutePath
-        )
-    }
-}
-
-tasks.matching { it.name.contains("MergeAssets") || it.name.contains("mergeAssets") }.configureEach {
-    dependsOn(composeAppProject.tasks.named("copyComposeResourcesToAndroidAssets"))
-}
-
 dependencies {
     implementation(projects.composeApp)
     implementation(libs.androidx.activity.compose)

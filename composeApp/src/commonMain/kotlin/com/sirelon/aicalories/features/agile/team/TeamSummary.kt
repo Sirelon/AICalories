@@ -21,8 +21,8 @@ import com.sirelon.aicalories.designsystem.AppChip
 import com.sirelon.aicalories.designsystem.AppChipDefaults
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
-import com.sirelon.aicalories.composeapp.generated.resources.Res
-import com.sirelon.aicalories.composeapp.generated.resources.*
+import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 

@@ -42,8 +42,8 @@ import com.sirelon.aicalories.features.agile.team.Team
 import com.sirelon.aicalories.features.agile.team.TeamSummary
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.sirelon.aicalories.composeapp.generated.resources.Res
-import com.sirelon.aicalories.composeapp.generated.resources.*
+import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
