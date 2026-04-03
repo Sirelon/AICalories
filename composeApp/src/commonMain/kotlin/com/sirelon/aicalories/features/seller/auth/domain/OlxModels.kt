@@ -34,6 +34,7 @@ data class OlxAuthCallback(
     val errorDescription: String? = null,
 )
 
+@Serializable
 data class OlxPendingAuthSession(
     val state: String,
     val redirectUri: String,

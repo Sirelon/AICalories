@@ -4,9 +4,10 @@ import com.sirelon.aicalories.features.seller.auth.domain.OlxAuthCallback
 import com.sirelon.aicalories.features.seller.auth.domain.OlxLaunchResult
 import com.sirelon.aicalories.features.seller.auth.domain.OlxPendingAuthSession
 import com.sirelon.aicalories.features.seller.auth.domain.OlxTokens
+import com.sirelon.aicalories.datastore.KeyValueStore
+import com.sirelon.aicalories.datastore.createKeyValueStore
 import com.sirelon.aicalories.platform.PlatformTargets
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.Json
 
 interface OlxCredentialsProvider {
     suspend fun getClientId(): String
@@ -14,20 +15,38 @@ interface OlxCredentialsProvider {
     suspend fun getClientSecret(): String
 }
 
-interface OlxTokenStore {
-    suspend fun read(): OlxTokens?
+class OlxTokenStore internal constructor(private val storage: KeyValueStore) {
+    constructor() : this(createKeyValueStore("olx_tokens"))
 
-    suspend fun write(tokens: OlxTokens)
+    suspend fun read(): OlxTokens? =
+        storage.getString(KEY)?.let { json.decodeFromString<OlxTokens>(it) }
 
-    suspend fun clear()
+    suspend fun write(tokens: OlxTokens) =
+        storage.putString(KEY, json.encodeToString<OlxTokens>(tokens))
+
+    suspend fun clear() = storage.remove(KEY)
+
+    private companion object {
+        const val KEY = "tokens"
+        val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+    }
 }
 
-interface OlxAuthSessionStore {
-    suspend fun read(): OlxPendingAuthSession?
+class OlxAuthSessionStore internal constructor(private val storage: KeyValueStore) {
+    constructor() : this(createKeyValueStore("olx_auth_session"))
 
-    suspend fun write(session: OlxPendingAuthSession)
+    suspend fun read(): OlxPendingAuthSession? =
+        storage.getString(KEY)?.let { json.decodeFromString<OlxPendingAuthSession>(it) }
 
-    suspend fun clear()
+    suspend fun write(session: OlxPendingAuthSession) =
+        storage.putString(KEY, json.encodeToString<OlxPendingAuthSession>(session))
+
+    suspend fun clear() = storage.remove(KEY)
+
+    private companion object {
+        const val KEY = "session"
+        val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+    }
 }
 
 interface OlxRedirectHandler {
@@ -44,42 +63,4 @@ class BuildConfigOlxCredentialsProvider : OlxCredentialsProvider {
     override suspend fun getClientId(): String = OlxConfig.clientId
 
     override suspend fun getClientSecret(): String = OlxConfig.clientSecret
-}
-
-class InMemoryOlxTokenStore : OlxTokenStore {
-    private val mutex = Mutex()
-    private var tokens: OlxTokens? = null
-
-    override suspend fun read(): OlxTokens? = mutex.withLock { tokens }
-
-    override suspend fun write(tokens: OlxTokens) {
-        mutex.withLock {
-            this.tokens = tokens
-        }
-    }
-
-    override suspend fun clear() {
-        mutex.withLock {
-            tokens = null
-        }
-    }
-}
-
-class InMemoryOlxAuthSessionStore : OlxAuthSessionStore {
-    private val mutex = Mutex()
-    private var session: OlxPendingAuthSession? = null
-
-    override suspend fun read(): OlxPendingAuthSession? = mutex.withLock { session }
-
-    override suspend fun write(session: OlxPendingAuthSession) {
-        mutex.withLock {
-            this.session = session
-        }
-    }
-
-    override suspend fun clear() {
-        mutex.withLock {
-            session = null
-        }
-    }
 }

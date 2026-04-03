@@ -1,9 +1,8 @@
 package com.sirelon.aicalories.features.auth.data
 
-import com.sirelon.aicalories.features.seller.auth.data.InMemoryOlxAuthSessionStore
-import com.sirelon.aicalories.features.seller.auth.data.InMemoryOlxTokenStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
+import com.sirelon.aicalories.features.seller.auth.data.OlxAuthSessionStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxCredentialsProvider
 import com.sirelon.aicalories.features.seller.auth.data.OlxRedirectHandler
 import com.sirelon.aicalories.features.seller.auth.data.OlxTokenStore
@@ -30,7 +29,7 @@ class OlxApiClientTest {
     fun `getAuthenticatedUser attaches bearer token and version header`() = runBlocking {
         var authorizationHeader: String? = null
         var versionHeader: String? = null
-        val tokenStore = InMemoryOlxTokenStore().apply {
+        val tokenStore = OlxTokenStore(InMemoryOlxKeyValueStore()).apply {
             write(
                 OlxTokens(
                     accessToken = "active-token",
@@ -129,7 +128,7 @@ class OlxApiClientTest {
                 else -> error("Unexpected request: ${request.url}")
             }
         }
-        val tokenStore = InMemoryOlxTokenStore().apply {
+        val tokenStore = OlxTokenStore(InMemoryOlxKeyValueStore()).apply {
             write(
                 OlxTokens(
                     accessToken = "stale-token",
@@ -193,7 +192,7 @@ class OlxApiClientTest {
                 else -> error("Unexpected request: ${request.url}")
             }
         }
-        val tokenStore = InMemoryOlxTokenStore().apply {
+        val tokenStore = OlxTokenStore(InMemoryOlxKeyValueStore()).apply {
             write(
                 OlxTokens(
                     accessToken = "stale-token",
@@ -231,7 +230,7 @@ class OlxApiClientTest {
                 httpClient = createOlxHttpClient(engine),
                 credentialsProvider = TestCredentialsProvider(),
                 tokenStore = tokenStore,
-                authSessionStore = InMemoryOlxAuthSessionStore(),
+                authSessionStore = OlxAuthSessionStore(InMemoryOlxKeyValueStore()),
                 redirectHandler = TestRedirectHandler(),
             ),
         )
