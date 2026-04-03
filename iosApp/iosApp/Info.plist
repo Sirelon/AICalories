@@ -13,7 +13,7 @@
 			<string>com.sirelon.aicalories.olx</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>aicalories</string>
+				<string>selolxai</string>
 			</array>
 		</dict>
 	</array>

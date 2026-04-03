@@ -250,7 +250,7 @@ class OlxApiClientTest {
 
     private class TestRedirectHandler : OlxRedirectHandler {
         override fun buildRedirectUri(platform: com.sirelon.aicalories.platform.PlatformTargets): String {
-            return "aicalories://olx-auth/callback"
+            return "selolxai://olx-auth/callback"
         }
 
         override fun parseCallback(url: String): OlxAuthCallback {

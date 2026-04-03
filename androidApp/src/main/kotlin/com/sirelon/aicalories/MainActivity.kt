@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
 
     private fun publishOlxCallback(intent: Intent?) {
         intent?.dataString
-            ?.takeIf { it.startsWith("aicalories://olx-auth") }
+            ?.takeIf { it.startsWith("selolxai://olx-auth") }
             ?.let(OlxAuthCallbackBridge::publishCallback)
     }
 }
