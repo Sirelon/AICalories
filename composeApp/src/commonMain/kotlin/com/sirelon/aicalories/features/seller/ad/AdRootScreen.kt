@@ -34,14 +34,28 @@ sealed interface AdDestination {
     data object SelectRootCategory : AdDestination
 
     @Serializable
-    data class SelectSubcategory(val parentId: Int, val parentLabel: String) : AdDestination
+    data class SelectSubcategory(val category: OlxCategory) : AdDestination
 }
 
 @Composable
 fun AdRootScreen(onExit: () -> Unit) {
 
     val navBackStack = remember {
-        mutableStateListOf<AdDestination>(AdDestination.GenerateAd)
+//        mutableStateListOf<AdDestination>(AdDestination.GenerateAd)
+        mutableStateListOf<AdDestination>(
+            AdDestination.PreviewAd(
+                advertisement = Advertisement(
+                    "iphone 15 pro",
+                    "",
+                    emptyList(),
+                    123.0,
+                    123.0,
+                    123.0,
+                    category = "adsa",
+                    condition = AdCondition.NEW,
+                )
+            )
+        )
     }
 
     var pendingCategory by remember { mutableStateOf<OlxCategory?>(null) }
@@ -85,15 +99,14 @@ fun AdRootScreen(onExit: () -> Unit) {
                         pendingCategory = category
                     },
                     onNavigateToSubcategory = { category ->
-                        navBackStack.add(AdDestination.SelectSubcategory(category.id, category.label))
+                        navBackStack.add(AdDestination.SelectSubcategory(category))
                     },
                 )
             }
 
             entry<AdDestination.SelectSubcategory> { destination ->
                 SelectSubcategoryScreen(
-                    parentId = destination.parentId,
-                    parentLabel = destination.parentLabel,
+                    category = destination.category,
                     onBack = { navBackStack.removeAt(navBackStack.lastIndex) },
                     onCategorySelected = { category ->
                         while (navBackStack.last() !is AdDestination.PreviewAd) {
@@ -102,7 +115,7 @@ fun AdRootScreen(onExit: () -> Unit) {
                         pendingCategory = category
                     },
                     onNavigateToSubcategory = { category ->
-                        navBackStack.add(AdDestination.SelectSubcategory(category.id, category.label))
+                        navBackStack.add(AdDestination.SelectSubcategory(category))
                     },
                 )
             }

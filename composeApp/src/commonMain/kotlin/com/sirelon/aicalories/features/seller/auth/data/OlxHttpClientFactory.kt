@@ -51,9 +51,6 @@ fun createOlxAuthorizedHttpClient(
                 loadTokens {
                     tokenStore.read()?.toBearerTokens()
                 }
-                sendWithoutRequest { request ->
-                    request.url.toString().startsWith("${OlxConfig.apiBaseUrl}/partner/")
-                }
                 refreshTokens {
                     try {
                         val refreshedTokens = refreshOlxBearerTokens(
@@ -116,7 +113,7 @@ private suspend fun refreshOlxBearerTokens(
 ): OlxTokens? {
     if (refreshToken.isNullOrBlank()) return null
 
-    val response = client.post("${OlxConfig.apiBaseUrl}${OlxConfig.authTokenPath}") {
+    val response = client.post("/api/${OlxConfig.authTokenPath}") {
         contentType(ContentType.Application.Json)
         setBody(
             RefreshTokenRequest(

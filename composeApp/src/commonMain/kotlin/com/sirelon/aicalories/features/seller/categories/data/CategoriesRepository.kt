@@ -1,8 +1,8 @@
 package com.sirelon.aicalories.features.seller.categories.data
 
-import com.sirelon.aicalories.features.seller.categories.domain.OlxAttribute
 import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.categories.domain.CategoriesMapper
+import com.sirelon.aicalories.features.seller.categories.domain.OlxAttribute
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -41,9 +41,15 @@ class CategoriesRepository(
 
     suspend fun getCategoryById(id: Int): OlxCategory? =
         categoriesFlow.first().find { it.id == id }
+
     fun getAttributes(categoryId: Int): Flow<List<OlxAttribute>> = flow {
         val response = olxApiClient.loadAttributes(categoryId)
         emit(mapper.mapAttributes(response))
+    }
+
+    fun categorySuggestion(title: String): Flow<OlxCategory> = flow {
+        val response = runCatching { olxApiClient.loadCategorySuggestion(title) }
+//        emit(response)
     }
 
     private suspend fun loadSupportedCategories(): List<OlxCategory> {

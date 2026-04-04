@@ -138,7 +138,7 @@ class OlxAuthRepository(
         callback: OlxAuthCallback,
         redirectUri: String,
     ): OlxTokens {
-        val response = httpClient.post("${OlxConfig.apiBaseUrl}${OlxConfig.authTokenPath}") {
+        val response = httpClient.post("/api/${OlxConfig.authTokenPath}") {
             contentType(ContentType.Application.Json)
             setBody(
                 TokenRequest(
@@ -163,7 +163,7 @@ class OlxAuthRepository(
         val refreshToken = tokens.refreshToken
             ?: throw OlxApiException(OlxApiError.InvalidGrant("No OLX refresh token is available."))
 
-        val response = httpClient.post("${OlxConfig.apiBaseUrl}${OlxConfig.authTokenPath}") {
+        val response = httpClient.post("/api/${OlxConfig.authTokenPath}") {
             contentType(ContentType.Application.Json)
             setBody(
                 TokenRequest(

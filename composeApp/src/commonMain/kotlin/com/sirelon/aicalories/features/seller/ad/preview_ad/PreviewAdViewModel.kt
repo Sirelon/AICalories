@@ -4,15 +4,20 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewModelScope
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.seller.ad.Advertisement
-import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEffect
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.Publish
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdState
+import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 
 class PreviewAdViewModel(
@@ -23,6 +28,18 @@ class PreviewAdViewModel(
     val titleState = TextFieldState(advertisement.title)
     val descriptionState = TextFieldState(advertisement.description)
     var selectedPrice by mutableFloatStateOf(advertisement.suggestedPrice.toFloat())
+
+    init {
+        snapshotFlow { titleState.text }
+            .distinctUntilChanged()
+            .debounce(300L)
+            .flatMapLatest {
+                categoriesRepository.categorySuggestion(it.toString())
+
+
+            }
+            .launchIn(viewModelScope)
+    }
 
     override fun initialState() = PreviewAdState(
         categoryLabel = advertisement.category,
@@ -44,6 +61,7 @@ class PreviewAdViewModel(
                 }
                 setState { it.copy(categoryLabel = path.joinToString(" / ")) }
             }
+
             Publish -> {
                 // TODO: Post to OLX API — read titleState.text, descriptionState.text, selectedPrice here
                 postEffect(PreviewAdEffect.ShowMessage("Publishing not yet implemented"))

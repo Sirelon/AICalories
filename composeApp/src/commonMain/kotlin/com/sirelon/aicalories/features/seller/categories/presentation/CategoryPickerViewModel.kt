@@ -1,7 +1,9 @@
 package com.sirelon.aicalories.features.seller.categories.presentation
 
+import androidx.lifecycle.viewModelScope
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
+import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import com.sirelon.aicalories.features.seller.categories.presentation.CategoryPickerContract.CategoryPickerEvent
 import com.sirelon.aicalories.features.seller.categories.presentation.CategoryPickerContract.CategoryPickerState
 import kotlinx.coroutines.flow.launchIn
@@ -9,10 +11,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
 class CategoryPickerViewModel(
-    private val parentId: Int?,
+    private val parentCategory: OlxCategory?,
     private val categoriesRepository: CategoriesRepository,
 ) : BaseViewModel<CategoryPickerState, CategoryPickerEvent, Nothing>() {
 
+    private val parentId: Int? = parentCategory?.id
     override fun initialState() = CategoryPickerState()
 
     init {

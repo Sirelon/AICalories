@@ -2,6 +2,7 @@ package com.sirelon.aicalories.startup
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
 import com.sirelon.aicalories.navigation.AppDestination
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,6 +12,7 @@ import kotlinx.coroutines.launch
 
 class AppNavigationViewModel(
     private val authRepository: OlxAuthRepository,
+    private val olxApiClient: OlxApiClient,
     private val startupStore: AppStartupStore,
 ) : ViewModel() {
 
@@ -53,7 +55,17 @@ class AppNavigationViewModel(
             AppDestination.SellerOnboarding
         } else {
             val session = authRepository.currentSession()
-            if (session.isAuthorized) AppDestination.Seller else AppDestination.SellerLanding
+            if (session.isAuthorized) {
+                olxApiClient
+                    .getAuthenticatedUser()
+                    .map { AppDestination.Seller }
+                    .getOrElse {
+                        it.printStackTrace()
+                        AppDestination.SellerLanding
+                    }
+            } else {
+                AppDestination.SellerLanding
+            }
         }
         _backStack.value = listOf(initial)
     }

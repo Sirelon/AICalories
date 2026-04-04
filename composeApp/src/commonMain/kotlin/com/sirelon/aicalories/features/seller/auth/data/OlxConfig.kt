@@ -4,7 +4,7 @@ import com.sirelon.aicalories.config.AppConfig
 
 object OlxConfig {
     const val apiVersion = "2.0"
-    const val authTokenPath = "/open/oauth/token"
+    const val authTokenPath = "open/oauth/token"
     const val defaultRefreshSafetyWindowSeconds = 60L
 
     val clientId: String

@@ -37,8 +37,8 @@ import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.ic_chevron_left
 import com.sirelon.aicalories.generated.resources.ic_chevron_right
 import com.sirelon.aicalories.generated.resources.ic_layout_grid
-import com.sirelon.aicalories.generated.resources.subcategory_count
 import com.sirelon.aicalories.generated.resources.select_category
+import com.sirelon.aicalories.generated.resources.subcategory_count
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -50,9 +50,7 @@ fun SelectRootCategoryScreen(
     onCategorySelected: (OlxCategory) -> Unit,
     onNavigateToSubcategory: (OlxCategory) -> Unit,
 ) {
-    val viewModel: CategoryPickerViewModel = koinViewModel(
-        parameters = { parametersOf(null as Int?) },
-    )
+    val viewModel: CategoryPickerViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     AppScaffold(
@@ -94,21 +92,20 @@ fun SelectRootCategoryScreen(
 
 @Composable
 fun SelectSubcategoryScreen(
-    parentId: Int,
-    parentLabel: String,
+    category: OlxCategory,
     onBack: () -> Unit,
     onCategorySelected: (OlxCategory) -> Unit,
     onNavigateToSubcategory: (OlxCategory) -> Unit,
 ) {
     val viewModel: CategoryPickerViewModel = koinViewModel(
-        parameters = { parametersOf(parentId) },
+        parameters = { parametersOf(category) },
     )
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     AppScaffold(
         topBar = {
             TopAppBar(
-                title = { Text(parentLabel) },
+                title = { Text(category.label) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
