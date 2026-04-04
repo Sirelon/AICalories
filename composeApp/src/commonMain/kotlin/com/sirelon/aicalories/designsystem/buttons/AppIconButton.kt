@@ -6,12 +6,12 @@ import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import com.sirelon.aicalories.designsystem.AppDimens
 
 @Composable
 fun AppIconButton(
-    icon: ImageVector,
+    icon: Painter,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -21,7 +21,7 @@ fun AppIconButton(
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl4),
     ) {
         Icon(
-            imageVector = icon,
+            painter = icon,
             contentDescription = null,
             modifier = Modifier.size(AppDimens.Size.xl6),
         )

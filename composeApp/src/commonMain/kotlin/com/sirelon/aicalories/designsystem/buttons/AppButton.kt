@@ -14,7 +14,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import com.sirelon.aicalories.designsystem.AppDimens
@@ -26,8 +26,8 @@ fun AppButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     style: AppButtonStyle = AppButtonDefaults.primary(),
-    leadingIcon: ImageVector? = null,
-    trailingIcon: ImageVector? = null,
+    leadingIcon: Painter? = null,
+    trailingIcon: Painter? = null,
     enabled: Boolean = true,
 ) {
     Button(
@@ -49,7 +49,7 @@ fun AppButton(
         ) {
             leadingIcon?.let {
                 Icon(
-                    imageVector = it,
+                    painter = it,
                     contentDescription = null,
                     modifier = Modifier.size(AppDimens.Size.xl5),
                 )
@@ -61,7 +61,7 @@ fun AppButton(
             )
             trailingIcon?.let {
                 Icon(
-                    imageVector = it,
+                    painter = it,
                     contentDescription = null,
                     modifier = Modifier.size(AppDimens.Size.xl5),
                 )

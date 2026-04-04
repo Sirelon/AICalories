@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -57,7 +56,10 @@ import com.sirelon.aicalories.generated.resources.benefit_sync
 import com.sirelon.aicalories.generated.resources.continue_as_guest
 import com.sirelon.aicalories.generated.resources.continue_with_olx
 import com.sirelon.aicalories.generated.resources.guest_description
+import com.sirelon.aicalories.generated.resources.ic_check
 import com.sirelon.aicalories.generated.resources.ic_snap_logo
+import com.sirelon.aicalories.generated.resources.ic_user
+import com.sirelon.aicalories.generated.resources.ic_x
 import com.sirelon.aicalories.generated.resources.or_divider
 import com.sirelon.aicalories.generated.resources.welcome_subtitle
 import com.sirelon.aicalories.generated.resources.welcome_to_sellsnap

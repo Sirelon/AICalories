@@ -14,17 +14,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import com.mohamedrejeb.calf.io.KmpFile
-import com.sirelon.aicalories.generated.resources.Res
-import com.sirelon.aicalories.generated.resources.*
-import org.jetbrains.compose.resources.stringResource
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.designsystem.buttons.AppIconButton
 import com.sirelon.aicalories.features.media.upload.UploadingItem
+import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.add_photos_title
+import com.sirelon.aicalories.generated.resources.photos_count_format
+import com.sirelon.aicalories.generated.resources.take_photo
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun PhotosSection(
@@ -82,11 +85,11 @@ fun PhotosSection(
                     style = AppButtonDefaults.secondary(),
                     text = stringResource(Res.string.take_photo),
                     onClick = onTakePhotoClick,
-                    leadingIcon = Icons.Default.CameraAlt,
+                    leadingIcon = rememberVectorPainter(Icons.Default.CameraAlt),
                 )
 
                 AppIconButton(
-                    icon = Icons.Default.FileUpload,
+                    icon = rememberVectorPainter(Icons.Default.FileUpload),
                     onClick = onUploadClick,
                 )
             }

@@ -46,6 +46,8 @@ import com.sirelon.aicalories.generated.resources.ai_step_analyzing_image
 import com.sirelon.aicalories.generated.resources.ai_step_calculating_price
 import com.sirelon.aicalories.generated.resources.ai_step_generating_title
 import com.sirelon.aicalories.generated.resources.ai_step_writing_description
+import com.sirelon.aicalories.generated.resources.ic_check
+import com.sirelon.aicalories.generated.resources.ic_sparkles
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
