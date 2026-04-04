@@ -7,7 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-internal object OlxRemoteErrorParser {
+object OlxRemoteErrorParser {
     private val json = Json { ignoreUnknownKeys = true }
 
     fun parse(status: HttpStatusCode, payload: String): OlxApiException {
