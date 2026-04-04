@@ -1,4 +1,4 @@
-package com.sirelon.aicalories.features.attributes.domain
+package com.sirelon.aicalories.features.seller.categories.domain
 
 sealed interface AttributeValidationResult {
     data object Valid : AttributeValidationResult

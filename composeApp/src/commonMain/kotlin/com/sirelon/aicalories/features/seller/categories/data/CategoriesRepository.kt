@@ -1,10 +1,12 @@
 package com.sirelon.aicalories.features.seller.categories.data
 
+import com.sirelon.aicalories.features.seller.categories.domain.OlxAttribute
 import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.categories.domain.CategoriesMapper
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEmpty
 
 class CategoriesRepository(
@@ -29,13 +31,18 @@ class CategoriesRepository(
 
     fun loadCategories(): Flow<List<OlxCategory>> = categoriesFlow
 
+    fun getAttributes(categoryId: Int): Flow<List<OlxAttribute>> = flow {
+        val response = olxApiClient.loadAttributes(categoryId)
+        emit(mapper.mapAttributes(response))
+    }
+
+
     private suspend fun loadSupportedCategories(): List<OlxCategory> {
         val result = olxApiClient.loadCategories()
         val data = result.map(mapper::mapCategory)
 
         return normalize(data)
     }
-
     private fun normalize(data: List<OlxCategory>): List<OlxCategory> {
         val grouppedData = data.groupBy { it.parentId }.toMutableMap()
 

@@ -13,9 +13,11 @@ import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.Pr
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.Publish
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.ShowCategoryPicker
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdState
+import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
 
 class PreviewAdViewModel(
     private val advertisement: Advertisement,
+    private val categoriesRepository: CategoriesRepository,
 ) : BaseViewModel<PreviewAdState, PreviewAdEvent, PreviewAdEffect>() {
 
     val titleState = TextFieldState(advertisement.title)

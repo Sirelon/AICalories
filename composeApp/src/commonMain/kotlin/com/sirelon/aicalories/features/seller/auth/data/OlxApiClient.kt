@@ -2,8 +2,10 @@ package com.sirelon.aicalories.features.seller.auth.data
 
 import com.sirelon.aicalories.features.seller.auth.domain.OlxMeResponse
 import com.sirelon.aicalories.features.seller.auth.domain.OlxUserResponse
-import com.sirelon.aicalories.features.seller.categories.data.OlxCategoriesRootResponse
-import com.sirelon.aicalories.features.seller.categories.data.OlxCategoryResponse
+import com.sirelon.aicalories.features.seller.categories.data.responses.OlxAttributeResponse
+import com.sirelon.aicalories.features.seller.categories.data.responses.OlxAttributesResponse
+import com.sirelon.aicalories.features.seller.categories.data.responses.OlxCategoriesRootResponse
+import com.sirelon.aicalories.features.seller.categories.data.responses.OlxCategoryResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -24,6 +26,17 @@ class OlxApiClient(
 
     suspend fun loadCategories(): List<OlxCategoryResponse> {
         val response = httpClient.get("categories")
+        if (!response.status.isSuccess()) {
+            throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
+        }
         return response.body<OlxCategoriesRootResponse>().data
+    }
+
+    internal suspend fun loadAttributes(categoryId: Int): List<OlxAttributeResponse> {
+        val response = httpClient.get("categories/$categoryId/attributes")
+        if (!response.status.isSuccess()) {
+            throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
+        }
+        return response.body<OlxAttributesResponse>().data ?: emptyList()
     }
 }
