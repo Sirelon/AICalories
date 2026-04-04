@@ -199,6 +199,7 @@ Most features use some combination of:
 - Design system code lives under `composeApp/src/commonMain/kotlin/com/sirelon/aicalories/designsystem/`.
 - Reusable templates already exist in `designsystem/templates/`.
 - Avoid reaching for raw Material APIs first when an app component/token already exists.
+- Use the 40 custom icons (`ic_*.xml`) when suitable instead of Material Design icons.
 
 ## Platform Abstractions
 - Camera launcher uses expect/actual style placement under `camera/`.

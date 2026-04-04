@@ -17,9 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -159,7 +157,7 @@ private fun GenerateAdScreenContent(
                 style = AppButtonDefaults.primary(),
                 text = if (state.isLoading) stringResource(Res.string.generating) else stringResource(Res.string.generate_ad_with_ai),
                 onClick = onSubmitClick,
-                leadingIcon = if (state.isLoading) null else Icons.Rounded.Star,
+                leadingIcon = if (state.isLoading) null else painterResource(Res.drawable.ic_sparkles),
                 enabled = state.canSubmit,
             )
         }
@@ -367,7 +365,7 @@ private fun TipItem(
         horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
     ) {
         Icon(
-            imageVector = Icons.Default.Check,
+            painter = painterResource(Res.drawable.ic_check),
             contentDescription = null,
             modifier = Modifier.size(AppDimens.Size.xl4),
             tint = AppTheme.colors.success

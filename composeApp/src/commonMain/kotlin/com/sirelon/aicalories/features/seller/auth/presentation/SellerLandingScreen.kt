@@ -13,9 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -113,7 +110,7 @@ fun SellerLandingScreenRoute(openHome: () -> Unit) {
                         title = { Text("Connect OLX Account") },
                         navigationIcon = {
                             IconButton(onClick = { webViewUrl = null }) {
-                                Icon(Icons.Default.Close, contentDescription = "Close")
+                                Icon(painterResource(Res.drawable.ic_x), contentDescription = "Close")
                             }
                         },
                     )
@@ -228,7 +225,7 @@ private fun ContinueAsGuestBlock(onContinueAsGuest: () -> Unit) {
             onClick = onContinueAsGuest,
             modifier = Modifier.fillMaxWidth(),
             style = AppButtonDefaults.outline(),
-            leadingIcon = Icons.Default.Person
+            leadingIcon = painterResource(Res.drawable.ic_user)
         )
     }
 }
@@ -288,7 +285,7 @@ private fun ContinueAsGuestInfoBlock() {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Default.Person,
+                painter = painterResource(Res.drawable.ic_user),
                 contentDescription = null,
                 tint = AppTheme.colors.onSurfaceSoft
             )
@@ -318,7 +315,7 @@ private fun BenefitItem(text: String) {
         horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
     ) {
         Icon(
-            imageVector = Icons.Default.Check,
+            painter = painterResource(Res.drawable.ic_check),
             contentDescription = null,
             tint = AppTheme.colors.success,
             modifier = Modifier.size(AppDimens.Size.xl3)

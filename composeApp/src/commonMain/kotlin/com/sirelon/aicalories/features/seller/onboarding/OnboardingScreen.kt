@@ -17,8 +17,6 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -155,7 +153,7 @@ private fun BottomButtons(
         ) {
             if (state.currentPage > 0) {
                 AppIconButton(
-                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    icon = painterResource(Res.drawable.ic_arrow_left),
                     onClick = {
                         scope.launch {
                             state.animateScrollToPage(state.currentPage - 1)
@@ -184,7 +182,7 @@ private fun BottomButtons(
                         }
                     }
                 },
-                trailingIcon = Icons.AutoMirrored.Filled.ArrowForward,
+                trailingIcon = painterResource(Res.drawable.ic_arrow_right),
             )
         }
     }

@@ -20,11 +20,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
@@ -64,6 +59,7 @@ import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.Pr
 import kotlinx.coroutines.launch
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.*
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -92,7 +88,7 @@ fun PreviewAdScreen(advertisement: Advertisement) {
                     .padding(horizontal = AppDimens.Spacing.xl3),
                 style = AppButtonDefaults.secondary(),
                 text = stringResource(Res.string.publish_to_olx),
-                trailingIcon = Icons.AutoMirrored.Filled.ArrowForward,
+                trailingIcon = painterResource(Res.drawable.ic_arrow_right),
                 onClick = { viewModel.onEvent(PreviewAdEvent.Publish) },
             )
         },
@@ -201,7 +197,7 @@ private fun PreviewSectionCard(
                         },
                     ) {
                         Icon(
-                            Icons.Default.ContentCopy,
+                            painterResource(Res.drawable.ic_copy),
                             contentDescription = null,
                             modifier = Modifier.size(AppDimens.Size.xl3)
                         )
@@ -225,14 +221,14 @@ private fun PreviewSectionCard(
 
 @Composable
 private fun AdTitleCard(titleState: TextFieldState) {
-    PreviewSectionCard(icon = Icons.Default.LocalOffer, label = stringResource(Res.string.ad_title_label), textFieldState = titleState) {
+    PreviewSectionCard(icon = null, label = stringResource(Res.string.ad_title_label), textFieldState = titleState) {
     }
 }
 
 @Composable
 private fun AdDescriptionCard(descriptionState: TextFieldState) {
     PreviewSectionCard(
-        icon = Icons.Default.Description,
+        icon = null,
         label = stringResource(Res.string.ad_description_label),
         textFieldState = descriptionState,
     ) {
@@ -256,7 +252,7 @@ private fun AdPriceCard(
     maxPrice: Float,
 ) {
     PreviewSectionCard(
-        icon = Icons.Default.AttachMoney,
+        icon = null,
         label = stringResource(Res.string.ad_your_price),
     ) {
         Column {
