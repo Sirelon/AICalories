@@ -91,7 +91,7 @@ import com.sirelon.aicalories.composeapp.generated.resources.Res
 import org.jetbrains.compose.resources.painterResource
 
 Icon(
-    painter = painterResource(Res.drawable.Heart),
+    painter = painterResource(Res.drawable.ic_heart),
     contentDescription = "Favorite",
     tint = Color.Red,
     modifier = Modifier.size(24.dp)

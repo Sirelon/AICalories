@@ -1,5 +1,5 @@
-ICONS INTEGRATION - FILES CREATED
-==================================
+ICONS INTEGRATION - FILES CREATED (ic_[name] format)
+=====================================================
 
 Directory Structure:
 /Users/sirelon/Projects/AICalories/.conductor/salvador/
@@ -13,56 +13,65 @@ Directory Structure:
   ├── FILES_CREATED.txt                  (This file)
   └── IconPreviewScreen.kt               (Compose preview component)
 
-🎨 SVG Icon Files (39 total):
-  ArrowLeft.svg
-  Baby.svg
-  BookOpen.svg
-  Camera.svg
-  Car.svg
-  Check.svg
-  ChevronLeft.svg
-  ChevronRight.svg
-  CircleAlert.svg
-  CircleCheckBig.svg
-  Copy.svg
-  DollarSign.svg
-  Dumbbell.svg
-  Eye.svg
-  FileText.svg
-  Frown.svg
-  Gift.svg
-  Heart.svg
-  Home.svg
-  LayoutGrid.svg
-  Meh.svg
-  Palette.svg
-  PenLine.svg
-  RefreshCw.svg
-  Server.svg
-  Share2.svg
-  Shirt.svg
-  Smartphone.svg
-  Sparkles.svg
-  Tag.svg
-  TreePine.svg
-  TrendingUp.svg
-  TriangleAlert.svg
-  Upload.svg
-  User.svg
-  WandSparkles.svg
-  WifiOff.svg
-  Wrench.svg
-  X.svg
+🎨 SVG Icon Files (39 total) - ic_[name].svg format:
+  ic_arrow_left.svg
+  ic_baby.svg
+  ic_book_open.svg
+  ic_camera.svg
+  ic_car.svg
+  ic_check.svg
+  ic_chevron_left.svg
+  ic_chevron_right.svg
+  ic_circle_alert.svg
+  ic_circle_check_big.svg
+  ic_copy.svg
+  ic_dollar_sign.svg
+  ic_dumbbell.svg
+  ic_eye.svg
+  ic_file_text.svg
+  ic_frown.svg
+  ic_gift.svg
+  ic_heart.svg
+  ic_home.svg
+  ic_layout_grid.svg
+  ic_meh.svg
+  ic_palette.svg
+  ic_pen_line.svg
+  ic_refresh_cw.svg
+  ic_server.svg
+  ic_share_2.svg
+  ic_shirt.svg
+  ic_smartphone.svg
+  ic_sparkles.svg
+  ic_tag.svg
+  ic_tree_pine.svg
+  ic_trending_up.svg
+  ic_triangle_alert.svg
+  ic_upload.svg
+  ic_user.svg
+  ic_wand_sparkles.svg
+  ic_wifi_off.svg
+  ic_wrench.svg
+  ic_x.svg
 
 📺 Preview Files:
   └── icon_preview.html                  (Visual preview - open in browser)
 
 TOTAL FILES: 44
-  - 39 SVG icons
+  - 39 SVG icons (with ic_ prefix)
   - 1 Compose Kotlin file
   - 3 Documentation files
   - 1 HTML preview file
   - 1 Summary file
+
+NAMING CONVENTION:
+==================
+All icon files follow the standard naming: ic_[name].svg
+
+Examples:
+  ic_heart.svg (not Heart.svg)
+  ic_arrow_left.svg (not ArrowLeft.svg)
+  ic_circle_check_big.svg (not CircleCheckBig.svg)
 
 WHAT'S NEXT:
 ============
@@ -75,7 +84,7 @@ WHAT'S NEXT:
 QUICK USAGE:
 ============
 Icon(
-    painter = painterResource(Res.drawable.Heart),
+    painter = painterResource(Res.drawable.ic_heart),
     contentDescription = "Favorite",
     tint = Color.Red,
     modifier = Modifier.size(24.dp)
