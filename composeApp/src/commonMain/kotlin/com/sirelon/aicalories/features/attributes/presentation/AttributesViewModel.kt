@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 
 class AttributesViewModel(
@@ -22,12 +21,19 @@ class AttributesViewModel(
     init {
         retryTrigger
             .onEach { setState { it.copy(isLoading = true, errorMessage = null) } }
-            .flatMapLatest { repository.getAttributes() }
+            .flatMapLatest {
+                repository.getAttributes()
+                    .catch { error ->
+                        setState {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = error.message ?: "Unknown error",
+                            )
+                        }
+                    }
+            }
             .onEach { attributes ->
                 setState { it.copy(isLoading = false, attributes = attributes) }
-            }
-            .catch { error ->
-                setState { it.copy(isLoading = false, errorMessage = error.message ?: "Unknown error") }
             }
             .launchIn(viewModelScope)
     }
