@@ -14,10 +14,13 @@ import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.Pr
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.Publish
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdState
 import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
+import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class PreviewAdViewModel(
@@ -35,8 +38,12 @@ class PreviewAdViewModel(
             .debounce(300L)
             .flatMapLatest {
                 categoriesRepository.categorySuggestion(it.toString())
-
-
+            }
+            .catch {
+                it.printStackTrace()
+            }
+            .onEach {
+                updateSelectedCategory(category = it)
             }
             .launchIn(viewModelScope)
     }
@@ -52,14 +59,7 @@ class PreviewAdViewModel(
     override fun onEvent(event: PreviewAdEvent) {
         when (event) {
             is CategorySelected -> viewModelScope.launch {
-                val path = mutableListOf(event.category.label)
-                var parentId = event.category.parentId
-                while (parentId != null) {
-                    val parent = categoriesRepository.getCategoryById(parentId) ?: break
-                    path.add(0, parent.label)
-                    parentId = parent.parentId
-                }
-                setState { it.copy(categoryLabel = path.joinToString(" / ")) }
+                updateSelectedCategory(event.category)
             }
 
             Publish -> {
@@ -67,5 +67,16 @@ class PreviewAdViewModel(
                 postEffect(PreviewAdEffect.ShowMessage("Publishing not yet implemented"))
             }
         }
+    }
+
+    private suspend fun updateSelectedCategory(category: OlxCategory) {
+        val path = mutableListOf(category.label)
+        var parentId = category.parentId
+        while (parentId != null) {
+            val parent = categoriesRepository.getCategoryById(parentId) ?: break
+            path.add(0, parent.label)
+            parentId = parent.parentId
+        }
+        setState { it.copy(categoryLabel = path.joinToString(" / ")) }
     }
 }

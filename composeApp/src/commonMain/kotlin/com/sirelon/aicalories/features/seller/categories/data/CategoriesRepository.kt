@@ -4,12 +4,17 @@ import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.categories.domain.CategoriesMapper
 import com.sirelon.aicalories.features.seller.categories.domain.OlxAttribute
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEmpty
+import kotlinx.coroutines.flow.shareIn
 
 class CategoriesRepository(
     private val olxApiClient: OlxApiClient,
@@ -25,11 +30,13 @@ class CategoriesRepository(
         3428, // Оренда та прокат ?
     )
 
+    @OptIn(DelicateCoroutinesApi::class)
     private val categoriesFlow = emptyFlow<List<OlxCategory>>()
         .onEmpty {
             val data = loadSupportedCategories()
             emit(data)
         }
+        .shareIn(GlobalScope, SharingStarted.Lazily)
 
     fun loadCategories(): Flow<List<OlxCategory>> = categoriesFlow
 
@@ -48,9 +55,14 @@ class CategoriesRepository(
     }
 
     fun categorySuggestion(title: String): Flow<OlxCategory> = flow {
-        val response = runCatching { olxApiClient.loadCategorySuggestion(title) }
-//        emit(response)
+        val response = olxApiClient.loadCategorySuggestionId(title)
+        if (response == null) {
+            emit(null)
+        } else {
+            emit(getCategoryById(response))
+        }
     }
+        .filterNotNull()
 
     private suspend fun loadSupportedCategories(): List<OlxCategory> {
         val result = olxApiClient.loadCategories()
@@ -58,6 +70,7 @@ class CategoriesRepository(
 
         return normalize(data)
     }
+
     private fun normalize(data: List<OlxCategory>): List<OlxCategory> {
         val grouppedData = data.groupBy { it.parentId }.toMutableMap()
 

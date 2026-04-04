@@ -5,6 +5,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal class OlxCategorySuggestionResponse(
-    @SerialName("a")
-    val a: String?
-)
+    @SerialName("data")
+    val data: List<OlxCategorySuggestionResponseItem>
+) {
+    @Serializable
+    internal class OlxCategorySuggestionResponseItem(@SerialName("id") val id: Int)
+}
+
