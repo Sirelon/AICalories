@@ -10,11 +10,13 @@ import com.sirelon.aicalories.features.media.di.mediaModule
 import com.sirelon.aicalories.features.seller.ad.generate_ad.di.generateAdModule
 import com.sirelon.aicalories.features.seller.ad.preview_ad.di.previewAdModule
 import com.sirelon.aicalories.features.seller.auth.di.sellerAuthModule
+import com.sirelon.aicalories.features.seller.categories.categoriesModule
 import com.sirelon.aicalories.startup.appStartupModule
 import com.sirelon.aicalories.network.ApiTokenProvider
 import com.sirelon.aicalories.network.OpenAIClient
 import com.sirelon.aicalories.network.createHttpClient
 import com.sirelon.aicalories.network.createOpenAI
+import com.sirelon.aicalories.startup.appStartupModule
 import com.sirelon.aicalories.supabase.SupabaseClient
 import com.sirelon.aicalories.supabase.SupabaseConfig
 import kotlinx.serialization.json.Json
@@ -33,6 +35,7 @@ val appModule = module {
         previewAdModule,
         attributesModule,
         appStartupModule,
+        categoriesModule,
     )
     single { Greeting() }
 }
