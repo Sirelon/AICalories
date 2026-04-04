@@ -1,6 +1,6 @@
 package com.sirelon.aicalories.features.attributes.data
 
-import com.sirelon.aicalories.features.attributes.data.dto.OlxAttributesResponseDto
+import com.sirelon.aicalories.features.attributes.data.response.OlxAttributesResponse
 import com.sirelon.aicalories.features.attributes.domain.OlxAttribute
 import com.sirelon.aicalories.features.seller.auth.data.OlxRemoteErrorParser
 import io.ktor.client.HttpClient
@@ -24,7 +24,7 @@ class OlxAttributesRepository(
         if (!response.status.isSuccess()) {
             throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
         }
-        val dtos = response.body<OlxAttributesResponseDto>().data
-        emit(mapper.mapToDomain(dtos))
+        val data = response.body<OlxAttributesResponse>().data ?: emptyList()
+        emit(mapper.mapToDomain(data))
     }
 }
