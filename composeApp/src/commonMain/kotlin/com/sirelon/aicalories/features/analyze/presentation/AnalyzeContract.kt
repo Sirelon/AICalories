@@ -14,6 +14,7 @@ interface AnalyzeContract {
         val hasReport: Boolean = false,
         val errorMessage: String? = null,
         val uploads: Map<KmpFile, UploadingItem> = emptyMap(),
+        val hasUploadFailures: Boolean = false,
     ) {
         val hasPendingUploads: Boolean
             get() = uploads.values.any { !it.isUploaded }
