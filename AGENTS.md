@@ -199,14 +199,7 @@ Most features use some combination of:
 - Design system code lives under `composeApp/src/commonMain/kotlin/com/sirelon/aicalories/designsystem/`.
 - Reusable templates already exist in `designsystem/templates/`.
 - Avoid reaching for raw Material APIs first when an app component/token already exists.
-
-## Icons
-- 40 VectorDrawable XML icons available in `composeApp/src/commonMain/composeResources/drawable/ic_*.xml`
-- Icon names: `ic_arrow_left`, `ic_arrow_right`, `ic_check`, `ic_copy`, `ic_dollar_sign`, `ic_file_text`, `ic_heart`, `ic_home`, `ic_sparkles`, `ic_tag`, `ic_user`, `ic_x`, and 28 others
-- Use these icons instead of Material Design icons when the icon is suitable for the UI
-- Icons are KMP-compatible with hex colors (#000000, etc.) — no Android-specific references
-- Pattern: `Icon(painter = painterResource(Res.drawable.ic_name), contentDescription = "...")`
-- When adding new features with icons, prefer these over Material Design when possible
+- Use the 40 custom icons (`ic_*.xml`) when suitable instead of Material Design icons.
 
 ## Platform Abstractions
 - Camera launcher uses expect/actual style placement under `camera/`.
