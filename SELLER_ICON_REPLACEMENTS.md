@@ -1,278 +1,80 @@
-# Seller Package Icon Replacements Guide
+# Replace Icons in Seller Package
 
-This guide shows exactly how to replace Material Design Icons with SVG drawable icons in the seller package.
-
-## Files to Modify
+## Files to Edit (5 total)
 
 ### 1. PreviewAdScreen.kt
-**Location:** `composeApp/src/commonMain/kotlin/com/sirelon/aicalories/features/seller/ad/preview_ad/PreviewAdScreen.kt`
+- Line 95: `Icons.AutoMirrored.Filled.ArrowForward` → `Res.drawable.ic_arrow_right`
+- Line 204: `Icons.Default.ContentCopy` → `Res.drawable.ic_copy`
+- Line 228: `Icons.Default.LocalOffer` → `Res.drawable.ic_tag`
+- Line 235: `Icons.Default.Description` → `Res.drawable.ic_file_text`
+- Line 259: `Icons.Default.AttachMoney` → `Res.drawable.ic_dollar_sign`
 
-**Step 1: Update Imports**
-Remove these lines (22-27):
-```kotlin
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.LocalOffer
-```
-
-Add this import (after the Icon import):
-```kotlin
-import org.jetbrains.compose.resources.painterResource
-```
-
-**Step 2: Replace Icon References**
-
-Line 95 - Change:
-```kotlin
-trailingIcon = Icons.AutoMirrored.Filled.ArrowForward,
-```
-To:
-```kotlin
-trailingIcon = null, // Will add painter separately
-```
-Then update the AppButton composable to use painter parameter if available, or wrap Icon:
-```kotlin
-Icon(
-    painter = painterResource(Res.drawable.ic_arrow_right),
-    contentDescription = "Publish",
-    modifier = Modifier.size(24.dp)
-)
-```
-
-Line 204 - Change:
-```kotlin
-Icon(
-    Icons.Default.ContentCopy,
-    contentDescription = "Copy"
-)
-```
-To:
-```kotlin
-Icon(
-    painter = painterResource(Res.drawable.ic_copy),
-    contentDescription = "Copy"
-)
-```
-
-Line 228 - Change:
-```kotlin
-PreviewSectionCard(icon = Icons.Default.LocalOffer, ...
-```
-To:
-```kotlin
-PreviewSectionCard(icon = null, painter = painterResource(Res.drawable.ic_tag), ...
-```
-(Note: You may need to update PreviewSectionCard signature to accept painter)
-
-Line 235 - Change:
-```kotlin
-icon = Icons.Default.Description,
-```
-To:
-```kotlin
-icon = null, painter = painterResource(Res.drawable.ic_file_text),
-```
-
-Line 259 - Change:
-```kotlin
-icon = Icons.Default.AttachMoney,
-```
-To:
-```kotlin
-icon = null, painter = painterResource(Res.drawable.ic_dollar_sign),
-```
-
----
+Remove imports: ArrowForward, AttachMoney, ContentCopy, Description, LocalOffer
+Add import: `org.jetbrains.compose.resources.painterResource`
 
 ### 2. AiProcessingContent.kt
-**Location:** `composeApp/src/commonMain/kotlin/com/sirelon/aicalories/features/seller/ad/generate_ad/AiProcessingContent.kt`
+- Line 121: `Icons.Rounded.Star` → `Res.drawable.ic_sparkles`
+- Line 221: `Icons.Default.Check` → `Res.drawable.ic_check`
+- Line 152: `Icons.Default.FlashOn` → **KEEP** (no replacement)
 
-**Step 1: Add Import**
-Add:
-```kotlin
-import org.jetbrains.compose.resources.painterResource
-```
-
-**Step 2: Replace Icons**
-
-Line 121 - Change:
-```kotlin
-imageVector = Icons.Rounded.Star,
-```
-To:
-```kotlin
-painter = painterResource(Res.drawable.ic_sparkles),
-```
-(Also change parameter name from `imageVector` to `painter`)
-
-Line 221 - Change:
-```kotlin
-imageVector = Icons.Default.Check,
-```
-To:
-```kotlin
-painter = painterResource(Res.drawable.ic_check),
-```
-
-Keep line 152 as-is (FlashOn icon - no replacement available):
-```kotlin
-imageVector = Icons.Default.FlashOn,  // No SVG replacement
-```
-
----
+Add import: `org.jetbrains.compose.resources.painterResource`
 
 ### 3. GenerateAdScreen.kt
-**Location:** `composeApp/src/commonMain/kotlin/com/sirelon/aicalories/features/seller/ad/generate_ad/GenerateAdScreen.kt`
+- Line 162: `Icons.Rounded.Star` → `Res.drawable.ic_sparkles`
+- Line 370: `Icons.Default.Check` → `Res.drawable.ic_check`
+- Line 335: `Icons.Default.FlashOn` → **KEEP** (no replacement)
 
-**Step 1: Add Import** (if not already present)
-```kotlin
-import org.jetbrains.compose.resources.painterResource
-```
-
-**Step 2: Replace Icons**
-
-Line 162 - Change:
-```kotlin
-leadingIcon = if (state.isLoading) null else Icons.Rounded.Star,
-```
-To:
-```kotlin
-leadingIcon = null,  // Using painter instead
-```
-Then use painter in the button content or find alternative.
-
-Line 370 - Change:
-```kotlin
-imageVector = Icons.Default.Check,
-```
-To:
-```kotlin
-painter = painterResource(Res.drawable.ic_check),
-```
-
-Keep line 335 as-is:
-```kotlin
-imageVector = Icons.Default.FlashOn,  // No SVG replacement
-```
-
----
+Add import: `org.jetbrains.compose.resources.painterResource`
 
 ### 4. SellerLandingScreen.kt
-**Location:** `composeApp/src/commonMain/kotlin/com/sirelon/aicalories/features/seller/auth/presentation/SellerLandingScreen.kt`
+- Line 116: `Icons.Default.Close` → `Res.drawable.ic_x`
+- Line 231: `Icons.Default.Person` → `Res.drawable.ic_user`
+- Line 291: `Icons.Default.Person` → `Res.drawable.ic_user`
+- Line 321: `Icons.Default.Check` → `Res.drawable.ic_check`
 
-**Step 1: Add Import** (if not already present)
-```kotlin
-import org.jetbrains.compose.resources.painterResource
-```
-
-**Step 2: Replace Icons**
-
-Line 116 - Change:
-```kotlin
-Icon(Icons.Default.Close, contentDescription = "Close")
-```
-To:
-```kotlin
-Icon(painterResource(Res.drawable.ic_x), contentDescription = "Close")
-```
-
-Line 231 - Change:
-```kotlin
-leadingIcon = Icons.Default.Person
-```
-To:
-```kotlin
-leadingIcon = null,  // Using painter in content
-```
-And add Icon with painter.
-
-Line 291 - Change:
-```kotlin
-imageVector = Icons.Default.Person,
-```
-To:
-```kotlin
-painter = painterResource(Res.drawable.ic_user),
-```
-
-Line 321 - Change:
-```kotlin
-imageVector = Icons.Default.Check,
-```
-To:
-```kotlin
-painter = painterResource(Res.drawable.ic_check),
-```
-
----
+Add import: `org.jetbrains.compose.resources.painterResource`
 
 ### 5. OnboardingScreen.kt
-**Location:** `composeApp/src/commonMain/kotlin/com/sirelon/aicalories/features/seller/onboarding/OnboardingScreen.kt`
+- Line 158: `Icons.AutoMirrored.Filled.ArrowBack` → `Res.drawable.ic_arrow_left`
+- Line 187: `Icons.AutoMirrored.Filled.ArrowForward` → `Res.drawable.ic_arrow_right`
 
-**Step 1: Update Imports**
-Remove:
+Remove imports: ArrowBack, ArrowForward
+Add import: `org.jetbrains.compose.resources.painterResource`
+
+## Change Pattern
+
+**For `imageVector` parameters:**
 ```kotlin
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+// Before
+imageVector = Icons.Default.Copy
+
+// After
+painter = painterResource(Res.drawable.ic_copy)
 ```
 
-Add:
+**For `Icon` composables:**
 ```kotlin
-import org.jetbrains.compose.resources.painterResource
+// Before
+Icon(Icons.Default.Copy, contentDescription = "Copy")
+
+// After
+Icon(painterResource(Res.drawable.ic_copy), contentDescription = "Copy")
 ```
 
-**Step 2: Replace Icons**
+## Icon Reference
 
-Line 158 - Change:
-```kotlin
-icon = Icons.AutoMirrored.Filled.ArrowBack,
-```
-To:
-```kotlin
-icon = null,  // Using painter
-```
-Then add painter with ic_arrow_left.
+| Material Icon | SVG Icon |
+|---|---|
+| ArrowBack | ic_arrow_left |
+| ArrowForward | ic_arrow_right |
+| AttachMoney | ic_dollar_sign |
+| Check | ic_check |
+| Close | ic_x |
+| ContentCopy | ic_copy |
+| Description | ic_file_text |
+| LocalOffer | ic_tag |
+| Person | ic_user |
+| Star | ic_sparkles |
+| FlashOn | ❌ KEEP |
 
-Line 187 - Change:
-```kotlin
-trailingIcon = Icons.AutoMirrored.Filled.ArrowForward,
-```
-To:
-```kotlin
-trailingIcon = null,  // Using painter
-```
-Then add Icon with ic_arrow_right painter.
-
----
-
-## Icon Mapping Reference
-
-| Old Material Icon | New SVG Icon | File Name |
-|---|---|---|
-| Icons.Default.ArrowBack | ic_arrow_left | ic_arrow_left.svg |
-| Icons.Default.ArrowForward* | ic_arrow_right | ic_arrow_right.svg |
-| Icons.Default.AttachMoney | ic_dollar_sign | ic_dollar_sign.svg |
-| Icons.Default.Check | ic_check | ic_check.svg |
-| Icons.Default.Close | ic_x | ic_x.svg |
-| Icons.Default.ContentCopy | ic_copy | ic_copy.svg |
-| Icons.Default.Description | ic_file_text | ic_file_text.svg |
-| Icons.Default.FlashOn | ❌ NOT AVAILABLE | Keep Material Icon |
-| Icons.Default.LocalOffer | ic_tag | ic_tag.svg |
-| Icons.Default.Person | ic_user | ic_user.svg |
-| Icons.Rounded.Star | ic_sparkles | ic_sparkles.svg |
-| Icons.AutoMirrored.Filled.ArrowForward | ic_arrow_right | ic_arrow_right.svg |
-
-*ArrowForward is a Compose Material icon that points right; use ic_arrow_right
-
----
-
-## Notes
-
-- FlashOn icon (lightning bolt) has no equivalent in our SVG set - keep the Material icon
-- When changing from `imageVector` to `painter`, make sure the parameter name changes too
-- Ensure `painterResource` is imported in each file
-- Some composables may have custom parameters - adjust according to your implementation
-- Test each screen after making changes to ensure icons display correctly
+All 40 icons already in: `composeApp/src/commonMain/composeResources/drawable/ic_*.svg`
