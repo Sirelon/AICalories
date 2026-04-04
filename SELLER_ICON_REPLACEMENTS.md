@@ -63,7 +63,7 @@ Icon(painterResource(Res.drawable.ic_copy), contentDescription = "Copy")
 
 ## Icon Reference
 
-| Material Icon | SVG Icon |
+| Material Icon | VectorDrawable Icon |
 |---|---|
 | ArrowBack | ic_arrow_left |
 | ArrowForward | ic_arrow_right |
@@ -77,4 +77,4 @@ Icon(painterResource(Res.drawable.ic_copy), contentDescription = "Copy")
 | Star | ic_sparkles |
 | FlashOn | ❌ KEEP |
 
-All 40 icons already in: `composeApp/src/commonMain/composeResources/drawable/ic_*.svg`
+All 40 icons already in: `composeApp/src/commonMain/composeResources/drawable/ic_*.xml` (Android VectorDrawable XML format)
