@@ -6,28 +6,15 @@ import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.media.upload.MediaUploadHelper
 import com.sirelon.aicalories.features.media.upload.MediaUploadUpdate
 import com.sirelon.aicalories.features.media.upload.UploadingItem
-import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
 import com.sirelon.aicalories.network.OpenAIClient
 import com.sirelon.aicalories.supabase.error.RemoteException
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class GenerateAdViewModel(
     private val mediaUploadHelper: MediaUploadHelper,
     private val openAi: OpenAIClient,
-    private val categoriesRepository: CategoriesRepository,
 ) : BaseViewModel<GenerateAdContract.GenerateAdState, GenerateAdContract.GenerateAdEvent, GenerateAdContract.GenerateAdEffect>() {
-
-    init {
-        categoriesRepository
-            .loadCategories()
-            .onEach {
-                println(it)
-            }
-            .launchIn(viewModelScope)
-    }
 
     override fun initialState(): GenerateAdContract.GenerateAdState =
         GenerateAdContract.GenerateAdState()
