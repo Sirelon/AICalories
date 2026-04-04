@@ -98,7 +98,7 @@ internal class AnalyzeViewModel(
     private fun handleUploadUpdate(update: MediaUploadUpdate) {
         when (update) {
             MediaUploadUpdate.Started -> {
-                setState { it.copy(errorMessage = null) }
+                setState { it.copy(errorMessage = null, hasUploadFailures = false) }
             }
 
             is MediaUploadUpdate.AddPlaceholder -> {
@@ -161,6 +161,13 @@ internal class AnalyzeViewModel(
 
         viewModelScope.launch {
             val uploadedFiles = state.value.uploads.values.mapNotNull { it.uploadedFile }
+
+            if (uploadedFiles.isEmpty() && (uploadsSnapshot.isNotEmpty() || state.value.hasUploadFailures)) {
+                setState { it.copy(isLoading = false) }
+                postEffect(AnalyzeContract.AnalyzeEffect.ShowMessage("Upload failed. Please add photos and try again."))
+                return@launch
+            }
+
             val note = prompt.ifBlank { null }
 
             val foodEntryId = repository
@@ -219,6 +226,7 @@ internal class AnalyzeViewModel(
             current.copy(
                 errorMessage = message,
                 uploads = current.uploads - file,
+                hasUploadFailures = true,
             )
         }
         postEffect(AnalyzeContract.AnalyzeEffect.ShowMessage(message))

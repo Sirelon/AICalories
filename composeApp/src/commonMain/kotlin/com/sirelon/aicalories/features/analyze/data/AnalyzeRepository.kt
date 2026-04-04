@@ -46,6 +46,10 @@ class AnalyzeRepository(
                 file.id ?: resolvedIds[file.path]
             }
 
+            if (files.isNotEmpty() && fileIds.isEmpty()) {
+                error("Files were not uploaded to storage. Please try again.")
+            }
+
             if (fileIds.isNotEmpty()) {
                 client.linkFilesToFoodEntry(foodEntryId = foodEntryId, fileIds = fileIds)
             }
