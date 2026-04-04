@@ -11,15 +11,50 @@ class CategoriesRepository(
     private val olxApiClient: OlxApiClient,
     private val mapper: CategoriesMapper,
 ) {
+    private val notSupportedParentIds = listOf(
+        1, // нерухомість
+        1532, // autotransport
+        6, // work
+        35, // тварини?? але під питанням, бо там є зоотовари
+        7, // бізнесс і послуги
+        3709, // житло подобово
+        3428, // Оренда та прокат ?
+    )
 
     private val categoriesFlow = emptyFlow<List<OlxCategory>>()
         .onEmpty {
-            val result = olxApiClient.loadCategories()
-            val data = result.map(mapper::mapCategory)
+            val data = loadSupportedCategories()
             emit(data)
         }
 
-
     fun loadCategories(): Flow<List<OlxCategory>> = categoriesFlow
 
+    private suspend fun loadSupportedCategories(): List<OlxCategory> {
+        val result = olxApiClient.loadCategories()
+        val data = result.map(mapper::mapCategory)
+
+        return normalize(data)
+    }
+
+    private fun normalize(data: List<OlxCategory>): List<OlxCategory> {
+        val grouppedData = data.groupBy { it.parentId }.toMutableMap()
+
+        val toRemove = grouppedData[null].orEmpty().filter { notSupportedParentIds.contains(it.id) }
+
+        grouppedData.removeLeaves(toRemove)
+
+        return grouppedData
+            .values
+            .flatten()
+            .toList()
+    }
+
+    private fun MutableMap<Int?, List<OlxCategory>>.removeLeaves(toRemove: List<OlxCategory>) {
+        if (toRemove.isEmpty()) return
+
+        val removeSub = toRemove
+            .flatMap { this.remove(it.id).orEmpty() }
+
+        removeLeaves(removeSub)
+    }
 }
