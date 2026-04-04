@@ -20,9 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,6 +47,7 @@ import com.sirelon.aicalories.generated.resources.ai_step_calculating_price
 import com.sirelon.aicalories.generated.resources.ai_step_generating_title
 import com.sirelon.aicalories.generated.resources.ai_step_writing_description
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.random.Random
 
@@ -118,7 +117,7 @@ private fun SpinningIcon(modifier: Modifier = Modifier) {
     )
 
     Icon(
-        imageVector = Icons.Rounded.Star,
+        painter = painterResource(Res.drawable.ic_sparkles),
         contentDescription = null,
         modifier = modifier
             .size(AppDimens.Size.xl8)
@@ -218,7 +217,7 @@ private fun ProcessingStepItem(
         ) {
             if (isDone) {
                 Icon(
-                    imageVector = Icons.Default.Check,
+                    painter = painterResource(Res.drawable.ic_check),
                     contentDescription = null,
                     modifier = Modifier.size(AppDimens.Size.xl2),
                     tint = AppTheme.colors.onPrimary,
