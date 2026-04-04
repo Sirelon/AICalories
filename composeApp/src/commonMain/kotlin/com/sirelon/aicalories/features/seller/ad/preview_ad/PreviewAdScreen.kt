@@ -1,11 +1,10 @@
 package com.sirelon.aicalories.features.seller.ad.preview_ad
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,10 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -34,6 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.carousel.HorizontalCenteredHeroCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -56,6 +53,8 @@ import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.designsystem.generateRandomColor
 import com.sirelon.aicalories.features.seller.ad.Advertisement
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
+import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
+import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import kotlinx.coroutines.launch
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.*
@@ -65,10 +64,22 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 @Composable
-fun PreviewAdScreen(advertisement: Advertisement) {
+fun PreviewAdScreen(
+    advertisement: Advertisement,
+    onChangeCategoryClick: () -> Unit,
+    pendingCategory: OlxCategory?,
+    onCategoryConsumed: () -> Unit,
+) {
     val viewModel: PreviewAdViewModel = koinViewModel { parametersOf(advertisement) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(pendingCategory) {
+        if (pendingCategory != null) {
+            viewModel.onEvent(CategorySelected(pendingCategory))
+            onCategoryConsumed()
+        }
+    }
 
     ObserveAsEvents(viewModel.effects) { effect ->
         when (effect) {
@@ -139,20 +150,11 @@ fun PreviewAdScreen(advertisement: Advertisement) {
                 )
 
                 AdCategoryCard(
-                    category = state.category,
-                    onChangeClick = { viewModel.onEvent(PreviewAdEvent.ShowCategoryPicker) },
+                    categoryLabel = state.categoryLabel,
+                    onChangeClick = onChangeCategoryClick,
                 )
             }
         }
-    }
-
-    if (state.isCategoryPickerVisible) {
-        CategoryPickerDialog(
-            categories = state.availableCategories,
-            selectedCategory = state.category,
-            onCategorySelected = { viewModel.onEvent(PreviewAdEvent.CategoryChanged(it)) },
-            onDismiss = { viewModel.onEvent(PreviewAdEvent.DismissCategoryPicker) },
-        )
     }
 }
 
@@ -320,53 +322,37 @@ private fun AdPriceCard(
 }
 
 @Composable
-private fun AdCategoryCard(category: String, onChangeClick: () -> Unit) {
+private fun AdCategoryCard(categoryLabel: String, onChangeClick: () -> Unit) {
     PreviewSectionCard(label = stringResource(Res.string.ad_category_label)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top = AppDimens.Spacing.m),
+            modifier = Modifier.fillMaxWidth().padding(top = AppDimens.Spacing.m).clickable(onClick = onChangeClick),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
-                text = category,
-                style = AppTheme.typography.title.copy(fontWeight = FontWeight.Bold)
-            )
-            TextButton(onClick = onChangeClick) {
-                Text(text = stringResource(Res.string.change_button))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
+                modifier = Modifier.weight(1f),
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_layout_grid),
+                    contentDescription = null,
+                    modifier = Modifier.size(AppDimens.Size.xl6),
+                    tint = AppTheme.colors.onSurfaceMuted,
+                )
+                Text(
+                    text = categoryLabel,
+                    style = AppTheme.typography.title.copy(fontWeight = FontWeight.Bold),
+                )
             }
+            Icon(
+                painter = painterResource(Res.drawable.ic_chevron_right),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(AppDimens.Size.xl4)
+                    .padding(start = AppDimens.Spacing.m),
+                tint = AppTheme.colors.onSurfaceMuted,
+            )
         }
     }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun CategoryPickerDialog(
-    categories: List<String>,
-    selectedCategory: String,
-    onCategorySelected: (String) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.select_category)) },
-        text = {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-            ) {
-                categories.forEach { category ->
-                    FilterChip(
-                        selected = category == selectedCategory,
-                        onClick = { onCategorySelected(category) },
-                        label = { Text(category) },
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(Res.string.cancel))
-            }
-        },
-    )
 }
