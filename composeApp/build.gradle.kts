@@ -113,6 +113,7 @@ kotlin {
             implementation(libs.koin.android)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.kotlinx.coroutines.android)
+            implementation(libs.play.services.location)
         }
         commonMain.dependencies {
             implementation(libs.supabase.compose.auth)

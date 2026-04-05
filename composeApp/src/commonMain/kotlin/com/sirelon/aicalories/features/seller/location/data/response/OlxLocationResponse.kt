@@ -4,6 +4,13 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+internal class OlxLocationsRootResponse(
+    @SerialName("data")
+    val data: List<OlxLocationResponse>,
+)
+
+
+@Serializable
 internal class OlxLocationResponse(
     @SerialName("city")
     val city: OlxCityResponse?,

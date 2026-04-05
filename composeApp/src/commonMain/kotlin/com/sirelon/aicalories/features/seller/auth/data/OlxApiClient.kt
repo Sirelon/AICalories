@@ -8,6 +8,7 @@ import com.sirelon.aicalories.features.seller.categories.data.responses.OlxCateg
 import com.sirelon.aicalories.features.seller.categories.data.responses.OlxCategoryResponse
 import com.sirelon.aicalories.features.seller.categories.data.responses.OlxCategorySuggestionResponse
 import com.sirelon.aicalories.features.seller.location.data.response.OlxLocationResponse
+import com.sirelon.aicalories.features.seller.location.data.response.OlxLocationsRootResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -45,7 +46,15 @@ class OlxApiClient(
         return response.body<OlxCategorySuggestionResponse>().data.firstOrNull()?.id
     }
 
-    suspend fun getLocations(latitude: Double, longitude: Double): List<OlxLocationResponse> {
+    internal suspend fun loadAttributes(categoryId: Int): List<OlxAttributeResponse> {
+        val response = httpClient.get("categories/$categoryId/attributes")
+        if (!response.status.isSuccess()) {
+            throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
+        }
+        return response.body<OlxAttributesResponse>().data ?: emptyList()
+    }
+
+    internal suspend fun getLocations(latitude: Double, longitude: Double): List<OlxLocationResponse> {
         val response = httpClient.get("locations") {
             parameter("latitude", latitude)
             parameter("longitude", longitude)
@@ -53,14 +62,6 @@ class OlxApiClient(
         if (!response.status.isSuccess()) {
             throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
         }
-        return response.body<List<OlxLocationResponse>>()
-    }
-
-    internal suspend fun loadAttributes(categoryId: Int): List<OlxAttributeResponse> {
-        val response = httpClient.get("categories/$categoryId/attributes")
-        if (!response.status.isSuccess()) {
-            throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
-        }
-        return response.body<OlxAttributesResponse>().data ?: emptyList()
+        return response.body<OlxLocationsRootResponse>().data
     }
 }

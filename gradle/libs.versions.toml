@@ -42,6 +42,7 @@ calf = "0.10.0"
 supabase = "3.4.1"
 buildKonfig = "0.17.1"
 compose = "1.10.3"
+playServicesLocation = "21.3.0"
 
 [libraries]
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3Runtime" }
@@ -111,6 +112,7 @@ supabase-compose-auth = { module = "io.github.jan-tennert.supabase:compose-auth"
 supabase-compose-auth-ui = { module = "io.github.jan-tennert.supabase:compose-auth-ui", version.ref = "supabase" }
 supabase-coil3-integration = { module = "io.github.jan-tennert.supabase:coil3-integration", version.ref = "supabase" }
 supabase-realtime = { module = "io.github.jan-tennert.supabase:realtime-kt", version.ref = "supabase" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
