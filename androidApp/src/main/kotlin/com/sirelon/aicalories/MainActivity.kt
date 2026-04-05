@@ -8,7 +8,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.sirelon.aicalories.datastore.initAndroidKeyValueStore
-import com.sirelon.aicalories.features.seller.location.AndroidAppContextHolder
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthCallbackBridge
 
 class MainActivity : ComponentActivity() {
@@ -16,7 +15,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         initAndroidKeyValueStore(filesDir.absolutePath)
-        AndroidAppContextHolder.initialize(applicationContext)
         publishOlxCallback(intent)
 
         setContent {
