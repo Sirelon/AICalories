@@ -157,6 +157,7 @@ kotlin {
             implementation(libs.calf.filepicker)
             implementation(libs.calf.filepicker.coil)
             implementation(libs.calf.permissions)
+            implementation(libs.calf.permissions.location)
             implementation("com.aallam.openai:openai-client:4.1.0")
         }
         commonTest.dependencies {
