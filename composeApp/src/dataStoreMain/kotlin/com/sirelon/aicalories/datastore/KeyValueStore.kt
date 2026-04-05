@@ -12,12 +12,10 @@ private val dataStoreCache = mutableMapOf<String, DataStore<Preferences>>()
 
 internal fun createDataStoreKeyValueStore(producePath: () -> String): KeyValueStore {
     val path = producePath()
-    val dataStore = synchronized(dataStoreCache) {
-        dataStoreCache.getOrPut(path) {
-            PreferenceDataStoreFactory.createWithPath(
-                produceFile = { path.toPath() }
-            )
-        }
+    val dataStore = dataStoreCache.getOrPut(path) {
+        PreferenceDataStoreFactory.createWithPath(
+            produceFile = { path.toPath() }
+        )
     }
     return DataStoreKeyValueStore(dataStore)
 }
