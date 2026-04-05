@@ -18,7 +18,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -44,6 +47,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.mohamedrejeb.calf.permissions.CoarseLocation
+import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppScaffold
 import com.sirelon.aicalories.designsystem.AppTheme
@@ -51,10 +56,14 @@ import com.sirelon.aicalories.designsystem.ObserveAsEvents
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.designsystem.generateRandomColor
+import com.sirelon.aicalories.features.media.PermissionDialogContent
+import com.sirelon.aicalories.features.media.PermissionDialogs
+import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.seller.ad.Advertisement
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
+import com.sirelon.aicalories.features.seller.location.OlxLocation
 import kotlinx.coroutines.launch
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.*
@@ -86,6 +95,36 @@ fun PreviewAdScreen(
             is PreviewAdContract.PreviewAdEffect.ShowMessage -> {
                 snackbarHostState.showSnackbar(effect.message)
             }
+        }
+    }
+
+    val locationPermissionController = rememberPermissionController(permission = Permission.CoarseLocation)
+
+    PermissionDialogs(
+        controller = locationPermissionController,
+        rationaleContent = PermissionDialogContent(
+            title = Res.string.location_rationale_title,
+            message = Res.string.location_rationale_message,
+            confirmText = Res.string.retry,
+            dismissText = Res.string.not_now,
+        ),
+        settingsContentProvider = { isIos ->
+            PermissionDialogContent(
+                title = Res.string.location_settings_title,
+                message = if (isIos) {
+                    Res.string.location_settings_message_ios
+                } else {
+                    Res.string.location_settings_message_android
+                },
+                confirmText = Res.string.open_settings,
+                dismissText = Res.string.cancel,
+            )
+        },
+    )
+
+    LaunchedEffect(Unit) {
+        locationPermissionController.requestPermission {
+            viewModel.onEvent(PreviewAdEvent.FetchLocation)
         }
     }
 
@@ -152,6 +191,11 @@ fun PreviewAdScreen(
                 AdCategoryCard(
                     categoryLabel = state.categoryLabel,
                     onChangeClick = onChangeCategoryClick,
+                )
+
+                AdLocationCard(
+                    location = state.location,
+                    isLoading = state.locationLoading,
                 )
             }
         }
@@ -353,6 +397,52 @@ private fun AdCategoryCard(categoryLabel: String, onChangeClick: () -> Unit) {
                     .padding(start = AppDimens.Spacing.m),
                 tint = AppTheme.colors.onSurfaceMuted,
             )
+        }
+    }
+}
+
+@Composable
+private fun AdLocationCard(
+    location: OlxLocation?,
+    isLoading: Boolean,
+) {
+    PreviewSectionCard(label = stringResource(Res.string.ad_location_label)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = AppDimens.Spacing.m),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
+        ) {
+            Icon(
+                imageVector = Icons.Default.LocationOn,
+                contentDescription = null,
+                modifier = Modifier.size(AppDimens.Size.xl6),
+                tint = AppTheme.colors.onSurfaceMuted,
+            )
+            when {
+                isLoading -> {
+                    CircularProgressIndicator(modifier = Modifier.size(AppDimens.Size.xl4))
+                    Text(
+                        text = stringResource(Res.string.location_detecting),
+                        style = AppTheme.typography.body,
+                        color = AppTheme.colors.outline,
+                    )
+                }
+
+                location != null -> {
+                    Text(
+                        text = location.displayName,
+                        style = AppTheme.typography.title.copy(fontWeight = FontWeight.Bold),
+                    )
+                }
+
+                else -> {
+                    Text(
+                        text = stringResource(Res.string.location_not_available),
+                        style = AppTheme.typography.body,
+                        color = AppTheme.colors.outline,
+                    )
+                }
+            }
         }
     }
 }

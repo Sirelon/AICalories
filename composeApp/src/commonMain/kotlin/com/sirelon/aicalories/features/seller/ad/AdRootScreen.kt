@@ -41,21 +41,7 @@ sealed interface AdDestination {
 fun AdRootScreen(onExit: () -> Unit) {
 
     val navBackStack = remember {
-//        mutableStateListOf<AdDestination>(AdDestination.GenerateAd)
-        mutableStateListOf<AdDestination>(
-            AdDestination.PreviewAd(
-                advertisement = Advertisement(
-                    "iphone 15 pro",
-                    "",
-                    emptyList(),
-                    123.0,
-                    123.0,
-                    123.0,
-                    category = "adsa",
-                    condition = AdCondition.NEW,
-                )
-            )
-        )
+        mutableStateListOf<AdDestination>(AdDestination.GenerateAd)
     }
 
     var pendingCategory by remember { mutableStateOf<OlxCategory?>(null) }

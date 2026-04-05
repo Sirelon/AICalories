@@ -19,5 +19,7 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>AI Calories needs access to the camera to capture your meal photos.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>AI Calories uses your location to suggest the nearest city for your OLX advertisement.</string>
 </dict>
 </plist>

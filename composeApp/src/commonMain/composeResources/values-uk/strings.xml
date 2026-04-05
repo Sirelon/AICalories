@@ -255,6 +255,14 @@
     <string name="ad_description_label">Опис</string>
     <string name="ad_your_price">Ваша ціна</string>
     <string name="ad_category_label">Категорія</string>
+    <string name="ad_location_label">Місцезнаходження</string>
+    <string name="location_detecting">Визначення місцезнаходження...</string>
+    <string name="location_not_available">Місцезнаходження недоступне</string>
+    <string name="location_rationale_title">Потрібен дозвіл на місцезнаходження</string>
+    <string name="location_rationale_message">Нам потрібне ваше місцезнаходження, щоб запропонувати найближче місто для вашого оголошення OLX.</string>
+    <string name="location_settings_title">Дозволити доступ до місцезнаходження в налаштуваннях</string>
+    <string name="location_settings_message_android">Доступ до місцезнаходження заблоковано. Будь ласка, відкрийте налаштування додатку та увімкніть дозвіл на місцезнаходження.</string>
+    <string name="location_settings_message_ios">Доступ до місцезнаходження заблоковано. Відкрийте Налаштування > Конфіденційність > Служби геолокації та увімкніть AI Calories.</string>
     <string name="select_category">Обрати категорію</string>
     <string name="subcategory_count">%d підкатегорій</string>
 

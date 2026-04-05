@@ -7,6 +7,7 @@ import com.sirelon.aicalories.features.seller.categories.data.responses.OlxAttri
 import com.sirelon.aicalories.features.seller.categories.data.responses.OlxCategoriesRootResponse
 import com.sirelon.aicalories.features.seller.categories.data.responses.OlxCategoryResponse
 import com.sirelon.aicalories.features.seller.categories.data.responses.OlxCategorySuggestionResponse
+import com.sirelon.aicalories.features.seller.location.data.response.OlxLocationResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -42,6 +43,17 @@ class OlxApiClient(
             throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
         }
         return response.body<OlxCategorySuggestionResponse>().data.firstOrNull()?.id
+    }
+
+    suspend fun getLocations(latitude: Double, longitude: Double): List<OlxLocationResponse> {
+        val response = httpClient.get("locations") {
+            parameter("latitude", latitude)
+            parameter("longitude", longitude)
+        }
+        if (!response.status.isSuccess()) {
+            throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
+        }
+        return response.body<List<OlxLocationResponse>>()
     }
 
     internal suspend fun loadAttributes(categoryId: Int): List<OlxAttributeResponse> {
