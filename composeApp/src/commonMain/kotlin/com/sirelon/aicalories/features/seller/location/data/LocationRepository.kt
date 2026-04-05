@@ -16,12 +16,15 @@ class LocationRepository(
             longitude = deviceLocation.longitude,
         )
 
-        val first = locations.firstOrNull() ?: return null
-        val cityName = first.city?.name ?: return null
+        val firstValidLocation = locations.firstNotNullOfOrNull { location ->
+            val cityName = location.city?.name ?: return@firstNotNullOfOrNull null
 
-        return OlxLocation(
-            cityName = cityName,
-            districtName = first.district?.name,
-        )
+            OlxLocation(
+                cityName = cityName,
+                districtName = location.district?.name,
+            )
+        }
+
+        return firstValidLocation
     }
 }

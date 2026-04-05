@@ -3,14 +3,19 @@ package com.sirelon.aicalories.features.seller.location
 import android.annotation.SuppressLint
 import android.content.Context
 import android.location.LocationManager
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-actual fun createLocationProvider(): LocationProvider = AndroidLocationProvider()
+actual fun createLocationProvider(): LocationProvider {
+    val context = AndroidAppContextHolder.applicationContext ?: return EmptyLocationProvider
+    return AndroidLocationProvider(context)
+}
 
-class AndroidLocationProvider : LocationProvider, KoinComponent {
+private object EmptyLocationProvider : LocationProvider {
+    override suspend fun getCurrentLocation(): DeviceLocation? = null
+}
 
-    private val context: Context by inject()
+class AndroidLocationProvider(
+    private val context: Context,
+) : LocationProvider {
 
     @SuppressLint("MissingPermission")
     override suspend fun getCurrentLocation(): DeviceLocation? {
