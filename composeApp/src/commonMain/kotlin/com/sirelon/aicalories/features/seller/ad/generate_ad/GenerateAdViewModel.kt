@@ -69,9 +69,7 @@ class GenerateAdViewModel(
                         .filter { (_, item) -> item.uploadedFile != null }
                         .mapNotNull { (_, item) ->
                             item.uploadedFile?.path?.let {
-                                mediaUploadHelper.publicUrl(
-                                    it
-                                )
+                                mediaUploadHelper.publicUrl(it)
                             }
                         }
 

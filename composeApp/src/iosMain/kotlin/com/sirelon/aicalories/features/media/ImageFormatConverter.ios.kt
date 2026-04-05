@@ -4,18 +4,18 @@ import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.io.getName
 import com.mohamedrejeb.calf.io.readByteArray
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import platform.Foundation.NSData
 import platform.Foundation.NSTemporaryDirectory
-import platform.Foundation.NSUUID
 import platform.Foundation.NSURL
+import platform.Foundation.NSUUID
 import platform.Foundation.create
+import platform.Foundation.writeToURL
 import platform.UIKit.UIImage
 import platform.UIKit.UIImageJPEGRepresentation
-import platform.Foundation.writeToURL
 
 actual fun imageFormatConverter(): ImageFormatConverter = IosImageFormatConverter()
 
@@ -37,7 +37,6 @@ private class IosImageFormatConverter : ImageFormatConverter {
                 ?: return@withContext file
 
             val uiImage = UIImage(data = imageData.toNSData())
-                ?: return@withContext file
 
             val jpegData = UIImageJPEGRepresentation(uiImage, 0.9)
                 ?: return@withContext file

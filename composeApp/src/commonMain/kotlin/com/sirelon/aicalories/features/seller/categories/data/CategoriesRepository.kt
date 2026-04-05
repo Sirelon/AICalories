@@ -36,7 +36,7 @@ class CategoriesRepository(
             val data = loadSupportedCategories()
             emit(data)
         }
-        .shareIn(GlobalScope, SharingStarted.Lazily)
+        .shareIn(GlobalScope, SharingStarted.Lazily, 1)
 
     fun loadCategories(): Flow<List<OlxCategory>> = categoriesFlow
 

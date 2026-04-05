@@ -82,6 +82,14 @@ class SupabaseClient {
                     .storage
                     .from(STORAGE_BUCKET_NAME)
                     .uploadAsFlow(path = storagePath, data = byteArray)
+                    // TODO: remove it after fix https://github.com/supabase-community/supabase-kt/issues/1238
+                    .map { status ->
+                        if (status is UploadStatus.Success) {
+                            UploadStatus.Success(status.response.copy(path = storagePath))
+                        } else {
+                            status
+                        }
+                    }
             )
         }
     }
