@@ -24,7 +24,6 @@ Return ONLY valid JSON:
   "suggestedPrice": number,
   "minPrice": number,
   "maxPrice": number,
-  "category": "...",
   "condition": "new|like_new|good|fair|poor"
 }
 
@@ -38,7 +37,6 @@ Rules:
   - suggestedPrice should be the best estimate
   - minPrice and maxPrice should define a reasonable range
 - Condition must be exactly one of: new, like_new, good, fair, poor
-- Category should be a simple, common marketplace category (e.g., Electronics, Furniture, Clothing)
 
 Output:
 - Write all text fields in Ukrainian

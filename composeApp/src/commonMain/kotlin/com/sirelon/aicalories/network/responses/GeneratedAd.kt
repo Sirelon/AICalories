@@ -15,8 +15,6 @@ data class GeneratedAd(
     val minPrice: Double,
     @SerialName("maxPrice")
     val maxPrice: Double,
-    @SerialName("category")
-    val category: String,
     @SerialName("condition")
     val condition: Condition,
 )

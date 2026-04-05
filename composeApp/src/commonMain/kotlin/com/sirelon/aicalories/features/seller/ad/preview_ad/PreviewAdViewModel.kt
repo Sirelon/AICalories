@@ -49,7 +49,7 @@ class PreviewAdViewModel(
     }
 
     override fun initialState() = PreviewAdState(
-        categoryLabel = advertisement.category,
+        categoryLabel = "",
         minPrice = advertisement.minPrice.toFloat(),
         maxPrice = advertisement.maxPrice.toFloat(),
         originalPrice = advertisement.suggestedPrice,

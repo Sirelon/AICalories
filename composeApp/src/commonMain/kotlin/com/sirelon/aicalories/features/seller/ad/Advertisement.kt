@@ -10,7 +10,6 @@ data class Advertisement(
     val suggestedPrice: Double,
     val minPrice: Double,
     val maxPrice: Double,
-    val category: String,
     val condition: AdCondition,
 )
 

@@ -14,7 +14,6 @@ class GeneratedAdMapper {
             suggestedPrice = generatedAd.suggestedPrice,
             minPrice = generatedAd.minPrice,
             maxPrice = generatedAd.maxPrice,
-            category = generatedAd.category,
             condition = generatedAd.condition.toDomain(),
             images = images,
         )
