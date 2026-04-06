@@ -1,14 +1,12 @@
 package com.sirelon.aicalories.features.seller.ad.preview_ad
 
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewModelScope
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.seller.ad.Advertisement
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEffect
+import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEffect.ShowMessage
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.FetchLocation
@@ -33,7 +31,6 @@ class PreviewAdViewModel(
 
     val titleState = TextFieldState(advertisement.title)
     val descriptionState = TextFieldState(advertisement.description)
-    var selectedPrice by mutableFloatStateOf(advertisement.suggestedPrice.toFloat())
 
     init {
         snapshotFlow { titleState.text }
@@ -53,9 +50,9 @@ class PreviewAdViewModel(
 
     override fun initialState() = PreviewAdState(
         categoryLabel = "",
-        minPrice = advertisement.minPrice.toFloat(),
-        maxPrice = advertisement.maxPrice.toFloat(),
-        originalPrice = advertisement.suggestedPrice,
+        price = advertisement.suggestedPrice,
+        minPrice = advertisement.minPrice,
+        maxPrice = advertisement.maxPrice,
         images = advertisement.images,
     )
 
@@ -65,13 +62,25 @@ class PreviewAdViewModel(
                 updateSelectedCategory(event.category)
             }
 
-            Publish -> {
-                // TODO: Post to OLX API — read titleState.text, descriptionState.text, selectedPrice here
-                postEffect(PreviewAdEffect.ShowMessage("Publishing not yet implemented"))
+            is PreviewAdEvent.OnPriceChanged -> {
+                setState {
+                    it.copy(
+                        price = event.price,
+                        maxPrice = it.maxPrice.coerceAtLeast(event.price),
+                        minPrice = it.minPrice.coerceAtMost(event.price),
+                    )
+                }
             }
 
             FetchLocation -> viewModelScope.launch {
                 fetchLocation()
+            }
+
+            PreviewAdEvent.OnChangeCategoryClick -> postEffect(PreviewAdEffect.GoToGategoryPicker)
+
+            Publish -> {
+                // TODO: Post to OLX API — read titleState.text, descriptionState.text, selectedPrice here
+                postEffect(ShowMessage("Publishing not yet implemented"))
             }
         }
     }

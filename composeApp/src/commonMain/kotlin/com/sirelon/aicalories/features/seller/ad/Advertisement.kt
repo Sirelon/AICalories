@@ -7,9 +7,9 @@ data class Advertisement(
     val title: String,
     val description: String,
     val images: List<String>,
-    val suggestedPrice: Double,
-    val minPrice: Double,
-    val maxPrice: Double,
+    val suggestedPrice: Float,
+    val minPrice: Float,
+    val maxPrice: Float,
     val condition: AdCondition,
 )
 

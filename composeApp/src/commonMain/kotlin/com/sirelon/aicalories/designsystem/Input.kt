@@ -1,12 +1,32 @@
 package com.sirelon.aicalories.designsystem
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.VisualTransformation
+import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.character_count
+import com.sirelon.aicalories.generated.resources.copy
+import com.sirelon.aicalories.generated.resources.ic_copy
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun Input(
@@ -75,5 +95,58 @@ fun Input(
         keyboardActions = keyboardActions,
         visualTransformation = visualTransformation,
         textStyle = AppTheme.typography.body,
+    )
+}
+
+@Composable
+fun InputWithCopy(
+    state: TextFieldState,
+    modifier: Modifier = Modifier,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
+    maxCharacters: Int = Int.MIN_VALUE,
+    prefix: @Composable (() -> Unit)? = null
+) {
+    val clipboard = LocalClipboardManager.current
+    val scope = rememberCoroutineScope()
+
+    OutlinedTextField(
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedBorderColor = Color.Transparent,
+        ),
+        state = state,
+        modifier = modifier.fillMaxWidth(),
+        prefix = prefix,
+        keyboardOptions = keyboardOptions,
+        lineLimits = lineLimits,
+        supportingText = if (maxCharacters > 0) {
+            {
+                Text(
+                    text = stringResource(
+                        Res.string.character_count,
+                        state.text.length
+                    ),
+                    style = AppTheme.typography.caption,
+                    color = AppTheme.colors.outline,
+                )
+            }
+        } else null,
+        trailingIcon = {
+            TextButton(
+                onClick = {
+                    scope.launch {
+                        clipboard.setText(AnnotatedString(state.text.toString()))
+                    }
+                },
+            ) {
+                Icon(
+                    modifier = Modifier.size(AppDimens.Size.xl3),
+                    painter = painterResource(Res.drawable.ic_copy),
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(AppDimens.Spacing.l))
+                Text(stringResource(Res.string.copy), style = AppTheme.typography.label)
+            }
+        },
     )
 }

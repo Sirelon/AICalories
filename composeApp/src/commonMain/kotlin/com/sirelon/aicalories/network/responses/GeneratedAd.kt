@@ -10,11 +10,11 @@ data class GeneratedAd(
     @SerialName("description")
     val description: String,
     @SerialName("suggestedPrice")
-    val suggestedPrice: Double,
+    val suggestedPrice: Float,
     @SerialName("minPrice")
-    val minPrice: Double,
+    val minPrice: Float,
     @SerialName("maxPrice")
-    val maxPrice: Double,
+    val maxPrice: Float,
     @SerialName("condition")
     val condition: Condition,
 )

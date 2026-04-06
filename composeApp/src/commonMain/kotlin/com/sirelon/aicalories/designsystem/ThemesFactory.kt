@@ -15,7 +15,7 @@ object ThemesFactory {
         error = Color(0xFFBA1A1A),
         onError = Color(0xFFFFFFFF),
         success = Color(0xFF1B8E5A),
-        outline = Color(0xFFD8DADB),
+        outline = Color(0xFF6F6E6E),
         warning = Color(0xFFE67E22),
         warningVariant = Color(0xFFF28B44),
         onSurfaceMuted = Color(0xFF94A3B8),

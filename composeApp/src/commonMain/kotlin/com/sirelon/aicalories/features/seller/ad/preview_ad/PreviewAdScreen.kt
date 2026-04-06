@@ -1,22 +1,22 @@
 package com.sirelon.aicalories.features.seller.ad.preview_ad
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
@@ -24,27 +24,28 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.carousel.CarouselItemScope
 import androidx.compose.material3.carousel.HorizontalCenteredHeroCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.mohamedrejeb.calf.permissions.CoarseLocation
@@ -52,6 +53,7 @@ import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppScaffold
 import com.sirelon.aicalories.designsystem.AppTheme
+import com.sirelon.aicalories.designsystem.InputWithCopy
 import com.sirelon.aicalories.designsystem.ObserveAsEvents
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
@@ -64,13 +66,35 @@ import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.Pr
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import com.sirelon.aicalories.features.seller.location.OlxLocation
-import kotlinx.coroutines.launch
 import com.sirelon.aicalories.generated.resources.Res
-import com.sirelon.aicalories.generated.resources.*
+import com.sirelon.aicalories.generated.resources.ad_category_label
+import com.sirelon.aicalories.generated.resources.ad_description_label
+import com.sirelon.aicalories.generated.resources.ad_location_label
+import com.sirelon.aicalories.generated.resources.ad_title_label
+import com.sirelon.aicalories.generated.resources.ad_your_price
+import com.sirelon.aicalories.generated.resources.cancel
+import com.sirelon.aicalories.generated.resources.ic_arrow_right
+import com.sirelon.aicalories.generated.resources.ic_chevron_right
+import com.sirelon.aicalories.generated.resources.ic_layout_grid
+import com.sirelon.aicalories.generated.resources.location_detecting
+import com.sirelon.aicalories.generated.resources.location_not_available
+import com.sirelon.aicalories.generated.resources.location_rationale_message
+import com.sirelon.aicalories.generated.resources.location_rationale_title
+import com.sirelon.aicalories.generated.resources.location_settings_message_android
+import com.sirelon.aicalories.generated.resources.location_settings_message_ios
+import com.sirelon.aicalories.generated.resources.location_settings_title
+import com.sirelon.aicalories.generated.resources.not_now
+import com.sirelon.aicalories.generated.resources.open_settings
+import com.sirelon.aicalories.generated.resources.publish_to_olx
+import com.sirelon.aicalories.generated.resources.retry
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import kotlin.math.roundToInt
 
 @Composable
 fun PreviewAdScreen(
@@ -95,10 +119,51 @@ fun PreviewAdScreen(
             is PreviewAdContract.PreviewAdEffect.ShowMessage -> {
                 snackbarHostState.showSnackbar(effect.message)
             }
+
+            PreviewAdContract.PreviewAdEffect.GoToGategoryPicker -> onChangeCategoryClick()
         }
     }
 
-    val locationPermissionController = rememberPermissionController(permission = Permission.CoarseLocation)
+    LocationPermissionsBlock(viewModel::onEvent)
+
+    AppScaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            AppButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = AppDimens.Spacing.xl3),
+                style = AppButtonDefaults.secondary(),
+                text = stringResource(Res.string.publish_to_olx),
+                trailingIcon = painterResource(Res.drawable.ic_arrow_right),
+                onClick = { viewModel.onEvent(PreviewAdEvent.Publish) },
+            )
+        },
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = AppDimens.Spacing.xl3),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
+        ) {
+            ImagesCarousel(images = state.images)
+
+            PreviewAdContent(
+                onEvent = viewModel::onEvent,
+                state = state,
+                titleState = viewModel.titleState,
+                descriptionState = viewModel.descriptionState
+            )
+        }
+    }
+}
+
+@Composable
+private fun LocationPermissionsBlock(onEvent: (PreviewAdEvent) -> Unit) {
+    val locationPermissionController =
+        rememberPermissionController(permission = Permission.CoarseLocation)
 
     PermissionDialogs(
         controller = locationPermissionController,
@@ -124,141 +189,97 @@ fun PreviewAdScreen(
 
     LaunchedEffect(Unit) {
         locationPermissionController.requestPermission {
-            viewModel.onEvent(PreviewAdEvent.FetchLocation)
-        }
-    }
-
-    AppScaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            AppButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = AppDimens.Spacing.xl3),
-                style = AppButtonDefaults.secondary(),
-                text = stringResource(Res.string.publish_to_olx),
-                trailingIcon = painterResource(Res.drawable.ic_arrow_right),
-                onClick = { viewModel.onEvent(PreviewAdEvent.Publish) },
-            )
-        },
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = AppDimens.Spacing.xl3),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
-        ) {
-            val carouselState = rememberCarouselState { state.images.size }
-
-            HorizontalCenteredHeroCarousel(
-                modifier = Modifier.height(AppDimens.Size.xl24),
-                state = carouselState,
-            ) { pageIndex ->
-                val randomColor = remember(pageIndex) { generateRandomColor() }
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .maskClip(MaterialTheme.shapes.large)
-                        .background(randomColor)
-                ) {
-                    AsyncImage(
-                        modifier = Modifier.fillMaxSize(),
-                        model = state.images[pageIndex],
-                        contentDescription = null,
-                        contentScale = ContentScale.FillHeight,
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
-                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl)
-            ) {
-                AdTitleCard(titleState = viewModel.titleState)
-
-                AdDescriptionCard(descriptionState = viewModel.descriptionState)
-
-                AdPriceCard(
-                    price = viewModel.selectedPrice,
-                    onPriceChange = { viewModel.selectedPrice = it },
-                    originalPrice = state.originalPrice,
-                    minPrice = state.minPrice,
-                    maxPrice = state.maxPrice,
-                )
-
-                AdCategoryCard(
-                    categoryLabel = state.categoryLabel,
-                    onChangeClick = onChangeCategoryClick,
-                )
-
-                AdLocationCard(
-                    location = state.location,
-                    isLoading = state.locationLoading,
-                )
-            }
+            onEvent(PreviewAdEvent.FetchLocation)
         }
     }
 }
 
 @Composable
-private fun PreviewSectionCard(
-    icon: ImageVector? = null,
-    label: String,
-    textFieldState: TextFieldState? = null,
-    content: @Composable () -> Unit
+private fun PreviewAdContent(
+    titleState: TextFieldState,
+    descriptionState: TextFieldState,
+    state: PreviewAdContract.PreviewAdState,
+    onEvent: (PreviewAdEvent) -> Unit,
 ) {
-    val clipboard = LocalClipboardManager.current
-    val scope = rememberCoroutineScope()
+    Column(
+        modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
+        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl)
+    ) {
+        AdTitleCard(titleState = titleState)
 
+        AdDescriptionCard(descriptionState = descriptionState)
+
+        AdPriceCard(
+            price = state.price,
+            onPriceChange = { onEvent(PreviewAdEvent.OnPriceChanged(it)) },
+            minPrice = state.minPrice,
+            maxPrice = state.maxPrice,
+        )
+
+        AdCategoryCard(
+            categoryLabel = state.categoryLabel,
+            onChangeClick = { onEvent(PreviewAdEvent.OnChangeCategoryClick) },
+        )
+
+        AdLocationCard(
+            location = state.location,
+            isLoading = state.locationLoading,
+        )
+    }
+}
+
+@Composable
+private fun ImagesCarousel(images: List<String>) {
+    val carouselState = rememberCarouselState { images.size }
+
+    HorizontalCenteredHeroCarousel(
+        modifier = Modifier.height(AppDimens.Size.xl24),
+        state = carouselState,
+    ) { pageIndex ->
+        val randomColor = remember(pageIndex) { generateRandomColor() }
+        CarouselItem(background = randomColor, image = images[pageIndex])
+    }
+}
+
+@Composable
+private fun CarouselItemScope.CarouselItem(
+    background: Color,
+    image: String,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .maskClip(MaterialTheme.shapes.large)
+            .background(background)
+    ) {
+        AsyncImage(
+            modifier = Modifier.fillMaxSize(),
+            model = image,
+            contentDescription = null,
+            contentScale = ContentScale.FillHeight,
+        )
+    }
+}
+
+@Composable
+private fun PreviewSectionCard(
+    label: String,
+    onClick: (() -> Unit)? = null,
+    content: @Composable () -> Unit,
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
+        onClick = {
+            onClick?.invoke()
+        },
     ) {
-        Column(modifier = Modifier.padding(AppDimens.Spacing.xl3)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)
-            ) {
-                icon?.let {
-                    Icon(
-                        imageVector = it,
-                        modifier = Modifier.size(AppDimens.Size.xl4),
-                        contentDescription = null,
-                    )
-                }
-                Text(
-                    text = label,
-                    style = AppTheme.typography.label,
-                )
-                if (textFieldState != null) {
-                    Spacer(modifier = Modifier.weight(1f))
-                    TextButton(
-                        onClick = {
-                            scope.launch {
-                                clipboard.setText(AnnotatedString(textFieldState.text.toString()))
-                            }
-                        },
-                    ) {
-                        Icon(
-                            painterResource(Res.drawable.ic_copy),
-                            contentDescription = null,
-                            modifier = Modifier.size(AppDimens.Size.xl3)
-                        )
-                        Spacer(modifier = Modifier.width(AppDimens.Spacing.l))
-                        Text(stringResource(Res.string.copy), style = AppTheme.typography.label)
-                    }
-                }
-            }
-
-            if (textFieldState != null) {
-                BasicTextField(
-                    state = textFieldState,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+        Column(modifier = Modifier.padding(vertical = AppDimens.Spacing.xl3)) {
+            Text(
+                modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
+                text = label,
+                style = AppTheme.typography.subTitle,
+            )
 
             content()
         }
@@ -266,77 +287,85 @@ private fun PreviewSectionCard(
 }
 
 @Composable
+private fun PreviewSectionInputCard(
+    label: String,
+    textFieldState: TextFieldState,
+    maxCharacters: Int,
+) {
+    PreviewSectionCard(
+        label = label,
+        content = {
+            InputWithCopy(
+                state = textFieldState,
+                maxCharacters = maxCharacters,
+            )
+        }
+    )
+}
+
+@Composable
 private fun AdTitleCard(titleState: TextFieldState) {
-    PreviewSectionCard(icon = null, label = stringResource(Res.string.ad_title_label), textFieldState = titleState) {
-    }
+    PreviewSectionInputCard(
+        label = stringResource(Res.string.ad_title_label),
+        textFieldState = titleState,
+        maxCharacters = 140,
+    )
 }
 
 @Composable
 private fun AdDescriptionCard(descriptionState: TextFieldState) {
-    PreviewSectionCard(
-        icon = null,
+    PreviewSectionInputCard(
         label = stringResource(Res.string.ad_description_label),
         textFieldState = descriptionState,
-    ) {
-        Box {
-            Text(
-                text = stringResource(Res.string.character_count, descriptionState.text.length),
-                style = AppTheme.typography.caption,
-                color = AppTheme.colors.outline,
-                modifier = Modifier.align(Alignment.BottomEnd)
-            )
-        }
-    }
+        maxCharacters = 9000,
+    )
 }
 
 @Composable
 private fun AdPriceCard(
     price: Float,
     onPriceChange: (Float) -> Unit,
-    originalPrice: Double,
     minPrice: Float,
     maxPrice: Float,
 ) {
+    val priceTextFieldState = rememberTextFieldState("")
+
+    LaunchedEffect(price) {
+        priceTextFieldState.setTextAndPlaceCursorAtEnd(price.roundToInt().toString())
+    }
+
+    LaunchedEffect(null) {
+        snapshotFlow {
+            priceTextFieldState.text
+        }
+            .distinctUntilChanged()
+            .map { it.toString().toFloatOrNull() }
+            .filterNotNull()
+            .collect {
+                onPriceChange(it)
+            }
+    }
+
+
     PreviewSectionCard(
-        icon = null,
         label = stringResource(Res.string.ad_your_price),
     ) {
         Column {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "€",
-                    style = AppTheme.typography.title,
+            val textStyle = AppTheme.typography.headline
+            ProvideTextStyle(textStyle) {
+                InputWithCopy(
+                    state = priceTextFieldState,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    prefix = {
+                        // TODO: change currency
+                        Text(text = "$", style = textStyle)
+                    },
                 )
-                Text(
-                    text = price.toInt().toString(),
-                    style = AppTheme.typography.headline.copy(fontWeight = FontWeight.Bold)
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Box(
-                    modifier = Modifier
-                        .background(
-                            AppTheme.colors.success.copy(alpha = 0.15f),
-                            shape = MaterialTheme.shapes.small
-                        )
-                        .padding(horizontal = AppDimens.Spacing.m, vertical = AppDimens.Spacing.xs)
-                ) {
-                    val discount = ((1 - (price / originalPrice)) * 100).toInt()
-                    Text(
-                        text = stringResource(Res.string.discount_percentage, discount),
-                        color = AppTheme.colors.success,
-                        style = AppTheme.typography.label.copy(fontWeight = FontWeight.Bold)
-                    )
-                }
             }
-            Text(
-                text = stringResource(Res.string.original_price, originalPrice),
-                style = AppTheme.typography.body.copy(textDecoration = TextDecoration.LineThrough),
-                color = AppTheme.colors.outline
-            )
-
-            Spacer(modifier = Modifier.height(AppDimens.Spacing.xl3))
 
             Slider(
+                modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
                 value = price,
                 onValueChange = onPriceChange,
                 valueRange = minPrice..maxPrice,
@@ -347,7 +376,7 @@ private fun AdPriceCard(
             )
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = AppDimens.Spacing.xl3),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
@@ -366,10 +395,17 @@ private fun AdPriceCard(
 }
 
 @Composable
-private fun AdCategoryCard(categoryLabel: String, onChangeClick: () -> Unit) {
-    PreviewSectionCard(label = stringResource(Res.string.ad_category_label)) {
+private fun PreviewSectionClickableCard(
+    label: String,
+    icon: Painter,
+    content: @Composable () -> Unit,
+    onClick: () -> Unit
+) {
+    PreviewSectionCard(label = label, onClick = onClick) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top = AppDimens.Spacing.m).clickable(onClick = onChangeClick),
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = AppDimens.Spacing.xl3)
+                .padding(top = AppDimens.Spacing.xl3),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -379,26 +415,38 @@ private fun AdCategoryCard(categoryLabel: String, onChangeClick: () -> Unit) {
                 modifier = Modifier.weight(1f),
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_layout_grid),
+                    painter = icon,
                     contentDescription = null,
                     modifier = Modifier.size(AppDimens.Size.xl6),
                     tint = AppTheme.colors.onSurfaceMuted,
                 )
-                Text(
-                    text = categoryLabel,
-                    style = AppTheme.typography.title.copy(fontWeight = FontWeight.Bold),
-                )
+                content()
             }
             Icon(
                 painter = painterResource(Res.drawable.ic_chevron_right),
                 contentDescription = null,
-                modifier = Modifier
-                    .size(AppDimens.Size.xl4)
-                    .padding(start = AppDimens.Spacing.m),
+                modifier = Modifier,
                 tint = AppTheme.colors.onSurfaceMuted,
             )
         }
     }
+}
+
+
+@Composable
+private fun AdCategoryCard(categoryLabel: String, onChangeClick: () -> Unit) {
+    PreviewSectionClickableCard(
+        label = stringResource(Res.string.ad_category_label),
+        onClick = onChangeClick,
+        icon = painterResource(Res.drawable.ic_layout_grid),
+        content = {
+            Text(
+                text = categoryLabel,
+                style = AppTheme.typography.body,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+    )
 }
 
 @Composable
@@ -406,18 +454,12 @@ private fun AdLocationCard(
     location: OlxLocation?,
     isLoading: Boolean,
 ) {
-    PreviewSectionCard(label = stringResource(Res.string.ad_location_label)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(top = AppDimens.Spacing.m),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-        ) {
-            Icon(
-                imageVector = Icons.Default.LocationOn,
-                contentDescription = null,
-                modifier = Modifier.size(AppDimens.Size.xl6),
-                tint = AppTheme.colors.onSurfaceMuted,
-            )
+    PreviewSectionClickableCard(
+        label = stringResource(Res.string.ad_location_label),
+        // TODO: not implemented yet
+        onClick = { },
+        icon = rememberVectorPainter(Icons.Default.LocationOn),
+        content = {
             when {
                 isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.size(AppDimens.Size.xl4))
@@ -431,7 +473,8 @@ private fun AdLocationCard(
                 location != null -> {
                     Text(
                         text = location.displayName,
-                        style = AppTheme.typography.title.copy(fontWeight = FontWeight.Bold),
+                        style = AppTheme.typography.body,
+//                        fontWeight = FontWeight.Bold,
                     )
                 }
 
@@ -443,6 +486,6 @@ private fun AdLocationCard(
                     )
                 }
             }
-        }
-    }
+        },
+    )
 }

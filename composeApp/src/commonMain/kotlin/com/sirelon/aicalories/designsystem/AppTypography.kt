@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.sp
 data class AppTypography(
     val headline: TextStyle,
     val title: TextStyle,
+    val subTitle: TextStyle,
     val body: TextStyle,
     val label: TextStyle,
     val caption: TextStyle,
@@ -31,6 +32,13 @@ fun appTypography(
         fontWeight = FontWeight.Medium,
         fontSize = 22.sp,
         lineHeight = 28.sp,
+        letterSpacing = 0.sp,
+    )
+    val subTitle = TextStyle(
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 20.sp,
+        lineHeight = 20.sp,
         letterSpacing = 0.sp,
     )
     val body = TextStyle(
@@ -58,6 +66,7 @@ fun appTypography(
     return AppTypography(
         headline = headline,
         title = title,
+        subTitle = subTitle,
         body = body,
         label = label,
         caption = caption,

@@ -47,10 +47,10 @@ fun AdRootScreen(onExit: () -> Unit) {
                 Advertisement(
                     title = "Test",
                     description = "Test",
-                    suggestedPrice = 100.0,
+                    suggestedPrice = 100.0f,
                     images = emptyList(),
-                    minPrice = 20.0,
-                    maxPrice = 200.0,
+                    minPrice = 20.0f,
+                    maxPrice = 200.0f,
                     condition = AdCondition.NEW,
                 )
             )
