@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.util.fastRoundToInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.mohamedrejeb.calf.permissions.CoarseLocation
@@ -209,9 +210,22 @@ private fun PreviewAdContent(
 
         AdDescriptionCard(descriptionState = descriptionState)
 
+        val priceTextFieldState = rememberTextFieldState(state.price.roundToInt().toString())
+
+        LaunchedEffect(null) {
+            snapshotFlow {
+                priceTextFieldState.text
+            }
+                .distinctUntilChanged()
+                .map { it.toString().toFloatOrNull() }
+                .filterNotNull()
+                .collect {
+                    onEvent(PreviewAdEvent.OnPriceChanged(it))
+                }
+        }
+
         AdPriceCard(
-            price = state.price,
-            onPriceChange = { onEvent(PreviewAdEvent.OnPriceChanged(it)) },
+            priceTextFieldState = priceTextFieldState,
             minPrice = state.minPrice,
             maxPrice = state.maxPrice,
         )
@@ -323,30 +337,10 @@ private fun AdDescriptionCard(descriptionState: TextFieldState) {
 
 @Composable
 private fun AdPriceCard(
-    price: Float,
-    onPriceChange: (Float) -> Unit,
+    priceTextFieldState: TextFieldState,
     minPrice: Float,
     maxPrice: Float,
 ) {
-    val priceTextFieldState = rememberTextFieldState("")
-
-    LaunchedEffect(price) {
-        priceTextFieldState.setTextAndPlaceCursorAtEnd(price.roundToInt().toString())
-    }
-
-    LaunchedEffect(null) {
-        snapshotFlow {
-            priceTextFieldState.text
-        }
-            .distinctUntilChanged()
-            .map { it.toString().toFloatOrNull() }
-            .filterNotNull()
-            .collect {
-                onPriceChange(it)
-            }
-    }
-
-
     PreviewSectionCard(
         label = stringResource(Res.string.ad_your_price),
     ) {
@@ -364,10 +358,15 @@ private fun AdPriceCard(
                 )
             }
 
+            val price = remember(priceTextFieldState.text) {
+                (priceTextFieldState.text.toString().toFloatOrNull() ?: ((maxPrice + minPrice) / 2))
+            }
             Slider(
                 modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
                 value = price,
-                onValueChange = onPriceChange,
+                onValueChange = {
+                    priceTextFieldState.setTextAndPlaceCursorAtEnd(it.fastRoundToInt().toString())
+                },
                 valueRange = minPrice..maxPrice,
                 colors = SliderDefaults.colors(
                     thumbColor = AppTheme.colors.warning,
