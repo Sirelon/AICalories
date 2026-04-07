@@ -22,8 +22,10 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.VisualTransformation
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.character_count
+import com.sirelon.aicalories.generated.resources.character_count_range
 import com.sirelon.aicalories.generated.resources.copy
 import com.sirelon.aicalories.generated.resources.ic_copy
+import com.sirelon.aicalories.generated.resources.min_characters
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -46,10 +48,18 @@ fun Input(
     singleLine: Boolean = false,
     minLines: Int = 1,
     maxLines: Int = Int.MAX_VALUE,
+    minCharacters: Int = -1,
+    maxCharacters: Int = -1,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
+    val characterCountText = when {
+        maxCharacters > 0 -> stringResource(Res.string.character_count_range, value.length, maxCharacters)
+        minCharacters > 0 && value.length < minCharacters -> stringResource(Res.string.min_characters, minCharacters)
+        else -> supportingText
+    }
+
     OutlinedTextField(
         modifier = modifier,
         value = value,
@@ -74,7 +84,7 @@ fun Input(
                 )
             }
         },
-        supportingText = supportingText?.let {
+        supportingText = characterCountText?.let {
             {
                 Text(
                     text = it,
@@ -104,11 +114,18 @@ fun InputWithCopy(
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
+    minCharacters: Int = -1,
     maxCharacters: Int = Int.MIN_VALUE,
     prefix: @Composable (() -> Unit)? = null
 ) {
     val clipboard = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
+
+    val characterCountText = when {
+        maxCharacters > 0 -> stringResource(Res.string.character_count_range, state.text.length, maxCharacters)
+        minCharacters > 0 && state.text.length < minCharacters -> stringResource(Res.string.min_characters, minCharacters)
+        else -> null
+    }
 
     OutlinedTextField(
         colors = OutlinedTextFieldDefaults.colors(
@@ -119,18 +136,15 @@ fun InputWithCopy(
         prefix = prefix,
         keyboardOptions = keyboardOptions,
         lineLimits = lineLimits,
-        supportingText = if (maxCharacters > 0) {
+        supportingText = characterCountText?.let {
             {
                 Text(
-                    text = stringResource(
-                        Res.string.character_count,
-                        state.text.length
-                    ),
+                    text = it,
                     style = AppTheme.typography.caption,
                     color = AppTheme.colors.outline,
                 )
             }
-        } else null,
+        },
         trailingIcon = {
             TextButton(
                 onClick = {
