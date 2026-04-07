@@ -55,8 +55,8 @@ fun Input(
     visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
     val characterCountText = when {
-        maxCharacters > 0 -> stringResource(Res.string.character_count_range, value.length, maxCharacters)
         minCharacters > 0 && value.length < minCharacters -> stringResource(Res.string.min_characters, minCharacters)
+        maxCharacters > 0 -> stringResource(Res.string.character_count_range, value.length, maxCharacters)
         else -> supportingText
     }
 
@@ -122,8 +122,8 @@ fun InputWithCopy(
     val scope = rememberCoroutineScope()
 
     val characterCountText = when {
-        maxCharacters > 0 -> stringResource(Res.string.character_count_range, state.text.length, maxCharacters)
         minCharacters > 0 && state.text.length < minCharacters -> stringResource(Res.string.min_characters, minCharacters)
+        maxCharacters > 0 -> stringResource(Res.string.character_count_range, state.text.length, maxCharacters)
         else -> null
     }
 
