@@ -66,6 +66,7 @@ import com.sirelon.aicalories.features.seller.ad.Advertisement
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
+import com.sirelon.aicalories.features.seller.categories.ui.AttributeItem
 import com.sirelon.aicalories.features.seller.location.OlxLocation
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.ad_category_label
@@ -234,6 +235,10 @@ private fun PreviewAdContent(
             categoryLabel = state.categoryLabel,
             onChangeClick = { onEvent(PreviewAdEvent.OnChangeCategoryClick) },
         )
+
+        state.attributes.forEach {
+            AttributeItem(it)
+        }
 
         AdLocationCard(
             location = state.location,

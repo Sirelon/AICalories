@@ -50,7 +50,7 @@ private class IosImageFormatConverter : ImageFormatConverter {
 
             val success = jpegData.writeToURL(destinationUrl, true)
             if (success) {
-                KmpFile(url = destinationUrl, tempUrl = destinationUrl)
+                KmpFile(url = destinationUrl, originalUrl = destinationUrl)
             } else {
                 file
             }

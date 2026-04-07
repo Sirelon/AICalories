@@ -11,8 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.sirelon.aicalories.designsystem.AppDimens
@@ -48,9 +46,9 @@ fun LoadingOverlay(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .drawBehind {
-                        drawRect(color = Color.Black.copy(alpha = overlayAlpha))
-                    }
+//                    .drawBehind {
+//                        drawRect(color = Color.Black.copy(alpha = overlayAlpha))
+//                    }
                     // Block touches
                     .pointerInput(Unit) {
                         awaitPointerEventScope {
