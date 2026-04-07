@@ -47,11 +47,17 @@ class PreviewAdViewModel(
             .flatMapLatest {
                 categoriesRepository.categorySuggestion(it.toString())
             }
-            .catch {
-                it.printStackTrace()
-            }
             .onEach {
                 updateSelectedCategory(category = it)
+            }
+            .flatMapLatest {
+                categoriesRepository.getAttributes(it.id)
+            }
+            .onEach { attributes ->
+                setState { it.copy(attributes = attributes) }
+            }
+            .catch {
+                it.printStackTrace()
             }
             .launchIn(viewModelScope)
 

@@ -1,6 +1,5 @@
 package com.sirelon.aicalories.features.media
 
-import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.io.getName
 import com.mohamedrejeb.calf.io.readByteArray
@@ -21,18 +20,15 @@ actual fun imageFormatConverter(): ImageFormatConverter = IosImageFormatConverte
 
 private class IosImageFormatConverter : ImageFormatConverter {
 
-    override suspend fun convert(
-        platformContext: PlatformContext,
-        file: KmpFile,
-    ): KmpFile {
+    override suspend fun convert(file: KmpFile): KmpFile {
         return withContext(Dispatchers.Main) {
-            val currentName = file.getName(platformContext)
+            val currentName = file.getName()
             if (!currentName.isHeic()) {
                 return@withContext file
             }
 
             val imageData = runCatching {
-                file.readByteArray(platformContext)
+                file.readByteArray()
             }.getOrNull()
                 ?: return@withContext file
 
@@ -50,7 +46,7 @@ private class IosImageFormatConverter : ImageFormatConverter {
 
             val success = jpegData.writeToURL(destinationUrl, true)
             if (success) {
-                KmpFile(url = destinationUrl, tempUrl = destinationUrl)
+                KmpFile(url = destinationUrl, originalUrl = destinationUrl)
             } else {
                 file
             }

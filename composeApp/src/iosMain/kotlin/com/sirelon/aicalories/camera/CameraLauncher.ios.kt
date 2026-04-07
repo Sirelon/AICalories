@@ -4,9 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.uikit.LocalUIViewController
 import com.mohamedrejeb.calf.io.KmpFile
-import platform.Foundation.NSUUID
-import platform.Foundation.NSURL
 import platform.Foundation.NSTemporaryDirectory
+import platform.Foundation.NSURL
+import platform.Foundation.NSUUID
+import platform.Foundation.writeToURL
 import platform.UIKit.UIImage
 import platform.UIKit.UIImageJPEGRepresentation
 import platform.UIKit.UIImagePickerController
@@ -15,7 +16,6 @@ import platform.UIKit.UIImagePickerControllerDelegateProtocol
 import platform.UIKit.UIImagePickerControllerOriginalImage
 import platform.UIKit.UIImagePickerControllerSourceType
 import platform.UIKit.UINavigationControllerDelegateProtocol
-import platform.Foundation.writeToURL
 
 @Composable
 actual fun rememberCameraCaptureLauncher(
@@ -80,7 +80,7 @@ private class CameraCaptureDelegate :
         val result =
             if (writeSucceeded && fileUrl != null) {
                 CameraCaptureResult(
-                    file = KmpFile(url = fileUrl, tempUrl = fileUrl),
+                    file = KmpFile(url = fileUrl, originalUrl = fileUrl),
                     displayName = fileName,
                 )
             } else {

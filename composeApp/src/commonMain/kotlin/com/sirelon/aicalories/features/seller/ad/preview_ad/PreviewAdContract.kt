@@ -21,6 +21,7 @@ interface PreviewAdContract {
         val minPrice: Float,
         val maxPrice: Float,
         val images: List<String>,
+        val attributes: List<OlxAttribute> = emptyList(),
         val location: OlxLocation? = null,
         val locationLoading: Boolean = false,
         val attributeItems: List<OlxAttributeState> = emptyList(),
