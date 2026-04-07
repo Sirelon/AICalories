@@ -69,6 +69,11 @@ class PreviewAdViewModel(
             .onEach { attributes ->
                 setState { it.copy(attributeItems = attributes.map { OlxAttributeState(it) }) }
             }
+            .catch {
+                it.printStackTrace()
+                // Keep the stream alive so subsequent category changes can retry attribute loading.
+                setState { state -> state.copy(attributeItems = emptyList()) }
+            }
             .launchIn(viewModelScope)
     }
 
