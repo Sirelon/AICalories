@@ -6,10 +6,12 @@ import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.media.upload.MediaUploadHelper
 import com.sirelon.aicalories.features.media.upload.MediaUploadUpdate
 import com.sirelon.aicalories.features.media.upload.UploadingItem
+import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
 import com.sirelon.aicalories.network.OpenAIClient
 import com.sirelon.aicalories.supabase.error.RemoteException
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -21,6 +23,7 @@ import kotlinx.coroutines.launch
 
 class GenerateAdViewModel(
     private val mediaUploadHelper: MediaUploadHelper,
+    private val categoriesRepository: CategoriesRepository,
     private val openAi: OpenAIClient,
 ) : BaseViewModel<GenerateAdContract.GenerateAdState, GenerateAdContract.GenerateAdEvent, GenerateAdContract.GenerateAdEffect>() {
 
@@ -53,13 +56,34 @@ class GenerateAdViewModel(
             .onStart {
                 setState { it.copy(isLoading = true, errorMessage = null) }
             }
+            .onEach { println("onStart") }
+
             .map { uploadFilesAndGetPublicUrls() }
+            .onEach { println("uploadFilesAndGetPublicUrls") }
+
             .catch { error ->
                 setState { it.copy(isLoading = false) }
                 showError(error.message ?: "Upload failed")
             }
             .map { openAi.analyzeThing(it) }
-            .onEach { postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(it)) }
+            .onEach { println("analyzeThing") }
+
+            // get category, attributes, so on
+            .flatMapLatest { data ->
+                categoriesRepository
+                    .categorySuggestion(data.second.title)
+                    .onEach { println("categorySuggestion") }
+
+                    .flatMapLatest { categoriesRepository.getAttributes(it.id) }
+                    .onEach { println("getAttributes") }
+                    // TODO:
+                    .map { data }
+                // load openAi for fill attributes
+            }
+
+            .onEach {
+                postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(it.second))
+            }
             .catch { error ->
                 setState { it.copy(isLoading = false, errorMessage = error.message) }
             }

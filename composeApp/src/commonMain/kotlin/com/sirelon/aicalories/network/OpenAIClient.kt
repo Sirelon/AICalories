@@ -1,6 +1,7 @@
 package com.sirelon.aicalories.network
 
 import com.aallam.openai.api.model.ModelId
+import com.aallam.openai.api.response.ResponseId
 import com.aallam.openai.api.response.ResponseInput
 import com.aallam.openai.api.response.ResponseInputItem
 import com.aallam.openai.api.response.ResponseRequest
@@ -24,7 +25,6 @@ Return ONLY valid JSON:
   "suggestedPrice": number,
   "minPrice": number,
   "maxPrice": number,
-  "condition": "new|like_new|good|fair|poor"
 }
 
 Rules:
@@ -36,7 +36,6 @@ Rules:
 - Pricing: estimate realistic second-hand market value in USD
   - suggestedPrice should be the best estimate
   - minPrice and maxPrice should define a reasonable range
-- Condition must be exactly one of: new, like_new, good, fair, poor
 
 Output:
 - Write all text fields in Ukrainian
@@ -50,7 +49,7 @@ class OpenAIClient(
 
     private val mapper = GeneratedAdMapper()
 
-    suspend fun analyzeThing(images: List<String>): Advertisement {
+    suspend fun analyzeThing(images: List<String>): Pair<ResponseId, Advertisement> {
         val response = openAI.response(
             request = ResponseRequest(
                 model = ModelId("gpt-4.1"),
@@ -74,7 +73,7 @@ class OpenAIClient(
             }
 
         val generatedAd = json.decodeFromString<GeneratedAd>(jsonString)
-        return mapper.mapToDomain(generatedAd, images)
+        return response.id to mapper.mapToDomain(generatedAd, images)
     }
 
     private fun promptInput(): ResponseInputItem = ResponseInputItem(

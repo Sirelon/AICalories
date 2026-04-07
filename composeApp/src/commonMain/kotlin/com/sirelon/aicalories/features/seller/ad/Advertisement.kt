@@ -10,9 +10,4 @@ data class Advertisement(
     val suggestedPrice: Float,
     val minPrice: Float,
     val maxPrice: Float,
-    val condition: AdCondition,
 )
-
-enum class AdCondition {
-    NEW, LIKE_NEW, GOOD, FAIR, POOR
-}
