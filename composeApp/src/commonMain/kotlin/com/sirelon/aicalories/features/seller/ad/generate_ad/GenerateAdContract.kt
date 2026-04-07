@@ -1,6 +1,5 @@
 package com.sirelon.aicalories.features.seller.ad.generate_ad
 
-import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
 import com.sirelon.aicalories.features.media.upload.UploadingItem
 import com.sirelon.aicalories.features.seller.ad.Advertisement
@@ -20,12 +19,9 @@ interface GenerateAdContract {
     sealed interface GenerateAdEvent {
         data class PromptChanged(val value: String) : GenerateAdEvent
 
-        data class UploadFilesResult(
-            val platformContext: PlatformContext,
-            val result: Result<List<KmpFile>>,
-        ) : GenerateAdEvent
+        data class UploadFilesResult(val result: Result<List<KmpFile>>) : GenerateAdEvent
 
-        data class Submit(val platformContext: PlatformContext) : GenerateAdEvent
+        data object Submit : GenerateAdEvent
     }
 
     sealed interface GenerateAdEffect {

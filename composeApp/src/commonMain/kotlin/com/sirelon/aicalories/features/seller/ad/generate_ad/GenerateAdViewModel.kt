@@ -32,54 +32,7 @@ class GenerateAdViewModel(
 
             is GenerateAdContract.GenerateAdEvent.Submit -> {
                 viewModelScope.launch {
-                    setState { it.copy(isLoading = true, errorMessage = null) }
-
-                    val platformContext = event.platformContext
-                    val pendingFiles = state.value.uploads
-                        .filter { (_, item) -> item.isPending }
-                        .keys.toList()
-
-                    var uploadFailed = false
-
-                    if (pendingFiles.isNotEmpty()) {
-                        mediaUploadHelper
-                            .uploadPreparedFiles(platformContext, pendingFiles)
-                            .catch { error ->
-                                uploadFailed = true
-                                setState { it.copy(isLoading = false) }
-                                showError(error.message ?: "Upload failed")
-                            }
-                            .collect { update ->
-                                handleUploadUpdate(update)
-                                when (update) {
-                                    is MediaUploadUpdate.Failure,
-                                    is MediaUploadUpdate.Error -> uploadFailed = true
-
-                                    else -> {}
-                                }
-                            }
-                    }
-
-                    if (uploadFailed) {
-                        setState { it.copy(isLoading = false) }
-                        return@launch
-                    }
-
-                    val uploadedUrls = state.value.uploads
-                        .filter { (_, item) -> item.uploadedFile != null }
-                        .mapNotNull { (_, item) ->
-                            item.uploadedFile?.path?.let {
-                                mediaUploadHelper.publicUrl(it)
-                            }
-                        }
-
-                    runCatching {
-                        val result = openAi.analyzeThing(uploadedUrls)
-                        setState { it.copy(isLoading = false) }
-                        postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(result))
-                    }.onFailure { error ->
-                        setState { it.copy(isLoading = false, errorMessage = error.message) }
-                    }
+                    submit()
                 }
             }
 
@@ -87,13 +40,60 @@ class GenerateAdViewModel(
         }
     }
 
+    private suspend fun submit() {
+        setState { it.copy(isLoading = true, errorMessage = null) }
+
+        val pendingFiles = state.value.uploads
+            .filter { (_, item) -> item.isPending }
+            .keys.toList()
+
+        var uploadFailed = false
+
+        if (pendingFiles.isNotEmpty()) {
+            mediaUploadHelper
+                .uploadPreparedFiles(pendingFiles)
+                .catch { error ->
+                    uploadFailed = true
+                    setState { it.copy(isLoading = false) }
+                    showError(error.message ?: "Upload failed")
+                }
+                .collect { update ->
+                    handleUploadUpdate(update)
+                    when (update) {
+                        is MediaUploadUpdate.Failure,
+                        is MediaUploadUpdate.Error -> uploadFailed = true
+
+                        else -> {}
+                    }
+                }
+        }
+
+        if (uploadFailed) {
+            setState { it.copy(isLoading = false) }
+            return
+        }
+
+        val uploadedUrls = state.value.uploads
+            .filter { (_, item) -> item.uploadedFile != null }
+            .mapNotNull { (_, item) ->
+                item.uploadedFile?.path?.let {
+                    mediaUploadHelper.publicUrl(it)
+                }
+            }
+
+        runCatching {
+            val result = openAi.analyzeThing(uploadedUrls)
+            setState { it.copy(isLoading = false) }
+            postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(result))
+        }.onFailure { error ->
+            setState { it.copy(isLoading = false, errorMessage = error.message) }
+        }
+    }
+
     private fun onFileResult(event: GenerateAdContract.GenerateAdEvent.UploadFilesResult) {
         viewModelScope.launch {
             mediaUploadHelper
-                .prepareFiles(
-                    platformContext = event.platformContext,
-                    selectionResult = event.result,
-                )
+                .prepareFiles(selectionResult = event.result)
                 .onSuccess { files ->
                     setState { current ->
                         val newEntries = files

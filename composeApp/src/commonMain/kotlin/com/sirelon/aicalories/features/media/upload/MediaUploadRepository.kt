@@ -1,6 +1,5 @@
 package com.sirelon.aicalories.features.media.upload
 
-import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.io.getName
 import com.mohamedrejeb.calf.io.getPath
@@ -18,13 +17,13 @@ class MediaUploadRepository(
 
     fun publicUrl(path: String): String = client.publicUrl(path)
 
-    fun uploadFile(platformContext: PlatformContext, file: KmpFile): Flow<UploadStatus> = flow {
+    fun uploadFile(file: KmpFile): Flow<UploadStatus> = flow {
         emitAll(
             client.uploadFile(
-                path = file.getName(platformContext)
-                    ?: file.getPath(platformContext)
+                path = file.getName()
+                    ?: file.getPath()
                     ?: Uuid.random().toString(),
-                byteArray = file.readByteArray(platformContext),
+                byteArray = file.readByteArray(),
             ),
         )
     }

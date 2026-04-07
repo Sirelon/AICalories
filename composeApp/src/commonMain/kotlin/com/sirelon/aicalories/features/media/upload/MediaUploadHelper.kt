@@ -1,6 +1,5 @@
 package com.sirelon.aicalories.features.media.upload
 
-import com.mohamedrejeb.calf.core.PlatformContext
 import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.io.getName
 import com.mohamedrejeb.calf.io.getPath
@@ -27,7 +26,6 @@ class MediaUploadHelper(
      * Store the returned list in your ViewModel and call [uploadPreparedFiles] when ready.
      */
     suspend fun prepareFiles(
-        platformContext: PlatformContext,
         selectionResult: Result<List<KmpFile>>,
     ): Result<List<KmpFile>> {
         val selectedFiles = selectionResult.getOrElse { error ->
@@ -39,7 +37,7 @@ class MediaUploadHelper(
         }
 
         val unsupportedFiles = selectedFiles.filterNot {
-            it.isSupportedOrConvertible(platformContext)
+            it.isSupportedOrConvertible()
         }
         if (unsupportedFiles.isNotEmpty()) {
             return Result.failure(Exception("Only JPG, PNG, or WEBP images are supported."))
@@ -48,7 +46,7 @@ class MediaUploadHelper(
         return runCatching {
             withContext(Dispatchers.Default) {
                 selectedFiles.map { file ->
-                    imageFormatConverter.convert(platformContext, file)
+                    imageFormatConverter.convert(file)
                 }
             }
         }
@@ -58,10 +56,7 @@ class MediaUploadHelper(
      * Uploads all previously prepared files to Supabase in parallel.
      * Call this when the user confirms (e.g. taps a confirm button).
      */
-    fun uploadPreparedFiles(
-        platformContext: PlatformContext,
-        files: List<KmpFile>,
-    ): Flow<MediaUploadUpdate> = channelFlow {
+    fun uploadPreparedFiles(files: List<KmpFile>): Flow<MediaUploadUpdate> = channelFlow {
         if (files.isEmpty()) {
             send(MediaUploadUpdate.Error("No files to upload."))
             return@channelFlow
@@ -74,7 +69,7 @@ class MediaUploadHelper(
         files.forEach { file ->
             send(MediaUploadUpdate.UploadStarted(file))
             launch {
-                repository.uploadFile(platformContext, file)
+                repository.uploadFile(file)
                     .onEach { status ->
                         when (status) {
                             is UploadStatus.Progress -> {
@@ -100,30 +95,34 @@ class MediaUploadHelper(
                         }
                     }
                     .catch { error ->
-                        send(MediaUploadUpdate.Failure(file, error.message ?: "Failed to upload file."))
+                        send(
+                            MediaUploadUpdate.Failure(
+                                file,
+                                error.message ?: "Failed to upload file."
+                            )
+                        )
                     }
                     .collect()
             }
         }
     }
 
-    fun uploadSelectedFiles(
-        platformContext: PlatformContext,
-        selectionResult: Result<List<KmpFile>>,
-    ): Flow<MediaUploadUpdate> = channelFlow {
-        val prepared = prepareFiles(platformContext, selectionResult)
-        val files = prepared.getOrElse { error ->
-            send(MediaUploadUpdate.Error(error.message ?: "Unable to process selected files."))
-            return@channelFlow
-        }
+    fun uploadSelectedFiles(selectionResult: Result<List<KmpFile>>): Flow<MediaUploadUpdate> =
+        channelFlow {
+            val prepared = prepareFiles(selectionResult)
+            val files = prepared.getOrElse { error ->
+                send(MediaUploadUpdate.Error(error.message ?: "Unable to process selected files."))
+                return@channelFlow
+            }
 
-        uploadPreparedFiles(platformContext, files).collect { send(it) }
-    }
+            uploadPreparedFiles(files).collect { send(it) }
+        }
 }
 
 sealed interface MediaUploadUpdate {
     data object Started : MediaUploadUpdate
     data class AddPlaceholder(val file: KmpFile) : MediaUploadUpdate
+
     /** Emitted per file when batch upload begins. Flip item status to [UploadingStatus.Uploading]. */
     data class UploadStarted(val file: KmpFile) : MediaUploadUpdate
     data class Progress(
@@ -155,14 +154,14 @@ private fun UploadStatus.Progress.toProgressPercent(): Double {
 private val SUPPORTED_IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "webp")
 private val CONVERTIBLE_IMAGE_EXTENSIONS = setOf("heic", "heif")
 
-private fun KmpFile.isSupportedOrConvertible(context: PlatformContext): Boolean {
-    val extension = getFileExtension(context) ?: return false
+private fun KmpFile.isSupportedOrConvertible(): Boolean {
+    val extension = getFileExtension() ?: return false
     return extension in SUPPORTED_IMAGE_EXTENSIONS || extension in CONVERTIBLE_IMAGE_EXTENSIONS
 }
 
-private fun KmpFile.getFileExtension(context: PlatformContext): String? {
-    val candidate = getName(context)
-        ?: getPath(context)
+private fun KmpFile.getFileExtension(): String? {
+    val candidate = getName()
+        ?: getPath()
         ?: return null
     val rawExtension = candidate.substringAfterLast('.', missingDelimiterValue = "")
     return rawExtension.takeIf { it.isNotBlank() }?.lowercase()
