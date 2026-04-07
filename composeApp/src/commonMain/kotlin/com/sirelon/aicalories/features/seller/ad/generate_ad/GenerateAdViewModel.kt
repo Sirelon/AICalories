@@ -94,7 +94,8 @@ class GenerateAdViewModel(
     }
 
     private suspend fun uploadFilesAndGetPublicUrls(): List<String> {
-        val pendingFiles = state.value.uploads
+        val pendingFiles = currentState()
+            .uploads
             .filter { (_, item) -> item.isPending }
             .keys.toList()
 

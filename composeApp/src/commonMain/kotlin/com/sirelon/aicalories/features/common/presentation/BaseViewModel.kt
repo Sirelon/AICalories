@@ -37,4 +37,6 @@ abstract class BaseViewModel<State, Event, Effect> : ViewModel() {
     fun postEffect(effect: Effect) {
         _effects.trySend(effect)
     }
+
+    fun currentState(): State = _state.value
 }
