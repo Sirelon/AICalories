@@ -1,7 +1,7 @@
 package com.sirelon.aicalories.features.history.presentation
 
 import com.sirelon.aicalories.designsystem.ChipStyle
-import com.sirelon.aicalories.designsystem.RandomData
+import com.sirelon.aicalories.designsystem.utils.RandomData
 import com.sirelon.aicalories.features.history.ui.CaloriePointRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryAttachmentRenderModel
 import com.sirelon.aicalories.features.history.ui.HistoryEntryRenderModel

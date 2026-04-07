@@ -74,7 +74,10 @@ class CategoriesRepository(
     private fun normalize(data: List<OlxCategory>): List<OlxCategory> {
         val grouppedData = data.groupBy { it.parentId }.toMutableMap()
 
-        val toRemove = grouppedData[null].orEmpty().filter { notSupportedParentIds.contains(it.id) }
+        val rootCategories = grouppedData[null].orEmpty()
+        val toRemove = rootCategories.filter { notSupportedParentIds.contains(it.id) }
+
+        grouppedData[null] = rootCategories - toRemove
 
         grouppedData.removeLeaves(toRemove)
 

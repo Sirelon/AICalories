@@ -1,12 +1,14 @@
 package com.sirelon.aicalories.features.common.presentation
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlin.LazyThreadSafetyMode
 
 abstract class BaseViewModel<State, Event, Effect> : ViewModel() {
 
@@ -15,6 +17,11 @@ abstract class BaseViewModel<State, Event, Effect> : ViewModel() {
     }
     val state: StateFlow<State>
         get() = _state
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = initialState()
+            )
 
     private val _effects = Channel<Effect>(Channel.BUFFERED)
     val effects = _effects.receiveAsFlow()

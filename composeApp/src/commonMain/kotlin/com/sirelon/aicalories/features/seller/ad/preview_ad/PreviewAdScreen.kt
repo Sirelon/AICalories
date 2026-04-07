@@ -58,7 +58,7 @@ import com.sirelon.aicalories.designsystem.InputWithCopy
 import com.sirelon.aicalories.designsystem.ObserveAsEvents
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
-import com.sirelon.aicalories.designsystem.generateRandomColor
+import com.sirelon.aicalories.designsystem.utils.generateRandomColor
 import com.sirelon.aicalories.features.media.PermissionDialogContent
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController

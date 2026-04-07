@@ -1,4 +1,4 @@
-package com.sirelon.aicalories.designsystem
+package com.sirelon.aicalories.designsystem.utils
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Balance
@@ -16,7 +16,8 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Whatshot
-import androidx.compose.ui.graphics.Color
+import com.sirelon.aicalories.designsystem.ChipData
+import com.sirelon.aicalories.designsystem.ChipStyle
 import kotlin.random.Random
 
 object RandomData {
@@ -76,9 +77,11 @@ object RandomData {
             "High quality",
             "Balanced",
             "Protein-rich" -> ChipStyle.Success
+
             "Needs attention",
             "Too fatty",
             "Too sweet" -> ChipStyle.Error
+
             else -> ChipStyle.Neutral
         }
         return ChipData(text = tags[index], icon = icons.getOrNull(index), style = style)
@@ -87,26 +90,40 @@ object RandomData {
     fun randomInsightChip(random: Random, average: Int): List<ChipData> {
 
         val options = listOf(
-            ChipData("Avg ${average} kcal/day", Icons.Default.LocalFireDepartment, ChipStyle.Success),
-            ChipData("Consistency +${random.nextInt(2, 12)}%", Icons.Default.Insights, ChipStyle.Success),
-            ChipData("Protein +${random.nextInt(5, 20)}g", Icons.Default.FitnessCenter, ChipStyle.Success),
-            ChipData("Hydration ${random.nextInt(1, 4)}L", Icons.Default.WaterDrop, ChipStyle.Success),
+            ChipData(
+                "Avg ${average} kcal/day",
+                Icons.Default.LocalFireDepartment,
+                ChipStyle.Success
+            ),
+            ChipData(
+                "Consistency +${random.nextInt(2, 12)}%",
+                Icons.Default.Insights,
+                ChipStyle.Success
+            ),
+            ChipData(
+                "Protein +${random.nextInt(5, 20)}g",
+                Icons.Default.FitnessCenter,
+                ChipStyle.Success
+            ),
+            ChipData(
+                "Hydration ${random.nextInt(1, 4)}L",
+                Icons.Default.WaterDrop,
+                ChipStyle.Success
+            ),
             ChipData("Sleep ${random.nextInt(6, 9)}h", Icons.Default.Bedtime, ChipStyle.Success),
-            ChipData("Steps ${random.nextInt(6000, 12000)}", Icons.Default.DirectionsRun, ChipStyle.Success),
+            ChipData(
+                "Steps ${random.nextInt(6000, 12000)}",
+                Icons.Default.DirectionsRun,
+                ChipStyle.Success
+            ),
             ChipData("Fat −${random.nextInt(5, 15)}%", Icons.Default.Whatshot, ChipStyle.Success),
-            ChipData("Carbs ${random.nextInt(40, 65)}%", Icons.Default.LocalDining, ChipStyle.Success),
+            ChipData(
+                "Carbs ${random.nextInt(40, 65)}%",
+                Icons.Default.LocalDining,
+                ChipStyle.Success
+            ),
         )
 
         return options.shuffled(random).take(2)
     }
-}
-
-
-fun generateRandomColor(): Color {
-    return Color(
-        red = Random.nextFloat(),
-        green = Random.nextFloat(),
-        blue = Random.nextFloat(),
-        alpha = 1f
-    )
 }

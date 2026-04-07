@@ -1,6 +1,7 @@
-package com.sirelon.aicalories.designsystem
+package com.sirelon.aicalories.designsystem.utils
 
 import androidx.compose.ui.graphics.Color
+import com.sirelon.aicalories.designsystem.AppColors
 
 object ThemesFactory {
 

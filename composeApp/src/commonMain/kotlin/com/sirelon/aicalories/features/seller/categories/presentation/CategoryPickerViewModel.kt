@@ -19,21 +19,30 @@ class CategoryPickerViewModel(
     override fun initialState() = CategoryPickerState()
 
     init {
-        categoriesRepository.loadCategories()
+        val flow = if (parentId == null) {
+            categoriesRepository.getRootCategories()
+        } else {
+            categoriesRepository.getSubcategories(parentId)
+        }
+
+        flow
             .map { all ->
-                val toDisplay = if (parentId == null) {
-                    all.filter { it.parentId == null }
-                } else {
-                    all.filter { it.parentId == parentId }
-                }
-                toDisplay.map { category ->
+                all.map { category ->
                     CategoryWithChildCount(
                         category = category,
+                        // TODO: it's incorrect
                         childCount = all.count { it.parentId == category.id },
                     )
                 }
             }
-            .onEach { categories -> setState { it.copy(categories = categories, isLoading = false) } }
+            .onEach { categories ->
+                setState {
+                    it.copy(
+                        categories = categories,
+                        isLoading = false
+                    )
+                }
+            }
             .launchIn(viewModelScope)
     }
 
