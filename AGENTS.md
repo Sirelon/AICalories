@@ -14,7 +14,7 @@ AI-optimized repo map for agents working in this workspace. Read this first; onl
   - Android Gradle Plugin `9.1.0`
   - Ktor `3.4.2`
   - Koin `4.2.0`
-  - Supabase Kotlin `3.4.1`
+  - Supabase Kotlin `3.5.0`
   - Navigation3 runtime/UI
 - JVM target is `11` across Android/JVM/server.
 
@@ -231,6 +231,7 @@ Most features use some combination of:
 
 ## Important Build Notes
 - `composeApp/build.gradle.kts` has a custom Compose resources setup for Android.
+- `composeApp` applies the Compose Hot Reload plugin; keep it in mind when touching desktop/web dev workflow or plugin configuration.
 - Do not remove the `copyComposeResourcesToAndroidAssets` workaround if you encounter it elsewhere in the file/history.
 - `copyAndroidMainComposeResourcesToAndroidAssets` may be disabled intentionally to avoid build failures.
 - `compose.resources` generates public resources class:
@@ -239,9 +240,13 @@ Most features use some combination of:
 
 ## Common Commands
 - Build Android debug: `./gradlew :composeApp:assembleDebug`
+- Build desktop JVM artifact: `./gradlew :composeApp:jvmJar`
 - Run desktop app: `./gradlew :composeApp:run`
+- Build server: `./gradlew :server:build`
 - Run server: `./gradlew :server:run`
+- Build web Wasm production bundle: `./gradlew :composeApp:wasmJsBrowserProductionWebpack`
 - Run web Wasm: `./gradlew :composeApp:wasmJsBrowserDevelopmentRun`
+- Build web JS production bundle: `./gradlew :composeApp:jsBrowserProductionWebpack`
 - Run web JS: `./gradlew :composeApp:jsBrowserDevelopmentRun`
 - Run all tests: `./gradlew allTests`
 - Android lint: `./gradlew lint`

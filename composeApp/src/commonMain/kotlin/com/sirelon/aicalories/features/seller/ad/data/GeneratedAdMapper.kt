@@ -1,8 +1,6 @@
 package com.sirelon.aicalories.features.seller.ad.data
 
-import com.sirelon.aicalories.features.seller.ad.AdCondition
 import com.sirelon.aicalories.features.seller.ad.Advertisement
-import com.sirelon.aicalories.network.responses.Condition
 import com.sirelon.aicalories.network.responses.GeneratedAd
 
 class GeneratedAdMapper {
@@ -14,16 +12,7 @@ class GeneratedAdMapper {
             suggestedPrice = generatedAd.suggestedPrice,
             minPrice = generatedAd.minPrice,
             maxPrice = generatedAd.maxPrice,
-            condition = generatedAd.condition.toDomain(),
             images = images,
         )
-    }
-
-    private fun Condition.toDomain(): AdCondition = when (this) {
-        Condition.NEW -> AdCondition.NEW
-        Condition.LIKE_NEW -> AdCondition.LIKE_NEW
-        Condition.GOOD -> AdCondition.GOOD
-        Condition.FAIR -> AdCondition.FAIR
-        Condition.POOR -> AdCondition.POOR
     }
 }
