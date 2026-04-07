@@ -69,6 +69,7 @@ import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import com.sirelon.aicalories.features.seller.categories.ui.AttributeItem
 import com.sirelon.aicalories.features.seller.location.OlxLocation
 import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.ad_attributes_label
 import com.sirelon.aicalories.generated.resources.ad_category_label
 import com.sirelon.aicalories.generated.resources.ad_description_label
 import com.sirelon.aicalories.generated.resources.ad_location_label
@@ -236,8 +237,11 @@ private fun PreviewAdContent(
             onChangeClick = { onEvent(PreviewAdEvent.OnChangeCategoryClick) },
         )
 
-        state.attributes.forEach {
-            AttributeItem(it)
+        if (state.attributeItems.isNotEmpty()) {
+            AdAttributesCard(
+                items = state.attributeItems,
+                onEvent = onEvent,
+            )
         }
 
         AdLocationCard(
@@ -451,6 +455,27 @@ private fun AdCategoryCard(categoryLabel: String, onChangeClick: () -> Unit) {
             )
         }
     )
+}
+
+@Composable
+private fun AdAttributesCard(
+    items: List<OlxAttributeState>,
+    onEvent: (PreviewAdEvent) -> Unit,
+) {
+    PreviewSectionCard(label = stringResource(Res.string.ad_attributes_label)) {
+        Column {
+            items.forEach { item ->
+                AttributeItem(
+                    attribute = item.attribute,
+                    selectedValues = item.selectedValues,
+                    onSelectionChange = { values ->
+                        onEvent(PreviewAdEvent.AttributeValueChanged(item.attribute.code, values))
+                    },
+                    validationError = item.error,
+                )
+            }
+        }
+    }
 }
 
 @Composable

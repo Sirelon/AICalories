@@ -1,9 +1,17 @@
 package com.sirelon.aicalories.features.seller.ad.preview_ad
 
 import com.sirelon.aicalories.features.seller.categories.domain.OlxAttribute
+import com.sirelon.aicalories.features.seller.categories.domain.OlxAttributeValue
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
+import com.sirelon.aicalories.features.seller.categories.domain.ValidationError
 import com.sirelon.aicalories.features.seller.location.OlxLocation
 import kotlin.jvm.JvmInline
+
+data class OlxAttributeState(
+    val attribute: OlxAttribute,
+    val selectedValues: List<OlxAttributeValue> = emptyList(),
+    val error: ValidationError? = null,
+)
 
 interface PreviewAdContract {
 
@@ -16,6 +24,7 @@ interface PreviewAdContract {
         val attributes: List<OlxAttribute> = emptyList(),
         val location: OlxLocation? = null,
         val locationLoading: Boolean = false,
+        val attributeItems: List<OlxAttributeState> = emptyList(),
     )
 
     sealed interface PreviewAdEvent {
@@ -28,6 +37,11 @@ interface PreviewAdContract {
         value class OnPriceChanged(val price: Float) : PreviewAdEvent
 
         data object FetchLocation : PreviewAdEvent
+
+        data class AttributeValueChanged(
+            val attributeCode: String,
+            val values: List<OlxAttributeValue>,
+        ) : PreviewAdEvent
     }
 
     sealed interface PreviewAdEffect {

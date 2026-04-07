@@ -251,6 +251,17 @@
     <string name="open_settings">Відкрити налаштування</string>
     <string name="cancel">Скасувати</string>
 
+    <!-- Attributes -->
+    <string name="ad_attributes_label">Деталі</string>
+    <string name="attr_select_placeholder">Оберіть…</string>
+    <string name="confirm">Підтвердити</string>
+    <string name="error_attr_required">Це поле обов\'язкове</string>
+    <string name="error_attr_must_be_numeric">Має бути числом</string>
+    <string name="error_attr_below_minimum">Має бути не менше %1$s</string>
+    <string name="error_attr_above_maximum">Має бути не більше %1$s</string>
+    <string name="error_attr_invalid_selection">Невірний вибір</string>
+    <string name="error_attr_multiple_values_not_allowed">Дозволено лише одне значення</string>
+
     <!-- Preview Ad Screen -->
     <string name="copy">Копіювати</string>
     <string name="ad_title_label">Назва</string>
