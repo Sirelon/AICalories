@@ -250,6 +250,17 @@
     <string name="open_settings">Open settings</string>
     <string name="cancel">Cancel</string>
 
+    <!-- Attributes -->
+    <string name="ad_attributes_label">Details</string>
+    <string name="attr_select_placeholder">Select…</string>
+    <string name="confirm">Confirm</string>
+    <string name="error_attr_required">This field is required</string>
+    <string name="error_attr_must_be_numeric">Must be a number</string>
+    <string name="error_attr_below_minimum">Must be at least %1$s</string>
+    <string name="error_attr_above_maximum">Must be at most %1$s</string>
+    <string name="error_attr_invalid_selection">Invalid selection</string>
+    <string name="error_attr_multiple_values_not_allowed">Only one value allowed</string>
+
     <!-- Preview Ad Screen -->
     <string name="copy">Copy</string>
     <string name="ad_title_label">Title</string>
