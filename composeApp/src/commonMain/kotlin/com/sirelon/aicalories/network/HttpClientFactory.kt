@@ -44,5 +44,12 @@ fun createHttpClient(tokenProvider: ApiTokenProvider): HttpClient =
 
 
 fun createOpenAI(tokenProvider: ApiTokenProvider): OpenAI = OpenAI(
-    config = OpenAIConfig(token = tokenProvider.token!!, timeout = Timeout(3.minutes))
+    config = OpenAIConfig(
+        token = tokenProvider.token!!,
+        timeout = Timeout(
+            request = 5.minutes,
+            connect = 5.minutes,
+            socket = 5.minutes,
+        )
+    )
 )
