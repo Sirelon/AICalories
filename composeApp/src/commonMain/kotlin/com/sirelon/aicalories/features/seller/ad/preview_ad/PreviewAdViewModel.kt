@@ -155,6 +155,23 @@ class PreviewAdViewModel(
             return
         }
 
+        val validatedItems = s.attributeItems.map { item ->
+            val valuesToValidate = when (item.attribute.inputType) {
+                AttributeInputType.SingleSelect, AttributeInputType.MultiSelect ->
+                    item.selectedValues.map { it.code }
+                AttributeInputType.NumericInput, AttributeInputType.TextInput ->
+                    item.selectedValues.map { it.label }
+            }
+            val error = (attributeValidator.validate(item.attribute, valuesToValidate) as? AttributeValidationResult.Invalid)?.reason
+            item.copy(error = error)
+        }
+        val hasErrors = validatedItems.any { it.error != null }
+        if (hasErrors) {
+            setState { it.copy(attributeItems = validatedItems) }
+            postEffect(ShowMessage("Please fix attribute errors before publishing."))
+            return
+        }
+
         setState { it.copy(isPublishing = true) }
 
         val contactName = olxApiClient.getAuthenticatedUser().getOrNull()?.name
@@ -172,6 +189,7 @@ class PreviewAdViewModel(
             images = s.images,
             price = s.price,
             contactName = contactName,
+            attributeItems = validatedItems,
         )
 
         olxApiClient.postAdvert(request)

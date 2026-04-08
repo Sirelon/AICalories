@@ -13,7 +13,13 @@ internal data class PostAdvertRequest(
     @SerialName("location") val location: AdvertLocationRequest,
     @SerialName("images") val images: List<AdvertImageRequest>,
     @SerialName("price") val price: AdvertPriceRequest?,
-    @SerialName("attributes") val attributes: List<String>,
+    @SerialName("attributes") val attributes: List<AdvertAttributeRequest>,
+)
+
+@Serializable
+internal data class AdvertAttributeRequest(
+    @SerialName("code") val code: String,
+    @SerialName("values") val values: List<String>,
 )
 
 @Serializable
