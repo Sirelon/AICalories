@@ -1,29 +1,34 @@
 package com.sirelon.aicalories.features.seller.ad.data
 
-import com.sirelon.aicalories.features.seller.ad.AdCondition
 import com.sirelon.aicalories.features.seller.ad.Advertisement
-import com.sirelon.aicalories.network.responses.Condition
 import com.sirelon.aicalories.network.responses.GeneratedAd
 
 class GeneratedAdMapper {
 
     fun mapToDomain(generatedAd: GeneratedAd, images: List<String>): Advertisement {
-        return Advertisement(
-            title = generatedAd.title,
-            description = generatedAd.description,
-            suggestedPrice = generatedAd.suggestedPrice,
-            minPrice = generatedAd.minPrice,
-            maxPrice = generatedAd.maxPrice,
-            condition = generatedAd.condition.toDomain(),
-            images = images,
-        )
-    }
+        val normalizedMinPrice = minOf(
+            generatedAd.minPrice,
+            generatedAd.maxPrice,
+            generatedAd.suggestedPrice,
+        ).coerceAtLeast(0f)
 
-    private fun Condition.toDomain(): AdCondition = when (this) {
-        Condition.NEW -> AdCondition.NEW
-        Condition.LIKE_NEW -> AdCondition.LIKE_NEW
-        Condition.GOOD -> AdCondition.GOOD
-        Condition.FAIR -> AdCondition.FAIR
-        Condition.POOR -> AdCondition.POOR
+        val normalizedMaxPrice = maxOf(
+            generatedAd.minPrice,
+            generatedAd.maxPrice,
+            generatedAd.suggestedPrice,
+        ).coerceAtLeast(normalizedMinPrice)
+
+        val normalizedSuggestedPrice = generatedAd.suggestedPrice
+            .coerceAtLeast(0f)
+            .coerceIn(normalizedMinPrice, normalizedMaxPrice)
+
+        return Advertisement(
+            title = generatedAd.title.trim().ifBlank { "Товар" },
+            description = generatedAd.description.trim().ifBlank { "Стан і деталі дивіться на фото." },
+            suggestedPrice = normalizedSuggestedPrice,
+            minPrice = normalizedMinPrice,
+            maxPrice = normalizedMaxPrice,
+            images = images.distinct(),
+        )
     }
 }

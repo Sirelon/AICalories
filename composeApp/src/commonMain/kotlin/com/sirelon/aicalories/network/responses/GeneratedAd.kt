@@ -15,19 +15,5 @@ data class GeneratedAd(
     val minPrice: Float,
     @SerialName("maxPrice")
     val maxPrice: Float,
-    @SerialName("condition")
-    val condition: Condition,
 )
 
-enum class Condition {
-    @SerialName("new")
-    NEW,
-    @SerialName("like_new")
-    LIKE_NEW,
-    @SerialName("good")
-    GOOD,
-    @SerialName("fair")
-    FAIR,
-    @SerialName("poor")
-    POOR
-}

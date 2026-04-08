@@ -38,7 +38,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.mohamedrejeb.calf.core.LocalPlatformContext
 import com.mohamedrejeb.calf.permissions.Camera
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.designsystem.AppCard
@@ -61,7 +60,30 @@ import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.features.media.ui.PhotosSection
 import com.sirelon.aicalories.generated.resources.Res
-import com.sirelon.aicalories.generated.resources.*
+import com.sirelon.aicalories.generated.resources.add_description
+import com.sirelon.aicalories.generated.resources.add_photos_title
+import com.sirelon.aicalories.generated.resources.analysis_result_title
+import com.sirelon.aicalories.generated.resources.analyze_button
+import com.sirelon.aicalories.generated.resources.analyzing
+import com.sirelon.aicalories.generated.resources.bullet_item
+import com.sirelon.aicalories.generated.resources.checklist
+import com.sirelon.aicalories.generated.resources.confirm_and_save
+import com.sirelon.aicalories.generated.resources.crunching_numbers
+import com.sirelon.aicalories.generated.resources.description_placeholder
+import com.sirelon.aicalories.generated.resources.detected_insights
+import com.sirelon.aicalories.generated.resources.issues_noted
+import com.sirelon.aicalories.generated.resources.loading_report
+import com.sirelon.aicalories.generated.resources.no_summary_yet
+import com.sirelon.aicalories.generated.resources.nutrition_breakdown_loading
+import com.sirelon.aicalories.generated.resources.nutrition_facts_loading
+import com.sirelon.aicalories.generated.resources.quantity_format
+import com.sirelon.aicalories.generated.resources.review_detected_items
+import com.sirelon.aicalories.generated.resources.summary
+import com.sirelon.aicalories.generated.resources.syncing
+import com.sirelon.aicalories.generated.resources.tags
+import com.sirelon.aicalories.generated.resources.total_nutrition
+import com.sirelon.aicalories.generated.resources.uncertainties
+import com.sirelon.aicalories.generated.resources.upload_images_hint
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -73,7 +95,6 @@ fun AnalyzeScreen(
     val viewModel: AnalyzeViewModel = koinViewModel()
 
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val platformContext = LocalPlatformContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val permissionController = rememberPermissionController(permission = Permission.Camera)
 
@@ -85,12 +106,7 @@ fun AnalyzeScreen(
     val photoPicker = rememberPhotoPickerController(
         permissionController = permissionController,
         onResult = {
-            viewModel.onEvent(
-                AnalyzeContract.AnalyzeEvent.UploadFilesResult(
-                    platformContext = platformContext,
-                    result = it,
-                )
-            )
+            viewModel.onEvent(AnalyzeContract.AnalyzeEvent.UploadFilesResult(result = it))
         },
     )
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -211,8 +227,10 @@ private fun AnalyzeTopBar(
     onBack: (() -> Unit)?,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    val title = if (hasResult) stringResource(Res.string.analysis_result_title) else stringResource(Res.string.add_photos_title)
-    val subtitle = if (hasResult) stringResource(Res.string.review_detected_items) else stringResource(Res.string.upload_images_hint)
+    val title =
+        if (hasResult) stringResource(Res.string.analysis_result_title) else stringResource(Res.string.add_photos_title)
+    val subtitle =
+        if (hasResult) stringResource(Res.string.review_detected_items) else stringResource(Res.string.upload_images_hint)
     AppLargeAppBar(
         title = title,
         subtitle = subtitle,
@@ -280,7 +298,9 @@ private fun AnalyzeBottomBar(
                     )
                     Spacer(modifier = Modifier.width(AppDimens.Spacing.xl3))
                     Text(
-                        text = if (hasResult) stringResource(Res.string.syncing) else stringResource(Res.string.analyzing),
+                        text = if (hasResult) stringResource(Res.string.syncing) else stringResource(
+                            Res.string.analyzing
+                        ),
                         style = AppTheme.typography.title,
                     )
                 } else {
@@ -342,7 +362,9 @@ private fun PendingAnalysisCard(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
             Text(
-                text = if (isLoading) stringResource(Res.string.crunching_numbers) else stringResource(Res.string.no_summary_yet),
+                text = if (isLoading) stringResource(Res.string.crunching_numbers) else stringResource(
+                    Res.string.no_summary_yet
+                ),
                 style = AppTheme.typography.label,
             )
             Text(

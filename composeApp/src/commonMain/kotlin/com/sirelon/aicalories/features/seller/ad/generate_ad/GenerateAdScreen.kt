@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.mohamedrejeb.calf.core.LocalPlatformContext
 import com.mohamedrejeb.calf.permissions.Camera
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.designsystem.AppDimens
@@ -76,19 +75,13 @@ fun GenerateAdScreen(
 ) {
     val viewModel: GenerateAdViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val platformContext = LocalPlatformContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val permissionController = rememberPermissionController(permission = Permission.Camera)
 
     val photoPicker = rememberPhotoPickerController(
         permissionController = permissionController,
         onResult = { selectionResult ->
-            viewModel.onEvent(
-                GenerateAdContract.GenerateAdEvent.UploadFilesResult(
-                    platformContext = platformContext,
-                    result = selectionResult,
-                )
-            )
+            viewModel.onEvent(GenerateAdContract.GenerateAdEvent.UploadFilesResult(result = selectionResult))
         },
     )
 
@@ -124,7 +117,7 @@ fun GenerateAdScreen(
                 },
                 onSubmitClick = {
                     if (state.canSubmit) {
-                        viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit(platformContext))
+                        viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit)
                     }
                 },
                 modifier = modifier,
@@ -157,7 +150,9 @@ private fun GenerateAdScreenContent(
                     .navigationBarsPadding()
                     .padding(horizontal = AppDimens.Spacing.xl3),
                 style = AppButtonDefaults.primary(),
-                text = if (state.isLoading) stringResource(Res.string.generating) else stringResource(Res.string.generate_ad_with_ai),
+                text = if (state.isLoading) stringResource(Res.string.generating) else stringResource(
+                    Res.string.generate_ad_with_ai
+                ),
                 onClick = onSubmitClick,
                 leadingIcon = if (state.isLoading) null else painterResource(Res.drawable.ic_sparkles),
                 enabled = state.canSubmit,

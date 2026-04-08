@@ -11,7 +11,6 @@ import com.sirelon.aicalories.features.media.upload.UploadingItem
 import com.sirelon.aicalories.supabase.error.RemoteException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
@@ -84,10 +83,7 @@ internal class AnalyzeViewModel(
     private fun onFileResult(event: AnalyzeContract.AnalyzeEvent.UploadFilesResult) {
         viewModelScope.launch {
             mediaUploadHelper
-                .uploadSelectedFiles(
-                    platformContext = event.platformContext,
-                    selectionResult = event.result,
-                )
+                .uploadSelectedFiles(selectionResult = event.result)
                 .catch { error ->
                     showError(error.message ?: "Failed to upload file.")
                 }
