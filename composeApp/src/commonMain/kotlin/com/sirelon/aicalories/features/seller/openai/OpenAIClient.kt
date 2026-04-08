@@ -1,13 +1,11 @@
 package com.sirelon.aicalories.features.seller.openai
 
-import com.aallam.openai.api.core.Parameters
 import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.api.response.Response
 import com.aallam.openai.api.response.ResponseId
 import com.aallam.openai.api.response.ResponseInput
 import com.aallam.openai.api.response.ResponseInputItem
 import com.aallam.openai.api.response.ResponseRequest
-import com.aallam.openai.api.response.ResponseTool
 import com.aallam.openai.client.OpenAI
 import com.sirelon.aicalories.features.seller.ad.Advertisement
 import com.sirelon.aicalories.features.seller.ad.data.GeneratedAdMapper
@@ -17,20 +15,15 @@ import com.sirelon.aicalories.features.seller.categories.domain.OlxAttributeValu
 import com.sirelon.aicalories.features.seller.openai.requests.OpenAIAttributeOptionRequest
 import com.sirelon.aicalories.features.seller.openai.requests.OpenAIAttributeRequest
 import com.sirelon.aicalories.features.seller.openai.requests.OpenAIAttributesRequest
+import com.sirelon.aicalories.features.seller.openai.responses.OpenAIAttributeSuggestionResponse
 import com.sirelon.aicalories.features.seller.openai.responses.OpenAIAttributeSuggestionsResponse
 import com.sirelon.aicalories.features.seller.openai.responses.OpenAIGeneratedAd
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import kotlinx.serialization.json.putJsonArray
-import kotlinx.serialization.json.putJsonObject
 
 private val DEFAULT_MODEL = ModelId("gpt-4.1")
-private const val GENERATE_AD_TOOL_NAME = "generate_marketplace_listing"
-private const val FILL_ATTRIBUTES_TOOL_NAME = "fill_marketplace_attributes"
-
 private const val DEFAULT_IMAGE_DETAIL = "high"
 
 private const val AD_GENERATION_INSTRUCTIONS = """
@@ -50,6 +43,9 @@ Rules:
 - Price for the second-hand marketplace value, not new retail price and not collectible premium price.
 - Ensure `minPrice <= suggestedPrice <= maxPrice`.
 - If the photos are not clear enough for a confident listing, return generic but usable text and conservative pricing.
+- Return ONLY valid JSON with this exact shape:
+  {"title":"string","description":"string","suggestedPrice":number,"minPrice":number,"maxPrice":number}
+- The response must start with `{` and end with `}`.
 """
 
 private const val ATTRIBUTE_FILL_INSTRUCTIONS = """
@@ -64,6 +60,9 @@ Rules:
 - Never invent hidden specifications or unsupported details.
 - Respect numeric limits.
 - Use at most one value unless the attribute explicitly supports multiple choices.
+- Return ONLY valid JSON with this exact shape:
+  {"attributes":[{"code":"string","valueCodes":["string"],"valueText":"string","confidence":"high|medium|low"}]}
+- The response must start with `{` and end with `}`.
 """
 
 class OpenAIClient(
@@ -72,6 +71,7 @@ class OpenAIClient(
 ) {
 
     private val mapper = GeneratedAdMapper()
+
     // Compact serializer for prompt-side payloads so we don't waste tokens on nulls/defaults.
     private val compactJson = Json {
         ignoreUnknownKeys = true
@@ -89,36 +89,19 @@ class OpenAIClient(
 
         val response = openAI.response(
             request = ResponseRequest(
-                // Vision-capable model used for both the initial listing and the follow-up attribute pass.
+                // Vision-capable model reused for the follow-up attribute pass.
                 model = model,
-                // Reuses the model's prior understanding of the item from the image-analysis turn.
+                // Pulls server-side context from the stored listing-analysis response.
                 previousResponseId = previousResponseId,
-                // Re-states the task rules for this turn. Previous response context does not replace clear instructions.
+                // Re-states task rules for this turn; previous response context does not replace instructions.
                 instructions = ATTRIBUTE_FILL_INSTRUCTIONS.trimIndent(),
-                // Keep sampling deterministic for structured attribute extraction.
+                // Deterministic output is preferable here because we want stable attribute picks.
                 temperature = 0.0,
-                // Caps output size so the model stays inside the compact tool payload we expect.
+                // Attribute-filling output grows with the number of fields/options, so cap proportionally.
                 maxOutputTokens = attributeOutputTokenLimit(attributes.size),
-                // We want exactly one tool call payload, not parallel tool branches.
-                parallelToolCalls = false,
-                // Avoid storing this response for distillation/evals since it contains user listing data.
+                // This follow-up response is not chained further yet.
                 store = false,
-                // Force a single structured function payload instead of free-form text.
-                toolChoice = buildJsonObject {
-                    put("type", "function")
-                    put("name", FILL_ATTRIBUTES_TOOL_NAME)
-                },
-                // Declares the strict schema the model must use for returned attribute suggestions.
-                tools = listOf(
-                    ResponseTool(
-                        type = "function",
-                        name = FILL_ATTRIBUTES_TOOL_NAME,
-                        description = "Fill OLX attribute values for the previously analyzed marketplace item.",
-                        parameters = generatedAttributeSuggestionParameters(),
-                        strict = true,
-                    )
-                ),
-                // This turn only needs compact text input because the image understanding comes from previousResponseId.
+                // Only compact text input is needed because the item understanding comes from `previousResponseId`.
                 input = ResponseInput(
                     items = listOf(
                         createTextUserResponseItem(buildAttributeFillPrompt(attributes))
@@ -127,7 +110,7 @@ class OpenAIClient(
             )
         )
 
-        val jsonString = extractToolArguments(response, FILL_ATTRIBUTES_TOOL_NAME)
+        val jsonString = extractTextPayload(response)
         val suggestions = json.decodeFromString<OpenAIAttributeSuggestionsResponse>(jsonString)
         return mapAttributeSuggestions(attributes, suggestions)
     }
@@ -147,32 +130,15 @@ class OpenAIClient(
             request = ResponseRequest(
                 // Vision-capable model for the initial photo-to-listing analysis.
                 model = model,
-                // Listing-generation rules and output constraints for this turn.
+                // Rules that constrain the listing draft and JSON response format.
                 instructions = AD_GENERATION_INSTRUCTIONS.trimIndent(),
-                // Low temperature keeps titles/prices stable and reduces random variation.
+                // Low temperature keeps titles and prices stable and reduces random drift.
                 temperature = 0.1,
-                // Listing output is small, so we keep the cap tight to control cost and drift.
+                // Listing output is intentionally small.
                 maxOutputTokens = 200,
-                // Only one strict tool payload is expected from this request.
-                parallelToolCalls = false,
-                // Avoid storing marketplace photo analysis by default.
-                store = false,
-                // Force the model to answer via the listing tool schema instead of natural language.
-                toolChoice = buildJsonObject {
-                    put("type", "function")
-                    put("name", GENERATE_AD_TOOL_NAME)
-                },
-                // Declares the structured output contract for the generated ad draft.
-                tools = listOf(
-                    ResponseTool(
-                        type = "function",
-                        name = GENERATE_AD_TOOL_NAME,
-                        description = "Generate a structured marketplace listing draft from seller photos.",
-                        parameters = generatedAdParameters(),
-                        strict = true,
-                    )
-                ),
-                // Sends one multimodal user message: short task text plus all listing photos.
+                // This response must be stored so the next turn can reference it via `previousResponseId`.
+                store = true,
+                // One multimodal user turn: short task text plus all listing photos.
                 input = ResponseInput(
                     items = listOf(
                         createUserResponseItem(
@@ -185,8 +151,7 @@ class OpenAIClient(
             )
         )
 
-        val jsonString = extractToolArguments(response, GENERATE_AD_TOOL_NAME)
-
+        val jsonString = extractTextPayload(response)
         val generatedAd = json.decodeFromString<OpenAIGeneratedAd>(jsonString)
         return response.id to mapper.mapToDomain(generatedAd, images)
     }
@@ -234,7 +199,7 @@ class OpenAIClient(
     ) = buildJsonObject {
         put("type", "input_image")
         put("image_url", imageUrl)
-        // "high" gives better recognition for attribute extraction; lower detail is cheaper but weaker.
+        // "high" gives better recognition when later turns depend on precise item understanding.
         put("detail", imageDetail)
     }
 
@@ -264,91 +229,7 @@ class OpenAIClient(
             unit = attribute.unit.takeIf { it.isNotBlank() },
         )
 
-    private fun generatedAdParameters(): Parameters = Parameters.buildJsonObject {
-        put("type", "object")
-        putJsonObject("properties") {
-            putJsonObject("title") {
-                put("type", "string")
-                put("description", "Concise marketplace title in Ukrainian.")
-                put("maxLength", 80)
-            }
-            putJsonObject("description") {
-                put("type", "string")
-                put("description", "Short marketplace description in Ukrainian.")
-                put("maxLength", 500)
-            }
-            putJsonObject("suggestedPrice") {
-                put("type", "number")
-                put("minimum", 0)
-            }
-            putJsonObject("minPrice") {
-                put("type", "number")
-                put("minimum", 0)
-            }
-            putJsonObject("maxPrice") {
-                put("type", "number")
-                put("minimum", 0)
-            }
-        }
-        putJsonArray("required") {
-            add(JsonPrimitive("title"))
-            add(JsonPrimitive("description"))
-            add(JsonPrimitive("suggestedPrice"))
-            add(JsonPrimitive("minPrice"))
-            add(JsonPrimitive("maxPrice"))
-        }
-        put("additionalProperties", false)
-    }
-
-    private fun generatedAttributeSuggestionParameters(): Parameters = Parameters.buildJsonObject {
-        put("type", "object")
-        putJsonObject("properties") {
-            putJsonObject("attributes") {
-                put("type", "array")
-                putJsonObject("items") {
-                    put("type", "object")
-                    putJsonObject("properties") {
-                        putJsonObject("code") {
-                            put("type", "string")
-                        }
-                        putJsonObject("valueCodes") {
-                            put("type", "array")
-                            putJsonObject("items") {
-                                put("type", "string")
-                            }
-                        }
-                        putJsonObject("valueText") {
-                            put("type", "string")
-                        }
-                        putJsonObject("confidence") {
-                            put("type", "string")
-                            putJsonArray("enum") {
-                                add(JsonPrimitive("high"))
-                                add(JsonPrimitive("medium"))
-                                add(JsonPrimitive("low"))
-                            }
-                        }
-                    }
-                    putJsonArray("required") {
-                        add(JsonPrimitive("code"))
-                        add(JsonPrimitive("valueCodes"))
-                        add(JsonPrimitive("valueText"))
-                        add(JsonPrimitive("confidence"))
-                    }
-                    put("additionalProperties", false)
-                }
-            }
-        }
-        putJsonArray("required") {
-            add(JsonPrimitive("attributes"))
-        }
-        put("additionalProperties", false)
-    }
-
-    private fun extractToolArguments(
-        response: Response,
-        toolName: String,
-    ): String {
+    private fun extractTextPayload(response: Response): String {
         response.error?.message
             ?.takeIf { it.isNotBlank() }
             ?.let { message ->
@@ -368,17 +249,6 @@ class OpenAIClient(
                 error("OpenAI refused to generate the advertisement: $refusal")
             }
 
-        val functionArguments = response.output
-            .asSequence()
-            // Responses API returns strict tool output here as JSON arguments.
-            .firstOrNull { it.type == "function_call" && it.name == toolName }
-            ?.arguments
-            ?.trim()
-
-        if (!functionArguments.isNullOrBlank()) {
-            return sanitizeJsonPayload(functionArguments)
-        }
-
         val payload = response.outputText
             ?: response.output
                 .asSequence()
@@ -394,7 +264,6 @@ class OpenAIClient(
     }
 
     private fun attributeOutputTokenLimit(attributeCount: Int): Int =
-        // Attribute filling scales with the number of fields/options, so keep the cap proportional.
         (attributeCount * 40).coerceIn(200, 1200)
 
     private fun mapAttributeSuggestions(
@@ -415,7 +284,7 @@ class OpenAIClient(
 
     private fun mapSuggestedValues(
         attribute: OlxAttribute,
-        suggestion: com.sirelon.aicalories.features.seller.openai.responses.OpenAIAttributeSuggestionResponse,
+        suggestion: OpenAIAttributeSuggestionResponse,
     ): List<OlxAttributeValue> = when (attribute.inputType) {
         AttributeInputType.SingleSelect -> suggestion.valueCodes
             .orEmpty()
@@ -456,9 +325,7 @@ class OpenAIClient(
     private fun sanitizeJsonPayload(payload: String): String {
         val trimmed = payload.trim()
         return when {
-            trimmed.startsWith("```json") -> trimmed.removePrefix("```json").removeSuffix("```")
-                .trim()
-
+            trimmed.startsWith("```json") -> trimmed.removePrefix("```json").removeSuffix("```").trim()
             trimmed.startsWith("```") -> trimmed.removePrefix("```").removeSuffix("```").trim()
             else -> trimmed
         }
