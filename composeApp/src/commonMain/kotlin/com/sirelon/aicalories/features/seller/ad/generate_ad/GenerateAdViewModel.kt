@@ -79,7 +79,10 @@ class GenerateAdViewModel(
 
                     .map {
                         val allRequiredFields = it.filter { it.validationRules.required }
-                        openAi.analyzeThing()
+                        openAi.fillAdditionalInfo(
+                            previousResponseId = data.first,
+                            attributes = allRequiredFields,
+                        )
                     }
 
                     // TODO:

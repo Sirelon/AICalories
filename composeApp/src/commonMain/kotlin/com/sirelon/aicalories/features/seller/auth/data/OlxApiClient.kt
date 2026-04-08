@@ -1,5 +1,6 @@
 package com.sirelon.aicalories.features.seller.auth.data
 
+import com.sirelon.aicalories.features.seller.auth.data.response.PostAdvertRootResponse
 import com.sirelon.aicalories.features.seller.auth.domain.OlxMeResponse
 import com.sirelon.aicalories.features.seller.auth.domain.OlxUserResponse
 import com.sirelon.aicalories.features.seller.categories.data.responses.OlxAttributeResponse
@@ -9,7 +10,6 @@ import com.sirelon.aicalories.features.seller.categories.data.responses.OlxCateg
 import com.sirelon.aicalories.features.seller.categories.data.responses.OlxCategorySuggestionResponse
 import com.sirelon.aicalories.features.seller.location.data.response.OlxLocationResponse
 import com.sirelon.aicalories.features.seller.location.data.response.OlxLocationsRootResponse
-import com.sirelon.aicalories.features.seller.auth.data.response.PostAdvertRootResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -70,7 +70,7 @@ class OlxApiClient(
         return response.body<OlxLocationsRootResponse>().data
     }
 
-    suspend fun postAdvert(request: PostAdvertRequest): Result<PostAdvertResult> = runCatching {
+    internal suspend fun postAdvert(request: PostAdvertRequest): Result<PostAdvertResult> = runCatching {
         val response = httpClient.post("adverts") {
             contentType(ContentType.Application.Json)
             setBody(request)

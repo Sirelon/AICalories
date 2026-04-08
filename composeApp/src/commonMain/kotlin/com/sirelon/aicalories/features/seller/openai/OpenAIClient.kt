@@ -80,10 +80,6 @@ class OpenAIClient(
         explicitNulls = false
     }
 
-    // Temporary no-op overload so the in-progress attribute pipeline can compile
-    // before it is wired to `fillAdditionalInfo(...)`.
-    suspend fun analyzeThing() = Unit
-
     suspend fun fillAdditionalInfo(
         previousResponseId: ResponseId,
         attributes: List<OlxAttribute>,
@@ -93,19 +89,26 @@ class OpenAIClient(
 
         val response = openAI.response(
             request = ResponseRequest(
+                // Vision-capable model used for both the initial listing and the follow-up attribute pass.
                 model = model,
                 // Reuses the model's prior understanding of the item from the image-analysis turn.
                 previousResponseId = previousResponseId,
+                // Re-states the task rules for this turn. Previous response context does not replace clear instructions.
                 instructions = ATTRIBUTE_FILL_INSTRUCTIONS.trimIndent(),
+                // Keep sampling deterministic for structured attribute extraction.
                 temperature = 0.0,
+                // Caps output size so the model stays inside the compact tool payload we expect.
                 maxOutputTokens = attributeOutputTokenLimit(attributes.size),
+                // We want exactly one tool call payload, not parallel tool branches.
                 parallelToolCalls = false,
+                // Avoid storing this response for distillation/evals since it contains user listing data.
                 store = false,
                 // Force a single structured function payload instead of free-form text.
                 toolChoice = buildJsonObject {
                     put("type", "function")
                     put("name", FILL_ATTRIBUTES_TOOL_NAME)
                 },
+                // Declares the strict schema the model must use for returned attribute suggestions.
                 tools = listOf(
                     ResponseTool(
                         type = "function",
@@ -115,6 +118,7 @@ class OpenAIClient(
                         strict = true,
                     )
                 ),
+                // This turn only needs compact text input because the image understanding comes from previousResponseId.
                 input = ResponseInput(
                     items = listOf(
                         createTextUserResponseItem(buildAttributeFillPrompt(attributes))
@@ -141,16 +145,24 @@ class OpenAIClient(
 
         val response = openAI.response(
             request = ResponseRequest(
+                // Vision-capable model for the initial photo-to-listing analysis.
                 model = model,
+                // Listing-generation rules and output constraints for this turn.
                 instructions = AD_GENERATION_INSTRUCTIONS.trimIndent(),
+                // Low temperature keeps titles/prices stable and reduces random variation.
                 temperature = 0.1,
+                // Listing output is small, so we keep the cap tight to control cost and drift.
                 maxOutputTokens = 200,
+                // Only one strict tool payload is expected from this request.
                 parallelToolCalls = false,
+                // Avoid storing marketplace photo analysis by default.
                 store = false,
+                // Force the model to answer via the listing tool schema instead of natural language.
                 toolChoice = buildJsonObject {
                     put("type", "function")
                     put("name", GENERATE_AD_TOOL_NAME)
                 },
+                // Declares the structured output contract for the generated ad draft.
                 tools = listOf(
                     ResponseTool(
                         type = "function",
@@ -160,6 +172,7 @@ class OpenAIClient(
                         strict = true,
                     )
                 ),
+                // Sends one multimodal user message: short task text plus all listing photos.
                 input = ResponseInput(
                     items = listOf(
                         createUserResponseItem(
