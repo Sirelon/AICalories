@@ -1,10 +1,13 @@
 package com.sirelon.aicalories.features.seller.ad.data
 
+import com.sirelon.aicalories.features.seller.ad.preview_ad.OlxAttributeState
+import com.sirelon.aicalories.features.seller.auth.data.AdvertAttributeRequest
 import com.sirelon.aicalories.features.seller.auth.data.AdvertContactRequest
 import com.sirelon.aicalories.features.seller.auth.data.AdvertImageRequest
 import com.sirelon.aicalories.features.seller.auth.data.AdvertLocationRequest
 import com.sirelon.aicalories.features.seller.auth.data.AdvertPriceRequest
 import com.sirelon.aicalories.features.seller.auth.data.PostAdvertRequest
+import com.sirelon.aicalories.features.seller.categories.domain.AttributeInputType
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import com.sirelon.aicalories.features.seller.location.OlxLocation
 
@@ -18,6 +21,7 @@ internal object PostAdvertRequestMapper {
         images: List<String>,
         price: Float,
         contactName: String,
+        attributeItems: List<OlxAttributeState> = emptyList(),
     ): PostAdvertRequest = PostAdvertRequest(
         title = title,
         description = description,
@@ -27,6 +31,16 @@ internal object PostAdvertRequestMapper {
         location = AdvertLocationRequest(cityId = location.cityId, districtId = location.districtId),
         images = images.map { AdvertImageRequest(url = it) },
         price = AdvertPriceRequest(value = price.toInt(), currency = "UAH", negotiable = false),
-        attributes = emptyList(), // TODO SIR-17: Implement attribute selection
+        attributes = attributeItems
+            .filter { it.selectedValues.isNotEmpty() }
+            .map { item ->
+                val values = when (item.attribute.inputType) {
+                    AttributeInputType.SingleSelect, AttributeInputType.MultiSelect ->
+                        item.selectedValues.map { it.code }
+                    AttributeInputType.NumericInput, AttributeInputType.TextInput ->
+                        item.selectedValues.map { it.label }
+                }
+                AdvertAttributeRequest(code = item.attribute.code, values = values)
+            },
     )
 }
