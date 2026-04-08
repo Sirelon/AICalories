@@ -9,11 +9,16 @@ import com.sirelon.aicalories.features.seller.categories.data.responses.OlxCateg
 import com.sirelon.aicalories.features.seller.categories.data.responses.OlxCategorySuggestionResponse
 import com.sirelon.aicalories.features.seller.location.data.response.OlxLocationResponse
 import com.sirelon.aicalories.features.seller.location.data.response.OlxLocationsRootResponse
+import com.sirelon.aicalories.features.seller.auth.data.response.PostAdvertRootResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 
 class OlxApiClient(
@@ -63,5 +68,24 @@ class OlxApiClient(
             throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
         }
         return response.body<OlxLocationsRootResponse>().data
+    }
+
+    suspend fun postAdvert(request: PostAdvertRequest): Result<PostAdvertResult> = runCatching {
+        val response = httpClient.post("adverts") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
+        if (!response.status.isSuccess()) {
+            throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
+        }
+        val body = response.body<PostAdvertRootResponse>()
+        val advert = body.data ?: throw IllegalStateException("Missing advert data in OLX response")
+        val advertId = advert.id ?: throw IllegalStateException("Missing advert id in OLX response")
+
+        PostAdvertResult(
+            id = advertId,
+            status = advert.status ?: "",
+            url = advert.url,
+        )
     }
 }

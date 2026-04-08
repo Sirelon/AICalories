@@ -124,6 +124,15 @@ fun PreviewAdScreen(
             }
 
             PreviewAdContract.PreviewAdEffect.GoToGategoryPicker -> onChangeCategoryClick()
+
+            is PreviewAdContract.PreviewAdEffect.PublishSuccess -> {
+                val message = if (effect.advertUrl != null) {
+                    "Ad published! View at: ${effect.advertUrl}"
+                } else {
+                    "Ad published successfully."
+                }
+                snackbarHostState.showSnackbar(message)
+            }
         }
     }
 
@@ -139,7 +148,8 @@ fun PreviewAdScreen(
                     .padding(horizontal = AppDimens.Spacing.xl3),
                 style = AppButtonDefaults.secondary(),
                 text = stringResource(Res.string.publish_to_olx),
-                trailingIcon = painterResource(Res.drawable.ic_arrow_right),
+                trailingIcon = if (state.isPublishing) null else painterResource(Res.drawable.ic_arrow_right),
+                enabled = !state.isPublishing,
                 onClick = { viewModel.onEvent(PreviewAdEvent.Publish) },
             )
         },
