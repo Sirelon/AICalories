@@ -54,28 +54,27 @@ class GenerateAdViewModel(
     private suspend fun submit() {
         flowOf(1)
             .onStart {
-                setState { it.copy(isLoading = true, errorMessage = null) }
+                setState { it.copy(isLoading = true, completedSteps = 0, errorMessage = null) }
             }
-            .onEach { println("onStart") }
 
             .map { uploadFilesAndGetPublicUrls() }
-            .onEach { println("uploadFilesAndGetPublicUrls") }
+            .onEach { setState { it.copy(completedSteps = 1) } }
 
             .catch { error ->
                 setState { it.copy(isLoading = false) }
                 showError(error.message ?: "Upload failed")
             }
             .map { openAi.analyzeThing(it) }
-            .onEach { println("analyzeThing") }
+            .onEach { setState { it.copy(completedSteps = 2) } }
 
             // get category, attributes, so on
             .flatMapLatest { data ->
                 categoriesRepository
                     .categorySuggestion(data.second.title)
-                    .onEach { println("categorySuggestion") }
+                    .onEach { setState { it.copy(completedSteps = 3) } }
 
                     .flatMapLatest { categoriesRepository.getAttributes(it.id) }
-                    .onEach { println("getAttributes") }
+                    .onEach { setState { it.copy(completedSteps = 4) } }
 
                     .map {
                         val allRequiredFields = it.filter { it.validationRules.required }
@@ -84,6 +83,7 @@ class GenerateAdViewModel(
                             attributes = allRequiredFields,
                         )
                     }
+                    .onEach { setState { it.copy(completedSteps = 5) } }
 
                     // TODO:
                     .map { data }
