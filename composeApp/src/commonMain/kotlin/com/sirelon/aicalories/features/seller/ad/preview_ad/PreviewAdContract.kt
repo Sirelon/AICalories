@@ -9,6 +9,8 @@ interface PreviewAdContract {
 
     data class PreviewAdState(
         val categoryLabel: String,
+        val selectedCategory: OlxCategory? = null,
+        val isPublishing: Boolean = false,
         val price: Float,
         val minPrice: Float,
         val maxPrice: Float,
@@ -33,5 +35,6 @@ interface PreviewAdContract {
     sealed interface PreviewAdEffect {
         data class ShowMessage(val message: String) : PreviewAdEffect
         data object GoToGategoryPicker : PreviewAdEffect
+        data class PublishSuccess(val advertUrl: String?) : PreviewAdEffect
     }
 }

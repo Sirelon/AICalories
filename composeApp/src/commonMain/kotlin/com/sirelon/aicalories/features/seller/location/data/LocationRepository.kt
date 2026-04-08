@@ -17,10 +17,13 @@ class LocationRepository(
         )
 
         val firstValidLocation = locations.firstNotNullOfOrNull { location ->
-            val cityName = location.city?.name ?: return@firstNotNullOfOrNull null
+            val cityId = location.city?.id ?: return@firstNotNullOfOrNull null
+            val cityName = location.city.name ?: return@firstNotNullOfOrNull null
 
             OlxLocation(
+                cityId = cityId,
                 cityName = cityName,
+                districtId = location.district?.id,
                 districtName = location.district?.name,
             )
         }

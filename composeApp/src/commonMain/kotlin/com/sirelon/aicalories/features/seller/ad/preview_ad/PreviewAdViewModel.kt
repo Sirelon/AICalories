@@ -5,6 +5,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewModelScope
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.seller.ad.Advertisement
+import com.sirelon.aicalories.features.seller.ad.data.PostAdvertRequestMapper
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEffect
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEffect.ShowMessage
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
@@ -12,6 +13,7 @@ import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.Pr
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.FetchLocation
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.Publish
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdState
+import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import com.sirelon.aicalories.features.seller.location.data.LocationRepository
@@ -27,6 +29,7 @@ class PreviewAdViewModel(
     private val advertisement: Advertisement,
     private val categoriesRepository: CategoriesRepository,
     private val locationRepository: LocationRepository,
+    private val olxApiClient: OlxApiClient,
 ) : BaseViewModel<PreviewAdState, PreviewAdEvent, PreviewAdEffect>() {
 
     val titleState = TextFieldState(advertisement.title)
@@ -84,9 +87,8 @@ class PreviewAdViewModel(
 
             PreviewAdEvent.OnChangeCategoryClick -> postEffect(PreviewAdEffect.GoToGategoryPicker)
 
-            Publish -> {
-                // TODO: Post to OLX API — read titleState.text, descriptionState.text, selectedPrice here
-                postEffect(ShowMessage("Publishing not yet implemented"))
+            Publish -> viewModelScope.launch {
+                publishAdvert()
             }
         }
     }
@@ -102,6 +104,48 @@ class PreviewAdViewModel(
         }
     }
 
+    private suspend fun publishAdvert() {
+        val s = state.value
+
+        val category = s.selectedCategory ?: run {
+            postEffect(ShowMessage("Please select a category before publishing."))
+            return
+        }
+        val location = s.location ?: run {
+            postEffect(ShowMessage("Location is required. Please allow location access and try again."))
+            return
+        }
+
+        setState { it.copy(isPublishing = true) }
+
+        val contactName = olxApiClient.getAuthenticatedUser().getOrNull()?.name
+        if (contactName == null) {
+            setState { it.copy(isPublishing = false) }
+            postEffect(ShowMessage("Could not fetch user profile."))
+            return
+        }
+
+        val request = PostAdvertRequestMapper.map(
+            title = titleState.text.toString(),
+            description = descriptionState.text.toString(),
+            category = category,
+            location = location,
+            images = s.images,
+            price = s.price,
+            contactName = contactName,
+        )
+
+        olxApiClient.postAdvert(request)
+            .onSuccess { data ->
+                setState { it.copy(isPublishing = false) }
+                postEffect(PreviewAdEffect.PublishSuccess(data.url))
+            }
+            .onFailure { error ->
+                setState { it.copy(isPublishing = false) }
+                postEffect(ShowMessage(error.message ?: "Publishing failed. Please try again."))
+            }
+    }
+
     private suspend fun updateSelectedCategory(category: OlxCategory) {
         val path = mutableListOf(category.label)
         var parentId = category.parentId
@@ -110,6 +154,6 @@ class PreviewAdViewModel(
             path.add(0, parent.label)
             parentId = parent.parentId
         }
-        setState { it.copy(categoryLabel = path.joinToString(" / ")) }
+        setState { it.copy(categoryLabel = path.joinToString(" / "), selectedCategory = category) }
     }
 }
