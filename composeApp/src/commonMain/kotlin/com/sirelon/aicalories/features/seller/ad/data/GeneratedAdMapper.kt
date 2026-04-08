@@ -1,11 +1,11 @@
 package com.sirelon.aicalories.features.seller.ad.data
 
 import com.sirelon.aicalories.features.seller.ad.Advertisement
-import com.sirelon.aicalories.network.responses.GeneratedAd
+import com.sirelon.aicalories.features.seller.openai.responses.OpenAIGeneratedAd
 
 class GeneratedAdMapper {
 
-    fun mapToDomain(generatedAd: GeneratedAd, images: List<String>): Advertisement {
+    fun mapToDomain(generatedAd: OpenAIGeneratedAd, images: List<String>): Advertisement {
         val normalizedMinPrice = minOf(
             generatedAd.minPrice,
             generatedAd.maxPrice,

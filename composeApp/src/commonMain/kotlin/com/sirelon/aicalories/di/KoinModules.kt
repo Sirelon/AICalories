@@ -11,7 +11,7 @@ import com.sirelon.aicalories.features.seller.ad.preview_ad.di.previewAdModule
 import com.sirelon.aicalories.features.seller.auth.di.sellerAuthModule
 import com.sirelon.aicalories.features.seller.categories.categoriesModule
 import com.sirelon.aicalories.network.ApiTokenProvider
-import com.sirelon.aicalories.network.OpenAIClient
+import com.sirelon.aicalories.features.seller.openai.OpenAIClient
 import com.sirelon.aicalories.network.createHttpClient
 import com.sirelon.aicalories.network.createOpenAI
 import com.sirelon.aicalories.startup.appStartupModule

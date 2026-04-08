@@ -1,10 +1,10 @@
-package com.sirelon.aicalories.network.responses
+package com.sirelon.aicalories.features.seller.openai.responses
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GeneratedAd(
+data class OpenAIGeneratedAd(
     @SerialName("title")
     val title: String,
     @SerialName("description")

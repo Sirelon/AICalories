@@ -7,7 +7,7 @@ import com.sirelon.aicalories.features.media.upload.MediaUploadHelper
 import com.sirelon.aicalories.features.media.upload.MediaUploadUpdate
 import com.sirelon.aicalories.features.media.upload.UploadingItem
 import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
-import com.sirelon.aicalories.network.OpenAIClient
+import com.sirelon.aicalories.features.seller.openai.OpenAIClient
 import com.sirelon.aicalories.supabase.error.RemoteException
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterIsInstance
@@ -76,6 +76,12 @@ class GenerateAdViewModel(
 
                     .flatMapLatest { categoriesRepository.getAttributes(it.id) }
                     .onEach { println("getAttributes") }
+
+                    .map {
+                        val allRequiredFields = it.filter { it.validationRules.required }
+                        openAi.analyzeThing()
+                    }
+
                     // TODO:
                     .map { data }
                 // load openAi for fill attributes
