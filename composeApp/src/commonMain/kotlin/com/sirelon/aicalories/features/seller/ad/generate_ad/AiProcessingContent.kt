@@ -24,11 +24,7 @@ import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -42,19 +38,19 @@ import com.sirelon.aicalories.designsystem.templates.TitleWithSubtitle
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.ai_analyzing_photo
 import com.sirelon.aicalories.generated.resources.ai_creating_ad_title
+import com.sirelon.aicalories.generated.resources.ai_step_uploading_photos
 import com.sirelon.aicalories.generated.resources.ai_step_analyzing_image
 import com.sirelon.aicalories.generated.resources.ai_step_calculating_price
 import com.sirelon.aicalories.generated.resources.ai_step_generating_title
 import com.sirelon.aicalories.generated.resources.ai_step_writing_description
 import com.sirelon.aicalories.generated.resources.ic_check
 import com.sirelon.aicalories.generated.resources.ic_sparkles
-import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import kotlin.random.Random
 
 @Composable
 private fun processingSteps() = listOf(
+    stringResource(Res.string.ai_step_uploading_photos),
     stringResource(Res.string.ai_step_analyzing_image),
     stringResource(Res.string.ai_step_generating_title),
     stringResource(Res.string.ai_step_writing_description),
@@ -63,17 +59,10 @@ private fun processingSteps() = listOf(
 
 @Composable
 fun AiProcessingContent(
+    completedSteps: Int,
     modifier: Modifier = Modifier,
 ) {
     val steps = processingSteps()
-    var completedSteps by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(Unit) {
-        for (i in 1..steps.size) {
-            delay(Random.nextInt(500, 1200).toLong())
-            completedSteps = i
-        }
-    }
 
     Column(
         modifier = modifier

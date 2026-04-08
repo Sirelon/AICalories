@@ -236,6 +236,7 @@
     <!-- AI Processing -->
     <string name="ai_creating_ad_title">Створення вашого оголошення</string>
     <string name="ai_analyzing_photo">Наш ШІ аналізує ваше фото та створює ідеальну назву, опис і ціну...</string>
+    <string name="ai_step_uploading_photos">Завантаження фото</string>
     <string name="ai_step_analyzing_image">Аналіз зображення</string>
     <string name="ai_step_generating_title">Генерація назви</string>
     <string name="ai_step_writing_description">Написання опису</string>

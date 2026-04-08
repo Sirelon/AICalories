@@ -235,6 +235,7 @@
     <!-- AI Processing -->
     <string name="ai_creating_ad_title">Creating Your Ad</string>
     <string name="ai_analyzing_photo">Our AI is analyzing your photo and crafting the perfect title, description, and price...</string>
+    <string name="ai_step_uploading_photos">Uploading photos</string>
     <string name="ai_step_analyzing_image">Analyzing image</string>
     <string name="ai_step_generating_title">Generating title</string>
     <string name="ai_step_writing_description">Writing description</string>
