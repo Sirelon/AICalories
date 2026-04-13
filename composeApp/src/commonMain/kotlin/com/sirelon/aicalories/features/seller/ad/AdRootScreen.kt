@@ -28,7 +28,7 @@ sealed interface AdDestination {
     data object GenerateAd : AdDestination
 
     @Serializable
-    data class PreviewAd(val advertisement: Advertisement) : AdDestination
+    data class PreviewAd(val advertisement: AdvertisementWithAttributes) : AdDestination
 
     @Serializable
     data object SelectRootCategory : AdDestination

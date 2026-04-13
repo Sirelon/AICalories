@@ -62,7 +62,7 @@ import com.sirelon.aicalories.designsystem.utils.generateRandomColor
 import com.sirelon.aicalories.features.media.PermissionDialogContent
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
-import com.sirelon.aicalories.features.seller.ad.Advertisement
+import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
@@ -101,7 +101,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun PreviewAdScreen(
-    advertisement: Advertisement,
+    advertisement: AdvertisementWithAttributes,
     onChangeCategoryClick: () -> Unit,
     pendingCategory: OlxCategory?,
     onCategoryConsumed: () -> Unit,

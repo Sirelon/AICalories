@@ -6,6 +6,7 @@ import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.media.upload.MediaUploadHelper
 import com.sirelon.aicalories.features.media.upload.MediaUploadUpdate
 import com.sirelon.aicalories.features.media.upload.UploadingItem
+import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
 import com.sirelon.aicalories.features.seller.openai.OpenAIClient
 import com.sirelon.aicalories.supabase.error.RemoteException
@@ -75,23 +76,24 @@ class GenerateAdViewModel(
 
                     .flatMapLatest { categoriesRepository.getAttributes(it.id) }
                     .onEach { setState { it.copy(completedSteps = 4) } }
-
+                    // load openAi for fill attributes
                     .map {
-                        val allRequiredFields = it.filter { it.validationRules.required }
                         openAi.fillAdditionalInfo(
                             previousResponseId = data.first,
                             attributes = it,
                         )
                     }
                     .onEach { setState { it.copy(completedSteps = 5) } }
-
-                    // TODO:
-                    .map { data }
-                // load openAi for fill attributes
+                    .map {
+                        AdvertisementWithAttributes(
+                            advertisement = data.second,
+                            filledAttributes = it
+                        )
+                    }
             }
 
             .onEach {
-                postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(it.second))
+                postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(it))
             }
             .catch { error ->
                 setState { it.copy(isLoading = false, errorMessage = error.message) }

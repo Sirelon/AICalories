@@ -1,5 +1,7 @@
 package com.sirelon.aicalories.features.seller.categories.domain
 
+import kotlinx.serialization.Serializable
+
 data class OlxAttribute(
     val code: String,
     val label: String,
@@ -24,6 +26,7 @@ data class AttributeValidationRules(
     val allowMultipleValues: Boolean,
 )
 
+@Serializable
 data class OlxAttributeValue(
     val code: String,
     val label: String,

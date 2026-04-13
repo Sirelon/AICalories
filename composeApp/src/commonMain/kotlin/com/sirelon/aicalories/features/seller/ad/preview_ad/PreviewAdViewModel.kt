@@ -4,7 +4,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewModelScope
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
-import com.sirelon.aicalories.features.seller.ad.Advertisement
+import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.features.seller.ad.data.PostAdvertRequestMapper
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEffect
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEffect.ShowMessage
@@ -31,12 +31,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class PreviewAdViewModel(
-    private val advertisement: Advertisement,
+    private val filledAdvertisement: AdvertisementWithAttributes,
     private val categoriesRepository: CategoriesRepository,
     private val locationRepository: LocationRepository,
     private val olxApiClient: OlxApiClient,
     private val attributeValidator: AttributeValidator,
 ) : BaseViewModel<PreviewAdState, PreviewAdEvent, PreviewAdEffect>() {
+
+    private val advertisement = filledAdvertisement.advertisement
 
     val titleState = TextFieldState(advertisement.title)
     val descriptionState = TextFieldState(advertisement.description)
@@ -70,7 +72,16 @@ class PreviewAdViewModel(
                 categoriesRepository.getAttributes(categoryId)
             }
             .onEach { attributes ->
-                setState { it.copy(attributeItems = attributes.map { OlxAttributeState(it) }) }
+                setState {
+                    it.copy(
+                        attributeItems = attributes.map { attribute ->
+                            OlxAttributeState(
+                                attribute = attribute,
+                                selectedValues = filledAdvertisement.filledAttributes[attribute.code].orEmpty(),
+                            )
+                        }
+                    )
+                }
             }
             .catch {
                 it.printStackTrace()
@@ -115,16 +126,21 @@ class PreviewAdViewModel(
             }
 
             is PreviewAdEvent.AttributeValueChanged -> setState { currentState ->
-                val index = currentState.attributeItems.indexOfFirst { it.attribute.code == event.attributeCode }
+                val index =
+                    currentState.attributeItems.indexOfFirst { it.attribute.code == event.attributeCode }
                 if (index == -1) return@setState currentState
                 val item = currentState.attributeItems[index]
                 val valuesToValidate = when (item.attribute.inputType) {
                     AttributeInputType.SingleSelect, AttributeInputType.MultiSelect ->
                         event.values.map { it.code }
+
                     AttributeInputType.NumericInput, AttributeInputType.TextInput ->
                         event.values.map { it.label }
                 }
-                val error = (attributeValidator.validate(item.attribute, valuesToValidate) as? AttributeValidationResult.Invalid)?.reason
+                val error = (attributeValidator.validate(
+                    item.attribute,
+                    valuesToValidate
+                ) as? AttributeValidationResult.Invalid)?.reason
                 val updatedItems = currentState.attributeItems.toMutableList()
                 updatedItems[index] = item.copy(selectedValues = event.values, error = error)
                 currentState.copy(attributeItems = updatedItems)
@@ -159,10 +175,14 @@ class PreviewAdViewModel(
             val valuesToValidate = when (item.attribute.inputType) {
                 AttributeInputType.SingleSelect, AttributeInputType.MultiSelect ->
                     item.selectedValues.map { it.code }
+
                 AttributeInputType.NumericInput, AttributeInputType.TextInput ->
                     item.selectedValues.map { it.label }
             }
-            val error = (attributeValidator.validate(item.attribute, valuesToValidate) as? AttributeValidationResult.Invalid)?.reason
+            val error = (attributeValidator.validate(
+                item.attribute,
+                valuesToValidate
+            ) as? AttributeValidationResult.Invalid)?.reason
             item.copy(error = error)
         }
         val hasErrors = validatedItems.any { it.error != null }

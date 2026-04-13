@@ -2,7 +2,7 @@ package com.sirelon.aicalories.features.seller.ad.generate_ad
 
 import com.mohamedrejeb.calf.io.KmpFile
 import com.sirelon.aicalories.features.media.upload.UploadingItem
-import com.sirelon.aicalories.features.seller.ad.Advertisement
+import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 
 interface GenerateAdContract {
 
@@ -27,6 +27,9 @@ interface GenerateAdContract {
 
     sealed interface GenerateAdEffect {
         data class ShowMessage(val message: String) : GenerateAdEffect
-        data class OpenAdPreview(val ad: Advertisement) : GenerateAdEffect
+
+        data class OpenAdPreview(
+            val ad: AdvertisementWithAttributes
+        ) : GenerateAdEffect
     }
 }

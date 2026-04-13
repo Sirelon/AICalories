@@ -47,7 +47,7 @@ import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
 import com.sirelon.aicalories.features.media.ui.PhotosSection
-import com.sirelon.aicalories.features.seller.ad.Advertisement
+import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.describe_item_placeholder
 import com.sirelon.aicalories.generated.resources.describe_your_item
@@ -70,7 +70,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun GenerateAdScreen(
     onBack: () -> Unit,
-    openAdPreview: (Advertisement) -> Unit,
+    openAdPreview: (AdvertisementWithAttributes) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: GenerateAdViewModel = koinViewModel()
