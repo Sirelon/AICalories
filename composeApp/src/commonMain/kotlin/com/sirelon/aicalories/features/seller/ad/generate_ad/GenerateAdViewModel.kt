@@ -65,7 +65,7 @@ class GenerateAdViewModel(
                 setState { it.copy(isLoading = false) }
                 showError(error.message ?: "Upload failed")
             }
-            .map { openAi.analyzeThing(it) }
+            .map { openAi.analyzeThing(images = it, sellerPrompt = state.value.prompt) }
             .onEach { setState { it.copy(completedSteps = 2) } }
 
             // get category, attributes, so on

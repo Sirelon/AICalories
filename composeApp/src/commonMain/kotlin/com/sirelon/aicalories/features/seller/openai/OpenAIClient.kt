@@ -42,6 +42,7 @@ Rules:
 - Prices must be plain numbers only, with no currency symbols or extra text.
 - Price for the second-hand marketplace value, not new retail price and not collectible premium price.
 - Ensure `minPrice <= suggestedPrice <= maxPrice`.
+- Respect seller note more than your own analysis.
 - If the photos are not clear enough for a confident listing, return generic but usable text and conservative pricing.
 - Return ONLY valid JSON with this exact shape:
   {"title":"string","description":"string","suggestedPrice":number,"minPrice":number,"maxPrice":number}
@@ -117,7 +118,7 @@ class OpenAIClient(
 
     suspend fun analyzeThing(
         images: List<String>,
-        sellerPrompt: String = "",
+        sellerPrompt: String,
         model: ModelId = DEFAULT_MODEL,
         imageDetail: String = DEFAULT_IMAGE_DETAIL,
     ): Pair<ResponseId, Advertisement> {
