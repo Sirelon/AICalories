@@ -81,6 +81,7 @@ class GenerateAdViewModel(
                         openAi.fillAdditionalInfo(
                             previousResponseId = data.first,
                             attributes = it,
+                            sellerPrompt = state.value.prompt
                         )
                     }
                     .onEach { setState { it.copy(completedSteps = 5) } }

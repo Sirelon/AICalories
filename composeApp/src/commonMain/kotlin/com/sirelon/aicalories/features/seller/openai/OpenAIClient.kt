@@ -38,11 +38,12 @@ Rules:
 - If identification is uncertain, use cautious generic wording.
 - Write `title` and `description` in Ukrainian.
 - `title`: concise, searchable, no hype, no marketing phrases.
-- `description`: 2 to 4 short sentences, no bullet points, no markdown. Describe what the item is, visible condition, included visible parts, and visible wear or defects.
+- `description`: 4 to 8 short sentences, no bullet points, no markdown. Describe what the item is, visible condition, included visible parts, and visible wear or defects.
 - Prices must be plain numbers only, with no currency symbols or extra text.
 - Price for the second-hand marketplace value, not new retail price and not collectible premium price.
 - Ensure `minPrice <= suggestedPrice <= maxPrice`.
 - Respect seller note more than your own analysis.
+- Include seller note to description if it applicable.
 - If the photos are not clear enough for a confident listing, return generic but usable text and conservative pricing.
 - Return ONLY valid JSON with this exact shape:
   {"title":"string","description":"string","suggestedPrice":number,"minPrice":number,"maxPrice":number}
@@ -60,6 +61,7 @@ Rules:
 - If a value is uncertain, not visible, or not inferable, leave `valueCodes` empty and `valueText` empty.
 - Never invent hidden specifications or unsupported details.
 - Respect numeric limits.
+- Respect seller note more than your own analysis.
 - Use at most one value unless the attribute explicitly supports multiple choices.
 - Return ONLY valid JSON with this exact shape:
   {"attributes":[{"code":"string","valueCodes":["string"],"valueText":"string","confidence":"high|medium|low"}]}
@@ -84,6 +86,7 @@ class OpenAIClient(
     suspend fun fillAdditionalInfo(
         previousResponseId: ResponseId,
         attributes: List<OlxAttribute>,
+        sellerPrompt: String,
         model: ModelId = DEFAULT_MODEL,
     ): Map<String, List<OlxAttributeValue>> {
         if (attributes.isEmpty()) return emptyMap()
@@ -105,6 +108,7 @@ class OpenAIClient(
                 // Only compact text input is needed because the item understanding comes from `previousResponseId`.
                 input = ResponseInput(
                     items = listOf(
+                        createTextUserResponseItem(sellerPrompt),
                         createTextUserResponseItem(buildAttributeFillPrompt(attributes))
                     )
                 ),
