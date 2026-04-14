@@ -116,7 +116,7 @@ fun PulseIndicator(
         Box(
             Modifier
                 .size(80.dp)
-                .background(AppTheme.colors.primary, CircleShape),
+                .background(AppTheme.colors.onPrimary, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Box(modifier = Modifier.size(32.dp)) {
