@@ -17,6 +17,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.graphics.Shape
 import com.mohamedrejeb.calf.io.KmpFile
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.*
@@ -35,7 +46,6 @@ fun PhotosGridComponent(
     gridSize: Int = 3,
     maxFiles: Int = 5,
 ) {
-    val emptyItems = maxFiles - files.size
     val spacing = AppDimens.Spacing.xl3
     val arrangement = Arrangement.spacedBy(spacing)
     BoxWithConstraints {
@@ -55,6 +65,7 @@ fun PhotosGridComponent(
                         // TODO: remove photo
                     },
                     enabled = interactionEnabled,
+                    isDashed = false,
                     content = {
                         AppAsyncImage(
                             modifier = Modifier,
@@ -68,23 +79,55 @@ fun PhotosGridComponent(
                 )
             }
 
-            repeat(emptyItems) {
-                PhotoContainer(
-                    modifier = itemModifier,
-                    onClick = onAddPhoto,
-                    enabled = interactionEnabled,
-                    content = {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            tint = AppTheme.colors.onSurface.copy(alpha = 0.6f),
-                            contentDescription = stringResource(Res.string.add_photo_cd),
-                            modifier = Modifier.size(AppDimens.Size.xl8),
-                        )
-                    }
-                )
+            // Only show empty cards in the first row
+            val emptyItemsInFirstRow = maxOf(0, gridSize - files.size % gridSize)
+            if (files.size < gridSize) {
+                repeat(emptyItemsInFirstRow) {
+                    PhotoContainer(
+                        modifier = itemModifier,
+                        onClick = onAddPhoto,
+                        enabled = interactionEnabled,
+                        isDashed = true,
+                        content = {
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                tint = AppTheme.colors.onSurface.copy(alpha = 0.6f),
+                                contentDescription = stringResource(Res.string.add_photo_cd),
+                                modifier = Modifier.size(AppDimens.Size.xl8),
+                            )
+                        }
+                    )
+                }
             }
         }
     }
+}
+
+private fun Modifier.dashedBorder(
+    width: Dp,
+    color: Color,
+    shape: Shape,
+) = drawBehind {
+    val stroke = Stroke(
+        width = width.toPx(),
+        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
+    )
+    drawPath(
+        path = Path().apply {
+            addRoundRect(
+                RoundRect(
+                    rect = Rect(
+                        offset = Offset(0f, 0f),
+                        size = Size(size.width, size.height)
+                    ),
+                    radiusX = 12f,
+                    radiusY = 12f
+                )
+            )
+        },
+        color = color,
+        style = stroke
+    )
 }
 
 @Composable
@@ -92,17 +135,26 @@ private fun PhotoContainer(
     modifier: Modifier,
     enabled: Boolean,
     onClick: () -> Unit,
+    isDashed: Boolean = false,
     content: @Composable BoxScope.() -> Unit,
 ) {
     Surface(
         onClick = onClick,
         enabled = enabled,
-        modifier = modifier,
+        modifier = if (isDashed) {
+            modifier.dashedBorder(
+                width = AppDimens.BorderWidth.l,
+                color = AppTheme.colors.outline.copy(alpha = if (enabled) 1f else 0.4f),
+                shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
+            )
+        } else {
+            modifier
+        },
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
-        border = BorderStroke(
+        border = if (!isDashed) BorderStroke(
             width = AppDimens.BorderWidth.l,
             color = AppTheme.colors.outline.copy(alpha = if (enabled) 1f else 0.4f),
-        ),
+        ) else null,
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
