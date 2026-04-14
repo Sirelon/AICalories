@@ -9,10 +9,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -21,7 +21,6 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.VisualTransformation
 import com.sirelon.aicalories.generated.resources.Res
-import com.sirelon.aicalories.generated.resources.character_count
 import com.sirelon.aicalories.generated.resources.character_count_range
 import com.sirelon.aicalories.generated.resources.copy
 import com.sirelon.aicalories.generated.resources.ic_copy
@@ -60,12 +59,29 @@ fun Input(
         else -> supportingText
     }
 
-    OutlinedTextField(
+    // Filled variant per design spec: surface-container-low background, no border,
+    // 2px primary indicator on focus only
+    TextField(
         modifier = modifier,
         value = value,
         onValueChange = onValueChange,
         enabled = enabled,
         readOnly = readOnly,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = AppTheme.colors.surfaceContainerLow,
+            unfocusedContainerColor = AppTheme.colors.surfaceContainerLow,
+            disabledContainerColor = AppTheme.colors.surfaceContainerLow.copy(alpha = 0.6f),
+            errorContainerColor = AppTheme.colors.surfaceContainerLow,
+            focusedIndicatorColor = AppTheme.colors.primary,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            errorIndicatorColor = AppTheme.colors.error,
+            focusedTextColor = AppTheme.colors.onSurface,
+            unfocusedTextColor = AppTheme.colors.onSurface,
+            focusedLabelColor = AppTheme.colors.primary,
+            unfocusedLabelColor = AppTheme.colors.onSurface.copy(alpha = 0.6f),
+            cursorColor = AppTheme.colors.primary,
+        ),
         label = label?.let {
             {
                 Text(
@@ -127,9 +143,13 @@ fun InputWithCopy(
         else -> null
     }
 
-    OutlinedTextField(
-        colors = OutlinedTextFieldDefaults.colors(
-            unfocusedBorderColor = Color.Transparent,
+    TextField(
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = AppTheme.colors.surfaceContainerLow,
+            unfocusedContainerColor = AppTheme.colors.surfaceContainerLow,
+            focusedIndicatorColor = AppTheme.colors.primary,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
         ),
         state = state,
         modifier = modifier.fillMaxWidth(),

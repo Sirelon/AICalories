@@ -237,8 +237,8 @@ private fun SellerHeader(
             .background(
                 Brush.linearGradient(
                     colors = listOf(
-                        AppTheme.colors.warningVariant,
-                        AppTheme.colors.warning,
+                        AppTheme.colors.primaryContainer,
+                        AppTheme.colors.primary,
                     )
                 )
             )
@@ -280,7 +280,7 @@ private fun SellerHeader(
                     Icon(
                         painter = painterResource(Res.drawable.ic_snap_logo),
                         contentDescription = null,
-                        tint = AppTheme.colors.warning,
+                        tint = AppTheme.colors.primary,
                     )
                 }
                 Text(

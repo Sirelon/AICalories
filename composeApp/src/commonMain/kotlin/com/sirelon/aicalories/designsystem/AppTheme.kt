@@ -12,7 +12,10 @@ import com.sirelon.aicalories.designsystem.utils.ThemesFactory
 fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     colors: AppColors = if (darkTheme) ThemesFactory.dark() else ThemesFactory.light(),
-    typography: AppTypography = appTypography(),
+    typography: AppTypography = appTypography(
+        displayFontFamily = ManropeFontFamily,
+        bodyFontFamily = InterFontFamily,
+    ),
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(

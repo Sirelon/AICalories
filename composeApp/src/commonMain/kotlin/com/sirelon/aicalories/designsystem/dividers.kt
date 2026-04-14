@@ -1,28 +1,26 @@
 package com.sirelon.aicalories.designsystem
 
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
+// No-Line Rule: visual separation is achieved through spacing and tonal layering, not lines.
+
 @Composable
 fun AppDivider(modifier: Modifier = Modifier) {
-    HorizontalDivider(
-        modifier = modifier.fillMaxWidth(),
-        color = AppTheme.colors.outline.copy(alpha = 0.5f),
-    )
+    Spacer(modifier = modifier.height(AppDimens.Spacing.xl3))
 }
 
 @Composable
 fun AppDivider(middleContent: @Composable () -> Unit, modifier: Modifier = Modifier) {
-    Row(
+    Box(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        contentAlignment = Alignment.Center,
     ) {
-        AppDivider(modifier = Modifier.weight(1f))
         middleContent()
-        AppDivider(modifier = Modifier.weight(1f))
     }
 }

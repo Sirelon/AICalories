@@ -10,9 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import com.sirelon.aicalories.designsystem.AppDimens
-import com.sirelon.aicalories.designsystem.AppDivider
 import com.sirelon.aicalories.designsystem.AppCard
+import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 
 @Composable
@@ -37,15 +36,14 @@ fun CardWithTitle(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     AppCard {
+        // Title section uses surfaceContainerLow to create tonal separation without a line
         Column(
             modifier = Modifier.padding(spacing),
-            verticalArrangement = Arrangement.spacedBy(spacing)
+            verticalArrangement = Arrangement.spacedBy(spacing * 2),
         ) {
             CompositionLocalProvider(LocalTextStyle provides AppTheme.typography.title) {
                 title()
             }
-
-            AppDivider()
 
             content()
         }

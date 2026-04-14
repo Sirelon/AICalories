@@ -6,46 +6,63 @@ import com.sirelon.aicalories.designsystem.AppColors
 object ThemesFactory {
 
     fun light(): AppColors = AppColors(
-        primary = Color(0xFF4F46E5),
-        onPrimary = Color(0xFFFFFFFF),
-        background = Color(0xFFF8F9FA),
-        onBackground = Color(0xFF1F2933),
-        surface = Color(0xFFFFFFFF),
-        onSurface = Color(0xFF1F2933),
-        surfaceVariant = Color(0xFF1F2933).copy(alpha = 0.08f),
+        // Brand: vibrant orange centered around #E67E22, gradient from darker to lighter
+        primary = Color(0xFFD0600A),           // rich dark orange (gradient start)
+        primaryContainer = Color(0xFFF08030),   // vibrant orange (gradient end)
+        onPrimary = Color(0xFFFFFFFF),          // white for max contrast on orange
+        background = Color(0xFFFFF8F2),         // warm white, barely tinted
+        onBackground = Color(0xFF3A1F00),       // deep warm brown, readable
+        surface = Color(0xFFFFF8F2),
+        onSurface = Color(0xFF3A1F00),
+        surfaceVariant = Color(0xFFFFD5AF),     // Fluid Highlight pill
+        surfaceContainerLowest = Color(0xFFFFFFFF),
+        surfaceContainerLow = Color(0xFFFFF0E0),
+        surfaceContainer = Color(0xFFFFE4C8),
+        surfaceContainerHigh = Color(0xFFFFD8B0),
+        surfaceContainerHighest = Color(0xFFFFCA98),
+        secondaryContainer = Color(0xFFFFBF85),  // Cognitive Chip bg
+        onSecondaryContainer = Color(0xFF5C2E00), // Cognitive Chip text
+        outlineVariant = Color(0xFFD9A070),
         error = Color(0xFFBA1A1A),
         onError = Color(0xFFFFFFFF),
         success = Color(0xFF1B8E5A),
-        outline = Color(0xFF6F6E6E),
-        warning = Color(0xFFE67E22),
-        warningVariant = Color(0xFFF28B44),
-        onSurfaceMuted = Color(0xFF94A3B8),
-        onSurfaceSoft = Color(0xFF64748B),
-        surfaceSubtle = Color(0xFFF1F5F9),
-        infoSurface = Color(0xFFF0F4FF),
-        infoSurfaceVariant = Color(0xFFDCE4FF),
+        outline = Color(0xFFD9A070),
+        warning = Color(0xFFD97706),
+        warningVariant = Color(0xFFFBBF24),
+        onSurfaceMuted = Color(0xFFAA7040),
+        onSurfaceSoft = Color(0xFF7A5030),
+        surfaceSubtle = Color(0xFFFFF0E0),
+        infoSurface = Color(0xFFFFF0E0),
+        infoSurfaceVariant = Color(0xFFFFE4C8),
     )
 
     fun dark(): AppColors = AppColors(
-        primary = Color(0xFFB4C6FF),
-        onPrimary = Color(0xFF121530),
-        background = Color(0xFF121212),
-        onBackground = Color(0xFFE5E7EB),
-        surface = Color(0xFF1C1C1E),
-        onSurface = Color(0xFFE5E7EB),
-        surfaceVariant = Color(0xFFE5E7EB).copy(alpha = 0.08f),
+        primary = Color(0xFFF08030),            // vibrant orange for dark bg
+        primaryContainer = Color(0xFFD0600A),   // darker orange
+        onPrimary = Color(0xFF1A0800),          // deep brown
+        background = Color(0xFF1E0D00),         // deep chocolate (not pure black)
+        onBackground = Color(0xFFFFEDD8),       // warm cream
+        surface = Color(0xFF2A1400),
+        onSurface = Color(0xFFFFEDD8),
+        surfaceVariant = Color(0xFF4A2800),
+        surfaceContainerLowest = Color(0xFF1E0D00),
+        surfaceContainerLow = Color(0xFF2A1400),
+        surfaceContainer = Color(0xFF381C00),
+        surfaceContainerHigh = Color(0xFF472400),
+        surfaceContainerHighest = Color(0xFF572C00),
+        secondaryContainer = Color(0xFF5C2E00),
+        onSecondaryContainer = Color(0xFFFFBF85),
+        outlineVariant = Color(0xFF7A5030),
         error = Color(0xFFFFB4AB),
         onError = Color(0xFF680003),
         success = Color(0xFF4FD28A),
-        outline = Color(0xFF3F4753),
+        outline = Color(0xFF7A5030),
         warning = Color(0xFFF59E0B),
         warningVariant = Color(0xFFFBBF24),
-        onSurfaceMuted = Color(0xFF94A3B8),
-        onSurfaceSoft = Color(0xFFA8B6C7),
-        surfaceSubtle = Color(0xFF28313C),
-        infoSurface = Color(0xFF232B45),
-        infoSurfaceVariant = Color(0xFF33406A),
+        onSurfaceMuted = Color(0xFFCCA070),
+        onSurfaceSoft = Color(0xFFE0B890),
+        surfaceSubtle = Color(0xFF381C00),
+        infoSurface = Color(0xFF381C00),
+        infoSurfaceVariant = Color(0xFF472400),
     )
-
-
 }

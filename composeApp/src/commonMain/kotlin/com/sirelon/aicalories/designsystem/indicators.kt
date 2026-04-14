@@ -37,15 +37,14 @@ fun BoxScope.UploadStatusIndicator(
 ) {
     if (progress >= COMPLETE_PERCENTAGE) return
 
-    // TODO: use colors from AppTheme
     val percent = progress.coerceIn(0.0, COMPLETE_PERCENTAGE)
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .align(Alignment.BottomCenter),
-        color = Color.Black.copy(alpha = 0.4f),
-        contentColor = Color.White,
+        color = AppTheme.colors.surfaceContainerHighest.copy(alpha = 0.92f),
+        contentColor = AppTheme.colors.onSurface,
     ) {
         Column(
             modifier = Modifier
@@ -59,8 +58,8 @@ fun BoxScope.UploadStatusIndicator(
             LinearProgressIndicator(
                 progress = { (percent / COMPLETE_PERCENTAGE).toFloat() },
                 modifier = Modifier.fillMaxWidth(),
-                color = Color.White,
-                trackColor = Color.White.copy(alpha = 0.3f),
+                color = AppTheme.colors.primary,
+                trackColor = AppTheme.colors.surfaceContainerHighest,
             )
             Text(
                 text = "${percent.toInt()}%",
@@ -96,16 +95,19 @@ fun PulseIndicator(
 
     Box(modifier.size(80.dp), contentAlignment = Alignment.Center) {
         @Composable
-        fun Ring(p: Float) = Box(
-            Modifier
-                .matchParentSize()
-                .graphicsLayer {
-                    scaleX = 1f + 0.8f * p
-                    scaleY = 1f + 0.8f * p
-                    alpha = 1f - p
-                }
-                .border(1.5.dp, Color.White.copy(alpha = 0.9f), CircleShape)
-        )
+        fun Ring(p: Float) {
+            val ringColor = AppTheme.colors.primary.copy(alpha = 0.9f)
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        scaleX = 1f + 0.8f * p
+                        scaleY = 1f + 0.8f * p
+                        alpha = 1f - p
+                    }
+                    .border(1.5.dp, ringColor, CircleShape)
+            )
+        }
 
         Ring(phase(offsetsMs[0]))
         Ring(phase(offsetsMs[1]))
@@ -114,7 +116,7 @@ fun PulseIndicator(
         Box(
             Modifier
                 .size(80.dp)
-                .background(Color.White, CircleShape),
+                .background(AppTheme.colors.primary, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Box(modifier = Modifier.size(32.dp)) {
