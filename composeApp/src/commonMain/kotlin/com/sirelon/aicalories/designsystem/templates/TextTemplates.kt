@@ -57,7 +57,7 @@ fun TermsAndPrivacy(onTermsClick: () -> Unit, onPrivacyClick: () -> Unit) {
         pushStringAnnotation(tag = "terms", annotation = "terms")
         withStyle(
             style = SpanStyle(
-                color = AppTheme.colors.warning,
+                color = AppTheme.colors.primary,
                 textDecoration = TextDecoration.Underline
             )
         ) {
@@ -68,7 +68,7 @@ fun TermsAndPrivacy(onTermsClick: () -> Unit, onPrivacyClick: () -> Unit) {
         pushStringAnnotation(tag = "privacy", annotation = "privacy")
         withStyle(
             style = SpanStyle(
-                color = AppTheme.colors.warning,
+                color = AppTheme.colors.primary,
                 textDecoration = TextDecoration.Underline
             )
         ) {

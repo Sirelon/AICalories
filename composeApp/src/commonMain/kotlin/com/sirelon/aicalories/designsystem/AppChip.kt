@@ -1,6 +1,5 @@
 package com.sirelon.aicalories.designsystem
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AssistChip
@@ -39,15 +38,12 @@ fun AppChip(
         }
     }
 
-    val borderStroke = colors.borderColor?.takeIf { it.alpha > 0f }?.let {
-        BorderStroke(AppDimens.BorderWidth.xs, it)
-    }
-
     AssistChip(
         modifier = modifier,
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(AppDimens.BorderRadius.l),
+        // Pill shape — "Fluid Highlight" per design spec
+        shape = RoundedCornerShape(percent = 50),
         label = {
             Text(
                 text = text,
@@ -66,7 +62,7 @@ fun AppChip(
             }
         },
         colors = colors.toChipColors(),
-        border = borderStroke,
+        border = null, // No-Line Rule: no border on chips
         elevation = AssistChipDefaults.assistChipElevation(elevation = AppDimens.Spacing.xs4),
     )
 }
@@ -76,7 +72,6 @@ data class AppChipColors(
     val containerColor: Color,
     val labelColor: Color,
     val leadingIconColor: Color,
-    val borderColor: Color? = null,
 )
 
 object AppChipDefaults {
@@ -86,10 +81,9 @@ object AppChipDefaults {
     fun neutralColors(): AppChipColors {
         val scheme = AppTheme.colors
         return AppChipColors(
-            containerColor = scheme.surfaceVariant,
-            labelColor = scheme.onSurfaceMuted,
-            leadingIconColor = scheme.primary,
-            borderColor = scheme.outline.copy(alpha = 0.6f),
+            containerColor = scheme.secondaryContainer,
+            labelColor = scheme.onSecondaryContainer,
+            leadingIconColor = scheme.onSecondaryContainer,
         )
     }
 
@@ -98,7 +92,7 @@ object AppChipDefaults {
     fun primaryColors(): AppChipColors {
         return accentColors(
             accent = AppTheme.colors.primary,
-            onAccent = AppTheme.colors.primary,
+            onAccent = AppTheme.colors.onPrimary,
         )
     }
 
@@ -128,12 +122,10 @@ object AppChipDefaults {
     ): AppChipColors {
         val scheme = AppTheme.colors
         val containerColor = lerp(scheme.surfaceVariant, accent, 0.35f)
-        val borderColor = lerp(containerColor, accent, 0.6f)
         return AppChipColors(
             containerColor = containerColor,
             labelColor = onAccent,
             leadingIconColor = onAccent,
-            borderColor = borderColor,
         )
     }
 

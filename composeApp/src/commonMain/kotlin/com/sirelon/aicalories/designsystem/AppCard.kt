@@ -1,6 +1,5 @@
 package com.sirelon.aicalories.designsystem
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,9 +8,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun AppCard(
@@ -19,38 +20,43 @@ fun AppCard(
     onClick: (() -> Unit)? = null,
     enabled: Boolean = true,
     shape: Shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
-    containerColor: Color = AppTheme.colors.surface,
+    containerColor: Color = AppTheme.colors.surfaceContainerLowest,
     contentColor: Color = AppTheme.colors.onSurface,
-    border: BorderStroke? = null,
-    tonalElevation: Dp = AppDimens.Size.xs,
+    shadowElevation: Dp = 2.dp,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val ambientShadowModifier = modifier.shadow(
+        elevation = shadowElevation,
+        shape = shape,
+        spotColor = AppTheme.colors.onSurface.copy(alpha = 0.06f),
+        ambientColor = AppTheme.colors.onSurface.copy(alpha = 0.04f),
+    )
+
     val colors = CardDefaults.cardColors(
         containerColor = containerColor,
         contentColor = contentColor,
     )
-    val elevation = CardDefaults.cardElevation(defaultElevation = tonalElevation)
+    // Zero tonal elevation — depth is achieved via ambient shadow and tonal layering
+    val elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
 
     if (onClick != null) {
         Card(
             onClick = onClick,
-            modifier = modifier,
+            modifier = ambientShadowModifier,
             enabled = enabled,
             shape = shape,
             colors = colors,
             elevation = elevation,
-            border = border,
             interactionSource = interactionSource,
             content = content,
         )
     } else {
         Card(
-            modifier = modifier,
+            modifier = ambientShadowModifier,
             shape = shape,
             colors = colors,
             elevation = elevation,
-            border = border,
             content = content,
         )
     }

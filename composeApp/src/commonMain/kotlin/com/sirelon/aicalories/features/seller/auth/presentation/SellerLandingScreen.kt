@@ -154,7 +154,7 @@ private fun SellerLandingScreen(
         ) {
             // Logo Section
             IconWithBackground(
-                backgroundColor = AppTheme.colors.warning,
+                backgroundColor = AppTheme.colors.primary,
                 modifier = Modifier.size(AppDimens.Size.xl16),
                 iconPadding = AppDimens.Spacing.xl5
             ) {
@@ -238,7 +238,7 @@ private fun ContinueWithOlxBlock(onContinueWithOlx: () -> Unit) {
         // Why connect to OLX card
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = AppTheme.colors.warning.copy(alpha = 0.16f))
+            colors = CardDefaults.cardColors(containerColor = AppTheme.colors.primary.copy(alpha = 0.16f))
         ) {
             Column(
                 modifier = Modifier.padding(AppDimens.Spacing.xl6),

@@ -1,5 +1,6 @@
 package com.sirelon.aicalories.designsystem.buttons
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -13,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
@@ -30,13 +33,24 @@ fun AppButton(
     trailingIcon: Painter? = null,
     enabled: Boolean = true,
 ) {
+    val shape = RoundedCornerShape(AppDimens.BorderRadius.xl4)
+    val gradient = style.gradient
+
+    val backgroundModifier = if (gradient != null && enabled) {
+        modifier
+            .height(AppDimens.Size.xl8 + AppDimens.Size.xl7)
+            .background(gradient, shape)
+    } else {
+        modifier.height(AppDimens.Size.xl8 + AppDimens.Size.xl7)
+    }
+
     Button(
         onClick = onClick,
         enabled = enabled,
-        modifier = modifier.height(AppDimens.Size.xl8 + AppDimens.Size.xl7),
-        shape = RoundedCornerShape(AppDimens.BorderRadius.xl4),
+        modifier = backgroundModifier,
+        shape = shape,
         colors = ButtonDefaults.buttonColors(
-            containerColor = style.backgroundColor,
+            containerColor = if (gradient != null) Color.Transparent else style.backgroundColor,
             contentColor = style.contentColor,
             disabledContainerColor = style.backgroundColor.copy(alpha = 0.55f),
             disabledContentColor = style.contentColor.copy(alpha = 0.7f),
@@ -74,17 +88,24 @@ data class AppButtonStyle(
     val backgroundColor: Color,
     val contentColor: Color,
     val elevation: Dp = AppDimens.Size.xs,
+    val gradient: Brush? = null,
 )
 
 data object AppButtonDefaults {
 
-
     @Composable
     @ReadOnlyComposable
     fun primary(): AppButtonStyle {
+        val primary = AppTheme.colors.primary
+        val primaryContainer = AppTheme.colors.primaryContainer
         return AppButtonStyle(
-            backgroundColor = AppTheme.colors.primary,
+            backgroundColor = primary,
             contentColor = AppTheme.colors.onPrimary,
+            gradient = Brush.linearGradient(
+                colors = listOf(primary, primaryContainer),
+                start = Offset(0f, 0f),
+                end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY),
+            ),
         )
     }
 
@@ -92,8 +113,9 @@ data object AppButtonDefaults {
     @ReadOnlyComposable
     fun secondary(): AppButtonStyle {
         return AppButtonStyle(
-            backgroundColor = AppTheme.colors.warning,
-            contentColor = AppTheme.colors.onPrimary,
+            backgroundColor = AppTheme.colors.surfaceContainerHigh,
+            contentColor = AppTheme.colors.onSurface,
+            elevation = AppDimens.Spacing.xs4,
         )
     }
 
@@ -101,7 +123,7 @@ data object AppButtonDefaults {
     @ReadOnlyComposable
     fun outline(): AppButtonStyle {
         return AppButtonStyle(
-            backgroundColor = AppTheme.colors.outline,
+            backgroundColor = AppTheme.colors.surfaceContainerHigh,
             contentColor = AppTheme.colors.onBackground,
             elevation = AppDimens.Spacing.xs4,
         )

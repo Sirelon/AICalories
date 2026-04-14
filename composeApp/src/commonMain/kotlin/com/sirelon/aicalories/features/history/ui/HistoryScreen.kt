@@ -136,7 +136,6 @@ private fun WeeklyCaloriesCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl4),
         containerColor = AppTheme.colors.surface,
-        tonalElevation = AppDimens.Size.xs,
     ) {
         Column(
             modifier = Modifier.padding(AppDimens.Spacing.xl6),
@@ -312,8 +311,6 @@ private fun HistoryEntryCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl4),
         containerColor = containerColor,
-        border = BorderStroke(AppDimens.BorderWidth.xs, borderColor),
-        tonalElevation = AppDimens.Size.xs,
         onClick = onClick,
     ) {
         Column(
@@ -579,7 +576,7 @@ private fun AttachmentsRow(
                     shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
                     border = BorderStroke(
                         AppDimens.BorderWidth.xs,
-                        AppTheme.colors.outline.copy(alpha = 0.3f)
+                        AppTheme.colors.outlineVariant.copy(alpha = 0.2f)
                     ),
                 ) {
                     Box(

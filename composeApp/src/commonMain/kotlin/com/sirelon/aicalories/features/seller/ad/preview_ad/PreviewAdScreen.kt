@@ -388,8 +388,8 @@ private fun AdPriceCard(
                 },
                 valueRange = minPrice..maxPrice,
                 colors = SliderDefaults.colors(
-                    thumbColor = AppTheme.colors.warning,
-                    activeTrackColor = AppTheme.colors.warning.copy(alpha = 0.24f)
+                    thumbColor = AppTheme.colors.primary,
+                    activeTrackColor = AppTheme.colors.primary.copy(alpha = 0.24f)
                 )
             )
 

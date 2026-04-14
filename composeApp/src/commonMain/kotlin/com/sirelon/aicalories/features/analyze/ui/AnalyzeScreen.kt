@@ -251,7 +251,6 @@ private fun AnalyzeBottomBar(
     Surface(
         color = AppTheme.colors.surface,
         contentColor = AppTheme.colors.onSurface,
-        tonalElevation = AppDimens.Size.xs,
     ) {
         Column(
             modifier = Modifier
@@ -323,7 +322,6 @@ private fun DescriptionSection(
     Surface(
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
         color = AppTheme.colors.surface,
-        tonalElevation = AppDimens.Size.xs,
     ) {
         Column(
             modifier = Modifier
@@ -353,7 +351,6 @@ private fun PendingAnalysisCard(
 ) {
     AppCard(
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
-        tonalElevation = AppDimens.Size.xs,
     ) {
         Column(
             modifier = Modifier
@@ -388,7 +385,6 @@ private fun SummaryCard(
 ) {
     AppCard(
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
-        tonalElevation = AppDimens.Size.xs,
     ) {
         Column(
             modifier = Modifier
@@ -430,7 +426,6 @@ private fun SummaryInsightsRow(
     Surface(
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl),
         color = AppTheme.colors.primary.copy(alpha = 0.1f),
-        tonalElevation = AppDimens.Size.xs,
     ) {
         Text(
             modifier = Modifier

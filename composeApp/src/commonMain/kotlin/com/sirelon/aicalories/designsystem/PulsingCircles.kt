@@ -24,11 +24,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 @Composable
 fun PulsingCircles(
     modifier: Modifier = Modifier,
-    outerColor: Color = AppTheme.colors.warning.copy(alpha = 0.2f),
-    middleColor: Color = AppTheme.colors.warning.copy(alpha = 0.35f),
+    outerColor: Color = AppTheme.colors.primary.copy(alpha = 0.2f),
+    middleColor: Color = AppTheme.colors.primary.copy(alpha = 0.35f),
     innerColors: List<Color> = listOf(
-        AppTheme.colors.warningVariant,
-        AppTheme.colors.warning,
+        AppTheme.colors.primaryContainer,
+        AppTheme.colors.primary,
     ),
     content: @Composable () -> Unit = {},
 ) {
