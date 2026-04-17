@@ -18,6 +18,7 @@ import com.sirelon.aicalories.features.seller.openai.requests.OpenAIAttributesRe
 import com.sirelon.aicalories.features.seller.openai.responses.OpenAIAttributeSuggestionResponse
 import com.sirelon.aicalories.features.seller.openai.responses.OpenAIAttributeSuggestionsResponse
 import com.sirelon.aicalories.features.seller.openai.responses.OpenAIGeneratedAd
+import com.sirelon.aicalories.features.seller.openai.responses.OpenAIListingContextResponse
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
@@ -25,43 +26,74 @@ import kotlinx.serialization.json.put
 
 private val DEFAULT_MODEL = ModelId("gpt-4.1")
 private const val DEFAULT_IMAGE_DETAIL = "high"
-
-private const val AD_GENERATION_INSTRUCTIONS = """
-Create one OLX-style listing draft for the main item shown across the images.
+private val NUMBER_PATTERN = Regex("""-?\d+(?:\.\d+)?""")
+private const val LISTING_CONTEXT_INSTRUCTIONS = """
+Extract structured listing context for one OLX Ukraine item.
 
 Rules:
-- Use only what is visible in the images and, if provided, explicitly stated in the seller note.
-- If several different items appear, describe only the main item that is most central or repeated across the photos.
-- Ignore background objects and unrelated items.
-- You may use text that is clearly readable on the item, label, or box.
-- Never invent brand, model, size, material, specifications, accessories, bundle contents, or defects.
-- If identification is uncertain, use cautious generic wording.
+- This step extracts facts only. Do not write listing copy.
+- Source priority:
+  1. explicit seller facts
+  2. readable text on the item, label, or box
+  3. neutral visible details from the photos
+- Keep exact seller-provided tokens for brand, model, size, purchase age, and condition when present.
+- Do not infer season (`зимова`, `демісезонна`, `весняна`, `осіння`) unless the seller explicitly says it or the photos make it unmistakable.
+- `itemType` must be a safe, broad item type in Ukrainian.
+- `mustUsePhrases` should contain 0 to 5 short exact phrases copied from the seller note that are concrete and should be preserved in the listing or attributes.
+- `visualFacts` should contain 2 to 6 short neutral visible facts from the photos.
+- Use empty strings for unknown scalar fields and empty arrays when unknown.
+- Return ONLY valid JSON with this exact shape:
+  {"itemType":"string","sellerFacts":{"brand":"string","model":"string","size":"string","purchaseAge":"string","condition":"string","season":"string","material":"string"},"mustUsePhrases":["string"],"visualFacts":["string"]}
+- The response must start with `{` and end with `}`.
+"""
+
+private const val AD_GENERATION_INSTRUCTIONS = """
+Write one OLX Ukraine listing draft using the structured context JSON from the input.
+
+Rules:
+- Your job is to create a usable marketplace listing, not to write an image inspection report.
+- Treat `sellerFacts` and `mustUsePhrases` as authoritative.
+- If `sellerFacts.brand` is not empty, preserve that exact brand token in the title or description.
+- If `sellerFacts.size` is not empty, preserve that exact size token in the title or description.
+- If `sellerFacts.purchaseAge` is not empty, include it naturally in the description.
+- Use `visualFacts` only to support the seller facts with neutral visible details.
+- Do not infer season unless `sellerFacts.season` is not empty.
+- Do not invent brand, size, material, season, accessories, defects, or condition.
+- Do not add filler phrases like `стан видно на фото`, `додаткові питання в повідомленнях`, or `підійде для повсякденного носіння`.
 - Write `title` and `description` in Ukrainian.
-- `title`: concise, searchable, no hype, no marketing phrases.
-- `description`: 4 to 8 short sentences, no bullet points, no markdown. Describe what the item is, visible condition, included visible parts, and visible wear or defects.
+- `title`: short, searchable, specific. Prefer item type + brand + key detail + exact size when available.
+- `description`: 3 to 5 short sentences, no bullet points, no markdown.
 - Prices must be plain numbers only, with no currency symbols or extra text.
+- All prices must be estimated in Ukrainian hryvnia (UAH) for the OLX Ukraine second-hand market.
 - Price for the second-hand marketplace value, not new retail price and not collectible premium price.
 - Ensure `minPrice <= suggestedPrice <= maxPrice`.
-- Respect seller note more than your own analysis.
-- Include seller note to description if it applicable.
-- If the photos are not clear enough for a confident listing, return generic but usable text and conservative pricing.
 - Return ONLY valid JSON with this exact shape:
   {"title":"string","description":"string","suggestedPrice":number,"minPrice":number,"maxPrice":number}
 - The response must start with `{` and end with `}`.
 """
 
 private const val ATTRIBUTE_FILL_INSTRUCTIONS = """
-Fill the provided OLX attributes for the previously analyzed item.
+Fill the provided OLX attributes for the same item.
 
 Rules:
-- Use only the earlier item analysis context and the provided attribute list.
+- This is form filling, not captioning.
+- Source priority:
+  1. structured seller facts from the previous response
+  2. exact phrases from `mustUsePhrases`
+  3. earlier image analysis context
+  4. attribute labels and allowed option labels
 - Return only attributes from the provided list.
 - For select and multi-select attributes, return allowed option codes in `valueCodes`.
 - For numeric and text attributes, return one plain value in `valueText`.
-- If a value is uncertain, not visible, or not inferable, leave `valueCodes` empty and `valueText` empty.
-- Never invent hidden specifications or unsupported details.
+- If the previous structured context contains a brand, size, model, condition, purchase age, material, or season, use that first for matching attributes.
+- Never replace an exact seller-provided value with an approximation. If the structured context says `XL`, do not return `L-XL`, `L`, or leave it empty.
+- If there is a brand attribute and the structured context contains `Nike`, fill that brand from the structured context.
+- If there is a size attribute and the structured context contains `XL`, fill that size from the structured context.
+- If a structured value matches an allowed option label semantically, return the corresponding option code.
+- Prefer exact option codes, but if needed you may repeat the matched label in `valueText` as a fallback hint.
+- If the structured context does not answer the field and the value is not directly visible or clearly inferable, leave `valueCodes` empty and `valueText` empty.
+- Never invent unsupported details.
 - Respect numeric limits.
-- Respect seller note more than your own analysis.
 - Use at most one value unless the attribute explicitly supports multiple choices.
 - Return ONLY valid JSON with this exact shape:
   {"attributes":[{"code":"string","valueCodes":["string"],"valueText":"string","confidence":"high|medium|low"}]}
@@ -105,12 +137,16 @@ class OpenAIClient(
                 maxOutputTokens = attributeOutputTokenLimit(attributes.size),
                 // This follow-up response is not chained further yet.
                 store = false,
-                // Only compact text input is needed because the item understanding comes from `previousResponseId`.
+                // Use separate text items so seller facts and attribute schema stay explicit.
                 input = ResponseInput(
-                    items = listOf(
-                        createTextUserResponseItem(sellerPrompt),
-                        createTextUserResponseItem(buildAttributeFillPrompt(attributes))
-                    )
+                    items = buildList {
+                        sellerPrompt.trim()
+                            .takeIf { it.isNotEmpty() }
+                            ?.let { prompt ->
+                                add(createTextUserResponseItem(buildAttributeSellerNotePrompt(prompt)))
+                            }
+                        add(createTextUserResponseItem(buildAttributeFillPrompt(attributes)))
+                    }
                 ),
             )
         )
@@ -131,22 +167,22 @@ class OpenAIClient(
             "Legacy gpt-4 does not support image input or structured outputs for this flow. Use gpt-4.1, gpt-4o, or a newer model."
         }
 
-        val response = openAI.response(
+        val contextResponse = openAI.response(
             request = ResponseRequest(
-                // Vision-capable model for the initial photo-to-listing analysis.
+                // Vision-capable model for structured seller/visual fact extraction.
                 model = model,
-                // Rules that constrain the listing draft and JSON response format.
-                instructions = AD_GENERATION_INSTRUCTIONS.trimIndent(),
-                // Low temperature keeps titles and prices stable and reduces random drift.
-                temperature = 0.1,
-                // Listing output is intentionally small.
-                maxOutputTokens = 200,
-                // This response must be stored so the next turn can reference it via `previousResponseId`.
+                // Extract normalized listing context from seller note + photos.
+                instructions = LISTING_CONTEXT_INSTRUCTIONS.trimIndent(),
+                // Deterministic extraction keeps seller facts stable.
+                temperature = 0.0,
+                // Structured fact output is compact but slightly larger than the final ad.
+                maxOutputTokens = 250,
+                // Stored so the draft and attribute-fill steps can reference the structured context.
                 store = true,
-                // One multimodal user turn: short task text plus all listing photos.
+                // One multimodal user turn: extraction task + seller note + images.
                 input = ResponseInput(
                     items = listOf(
-                        createUserResponseItem(
+                        createContextUserResponseItem(
                             images = images,
                             sellerPrompt = sellerPrompt,
                             imageDetail = imageDetail,
@@ -156,19 +192,47 @@ class OpenAIClient(
             )
         )
 
-        val jsonString = extractTextPayload(response)
-        val generatedAd = json.decodeFromString<OpenAIGeneratedAd>(jsonString)
-        return response.id to mapper.mapToDomain(generatedAd, images)
+        val contextJson = extractTextPayload(contextResponse)
+        val analysisContext = json.decodeFromString<OpenAIListingContextResponse>(contextJson)
+
+        val listingResponse = openAI.response(
+            request = ResponseRequest(
+                // Same model drafts the final listing from the structured context.
+                model = model,
+                // Seller facts are already normalized in the first step; this pass focuses on wording.
+                instructions = AD_GENERATION_INSTRUCTIONS.trimIndent(),
+                // Keep wording stable and avoid stylistic drift.
+                temperature = 0.1,
+                maxOutputTokens = 200,
+                // Store the final listing response so follow-up attribute fill can reference the full chain.
+                store = true,
+                previousResponseId = contextResponse.id,
+                input = ResponseInput(
+                    items = listOf(
+                        createTextUserResponseItem(buildListingDraftPrompt(analysisContext))
+                    )
+                ),
+            )
+        )
+
+        val listingJson = extractTextPayload(listingResponse)
+        val generatedAd = json.decodeFromString<OpenAIGeneratedAd>(listingJson)
+        return listingResponse.id to mapper.mapToDomain(generatedAd, images)
     }
 
-    private fun createUserResponseItem(
+    private fun createContextUserResponseItem(
         images: List<String>,
         sellerPrompt: String,
         imageDetail: String,
     ): ResponseInputItem = ResponseInputItem(
         role = "user",
         content = buildJsonArray {
-            add(createTextContent(buildAdPrompt(sellerPrompt)))
+            add(createTextContent(buildContextPrompt()))
+            sellerPrompt.trim()
+                .takeIf { it.isNotEmpty() }
+                ?.let { prompt ->
+                    add(createTextContent(buildSellerNotePrompt(prompt)))
+                }
             images.forEach { imageUrl ->
                 add(createImageContent(imageUrl, imageDetail))
             }
@@ -182,15 +246,22 @@ class OpenAIClient(
         }
     )
 
-    private fun buildAdPrompt(sellerPrompt: String): String = buildString {
-        append("Create one marketplace listing draft for the main item shown across all images.")
+    private fun buildContextPrompt(): String =
+        "Extract structured listing context for the main item shown in the photos."
 
-        sellerPrompt.trim()
-            .takeIf { it.isNotEmpty() }
-            ?.let {
-                append("\nSeller note: ")
-                append(it)
-            }
+    private fun buildListingDraftPrompt(analysisContext: OpenAIListingContextResponse): String = buildString {
+        appendLine("Structured listing context JSON:")
+        append(compactJson.encodeToString(analysisContext))
+    }
+
+    private fun buildSellerNotePrompt(sellerPrompt: String): String = buildString {
+        appendLine("Seller facts from the user. Treat them as authoritative listing facts.")
+        appendLine("Preserve exact brand, size, model, condition, and purchase-age wording when relevant.")
+        appendLine("Do not replace exact seller facts with guesses or broader ranges.")
+        appendLine("Seller note:")
+        appendLine("<<<")
+        appendLine(sellerPrompt)
+        append(">>>")
     }
 
     private fun createTextContent(text: String) = buildJsonObject {
@@ -208,8 +279,18 @@ class OpenAIClient(
         put("detail", imageDetail)
     }
 
+    private fun buildAttributeSellerNotePrompt(sellerPrompt: String): String = buildString {
+        appendLine("Seller facts to use first when filling attributes.")
+        appendLine("Preserve exact seller-provided brand, size, model, condition, and purchase-age values.")
+        appendLine("Seller note:")
+        appendLine("<<<")
+        appendLine(sellerPrompt)
+        append(">>>")
+    }
+
     private fun buildAttributeFillPrompt(attributes: List<OlxAttribute>): String = buildString {
-        appendLine("Fill these OLX attributes for the previously analyzed item.")
+        appendLine("Fill these OLX attributes for the same item.")
+        appendLine("Available OLX attributes and allowed options:")
         // Send a compact, model-friendly schema instead of the raw OLX transport payload.
         append("Attributes JSON: ")
         append(compactJson.encodeToString(OpenAIAttributesRequest(attributes.map(::toAttributeRequest))))
@@ -291,19 +372,12 @@ class OpenAIClient(
         attribute: OlxAttribute,
         suggestion: OpenAIAttributeSuggestionResponse,
     ): List<OlxAttributeValue> = when (attribute.inputType) {
-        AttributeInputType.SingleSelect -> suggestion.valueCodes
-            .orEmpty()
+        AttributeInputType.SingleSelect -> resolveSuggestedOptionValues(attribute, suggestion)
             .take(1)
-            .mapNotNull { code -> attribute.allowedValues.find { it.code == code } }
 
-        AttributeInputType.MultiSelect -> suggestion.valueCodes
-            .orEmpty()
-            .distinct()
-            .mapNotNull { code -> attribute.allowedValues.find { it.code == code } }
+        AttributeInputType.MultiSelect -> resolveSuggestedOptionValues(attribute, suggestion)
 
-        AttributeInputType.NumericInput -> suggestion.valueText
-            ?.trim()
-            ?.takeIf { it.isNotEmpty() }
+        AttributeInputType.NumericInput -> extractNumericValue(suggestion.valueText)
             ?.takeIf { value ->
                 val number = value.toDoubleOrNull() ?: return@takeIf false
                 val min = attribute.validationRules.min
@@ -318,6 +392,64 @@ class OpenAIClient(
             ?.takeIf { it.isNotEmpty() }
             ?.let { listOf(OlxAttributeValue(code = attribute.code, label = it)) }
             .orEmpty()
+    }
+
+    private fun resolveSuggestedOptionValues(
+        attribute: OlxAttribute,
+        suggestion: OpenAIAttributeSuggestionResponse,
+    ): List<OlxAttributeValue> = buildList {
+        suggestion.valueCodes
+            .orEmpty()
+            .forEach { candidate ->
+                resolveAllowedValue(attribute, candidate)?.let(::add)
+            }
+
+        suggestion.valueText
+            ?.takeIf { it.isNotBlank() }
+            ?.let(::splitSuggestedValues)
+            .orEmpty()
+            .forEach { candidate ->
+                resolveAllowedValue(attribute, candidate)?.let(::add)
+            }
+    }.distinctBy { it.code }
+
+    private fun resolveAllowedValue(
+        attribute: OlxAttribute,
+        candidate: String,
+    ): OlxAttributeValue? {
+        val normalizedCandidate = normalizeForMatching(candidate)
+        if (normalizedCandidate.isEmpty()) return null
+
+        return attribute.allowedValues.firstOrNull { value ->
+            val normalizedCode = normalizeForMatching(value.code)
+            val normalizedLabel = normalizeForMatching(value.label)
+
+            normalizedCandidate == normalizedCode ||
+                normalizedCandidate == normalizedLabel ||
+                normalizedCandidate.contains(normalizedCode) ||
+                normalizedCandidate.contains(normalizedLabel) ||
+                normalizedCode.contains(normalizedCandidate) ||
+                normalizedLabel.contains(normalizedCandidate)
+        }
+    }
+
+    private fun splitSuggestedValues(valueText: String): List<String> = valueText
+        .split(",", ";", "/", "\n")
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .ifEmpty { listOf(valueText.trim()) }
+
+    private fun extractNumericValue(valueText: String?): String? = valueText
+        ?.replace(',', '.')
+        ?.let { numericText ->
+            NUMBER_PATTERN.find(numericText)?.value
+        }
+        ?.takeIf { it.isNotBlank() }
+
+    private fun normalizeForMatching(value: String): String = buildString {
+        value.lowercase().forEach { char ->
+            if (char.isLetterOrDigit()) append(char)
+        }
     }
 
     private fun AttributeInputType.toOpenAIType(): String = when (this) {
