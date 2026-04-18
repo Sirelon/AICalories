@@ -36,7 +36,7 @@ fun CardWithTitle(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     AppCard {
-        // Title section uses surfaceContainerLow to create tonal separation without a line
+        // Title section uses surfaceLow to create tonal separation without a line.
         Column(
             modifier = Modifier.padding(spacing),
             verticalArrangement = Arrangement.spacedBy(spacing * 2),

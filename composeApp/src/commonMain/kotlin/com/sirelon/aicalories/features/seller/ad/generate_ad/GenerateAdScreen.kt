@@ -237,7 +237,7 @@ private fun SellerHeader(
             .background(
                 Brush.linearGradient(
                     colors = listOf(
-                        AppTheme.colors.primaryContainer,
+                        AppTheme.colors.primaryBright,
                         AppTheme.colors.primary,
                     )
                 )
@@ -316,7 +316,7 @@ private fun TipsSection(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl7),
-        color = AppTheme.colors.infoSurface
+        color = AppTheme.colors.surfaceLow
     ) {
         Row(
             modifier = Modifier.padding(AppDimens.Spacing.xl5),
@@ -324,7 +324,7 @@ private fun TipsSection(
         ) {
             IconWithBackground(
                 modifier = Modifier.size(AppDimens.Size.xl11),
-                backgroundColor = AppTheme.colors.infoSurfaceVariant,
+                backgroundColor = AppTheme.colors.surfaceHigh,
             ) {
                 Icon(
                     imageVector = Icons.Default.FlashOn,

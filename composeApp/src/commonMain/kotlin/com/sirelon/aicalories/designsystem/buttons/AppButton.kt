@@ -97,12 +97,12 @@ data object AppButtonDefaults {
     @ReadOnlyComposable
     fun primary(): AppButtonStyle {
         val primary = AppTheme.colors.primary
-        val primaryContainer = AppTheme.colors.primaryContainer
+        val primaryBright = AppTheme.colors.primaryBright
         return AppButtonStyle(
             backgroundColor = primary,
             contentColor = AppTheme.colors.onPrimary,
             gradient = Brush.linearGradient(
-                colors = listOf(primary, primaryContainer),
+                colors = listOf(primary, primaryBright),
                 start = Offset(0f, 0f),
                 end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY),
             ),
@@ -113,7 +113,7 @@ data object AppButtonDefaults {
     @ReadOnlyComposable
     fun secondary(): AppButtonStyle {
         return AppButtonStyle(
-            backgroundColor = AppTheme.colors.surfaceContainerHigh,
+            backgroundColor = AppTheme.colors.surfaceHigh,
             contentColor = AppTheme.colors.onSurface,
             elevation = AppDimens.Spacing.xs4,
         )
@@ -123,7 +123,7 @@ data object AppButtonDefaults {
     @ReadOnlyComposable
     fun outline(): AppButtonStyle {
         return AppButtonStyle(
-            backgroundColor = AppTheme.colors.surfaceContainerHigh,
+            backgroundColor = AppTheme.colors.surfaceHigh,
             contentColor = AppTheme.colors.onBackground,
             elevation = AppDimens.Spacing.xs4,
         )

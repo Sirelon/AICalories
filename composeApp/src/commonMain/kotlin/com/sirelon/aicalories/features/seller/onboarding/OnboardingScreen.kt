@@ -120,7 +120,7 @@ private fun OnboardingPage(item: OnboardingItem) {
                 modifier = Modifier
                     .size(iconSize)
                     .align(Alignment.BottomEnd),
-                backgroundColor = AppTheme.colors.infoSurfaceVariant,
+                backgroundColor = AppTheme.colors.surfaceHigh,
             ) {
                 Icon(
                     painter = painterResource(item.icon),
@@ -196,4 +196,3 @@ private fun OnboardingScreenPreview() {
         OnboardingScreen {}
     }
 }
-
