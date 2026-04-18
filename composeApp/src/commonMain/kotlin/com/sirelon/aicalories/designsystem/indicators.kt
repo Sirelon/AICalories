@@ -43,7 +43,7 @@ fun BoxScope.UploadStatusIndicator(
             .fillMaxWidth()
             .wrapContentHeight()
             .align(Alignment.BottomCenter),
-        color = AppTheme.colors.surfaceContainerHighest.copy(alpha = 0.92f),
+        color = AppTheme.colors.surfaceHigh.copy(alpha = 0.92f),
         contentColor = AppTheme.colors.onSurface,
     ) {
         Column(
@@ -59,7 +59,7 @@ fun BoxScope.UploadStatusIndicator(
                 progress = { (percent / COMPLETE_PERCENTAGE).toFloat() },
                 modifier = Modifier.fillMaxWidth(),
                 color = AppTheme.colors.primary,
-                trackColor = AppTheme.colors.surfaceContainerHighest,
+                trackColor = AppTheme.colors.surfaceHigh,
             )
             Text(
                 text = "${percent.toInt()}%",

@@ -20,7 +20,7 @@ fun AppCard(
     onClick: (() -> Unit)? = null,
     enabled: Boolean = true,
     shape: Shape = RoundedCornerShape(AppDimens.BorderRadius.xl3),
-    containerColor: Color = AppTheme.colors.surfaceContainerLowest,
+    containerColor: Color = AppTheme.colors.surfaceLowest,
     contentColor: Color = AppTheme.colors.onSurface,
     shadowElevation: Dp = 2.dp,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },

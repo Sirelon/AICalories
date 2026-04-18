@@ -27,7 +27,7 @@ fun PulsingCircles(
     outerColor: Color = AppTheme.colors.primary.copy(alpha = 0.2f),
     middleColor: Color = AppTheme.colors.primary.copy(alpha = 0.35f),
     innerColors: List<Color> = listOf(
-        AppTheme.colors.primaryContainer,
+        AppTheme.colors.primaryBright,
         AppTheme.colors.primary,
     ),
     content: @Composable () -> Unit = {},

@@ -59,7 +59,7 @@ fun Input(
         else -> supportingText
     }
 
-    // Filled variant per design spec: surface-container-low background, no border,
+    // Filled variant per design spec: surface-low background, no border,
     // 2px primary indicator on focus only
     TextField(
         modifier = modifier,
@@ -68,10 +68,10 @@ fun Input(
         enabled = enabled,
         readOnly = readOnly,
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = AppTheme.colors.surfaceContainerLow,
-            unfocusedContainerColor = AppTheme.colors.surfaceContainerLow,
-            disabledContainerColor = AppTheme.colors.surfaceContainerLow.copy(alpha = 0.6f),
-            errorContainerColor = AppTheme.colors.surfaceContainerLow,
+            focusedContainerColor = AppTheme.colors.surfaceLow,
+            unfocusedContainerColor = AppTheme.colors.surfaceLow,
+            disabledContainerColor = AppTheme.colors.surfaceLow.copy(alpha = 0.6f),
+            errorContainerColor = AppTheme.colors.surfaceLow,
             focusedIndicatorColor = AppTheme.colors.primary,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
@@ -145,8 +145,8 @@ fun InputWithCopy(
 
     TextField(
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = AppTheme.colors.surfaceContainerLow,
-            unfocusedContainerColor = AppTheme.colors.surfaceContainerLow,
+            focusedContainerColor = AppTheme.colors.surfaceLow,
+            unfocusedContainerColor = AppTheme.colors.surfaceLow,
             focusedIndicatorColor = AppTheme.colors.primary,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,

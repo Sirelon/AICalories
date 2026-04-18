@@ -5,44 +5,54 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 
+/**
+ * SellSnap-aligned semantic colors exposed through `AppTheme.colors`.
+ *
+ * Public tokens:
+ * `primary`, `primaryBright`, `onPrimary`, `background`, `onBackground`,
+ * `surface`, `surfaceLowest`, `surfaceLow`, `surfaceHigh`, `surfaceVariant`,
+ * `secondaryContainer`, `onSecondaryContainer`, `outline`, `outlineVariant`,
+ * `success`, `warning`, `warningVariant`, `error`, `onError`,
+ * `onSurface`, `onSurfaceMuted`, `onSurfaceSoft`.
+ *
+ * Material surface container roles are derived internally from these tokens.
+ */
 @Stable
 data class AppColors(
     val primary: Color,
-    val primaryContainer: Color,
+    val primaryBright: Color,
     val onPrimary: Color,
     val background: Color,
     val onBackground: Color,
     val surface: Color,
     val onSurface: Color,
     val surfaceVariant: Color,
-    val surfaceContainerLowest: Color,
-    val surfaceContainerLow: Color,
-    val surfaceContainer: Color,
-    val surfaceContainerHigh: Color,
-    val surfaceContainerHighest: Color,
+    val surfaceLowest: Color,
+    val surfaceLow: Color,
+    val surfaceHigh: Color,
     val secondaryContainer: Color,
     val onSecondaryContainer: Color,
+    val outline: Color,
     val outlineVariant: Color,
     val error: Color,
     val onError: Color,
     val success: Color,
-    val outline: Color,
     val warning: Color,
     val warningVariant: Color,
     val onSurfaceMuted: Color,
     val onSurfaceSoft: Color,
-    val surfaceSubtle: Color,
-    val infoSurface: Color,
-    val infoSurfaceVariant: Color,
 )
 
 internal fun AppColors.toMaterial(darkTheme: Boolean): ColorScheme {
     val baseScheme = if (darkTheme) darkColorScheme() else lightColorScheme()
+    val surfaceContainer = lerp(surfaceLow, surfaceHigh, 0.5f)
+    val surfaceContainerHighest = lerp(surfaceHigh, secondaryContainer, 0.5f)
     return baseScheme.copy(
         primary = primary,
         onPrimary = onPrimary,
-        primaryContainer = primaryContainer,
+        primaryContainer = primaryBright,
         onPrimaryContainer = onSecondaryContainer,
         secondary = primary,
         onSecondary = onPrimary,
@@ -58,10 +68,10 @@ internal fun AppColors.toMaterial(darkTheme: Boolean): ColorScheme {
         onSurface = onSurface,
         surfaceVariant = surfaceVariant,
         onSurfaceVariant = onSurface,
-        surfaceContainerLowest = surfaceContainerLowest,
-        surfaceContainerLow = surfaceContainerLow,
+        surfaceContainerLowest = surfaceLowest,
+        surfaceContainerLow = surfaceLow,
         surfaceContainer = surfaceContainer,
-        surfaceContainerHigh = surfaceContainerHigh,
+        surfaceContainerHigh = surfaceHigh,
         surfaceContainerHighest = surfaceContainerHighest,
         error = error,
         onError = onError,

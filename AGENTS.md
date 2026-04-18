@@ -100,6 +100,7 @@ AI-optimized repo map for agents working in this workspace. Read this first; onl
 - Web Wasm: `composeApp/src/wasmJsMain/kotlin/com/sirelon/aicalories/main.kt`
 - Root composable: `composeApp/src/commonMain/kotlin/com/sirelon/aicalories/App.kt`
 - iOS: `iosApp/iosApp/iOSApp.swift`
+- iOS Xcode sync/build bridge: `:composeApp:embedAndSignAppleFrameworkForXcode` is invoked from `iosApp/iosApp.xcodeproj/project.pbxproj`
 - Server: `server/src/main/kotlin/com/sirelon/aicalories/Application.kt`
 
 ## Navigation Rules
@@ -242,12 +243,14 @@ Most features use some combination of:
 - Build Android debug: `./gradlew :composeApp:assembleDebug`
 - Build desktop JVM artifact: `./gradlew :composeApp:jvmJar`
 - Run desktop app: `./gradlew :composeApp:run`
+- Package desktop native app for current OS: `./gradlew :composeApp:packageDistributionForCurrentOS`
 - Build server: `./gradlew :server:build`
 - Run server: `./gradlew :server:run`
 - Build web Wasm production bundle: `./gradlew :composeApp:wasmJsBrowserProductionWebpack`
 - Run web Wasm: `./gradlew :composeApp:wasmJsBrowserDevelopmentRun`
 - Build web JS production bundle: `./gradlew :composeApp:jsBrowserProductionWebpack`
 - Run web JS: `./gradlew :composeApp:jsBrowserDevelopmentRun`
+- Build/sign Apple framework for Xcode: `./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`
 - Run all tests: `./gradlew allTests`
 - Android lint: `./gradlew lint`
 - JS tests: `./gradlew jsTest`
