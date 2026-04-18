@@ -33,7 +33,7 @@ object ThemesFactory {
 
     fun dark(): AppColors = AppColors(
         primary = Color(0xFFF08030),            // vibrant orange for dark bg
-        primaryBright = Color(0xFFD0600A),      // darker orange
+        primaryBright = Color(0xFFD0600A),      // gradient endpoint (dark theme inverts direction)
         onPrimary = Color(0xFF1A0800),          // deep brown
         background = Color(0xFF1E0D00),         // deep chocolate (not pure black)
         onBackground = Color(0xFFFFEDD8),       // warm cream
