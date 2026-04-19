@@ -9,7 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 
@@ -20,19 +20,15 @@ import com.sirelon.aicalories.designsystem.AppTheme
  * in `Design/ClaudeDesign/project/ui.jsx`: primary → secondary → ghost →
  * outline → magic → success. Each variant is rendered twice — enabled and
  * disabled — so the press/disabled treatment is easy to eyeball.
+ *
+ * `@PreviewLightDark` renders the function twice (UI_MODE_NIGHT off and on)
+ * so a single composable covers both themes — no need for separate light/dark
+ * preview functions.
  */
-@Preview
+@PreviewLightDark
 @Composable
-private fun AppButtonVariantsLightPreview() {
-    AppTheme(darkTheme = false) {
-        AppButtonGallery()
-    }
-}
-
-@Preview
-@Composable
-private fun AppButtonVariantsDarkPreview() {
-    AppTheme(darkTheme = true) {
+private fun AppButtonVariantsPreview() {
+    AppTheme {
         AppButtonGallery()
     }
 }
