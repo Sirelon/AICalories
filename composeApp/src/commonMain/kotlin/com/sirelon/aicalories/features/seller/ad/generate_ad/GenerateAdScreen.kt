@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -19,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -52,20 +52,21 @@ import com.sirelon.aicalories.features.media.ui.MAX_PHOTOS
 import com.sirelon.aicalories.features.media.ui.PhotosGrid
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.generated.resources.Res
-import com.sirelon.aicalories.generated.resources.describe_item_placeholder
-import com.sirelon.aicalories.generated.resources.describe_your_item
-import com.sirelon.aicalories.generated.resources.generate_ad_with_ai
-import com.sirelon.aicalories.generated.resources.generating
+import com.sirelon.aicalories.generated.resources.add_photos_to_continue
+import com.sirelon.aicalories.generated.resources.ai_hint_label
+import com.sirelon.aicalories.generated.resources.ai_hint_placeholder
+import com.sirelon.aicalories.generated.resources.generate_with_ai
 import com.sirelon.aicalories.generated.resources.ic_check
 import com.sirelon.aicalories.generated.resources.ic_snap_logo
 import com.sirelon.aicalories.generated.resources.ic_sparkles
-import com.sirelon.aicalories.generated.resources.sellsnap_title
-import com.sirelon.aicalories.generated.resources.snap_photo_ad_desc
+import com.sirelon.aicalories.generated.resources.ic_user
+import com.sirelon.aicalories.generated.resources.new_listing
+import com.sirelon.aicalories.generated.resources.new_listing_subtitle
 import com.sirelon.aicalories.generated.resources.tip_angles
 import com.sirelon.aicalories.generated.resources.tip_defects
 import com.sirelon.aicalories.generated.resources.tip_lighting
 import com.sirelon.aicalories.generated.resources.tips_for_better_photos
-import com.sirelon.aicalories.generated.resources.turn_stuff_into_olx_listings
+import com.sirelon.aicalories.generated.resources.welcome_greeting
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -151,19 +152,36 @@ private fun GenerateAdScreenContent(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            AppButton(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = AppDimens.Spacing.xl3),
-                style = AppButtonDefaults.primary(),
-                text = if (state.isLoading) stringResource(Res.string.generating) else stringResource(
-                    Res.string.generate_ad_with_ai
-                ),
-                onClick = onSubmitClick,
-                leadingIcon = if (state.isLoading) null else painterResource(Res.drawable.ic_sparkles),
-                enabled = state.canSubmit,
-            )
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                AppTheme.colors.background.copy(alpha = 0f),
+                                AppTheme.colors.background,
+                            )
+                        )
+                    )
+                    .padding(top = AppDimens.Spacing.xl6),
+                contentAlignment = Alignment.BottomCenter,
+            ) {
+                AppButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = AppDimens.Spacing.xl3)
+                        .padding(bottom = AppDimens.Spacing.xl3),
+                    style = AppButtonDefaults.magic(),
+                    text = if (state.uploads.isEmpty())
+                        stringResource(Res.string.add_photos_to_continue)
+                    else
+                        stringResource(Res.string.generate_with_ai),
+                    onClick = onSubmitClick,
+                    leadingIcon = if (state.uploads.isEmpty()) null else painterResource(Res.drawable.ic_sparkles),
+                    enabled = state.canSubmit,
+                )
+            }
         }
     ) { padding ->
         Column(
@@ -174,7 +192,8 @@ private fun GenerateAdScreenContent(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
         ) {
-            SellerHeader()
+            SlimHeader()
+            PageTitle()
             PhotosGrid(
                 files = state.uploads,
                 onAddPhoto = onUploadClick,
@@ -207,6 +226,78 @@ private fun GenerateAdScreenContent(
 }
 
 @Composable
+private fun SlimHeader(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(AppDimens.Size.xl10)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                AppTheme.colors.primaryBright,
+                                AppTheme.colors.primary,
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_snap_logo),
+                    contentDescription = null,
+                    tint = AppTheme.colors.onPrimary,
+                    modifier = Modifier.size(AppDimens.Size.xl6),
+                )
+            }
+            // TODO SIR-29: show user first name when account info is wired
+            Text(
+                text = stringResource(Res.string.welcome_greeting),
+                fontSize = AppDimens.TextSize.xl4,
+                fontWeight = FontWeight.SemiBold,
+                color = AppTheme.colors.onSurface,
+            )
+        }
+        // TODO SIR-29: wire logout/account menu on click
+        IconButton(onClick = {}) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_user),
+                contentDescription = null,
+                tint = AppTheme.colors.onSurface,
+            )
+        }
+    }
+}
+
+@Composable
+private fun PageTitle(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
+    ) {
+        Text(
+            text = stringResource(Res.string.new_listing),
+            fontSize = AppDimens.TextSize.xl7,
+            fontWeight = FontWeight.ExtraBold,
+            color = AppTheme.colors.onSurface,
+        )
+        Text(
+            text = stringResource(Res.string.new_listing_subtitle),
+            fontSize = AppDimens.TextSize.xl3,
+            fontWeight = FontWeight.Normal,
+            color = AppTheme.colors.onSurfaceMuted,
+        )
+    }
+}
+
+@Composable
 private fun PromptSection(
     value: String,
     enabled: Boolean,
@@ -223,102 +314,20 @@ private fun PromptSection(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
             Text(
-                text = stringResource(Res.string.describe_your_item),
+                text = stringResource(Res.string.ai_hint_label),
                 fontSize = AppDimens.TextSize.xl5,
                 fontWeight = FontWeight.Bold,
                 color = AppTheme.colors.onSurface,
             )
             Input(
                 value = value,
-                onValueChange = onValueChange,
+                onValueChange = { onValueChange(it.take(120)) },
                 enabled = enabled,
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = stringResource(Res.string.describe_item_placeholder),
+                placeholder = stringResource(Res.string.ai_hint_placeholder),
                 minLines = 3,
                 maxLines = 5,
-            )
-        }
-    }
-}
-
-@Composable
-private fun SellerHeader(
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(AppDimens.BorderRadius.xl11))
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        AppTheme.colors.primaryBright,
-                        AppTheme.colors.primary,
-                    )
-                )
-            )
-            .padding(AppDimens.Spacing.xl6)
-    ) {
-        // Decorative circles
-        Box(
-            modifier = Modifier
-                .size(AppDimens.Size.xl21 + AppDimens.Size.xl)
-                .align(Alignment.TopEnd)
-                .offset(
-                    x = AppDimens.Spacing.xl10,
-                    y = -(AppDimens.Size.xl8 + AppDimens.Size.xl4),
-                )
-                .background(AppTheme.colors.onPrimary.copy(alpha = 0.1f), CircleShape)
-        )
-        Box(
-            modifier = Modifier
-                .size(AppDimens.Size.xl14 + AppDimens.Size.xl9)
-                .align(Alignment.BottomStart)
-                .offset(
-                    x = -(AppDimens.Spacing.xl5 + AppDimens.Spacing.l),
-                    y = AppDimens.Spacing.xl5 + AppDimens.Spacing.l,
-                )
-                .background(AppTheme.colors.onPrimary.copy(alpha = 0.1f), CircleShape)
-        )
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl5)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl)
-            ) {
-                IconWithBackground(
-                    modifier = Modifier.size(AppDimens.Size.xl11),
-                    backgroundColor = AppTheme.colors.onPrimary,
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_snap_logo),
-                        contentDescription = null,
-                        tint = AppTheme.colors.primary,
-                    )
-                }
-                Text(
-                    text = stringResource(Res.string.sellsnap_title),
-                    color = AppTheme.colors.onPrimary,
-                    fontSize = AppDimens.TextSize.xl6,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Text(
-                text = stringResource(Res.string.turn_stuff_into_olx_listings),
-                color = AppTheme.colors.onPrimary,
-                fontSize = AppDimens.TextSize.xl7,
-                fontWeight = FontWeight.ExtraBold,
-                lineHeight = AppDimens.TextSize.xl8
-            )
-
-            Text(
-                text = stringResource(Res.string.snap_photo_ad_desc),
-                color = AppTheme.colors.onPrimary.copy(alpha = 0.9f),
-                fontSize = AppDimens.TextSize.xl3,
-                fontWeight = FontWeight.Medium
+                maxCharacters = 120,
             )
         }
     }
@@ -393,10 +402,28 @@ private fun TipItem(
 
 @PreviewLightDark
 @Composable
-private fun GenerateAdScreenPreview() {
+private fun GenerateAdScreenEmptyPreview() {
     AppTheme {
         GenerateAdScreenContent(
             state = GenerateAdContract.GenerateAdState(),
+            snackbarHostState = remember { SnackbarHostState() },
+            onPromptChanged = {},
+            onTakePhotoClick = {},
+            onUploadClick = {},
+            onRemovePhoto = {},
+            onSubmitClick = {},
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun GenerateAdScreenWithPromptPreview() {
+    AppTheme {
+        GenerateAdScreenContent(
+            state = GenerateAdContract.GenerateAdState(
+                prompt = "Nike Air Max 90, size 42, worn 2 months",
+            ),
             snackbarHostState = remember { SnackbarHostState() },
             onPromptChanged = {},
             onTakePhotoClick = {},
