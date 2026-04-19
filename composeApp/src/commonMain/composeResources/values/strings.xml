@@ -234,6 +234,13 @@
     <!-- Generate Ad Screen -->
     <string name="generating">Generating...</string>
     <string name="generate_ad_with_ai">Generate Ad with AI</string>
+    <string name="generate_with_ai">Generate with AI</string>
+    <string name="add_photos_to_continue">Add photos to continue</string>
+    <string name="new_listing">New Listing</string>
+    <string name="new_listing_subtitle">Add 1-8 photos. AI will handle the rest.</string>
+    <string name="welcome_greeting">Welcome</string>
+    <string name="ai_hint_label">AI hint (optional)</string>
+    <string name="ai_hint_placeholder">e.g., Nike Air Max 90, size 42, worn 2 months</string>
     <string name="get_started">Get Started</string>
     <string name="next">Next</string>
 

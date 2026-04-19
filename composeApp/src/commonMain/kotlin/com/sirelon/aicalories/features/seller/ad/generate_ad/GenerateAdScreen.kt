@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -19,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -52,23 +54,28 @@ import com.sirelon.aicalories.features.media.ui.MAX_PHOTOS
 import com.sirelon.aicalories.features.media.ui.PhotosGrid
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.generated.resources.Res
-import com.sirelon.aicalories.generated.resources.describe_item_placeholder
-import com.sirelon.aicalories.generated.resources.describe_your_item
-import com.sirelon.aicalories.generated.resources.generate_ad_with_ai
-import com.sirelon.aicalories.generated.resources.generating
+import com.sirelon.aicalories.generated.resources.add_photos_to_continue
+import com.sirelon.aicalories.generated.resources.ai_hint_label
+import com.sirelon.aicalories.generated.resources.ai_hint_placeholder
+import com.sirelon.aicalories.generated.resources.generate_with_ai
 import com.sirelon.aicalories.generated.resources.ic_check
 import com.sirelon.aicalories.generated.resources.ic_snap_logo
 import com.sirelon.aicalories.generated.resources.ic_sparkles
-import com.sirelon.aicalories.generated.resources.sellsnap_title
+import com.sirelon.aicalories.generated.resources.ic_user
+import com.sirelon.aicalories.generated.resources.new_listing
 import com.sirelon.aicalories.generated.resources.snap_photo_ad_desc
+import com.sirelon.aicalories.generated.resources.sellsnap_title
 import com.sirelon.aicalories.generated.resources.tip_angles
 import com.sirelon.aicalories.generated.resources.tip_defects
 import com.sirelon.aicalories.generated.resources.tip_lighting
 import com.sirelon.aicalories.generated.resources.tips_for_better_photos
 import com.sirelon.aicalories.generated.resources.turn_stuff_into_olx_listings
+import com.sirelon.aicalories.generated.resources.welcome_greeting
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+
+private const val MAX_PROMPT_CHARS = 120
 
 @Composable
 fun GenerateAdScreen(
@@ -151,30 +158,32 @@ private fun GenerateAdScreenContent(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            AppButton(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
-                    .padding(horizontal = AppDimens.Spacing.xl3),
-                style = AppButtonDefaults.primary(),
-                text = if (state.isLoading) stringResource(Res.string.generating) else stringResource(
-                    Res.string.generate_ad_with_ai
-                ),
-                onClick = onSubmitClick,
-                leadingIcon = if (state.isLoading) null else painterResource(Res.drawable.ic_sparkles),
-                enabled = state.canSubmit,
-            )
+                    .padding(AppDimens.Spacing.xl3),
+            ) {
+                MagicCtaBar(
+                    hasPhotos = state.uploads.isNotEmpty(),
+                    canSubmit = state.canSubmit,
+                    onSubmitClick = onSubmitClick,
+                )
+            }
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .padding(AppDimens.Spacing.xl3)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl6)
         ) {
-            SellerHeader()
+            Column(modifier = Modifier.padding(AppDimens.Spacing.xl3)) {
+                SellerHeader()
+                SlimHeader()
+                PageTitle()
+            }
             PhotosGrid(
                 files = state.uploads,
                 onAddPhoto = onUploadClick,
@@ -182,60 +191,100 @@ private fun GenerateAdScreenContent(
                 interactionEnabled = !state.isLoading,
             )
             if (state.uploads.size < MAX_PHOTOS) {
-                CameraGalleryPicker(
-                    onCameraClick = onTakePhotoClick,
-                    onGalleryClick = onUploadClick,
-                    enabled = !state.isLoading,
-                )
+                Box(modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3)) {
+                    CameraGalleryPicker(
+                        onCameraClick = onTakePhotoClick,
+                        onGalleryClick = onUploadClick,
+                        enabled = !state.isLoading,
+                    )
+                }
             }
-            TipsSection()
-            PromptSection(
-                value = state.prompt,
-                enabled = !state.isLoading,
-                onValueChange = onPromptChanged,
-            )
-            state.errorMessage?.let { errorMessage ->
-                Text(
-                    text = errorMessage,
-                    color = AppTheme.colors.error,
-                    fontSize = AppDimens.TextSize.xl2,
-                    fontWeight = FontWeight.Medium,
+            Column(modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3)) {
+                TipsSection()
+                PromptSection(
+                    value = state.prompt,
+                    enabled = !state.isLoading,
+                    onValueChange = onPromptChanged,
                 )
+                state.errorMessage?.let { errorMessage ->
+                    Text(
+                        text = errorMessage,
+                        color = AppTheme.colors.error,
+                        fontSize = AppDimens.TextSize.xl2,
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
+                Spacer(modifier = Modifier.size(AppDimens.Spacing.xl3))
             }
         }
     }
 }
 
 @Composable
-private fun PromptSection(
-    value: String,
-    enabled: Boolean,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
+private fun MagicCtaBar(
+    hasPhotos: Boolean,
+    canSubmit: Boolean,
+    onSubmitClick: () -> Unit,
 ) {
-    Surface(
+    AppButton(
+        modifier = Modifier.fillMaxWidth(),
+        style = AppButtonDefaults.magic(),
+        text = if (hasPhotos)
+            stringResource(Res.string.generate_with_ai)
+        else
+            stringResource(Res.string.add_photos_to_continue),
+        onClick = onSubmitClick,
+        leadingIcon = if (hasPhotos) painterResource(Res.drawable.ic_sparkles) else null,
+        enabled = canSubmit,
+    )
+}
+
+@Composable
+private fun SlimHeader(modifier: Modifier = Modifier) {
+    Row(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(AppDimens.BorderRadius.xl7),
-        color = AppTheme.colors.surface,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Column(
-            modifier = Modifier.padding(AppDimens.Spacing.xl6),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {
+            Box(
+                modifier = Modifier
+                    .size(AppDimens.Size.xl10)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                AppTheme.colors.primaryBright,
+                                AppTheme.colors.primary,
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_snap_logo),
+                    contentDescription = null,
+                    tint = AppTheme.colors.onPrimary,
+                    modifier = Modifier.size(AppDimens.Size.xl6),
+                )
+            }
+            // TODO SIR-40: show user first name when account info is wired
             Text(
-                text = stringResource(Res.string.describe_your_item),
-                fontSize = AppDimens.TextSize.xl5,
-                fontWeight = FontWeight.Bold,
+                text = stringResource(Res.string.welcome_greeting),
+                fontSize = AppDimens.TextSize.xl4,
+                fontWeight = FontWeight.SemiBold,
                 color = AppTheme.colors.onSurface,
             )
-            Input(
-                value = value,
-                onValueChange = onValueChange,
-                enabled = enabled,
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = stringResource(Res.string.describe_item_placeholder),
-                minLines = 3,
-                maxLines = 5,
+        }
+        // TODO SIR-40: wire logout/account menu on click
+        IconButton(onClick = {}) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_user),
+                contentDescription = null,
+                tint = AppTheme.colors.onSurface,
             )
         }
     }
@@ -259,7 +308,6 @@ private fun SellerHeader(
             )
             .padding(AppDimens.Spacing.xl6)
     ) {
-        // Decorative circles
         Box(
             modifier = Modifier
                 .size(AppDimens.Size.xl21 + AppDimens.Size.xl)
@@ -325,13 +373,72 @@ private fun SellerHeader(
 }
 
 @Composable
+private fun PageTitle(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
+    ) {
+        Text(
+            text = stringResource(Res.string.new_listing),
+            fontSize = AppDimens.TextSize.xl7,
+            fontWeight = FontWeight.ExtraBold,
+            color = AppTheme.colors.onSurface,
+        )
+        Text(
+            text = "Add 1-$MAX_PHOTOS photos. AI will handle the rest.",
+            fontSize = AppDimens.TextSize.xl3,
+            fontWeight = FontWeight.Normal,
+            color = AppTheme.colors.onSurfaceMuted,
+        )
+    }
+}
+
+@Composable
+private fun PromptSection(
+    value: String,
+    enabled: Boolean,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(AppDimens.BorderRadius.xl7),
+        color = AppTheme.colors.surfaceHigh,
+        shadowElevation = AppDimens.Size.xs,
+    ) {
+        Column(
+            modifier = Modifier.padding(AppDimens.Spacing.xl6),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
+        ) {
+            Text(
+                text = stringResource(Res.string.ai_hint_label),
+                fontSize = AppDimens.TextSize.xl5,
+                fontWeight = FontWeight.Bold,
+                color = AppTheme.colors.onSurface,
+            )
+            Input(
+                value = value,
+                onValueChange = { onValueChange(it.take(MAX_PROMPT_CHARS)) },
+                enabled = enabled,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = stringResource(Res.string.ai_hint_placeholder),
+                minLines = 3,
+                maxLines = 5,
+                maxCharacters = MAX_PROMPT_CHARS,
+            )
+        }
+    }
+}
+
+@Composable
 private fun TipsSection(
     modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl7),
-        color = AppTheme.colors.surfaceLow
+        color = AppTheme.colors.surfaceHigh,
+        shadowElevation = AppDimens.Size.xs,
     ) {
         Row(
             modifier = Modifier.padding(AppDimens.Spacing.xl5),
@@ -339,7 +446,7 @@ private fun TipsSection(
         ) {
             IconWithBackground(
                 modifier = Modifier.size(AppDimens.Size.xl11),
-                backgroundColor = AppTheme.colors.surfaceHigh,
+                backgroundColor = AppTheme.colors.surface,
             ) {
                 Icon(
                     imageVector = Icons.Default.FlashOn,
@@ -393,10 +500,28 @@ private fun TipItem(
 
 @PreviewLightDark
 @Composable
-private fun GenerateAdScreenPreview() {
+private fun GenerateAdScreenEmptyPreview() {
     AppTheme {
         GenerateAdScreenContent(
             state = GenerateAdContract.GenerateAdState(),
+            snackbarHostState = remember { SnackbarHostState() },
+            onPromptChanged = {},
+            onTakePhotoClick = {},
+            onUploadClick = {},
+            onRemovePhoto = {},
+            onSubmitClick = {},
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun GenerateAdScreenWithPromptPreview() {
+    AppTheme {
+        GenerateAdScreenContent(
+            state = GenerateAdContract.GenerateAdState(
+                prompt = "Nike Air Max 90, size 42, worn 2 months",
+            ),
             snackbarHostState = remember { SnackbarHostState() },
             onPromptChanged = {},
             onTakePhotoClick = {},
