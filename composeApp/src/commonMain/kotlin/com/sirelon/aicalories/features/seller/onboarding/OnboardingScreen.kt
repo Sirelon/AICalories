@@ -171,10 +171,11 @@ private fun FadeInUp(
     }
     val translationPx = with(LocalDensity.current) { translation.toPx() }
     Box(
-        modifier = Modifier.graphicsLayer {
-            alpha = progress.value
-            translationY = (1f - progress.value) * translationPx
-        },
+        modifier = Modifier
+            .graphicsLayer {
+                alpha = progress.value
+                translationY = (1f - progress.value) * translationPx
+            },
     ) {
         content()
     }
@@ -197,7 +198,7 @@ private val SparkleBadgeTint = Color(0xFF3A1F00)
 private fun SnapStepIcon() {
     val colors = AppTheme.colors
     val shape = RoundedCornerShape(AppDimens.BorderRadius.xl11)
-    Box(modifier = Modifier.size(AppDimens.Size.xl22)) {
+    Box(modifier = Modifier.size(AppDimens.Size.xl22).padding(AppDimens.Spacing.xl3)) {
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -268,9 +269,10 @@ private fun AiWritesStepIcon() {
 private fun DoneStepIcon() {
     val colors = AppTheme.colors
     val shape = RoundedCornerShape(AppDimens.BorderRadius.xl11)
-    Box(
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         modifier = Modifier
-            .size(AppDimens.Size.xl22)
             .shadow(
                 elevation = AppDimens.Spacing.xl5,
                 shape = shape,
@@ -287,12 +289,11 @@ private fun DoneStepIcon() {
                 width = AppDimens.BorderWidth.s,
                 color = colors.outlineVariant.copy(alpha = 0.33f),
                 shape = shape,
-            ),
+            )
+            .padding(AppDimens.Spacing.xl8),
     ) {
         Box(
             modifier = Modifier
-                .align(Alignment.Center)
-                .size(AppDimens.Size.xl18)
                 .background(colors.success, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
@@ -306,7 +307,6 @@ private fun DoneStepIcon() {
 
         Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
                 .padding(bottom = AppDimens.Spacing.xl2)
                 .background(
                     color = colors.success.copy(alpha = 0.13f),
