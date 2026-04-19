@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -61,11 +62,13 @@ import com.sirelon.aicalories.generated.resources.ic_snap_logo
 import com.sirelon.aicalories.generated.resources.ic_sparkles
 import com.sirelon.aicalories.generated.resources.ic_user
 import com.sirelon.aicalories.generated.resources.new_listing
-import com.sirelon.aicalories.generated.resources.new_listing_subtitle
+import com.sirelon.aicalories.generated.resources.snap_photo_ad_desc
+import com.sirelon.aicalories.generated.resources.sellsnap_title
 import com.sirelon.aicalories.generated.resources.tip_angles
 import com.sirelon.aicalories.generated.resources.tip_defects
 import com.sirelon.aicalories.generated.resources.tip_lighting
 import com.sirelon.aicalories.generated.resources.tips_for_better_photos
+import com.sirelon.aicalories.generated.resources.turn_stuff_into_olx_listings
 import com.sirelon.aicalories.generated.resources.welcome_greeting
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -153,24 +156,19 @@ private fun GenerateAdScreenContent(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            MagicCtaBar(
-                hasPhotos = state.uploads.isNotEmpty(),
-                canSubmit = state.canSubmit,
-                onSubmitClick = onSubmitClick,
-            )
-        }
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .padding(AppDimens.Spacing.xl3)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
         ) {
-            SlimHeader()
-            PageTitle()
+            Column(modifier = Modifier.padding(AppDimens.Spacing.xl3)) {
+                SellerHeader()
+                SlimHeader()
+                PageTitle()
+            }
             PhotosGrid(
                 files = state.uploads,
                 onAddPhoto = onUploadClick,
@@ -178,25 +176,36 @@ private fun GenerateAdScreenContent(
                 interactionEnabled = !state.isLoading,
             )
             if (state.uploads.size < MAX_PHOTOS) {
-                CameraGalleryPicker(
-                    onCameraClick = onTakePhotoClick,
-                    onGalleryClick = onUploadClick,
-                    enabled = !state.isLoading,
-                )
+                Box(modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3)) {
+                    CameraGalleryPicker(
+                        onCameraClick = onTakePhotoClick,
+                        onGalleryClick = onUploadClick,
+                        enabled = !state.isLoading,
+                    )
+                }
             }
-            TipsSection()
-            PromptSection(
-                value = state.prompt,
-                enabled = !state.isLoading,
-                onValueChange = onPromptChanged,
-            )
-            state.errorMessage?.let { errorMessage ->
-                Text(
-                    text = errorMessage,
-                    color = AppTheme.colors.error,
-                    fontSize = AppDimens.TextSize.xl2,
-                    fontWeight = FontWeight.Medium,
+            Column(modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3)) {
+                TipsSection()
+                PromptSection(
+                    value = state.prompt,
+                    enabled = !state.isLoading,
+                    onValueChange = onPromptChanged,
                 )
+                state.errorMessage?.let { errorMessage ->
+                    Text(
+                        text = errorMessage,
+                        color = AppTheme.colors.error,
+                        fontSize = AppDimens.TextSize.xl2,
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
+                Box(modifier = Modifier.padding(vertical = AppDimens.Spacing.xl3)) {
+                    MagicCtaBar(
+                        hasPhotos = state.uploads.isNotEmpty(),
+                        canSubmit = state.canSubmit,
+                        onSubmitClick = onSubmitClick,
+                    )
+                }
             }
         }
     }
@@ -208,36 +217,17 @@ private fun MagicCtaBar(
     canSubmit: Boolean,
     onSubmitClick: () -> Unit,
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        AppTheme.colors.background.copy(alpha = 0f),
-                        AppTheme.colors.background,
-                    )
-                )
-            )
-            .padding(top = AppDimens.Spacing.xl6),
-        contentAlignment = Alignment.BottomCenter,
-    ) {
-        AppButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = AppDimens.Spacing.xl3)
-                .padding(bottom = AppDimens.Spacing.xl3),
-            style = AppButtonDefaults.magic(),
-            text = if (hasPhotos)
-                stringResource(Res.string.generate_with_ai)
-            else
-                stringResource(Res.string.add_photos_to_continue),
-            onClick = onSubmitClick,
-            leadingIcon = if (hasPhotos) painterResource(Res.drawable.ic_sparkles) else null,
-            enabled = canSubmit,
-        )
-    }
+    AppButton(
+        modifier = Modifier.fillMaxWidth(),
+        style = AppButtonDefaults.magic(),
+        text = if (hasPhotos)
+            stringResource(Res.string.generate_with_ai)
+        else
+            stringResource(Res.string.add_photos_to_continue),
+        onClick = onSubmitClick,
+        leadingIcon = if (hasPhotos) painterResource(Res.drawable.ic_sparkles) else null,
+        enabled = canSubmit,
+    )
 }
 
 @Composable
@@ -292,6 +282,88 @@ private fun SlimHeader(modifier: Modifier = Modifier) {
 }
 
 @Composable
+private fun SellerHeader(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(AppDimens.BorderRadius.xl11))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        AppTheme.colors.primaryBright,
+                        AppTheme.colors.primary,
+                    )
+                )
+            )
+            .padding(AppDimens.Spacing.xl6)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(AppDimens.Size.xl21 + AppDimens.Size.xl)
+                .align(Alignment.TopEnd)
+                .offset(
+                    x = AppDimens.Spacing.xl10,
+                    y = -(AppDimens.Size.xl8 + AppDimens.Size.xl4),
+                )
+                .background(AppTheme.colors.onPrimary.copy(alpha = 0.1f), CircleShape)
+        )
+        Box(
+            modifier = Modifier
+                .size(AppDimens.Size.xl14 + AppDimens.Size.xl9)
+                .align(Alignment.BottomStart)
+                .offset(
+                    x = -(AppDimens.Spacing.xl5 + AppDimens.Spacing.l),
+                    y = AppDimens.Spacing.xl5 + AppDimens.Spacing.l,
+                )
+                .background(AppTheme.colors.onPrimary.copy(alpha = 0.1f), CircleShape)
+        )
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl5)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl)
+            ) {
+                IconWithBackground(
+                    modifier = Modifier.size(AppDimens.Size.xl11),
+                    backgroundColor = AppTheme.colors.onPrimary,
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_snap_logo),
+                        contentDescription = null,
+                        tint = AppTheme.colors.primary,
+                    )
+                }
+                Text(
+                    text = stringResource(Res.string.sellsnap_title),
+                    color = AppTheme.colors.onPrimary,
+                    fontSize = AppDimens.TextSize.xl6,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Text(
+                text = stringResource(Res.string.turn_stuff_into_olx_listings),
+                color = AppTheme.colors.onPrimary,
+                fontSize = AppDimens.TextSize.xl7,
+                fontWeight = FontWeight.ExtraBold,
+                lineHeight = AppDimens.TextSize.xl8
+            )
+
+            Text(
+                text = stringResource(Res.string.snap_photo_ad_desc),
+                color = AppTheme.colors.onPrimary.copy(alpha = 0.9f),
+                fontSize = AppDimens.TextSize.xl3,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+@Composable
 private fun PageTitle(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
@@ -304,7 +376,7 @@ private fun PageTitle(modifier: Modifier = Modifier) {
             color = AppTheme.colors.onSurface,
         )
         Text(
-            text = stringResource(Res.string.new_listing_subtitle),
+            text = "Add 1-$MAX_PHOTOS photos. AI will handle the rest.",
             fontSize = AppDimens.TextSize.xl3,
             fontWeight = FontWeight.Normal,
             color = AppTheme.colors.onSurfaceMuted,
@@ -322,7 +394,8 @@ private fun PromptSection(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl7),
-        color = AppTheme.colors.surface,
+        color = AppTheme.colors.surfaceHigh,
+        shadowElevation = AppDimens.Size.m,
     ) {
         Column(
             modifier = Modifier.padding(AppDimens.Spacing.xl6),
@@ -355,7 +428,8 @@ private fun TipsSection(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl7),
-        color = AppTheme.colors.surfaceLow
+        color = AppTheme.colors.surfaceHigh,
+        shadowElevation = AppDimens.Size.m,
     ) {
         Row(
             modifier = Modifier.padding(AppDimens.Spacing.xl5),
@@ -363,7 +437,7 @@ private fun TipsSection(
         ) {
             IconWithBackground(
                 modifier = Modifier.size(AppDimens.Size.xl11),
-                backgroundColor = AppTheme.colors.surfaceHigh,
+                backgroundColor = AppTheme.colors.surface,
             ) {
                 Icon(
                     imageVector = Icons.Default.FlashOn,
