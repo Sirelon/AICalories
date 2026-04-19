@@ -71,6 +71,8 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
+private const val MAX_PROMPT_CHARS = 120
+
 @Composable
 fun GenerateAdScreen(
     onBack: () -> Unit,
@@ -152,36 +154,11 @@ private fun GenerateAdScreenContent(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                AppTheme.colors.background.copy(alpha = 0f),
-                                AppTheme.colors.background,
-                            )
-                        )
-                    )
-                    .padding(top = AppDimens.Spacing.xl6),
-                contentAlignment = Alignment.BottomCenter,
-            ) {
-                AppButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(horizontal = AppDimens.Spacing.xl3)
-                        .padding(bottom = AppDimens.Spacing.xl3),
-                    style = AppButtonDefaults.magic(),
-                    text = if (state.uploads.isEmpty())
-                        stringResource(Res.string.add_photos_to_continue)
-                    else
-                        stringResource(Res.string.generate_with_ai),
-                    onClick = onSubmitClick,
-                    leadingIcon = if (state.uploads.isEmpty()) null else painterResource(Res.drawable.ic_sparkles),
-                    enabled = state.canSubmit,
-                )
-            }
+            MagicCtaBar(
+                hasPhotos = state.uploads.isNotEmpty(),
+                canSubmit = state.canSubmit,
+                onSubmitClick = onSubmitClick,
+            )
         }
     ) { padding ->
         Column(
@@ -226,6 +203,44 @@ private fun GenerateAdScreenContent(
 }
 
 @Composable
+private fun MagicCtaBar(
+    hasPhotos: Boolean,
+    canSubmit: Boolean,
+    onSubmitClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        AppTheme.colors.background.copy(alpha = 0f),
+                        AppTheme.colors.background,
+                    )
+                )
+            )
+            .padding(top = AppDimens.Spacing.xl6),
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        AppButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = AppDimens.Spacing.xl3)
+                .padding(bottom = AppDimens.Spacing.xl3),
+            style = AppButtonDefaults.magic(),
+            text = if (hasPhotos)
+                stringResource(Res.string.generate_with_ai)
+            else
+                stringResource(Res.string.add_photos_to_continue),
+            onClick = onSubmitClick,
+            leadingIcon = if (hasPhotos) painterResource(Res.drawable.ic_sparkles) else null,
+            enabled = canSubmit,
+        )
+    }
+}
+
+@Composable
 private fun SlimHeader(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -257,7 +272,7 @@ private fun SlimHeader(modifier: Modifier = Modifier) {
                     modifier = Modifier.size(AppDimens.Size.xl6),
                 )
             }
-            // TODO SIR-29: show user first name when account info is wired
+            // TODO SIR-40: show user first name when account info is wired
             Text(
                 text = stringResource(Res.string.welcome_greeting),
                 fontSize = AppDimens.TextSize.xl4,
@@ -265,7 +280,7 @@ private fun SlimHeader(modifier: Modifier = Modifier) {
                 color = AppTheme.colors.onSurface,
             )
         }
-        // TODO SIR-29: wire logout/account menu on click
+        // TODO SIR-40: wire logout/account menu on click
         IconButton(onClick = {}) {
             Icon(
                 painter = painterResource(Res.drawable.ic_user),
@@ -321,13 +336,13 @@ private fun PromptSection(
             )
             Input(
                 value = value,
-                onValueChange = { onValueChange(it.take(120)) },
+                onValueChange = { onValueChange(it.take(MAX_PROMPT_CHARS)) },
                 enabled = enabled,
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = stringResource(Res.string.ai_hint_placeholder),
                 minLines = 3,
                 maxLines = 5,
-                maxCharacters = 120,
+                maxCharacters = MAX_PROMPT_CHARS,
             )
         }
     }
