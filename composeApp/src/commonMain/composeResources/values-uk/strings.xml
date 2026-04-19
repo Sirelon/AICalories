@@ -265,6 +265,9 @@
 
     <!-- Preview Ad Screen -->
     <string name="copy">Копіювати</string>
+    <string name="copy_pill_default">Копіювати</string>
+    <string name="copy_pill_copied">Скопійовано</string>
+    <string name="error_pill_default">Помилка</string>
     <string name="ad_title_label">Назва</string>
     <string name="ad_description_label">Опис</string>
     <string name="ad_your_price">Ваша ціна</string>
