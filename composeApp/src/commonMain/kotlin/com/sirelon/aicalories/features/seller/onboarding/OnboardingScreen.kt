@@ -198,7 +198,11 @@ private val SparkleBadgeTint = Color(0xFF3A1F00)
 private fun SnapStepIcon() {
     val colors = AppTheme.colors
     val shape = RoundedCornerShape(AppDimens.BorderRadius.xl11)
-    Box(modifier = Modifier.size(AppDimens.Size.xl22).padding(AppDimens.Spacing.xl3)) {
+    Box(
+        modifier = Modifier
+            .size(AppDimens.Size.xl22)
+            .padding(AppDimens.Spacing.xl3)
+    ) {
         Box(
             modifier = Modifier
                 .matchParentSize()
