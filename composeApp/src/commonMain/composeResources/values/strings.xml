@@ -264,6 +264,9 @@
 
     <!-- Preview Ad Screen -->
     <string name="copy">Copy</string>
+    <string name="copy_pill_default">Copy</string>
+    <string name="copy_pill_copied">Copied</string>
+    <string name="error_pill_default">Error</string>
     <string name="ad_title_label">Title</string>
     <string name="ad_description_label">Description</string>
     <string name="ad_your_price">Your Price</string>
