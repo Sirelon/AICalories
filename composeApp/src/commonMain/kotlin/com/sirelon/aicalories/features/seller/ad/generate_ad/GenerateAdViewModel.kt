@@ -49,6 +49,10 @@ class GenerateAdViewModel(
             }
 
             is GenerateAdContract.GenerateAdEvent.UploadFilesResult -> onFileResult(event)
+
+            is GenerateAdContract.GenerateAdEvent.RemovePhoto -> {
+                setState { current -> current.copy(uploads = current.uploads - event.file) }
+            }
         }
     }
 

@@ -32,8 +32,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.permissions.Camera
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.designsystem.AppDimens
@@ -46,7 +47,9 @@ import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
-import com.sirelon.aicalories.features.media.ui.PhotosSection
+import com.sirelon.aicalories.features.media.ui.CameraGalleryPicker
+import com.sirelon.aicalories.features.media.ui.MAX_PHOTOS
+import com.sirelon.aicalories.features.media.ui.PhotosGrid
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.describe_item_placeholder
@@ -115,6 +118,9 @@ fun GenerateAdScreen(
                         photoPicker.pickFromGallery()
                     }
                 },
+                onRemovePhoto = { file ->
+                    viewModel.onEvent(GenerateAdContract.GenerateAdEvent.RemovePhoto(file))
+                },
                 onSubmitClick = {
                     if (state.canSubmit) {
                         viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit)
@@ -137,6 +143,7 @@ private fun GenerateAdScreenContent(
     onPromptChanged: (String) -> Unit,
     onTakePhotoClick: () -> Unit,
     onUploadClick: () -> Unit,
+    onRemovePhoto: (KmpFile) -> Unit,
     onSubmitClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -168,11 +175,19 @@ private fun GenerateAdScreenContent(
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
         ) {
             SellerHeader()
-            PhotosSection(
-                onTakePhotoClick = onTakePhotoClick,
-                onUploadClick = onUploadClick,
+            PhotosGrid(
                 files = state.uploads,
+                onAddPhoto = onUploadClick,
+                onRemovePhoto = onRemovePhoto,
+                interactionEnabled = !state.isLoading,
             )
+            if (state.uploads.size < MAX_PHOTOS) {
+                CameraGalleryPicker(
+                    onCameraClick = onTakePhotoClick,
+                    onGalleryClick = onUploadClick,
+                    enabled = !state.isLoading,
+                )
+            }
             TipsSection()
             PromptSection(
                 value = state.prompt,
@@ -376,7 +391,7 @@ private fun TipItem(
     }
 }
 
-@Preview
+@PreviewLightDark
 @Composable
 private fun GenerateAdScreenPreview() {
     AppTheme {
@@ -386,6 +401,7 @@ private fun GenerateAdScreenPreview() {
             onPromptChanged = {},
             onTakePhotoClick = {},
             onUploadClick = {},
+            onRemovePhoto = {},
             onSubmitClick = {},
         )
     }

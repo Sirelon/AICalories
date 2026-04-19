@@ -139,6 +139,10 @@
     <!-- Photos Section -->
     <string name="photos_count_format">%1$d/%2$d photos</string>
     <string name="add_photo_cd">Add photo</string>
+    <string name="add_photo_label">Add</string>
+    <string name="remove_photo_cd">Remove photo</string>
+    <string name="source_camera">Camera</string>
+    <string name="source_gallery">Gallery</string>
 
     <!-- OLX Auth Profile -->
     <string name="profile_field_id">ID</string>

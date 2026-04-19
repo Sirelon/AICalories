@@ -149,6 +149,10 @@
     <!-- Photos Section -->
     <string name="photos_count_format">%1$d/%2$d фото</string>
     <string name="add_photo_cd">Додати фото</string>
+    <string name="add_photo_label">Додати</string>
+    <string name="remove_photo_cd">Видалити фото</string>
+    <string name="source_camera">Камера</string>
+    <string name="source_gallery">Галерея</string>
 
     <!-- Navigation -->
     <string name="app_name">AI Calories</string>

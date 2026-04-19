@@ -86,53 +86,53 @@ fun AgileRoot(
             )
         }
     ) { paddingValues ->
-        NavDisplay(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-            backStack = navBackStack,
-            onBack = { navBackStack.removeLastOrNull() },
-            sceneStrategy = listDetailStrategy,
-            entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AgileDestination>()),
-            entryProvider = entryProvider {
-                entry<AgileDestination.TeamPicker>(
-                    metadata = ListDetailSceneStrategy.listPane() + ThreePaneSceneStrategy.firstPane()
-                ) {
-                    TeamPickerScreen(
-                        onTeamSelected = { teamId ->
-                            pushDestination(AgileDestination.StoryBoard(teamId))
-                            replaceTopDestination(AgileDestination.StoryBoard(teamId))
-                        },
-                        onOpenTeamSettings = { teamId ->
-                            pushDestination(AgileDestination.TeamSettings(teamId))
-                        },
-                        onOpenDataGenerator = onOpenDataGenerator,
-                    )
-                }
-                entry<AgileDestination.TeamSettings>(
-                    metadata = ListDetailSceneStrategy.detailPane()
-                ) { destination ->
-                    TeamScreen(
-                        teamId = destination.teamId,
-                    )
-                }
-                entry<AgileDestination.StoryBoard>(
-                    metadata = ThreePaneSceneStrategy.secondPane()
-                ) { destination ->
-                    AgileScreen(
-                        onOpenTeamPicker = { replaceTopDestination(AgileDestination.TeamPicker) },
-                        onOpenCapacityResult = { teamId ->
-                            pushDestination(AgileDestination.CapacityResult(teamId))
-                        },
-                        teamId = destination.teamId,
-                    )
-                }
-                entry<AgileDestination.CapacityResult>(
-                    metadata = ThreePaneSceneStrategy.thirdPane()
-                ) { destination ->
-                    CapacityResultScreen(
-                        teamId = destination.teamId,
-                    )
-                }
+        val entryBuilder = entryProvider<AgileDestination> {
+            entry<AgileDestination.TeamPicker>(
+                metadata = ListDetailSceneStrategy.listPane() + ThreePaneSceneStrategy.firstPane()
+            ) {
+                TeamPickerScreen(
+                    onTeamSelected = { teamId ->
+                        pushDestination(AgileDestination.StoryBoard(teamId))
+                        replaceTopDestination(AgileDestination.StoryBoard(teamId))
+                    },
+                    onOpenTeamSettings = { teamId ->
+                        pushDestination(AgileDestination.TeamSettings(teamId))
+                    },
+                    onOpenDataGenerator = onOpenDataGenerator,
+                )
             }
+            entry<AgileDestination.TeamSettings>(
+                metadata = ListDetailSceneStrategy.detailPane()
+            ) { destination ->
+                TeamScreen(
+                    teamId = destination.teamId,
+                )
+            }
+            entry<AgileDestination.StoryBoard>(
+                metadata = ThreePaneSceneStrategy.secondPane()
+            ) { destination ->
+                AgileScreen(
+                    onOpenTeamPicker = { replaceTopDestination(AgileDestination.TeamPicker) },
+                    onOpenCapacityResult = { teamId ->
+                        pushDestination(AgileDestination.CapacityResult(teamId))
+                    },
+                    teamId = destination.teamId,
+                )
+            }
+            entry<AgileDestination.CapacityResult>(
+                metadata = ThreePaneSceneStrategy.thirdPane()
+            ) { destination ->
+                CapacityResultScreen(
+                    teamId = destination.teamId,
+                )
+            }
+        }
+
+        NavDisplay(
+            entries = navBackStack.map { entryBuilder(it) },
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            onBack = { navBackStack.removeLastOrNull() },
+            sceneStrategies = listOf(listDetailStrategy),
         )
     }
 }
