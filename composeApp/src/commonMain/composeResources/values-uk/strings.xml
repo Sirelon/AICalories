@@ -23,6 +23,7 @@
     <string name="onboarding_step2_subtitle">Отримайте привабливу назву, переконливий опис та розумну ціну за секунди.</string>
     <string name="onboarding_step3_title">Опублікуйте на OLX</string>
     <string name="onboarding_step3_subtitle">Публікуйте на ринку OLX одним натисканням. Зв'яжіться з тисячами покупців миттєво!</string>
+    <string name="onboarding_step3_pill">ПУБЛІКАЦІЯ</string>
 
     <!-- Generate Ad Screen -->
     <string name="turn_stuff_into_olx_listings">Перетворіть свої речі в оголошення OLX миттєво</string>
