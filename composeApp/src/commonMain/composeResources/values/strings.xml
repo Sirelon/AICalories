@@ -22,6 +22,7 @@
     <string name="onboarding_step2_subtitle">Get a catchy title, compelling description, and smart pricing in seconds.</string>
     <string name="onboarding_step3_title">Publish to OLX</string>
     <string name="onboarding_step3_subtitle">One-tap publish to OLX marketplace. Reach thousands of buyers instantly!</string>
+    <string name="onboarding_step3_pill">PUBLISHED</string>
 
     <!-- Generate Ad Screen -->
     <string name="turn_stuff_into_olx_listings">Turn your stuff into OLX listings instantly</string>
