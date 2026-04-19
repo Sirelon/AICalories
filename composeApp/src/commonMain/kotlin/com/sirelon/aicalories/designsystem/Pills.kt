@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -23,7 +23,6 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.copy_pill_copied
 import com.sirelon.aicalories.generated.resources.copy_pill_default
@@ -38,9 +37,9 @@ import org.jetbrains.compose.resources.stringResource
 
 const val CopyPillFeedbackDurationMs = 1400L
 
-private val PillShape = RoundedCornerShape(999.dp)
-private val PillHeight = 22.dp
-private val PillIconSize = 12.dp
+private val PillShape = CircleShape
+private val PillHeight = AppDimens.Size.xl5
+private val PillIconSize = AppDimens.Size.xl
 private val PillHorizontalPadding = AppDimens.Spacing.m
 private val PillVerticalPadding = AppDimens.Spacing.xs
 
