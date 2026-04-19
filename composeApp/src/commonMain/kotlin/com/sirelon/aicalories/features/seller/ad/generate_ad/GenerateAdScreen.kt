@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -156,13 +157,27 @@ private fun GenerateAdScreenContent(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(AppDimens.Spacing.xl3),
+            ) {
+                MagicCtaBar(
+                    hasPhotos = state.uploads.isNotEmpty(),
+                    canSubmit = state.canSubmit,
+                    onSubmitClick = onSubmitClick,
+                )
+            }
+        }
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl6)
         ) {
             Column(modifier = Modifier.padding(AppDimens.Spacing.xl3)) {
                 SellerHeader()
@@ -199,13 +214,7 @@ private fun GenerateAdScreenContent(
                         fontWeight = FontWeight.Medium,
                     )
                 }
-                Box(modifier = Modifier.padding(vertical = AppDimens.Spacing.xl3)) {
-                    MagicCtaBar(
-                        hasPhotos = state.uploads.isNotEmpty(),
-                        canSubmit = state.canSubmit,
-                        onSubmitClick = onSubmitClick,
-                    )
-                }
+                Spacer(modifier = Modifier.size(AppDimens.Spacing.xl3))
             }
         }
     }
@@ -395,7 +404,7 @@ private fun PromptSection(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl7),
         color = AppTheme.colors.surfaceHigh,
-        shadowElevation = AppDimens.Size.m,
+        shadowElevation = AppDimens.Size.xs,
     ) {
         Column(
             modifier = Modifier.padding(AppDimens.Spacing.xl6),
@@ -429,7 +438,7 @@ private fun TipsSection(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(AppDimens.BorderRadius.xl7),
         color = AppTheme.colors.surfaceHigh,
-        shadowElevation = AppDimens.Size.m,
+        shadowElevation = AppDimens.Size.xs,
     ) {
         Row(
             modifier = Modifier.padding(AppDimens.Spacing.xl5),
