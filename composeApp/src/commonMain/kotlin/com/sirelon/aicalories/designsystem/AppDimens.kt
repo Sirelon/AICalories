@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.sp
 object AppDimens {
 
     object Size {
+        val xxs: Dp = 2.dp
         val xs: Dp = 4.dp
         val s: Dp = 6.dp
         val m: Dp = 8.dp
