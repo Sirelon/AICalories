@@ -22,6 +22,8 @@ interface GenerateAdContract {
 
         data class UploadFilesResult(val result: Result<List<KmpFile>>) : GenerateAdEvent
 
+        data class RemovePhoto(val file: KmpFile) : GenerateAdEvent
+
         data object Submit : GenerateAdEvent
     }
 
