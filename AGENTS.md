@@ -10,10 +10,10 @@ AI-optimized repo map for agents working in this workspace. Read this first; onl
   - agile estimation / team planning tools
 - Tech stack:
   - Kotlin `2.3.20`
-  - Compose Multiplatform `1.11.0-beta01`
-  - Android Gradle Plugin `9.1.0`
+  - Compose Multiplatform `1.11.0-beta02`
+  - Android Gradle Plugin `9.1.1`
   - Ktor `3.4.2`
-  - Koin `4.2.0`
+  - Koin `4.2.1`
   - Supabase Kotlin `3.5.0`
   - Navigation3 runtime/UI
 - JVM target is `11` across Android/JVM/server.
@@ -64,6 +64,8 @@ AI-optimized repo map for agents working in this workspace. Read this first; onl
   - `:server`
   - `:shared`
 - Version catalog: `gradle/libs.versions.toml`
+- `enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")` is enabled in `settings.gradle.kts`.
+- Gradle JVM/toolchain resolution is wired through `org.gradle.toolchains.foojay-resolver-convention`.
 - `kotlin.mpp.applyDefaultHierarchyTemplate=false` is intentionally set in `gradle.properties`.
 
 ## Source Set Map
@@ -101,6 +103,7 @@ AI-optimized repo map for agents working in this workspace. Read this first; onl
 - Root composable: `composeApp/src/commonMain/kotlin/com/sirelon/aicalories/App.kt`
 - iOS: `iosApp/iosApp/iOSApp.swift`
 - iOS Xcode sync/build bridge: `:composeApp:embedAndSignAppleFrameworkForXcode` is invoked from `iosApp/iosApp.xcodeproj/project.pbxproj`
+- Xcode compile phase skips the Gradle bridge when `OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED=YES`
 - Server: `server/src/main/kotlin/com/sirelon/aicalories/Application.kt`
 
 ## Navigation Rules
@@ -241,11 +244,14 @@ Most features use some combination of:
 
 ## Common Commands
 - Build Android debug: `./gradlew :composeApp:assembleDebug`
+- Build Android app wrapper APK: `./gradlew :androidApp:assembleDebug`
 - Build desktop JVM artifact: `./gradlew :composeApp:jvmJar`
 - Run desktop app: `./gradlew :composeApp:run`
 - Package desktop native app for current OS: `./gradlew :composeApp:packageDistributionForCurrentOS`
+- Build shared module: `./gradlew :shared:build`
 - Build server: `./gradlew :server:build`
 - Run server: `./gradlew :server:run`
+- Run server in Ktor development mode: `./gradlew :server:run -Pdevelopment`
 - Build web Wasm production bundle: `./gradlew :composeApp:wasmJsBrowserProductionWebpack`
 - Run web Wasm: `./gradlew :composeApp:wasmJsBrowserDevelopmentRun`
 - Build web JS production bundle: `./gradlew :composeApp:jsBrowserProductionWebpack`
