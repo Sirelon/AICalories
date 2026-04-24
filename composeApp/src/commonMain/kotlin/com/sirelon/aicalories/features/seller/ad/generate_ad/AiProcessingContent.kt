@@ -1,36 +1,48 @@
 package com.sirelon.aicalories.features.seller.ad.generate_ad
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.sirelon.aicalories.designsystem.AppCard
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.PulsingCircles
@@ -38,15 +50,27 @@ import com.sirelon.aicalories.designsystem.templates.TitleWithSubtitle
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.ai_analyzing_photo
 import com.sirelon.aicalories.generated.resources.ai_creating_ad_title
-import com.sirelon.aicalories.generated.resources.ai_step_uploading_photos
+import com.sirelon.aicalories.generated.resources.ai_processing_status_done
+import com.sirelon.aicalories.generated.resources.ai_processing_status_in_progress
+import com.sirelon.aicalories.generated.resources.ai_processing_tip_capture_details
+import com.sirelon.aicalories.generated.resources.ai_processing_tip_good_lighting
+import com.sirelon.aicalories.generated.resources.ai_processing_tip_keep_background_clean
 import com.sirelon.aicalories.generated.resources.ai_step_analyzing_image
 import com.sirelon.aicalories.generated.resources.ai_step_calculating_price
 import com.sirelon.aicalories.generated.resources.ai_step_generating_title
+import com.sirelon.aicalories.generated.resources.ai_step_uploading_photos
 import com.sirelon.aicalories.generated.resources.ai_step_writing_description
 import com.sirelon.aicalories.generated.resources.ic_check
 import com.sirelon.aicalories.generated.resources.ic_sparkles
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+
+private enum class ProcessingStepStatus {
+    Pending,
+    Active,
+    Complete,
+}
 
 @Composable
 private fun processingSteps() = listOf(
@@ -58,11 +82,19 @@ private fun processingSteps() = listOf(
 )
 
 @Composable
+private fun processingTips() = listOf(
+    stringResource(Res.string.ai_processing_tip_good_lighting),
+    stringResource(Res.string.ai_processing_tip_capture_details),
+    stringResource(Res.string.ai_processing_tip_keep_background_clean),
+)
+
+@Composable
 fun AiProcessingContent(
     completedSteps: Int,
     modifier: Modifier = Modifier,
 ) {
     val steps = processingSteps()
+    val tips = processingTips()
 
     Column(
         modifier = modifier
@@ -71,7 +103,6 @@ fun AiProcessingContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        // Pulsing circles with spinning icon + bouncing badge
         Box(contentAlignment = Alignment.Center) {
             PulsingCircles {
                 SpinningIcon()
@@ -92,19 +123,35 @@ fun AiProcessingContent(
 
         Spacer(modifier = Modifier.height(AppDimens.Spacing.xl6))
 
-        ProcessingStepsList(steps = steps, completedSteps = completedSteps)
+        ProcessingStepsList(
+            steps = steps,
+            completedSteps = completedSteps,
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = AppDimens.Size.xl24),
+        )
+
+        Spacer(modifier = Modifier.height(AppDimens.Spacing.xl3))
+
+        ProcessingTipCard(
+            tips = tips,
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = AppDimens.Size.xl24),
+        )
     }
 }
 
 @Composable
 private fun SpinningIcon(modifier: Modifier = Modifier) {
-    val infiniteTransition = rememberInfiniteTransition()
+    val infiniteTransition = rememberInfiniteTransition(label = "heroIcon")
     val rotation by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 3000),
         ),
+        label = "heroRotation",
     )
 
     Icon(
@@ -119,7 +166,7 @@ private fun SpinningIcon(modifier: Modifier = Modifier) {
 
 @Composable
 private fun BouncingBadge(modifier: Modifier = Modifier) {
-    val infiniteTransition = rememberInfiniteTransition()
+    val infiniteTransition = rememberInfiniteTransition(label = "heroBadge")
     val offsetY by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = -8f,
@@ -127,12 +174,13 @@ private fun BouncingBadge(modifier: Modifier = Modifier) {
             animation = tween(durationMillis = 600),
             repeatMode = RepeatMode.Reverse,
         ),
+        label = "badgeOffset",
     )
 
     Box(
         modifier = modifier
             .graphicsLayer {
-                this.translationY = offsetY
+                translationY = offsetY
             }
             .size(AppDimens.Size.xl8)
             .background(AppTheme.colors.success, CircleShape),
@@ -153,13 +201,35 @@ private fun ProcessingStepsList(
     completedSteps: Int,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier.width(AppDimens.Size.xl24),
-        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
-    ) {
-        steps.forEachIndexed { index, stepText ->
-            val isDone = index < completedSteps
-            ProcessingStepItem(text = stepText, isDone = isDone)
+    val activeSubtitle = stringResource(Res.string.ai_processing_status_in_progress)
+    val completeSubtitle = stringResource(Res.string.ai_processing_status_done)
+    val clampedCompletedSteps = completedSteps.coerceAtLeast(0)
+
+    AppCard(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = AppDimens.Spacing.xl3, vertical = AppDimens.Spacing.xl2)
+                .animateContentSize(),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs),
+        ) {
+            steps.forEachIndexed { index, stepText ->
+                val status = when {
+                    index < clampedCompletedSteps -> ProcessingStepStatus.Complete
+                    index == clampedCompletedSteps && clampedCompletedSteps < steps.size -> ProcessingStepStatus.Active
+                    else -> ProcessingStepStatus.Pending
+                }
+
+                ProcessingStepItem(
+                    text = stepText,
+                    status = status,
+                    subtitle = when (status) {
+                        ProcessingStepStatus.Active -> activeSubtitle
+                        ProcessingStepStatus.Complete -> completeSubtitle
+                        ProcessingStepStatus.Pending -> null
+                    },
+                )
+            }
         }
     }
 }
@@ -167,85 +237,179 @@ private fun ProcessingStepsList(
 @Composable
 private fun ProcessingStepItem(
     text: String,
-    isDone: Boolean,
+    status: ProcessingStepStatus,
+    subtitle: String?,
     modifier: Modifier = Modifier,
 ) {
-    val successColor = AppTheme.colors.success
-    val idleColor = AppTheme.colors.onSurfaceSoft
-    val textDoneColor = AppTheme.colors.onSurface
-    val textIdleColor = AppTheme.colors.onSurfaceSoft
-
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isDone) successColor else idleColor,
-        animationSpec = tween(durationMillis = 300),
-        label = "bg"
+    val titleColor by animateColorAsState(
+        targetValue = when (status) {
+            ProcessingStepStatus.Active -> AppTheme.colors.onSurface
+            ProcessingStepStatus.Complete -> AppTheme.colors.onSurfaceSoft
+            ProcessingStepStatus.Pending -> AppTheme.colors.onSurfaceMuted
+        },
+        animationSpec = tween(durationMillis = 250),
+        label = "stepTitleColor",
+    )
+    val subtitleColor by animateColorAsState(
+        targetValue = when (status) {
+            ProcessingStepStatus.Active -> AppTheme.colors.primary
+            ProcessingStepStatus.Complete -> AppTheme.colors.onSurfaceSoft
+            ProcessingStepStatus.Pending -> Color.Transparent
+        },
+        animationSpec = tween(durationMillis = 250),
+        label = "stepSubtitleColor",
     )
 
-    val textColor = if (isDone) textDoneColor else textIdleColor
-
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxWidth()
+            .animateContentSize()
+            .padding(horizontal = AppDimens.Spacing.xs, vertical = AppDimens.Spacing.xl),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
+        horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl2),
     ) {
-        Box(
-            modifier = Modifier
-                .size(AppDimens.Size.xl6)
-                .graphicsLayer {
-                    clip = true
-                    shape = CircleShape
-                }
-                .drawWithCache {
-                    val radius = size.minDimension / 2f
-                    onDrawBehind {
-                        drawCircle(
-                            color = backgroundColor,
-                            radius = radius
-                        )
-                    }
-                },
-            contentAlignment = Alignment.Center,
+        StepStatusIndicator(status = status)
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs2),
         ) {
-            if (isDone) {
+            Text(
+                text = text,
+                style = AppTheme.typography.body,
+                fontWeight = if (status == ProcessingStepStatus.Active) FontWeight.SemiBold else FontWeight.Medium,
+                color = titleColor,
+            )
+
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    style = AppTheme.typography.caption,
+                    color = subtitleColor,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StepStatusIndicator(
+    status: ProcessingStepStatus,
+    modifier: Modifier = Modifier,
+) {
+    val backgroundColor by animateColorAsState(
+        targetValue = when (status) {
+            ProcessingStepStatus.Complete -> AppTheme.colors.success
+            ProcessingStepStatus.Active -> AppTheme.colors.primary.copy(alpha = 0.12f)
+            ProcessingStepStatus.Pending -> Color.Transparent
+        },
+        animationSpec = tween(durationMillis = 250),
+        label = "statusBackground",
+    )
+    val borderColor by animateColorAsState(
+        targetValue = when (status) {
+            ProcessingStepStatus.Pending -> AppTheme.colors.primary.copy(alpha = 0.4f)
+            ProcessingStepStatus.Active -> AppTheme.colors.primary.copy(alpha = 0.18f)
+            ProcessingStepStatus.Complete -> Color.Transparent
+        },
+        animationSpec = tween(durationMillis = 250),
+        label = "statusBorder",
+    )
+
+    Box(
+        modifier = modifier
+            .size(AppDimens.Size.xl9)
+            .background(backgroundColor, CircleShape)
+            .border(
+                width = AppDimens.BorderWidth.m,
+                color = borderColor,
+                shape = CircleShape,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        when (status) {
+            ProcessingStepStatus.Complete -> {
                 Icon(
                     painter = painterResource(Res.drawable.ic_check),
                     contentDescription = null,
                     modifier = Modifier.size(AppDimens.Size.xl2),
                     tint = AppTheme.colors.onPrimary,
                 )
-            } else {
-                PingingDot()
             }
-        }
 
-        Text(
-            text = text,
-            fontSize = AppDimens.TextSize.xl2,
-            fontWeight = FontWeight.Medium,
-            color = textColor,
-        )
+            ProcessingStepStatus.Active -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(AppDimens.Size.xl5),
+                    color = AppTheme.colors.primary,
+                    strokeWidth = AppDimens.BorderWidth.l,
+                )
+            }
+
+            ProcessingStepStatus.Pending -> Unit
+        }
     }
 }
 
 @Composable
-private fun PingingDot(modifier: Modifier = Modifier) {
-    val infiniteTransition = rememberInfiniteTransition()
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 0.6f,
-        targetValue = 1.4f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 800),
-            repeatMode = RepeatMode.Reverse,
-        ),
-    )
+private fun ProcessingTipCard(
+    tips: List<String>,
+    modifier: Modifier = Modifier,
+) {
+    val isInspectionMode = LocalInspectionMode.current
+    var tipIndex by remember { mutableIntStateOf(0) }
 
-    Box(
-        modifier = modifier
-            .size(AppDimens.Size.m)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .background(AppTheme.colors.onSurfaceMuted, CircleShape),
-    )
+    LaunchedEffect(tips, isInspectionMode) {
+        if (isInspectionMode || tips.isEmpty()) {
+            tipIndex = 0
+            return@LaunchedEffect
+        }
+
+        while (true) {
+            delay(3_000)
+            tipIndex = (tipIndex + 1) % tips.size
+        }
+    }
+
+    if (tips.isEmpty()) return
+
+    AppCard(
+        modifier = modifier,
+        containerColor = AppTheme.colors.primary.copy(alpha = 0.08f),
+    ) {
+        Text(
+            text = tips[tipIndex.coerceIn(0, tips.lastIndex)],
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = AppDimens.Spacing.xl3, vertical = AppDimens.Spacing.xl2),
+            style = AppTheme.typography.caption,
+            color = AppTheme.colors.onSurface,
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun AiProcessingContentStartPreview() {
+    AiProcessingContentPreview(completedSteps = 0)
+}
+
+@PreviewLightDark
+@Composable
+private fun AiProcessingContentMiddlePreview() {
+    AiProcessingContentPreview(completedSteps = 2)
+}
+
+@PreviewLightDark
+@Composable
+private fun AiProcessingContentCompletePreview() {
+    AiProcessingContentPreview(completedSteps = 5)
+}
+
+@Composable
+private fun AiProcessingContentPreview(completedSteps: Int) {
+    AppTheme {
+        Surface(color = AppTheme.colors.background) {
+            AiProcessingContent(completedSteps = completedSteps)
+        }
+    }
 }

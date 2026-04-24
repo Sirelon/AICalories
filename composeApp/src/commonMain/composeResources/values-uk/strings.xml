@@ -246,6 +246,11 @@
     <string name="ai_step_generating_title">Генерація назви</string>
     <string name="ai_step_writing_description">Написання опису</string>
     <string name="ai_step_calculating_price">Розрахунок ціни</string>
+    <string name="ai_processing_status_in_progress">У процесі…</string>
+    <string name="ai_processing_status_done">Готово</string>
+    <string name="ai_processing_tip_good_lighting">Порада: тримайте фото добре освітленими для кращого результату ШІ.</string>
+    <string name="ai_processing_tip_capture_details">Порада: додавайте крупні плани важливих деталей і слідів використання.</string>
+    <string name="ai_processing_tip_keep_background_clean">Порада: використовуйте чистий фон, щоб річ краще виділялася.</string>
 
     <!-- Permission Dialogs -->
     <string name="camera_rationale_title">Потрібен дозвіл на камеру</string>
