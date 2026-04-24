@@ -129,10 +129,12 @@ fun AgileRoot(
         }
 
         NavDisplay(
-            entries = navBackStack.map { entryBuilder(it) },
             modifier = Modifier.fillMaxSize().padding(paddingValues),
+            backStack = navBackStack,
             onBack = { navBackStack.removeLastOrNull() },
+            entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AgileDestination>()),
             sceneStrategies = listOf(listDetailStrategy),
+            entryProvider = entryBuilder,
         )
     }
 }
