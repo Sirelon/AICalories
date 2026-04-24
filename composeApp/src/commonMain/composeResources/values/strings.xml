@@ -50,6 +50,15 @@
 
     <!-- Preview Ad Screen -->
     <string name="publish_to_olx">Publish to OLX</string>
+    <string name="publish_on_olx">Publish on OLX</string>
+    <string name="publish_errors">Publish · %1$d errors</string>
+    <string name="validation_all_valid">Verified. All required fields filled.</string>
+    <string name="validation_fields_remaining">%1$d fields remaining</string>
+    <string name="validation_error_title_too_short">Title: at least 10 characters</string>
+    <string name="validation_error_desc_too_short">Description: at least 30 characters</string>
+    <string name="validation_error_no_category">Select a category</string>
+    <string name="validation_error_no_location">Add your location</string>
+    <string name="validation_errors_more">…and %1$d more</string>
     <string name="character_count">%1$d characters</string>
     <string name="min_characters">Type at least %1$d characters</string>
     <string name="character_count_range">%1$d/%2$d</string>
@@ -252,6 +261,11 @@
     <string name="ai_step_generating_title">Generating title</string>
     <string name="ai_step_writing_description">Writing description</string>
     <string name="ai_step_calculating_price">Calculating price</string>
+    <string name="ai_processing_status_in_progress">In progress…</string>
+    <string name="ai_processing_status_done">Done</string>
+    <string name="ai_processing_tip_good_lighting">Tip: keep photos well-lit for cleaner AI results.</string>
+    <string name="ai_processing_tip_capture_details">Tip: include close-ups of important details and wear.</string>
+    <string name="ai_processing_tip_keep_background_clean">Tip: use a clean background so the item stands out.</string>
 
     <!-- Permission Dialogs -->
     <string name="camera_rationale_title">Camera permission needed</string>

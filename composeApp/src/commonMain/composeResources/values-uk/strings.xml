@@ -51,6 +51,15 @@
 
     <!-- Preview Ad Screen -->
     <string name="publish_to_olx">Опублікувати на OLX</string>
+    <string name="publish_on_olx">Опублікувати на OLX</string>
+    <string name="publish_errors">Публікація · %1$d помилок</string>
+    <string name="validation_all_valid">Перевірено. Усі обов\'язкові поля заповнені.</string>
+    <string name="validation_fields_remaining">%1$d поля не заповнені</string>
+    <string name="validation_error_title_too_short">Назва: щонайменше 10 символів</string>
+    <string name="validation_error_desc_too_short">Опис: щонайменше 30 символів</string>
+    <string name="validation_error_no_category">Оберіть категорію</string>
+    <string name="validation_error_no_location">Додайте місцезнаходження</string>
+    <string name="validation_errors_more">…і ще %1$d</string>
     <string name="character_count">%1$d символів</string>
     <string name="min_characters">Введіть щонайменше %1$d символів</string>
     <string name="character_count_range">%1$d/%2$d</string>
@@ -246,6 +255,11 @@
     <string name="ai_step_generating_title">Генерація назви</string>
     <string name="ai_step_writing_description">Написання опису</string>
     <string name="ai_step_calculating_price">Розрахунок ціни</string>
+    <string name="ai_processing_status_in_progress">У процесі…</string>
+    <string name="ai_processing_status_done">Готово</string>
+    <string name="ai_processing_tip_good_lighting">Порада: тримайте фото добре освітленими для кращого результату ШІ.</string>
+    <string name="ai_processing_tip_capture_details">Порада: додавайте крупні плани важливих деталей і слідів використання.</string>
+    <string name="ai_processing_tip_keep_background_clean">Порада: використовуйте чистий фон, щоб річ краще виділялася.</string>
 
     <!-- Permission Dialogs -->
     <string name="camera_rationale_title">Потрібен дозвіл на камеру</string>
