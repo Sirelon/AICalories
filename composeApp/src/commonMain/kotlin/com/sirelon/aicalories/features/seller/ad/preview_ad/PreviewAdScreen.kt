@@ -1,6 +1,11 @@
 package com.sirelon.aicalories.features.seller.ad.preview_ad
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,9 +19,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
@@ -39,7 +44,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +64,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mohamedrejeb.calf.permissions.CoarseLocation
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.designsystem.AppAsyncImage
+import com.sirelon.aicalories.designsystem.AppCard
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppScaffold
 import com.sirelon.aicalories.designsystem.AppTheme
@@ -70,6 +79,7 @@ import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
+import com.sirelon.aicalories.features.seller.categories.domain.ValidationError
 import com.sirelon.aicalories.features.seller.categories.ui.AttributeItem
 import com.sirelon.aicalories.features.seller.location.OlxLocation
 import com.sirelon.aicalories.generated.resources.Res
@@ -83,6 +93,8 @@ import com.sirelon.aicalories.generated.resources.cancel
 import com.sirelon.aicalories.generated.resources.ic_arrow_right
 import com.sirelon.aicalories.generated.resources.ic_camera
 import com.sirelon.aicalories.generated.resources.ic_chevron_right
+import com.sirelon.aicalories.generated.resources.ic_circle_alert
+import com.sirelon.aicalories.generated.resources.ic_circle_check_big
 import com.sirelon.aicalories.generated.resources.ic_layout_grid
 import com.sirelon.aicalories.generated.resources.location_detecting
 import com.sirelon.aicalories.generated.resources.location_not_available
@@ -93,11 +105,26 @@ import com.sirelon.aicalories.generated.resources.location_settings_message_ios
 import com.sirelon.aicalories.generated.resources.location_settings_title
 import com.sirelon.aicalories.generated.resources.not_now
 import com.sirelon.aicalories.generated.resources.open_settings
-import com.sirelon.aicalories.generated.resources.publish_to_olx
+import com.sirelon.aicalories.generated.resources.error_attr_above_maximum
+import com.sirelon.aicalories.generated.resources.error_attr_below_minimum
+import com.sirelon.aicalories.generated.resources.error_attr_invalid_selection
+import com.sirelon.aicalories.generated.resources.error_attr_multiple_values_not_allowed
+import com.sirelon.aicalories.generated.resources.error_attr_must_be_numeric
+import com.sirelon.aicalories.generated.resources.error_attr_required
+import com.sirelon.aicalories.generated.resources.publish_errors
+import com.sirelon.aicalories.generated.resources.publish_on_olx
 import com.sirelon.aicalories.generated.resources.retry
+import com.sirelon.aicalories.generated.resources.validation_all_valid
+import com.sirelon.aicalories.generated.resources.validation_error_desc_too_short
+import com.sirelon.aicalories.generated.resources.validation_error_no_category
+import com.sirelon.aicalories.generated.resources.validation_error_no_location
+import com.sirelon.aicalories.generated.resources.validation_error_title_too_short
+import com.sirelon.aicalories.generated.resources.validation_errors_more
+import com.sirelon.aicalories.generated.resources.validation_fields_remaining
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -150,29 +177,90 @@ fun PreviewAdScreen(
 
     LocationPermissionsBlock(viewModel::onEvent)
 
+    val titleTooShortLabel = stringResource(Res.string.validation_error_title_too_short)
+    val descTooShortLabel = stringResource(Res.string.validation_error_desc_too_short)
+    val noCategoryLabel = stringResource(Res.string.validation_error_no_category)
+    val noLocationLabel = stringResource(Res.string.validation_error_no_location)
+
+    // @Composable reads of TextFieldState.text trigger recomposition on change.
+    val titleText = viewModel.titleState.text
+    val descText = viewModel.descriptionState.text
+    val validationErrors = buildList {
+        if (titleText.length < 10) add(titleTooShortLabel)
+        if (descText.length < 30) add(descTooShortLabel)
+        if (state.selectedCategory == null) add(noCategoryLabel)
+        if (state.location == null) add(noLocationLabel)
+        for (item in state.attributeItems) {
+            when {
+                item.error != null ->
+                    add("${item.attribute.label}: ${item.error.toDisplayString()}")
+                item.attribute.validationRules.required && item.selectedValues.isEmpty() ->
+                    add(item.attribute.label)
+            }
+        }
+    }
+    val isValid = validationErrors.isEmpty()
+
+    var showErrors by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
+
     AppScaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            AppButton(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
-                    .padding(horizontal = AppDimens.Spacing.xl3),
-                style = AppButtonDefaults.secondary(),
-                text = stringResource(Res.string.publish_to_olx),
-                trailingIcon = if (state.isPublishing) null else painterResource(Res.drawable.ic_arrow_right),
-                enabled = !state.isPublishing,
-                onClick = { viewModel.onEvent(PreviewAdEvent.Publish) },
-            )
+                    .padding(horizontal = AppDimens.Spacing.xl3)
+                    .padding(bottom = AppDimens.Spacing.m),
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
+            ) {
+                ValidationStatusCard(
+                    isValid = isValid,
+                    errorCount = validationErrors.size,
+                )
+                AppButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    style = if (isValid) AppButtonDefaults.success() else AppButtonDefaults.primary(),
+                    text = if (isValid) {
+                        stringResource(Res.string.publish_on_olx)
+                    } else {
+                        stringResource(Res.string.publish_errors, validationErrors.size)
+                    },
+                    trailingIcon = if (state.isPublishing) null else painterResource(Res.drawable.ic_arrow_right),
+                    enabled = !state.isPublishing,
+                    onClick = {
+                        if (!isValid) {
+                            showErrors = true
+                            coroutineScope.launch { scrollState.animateScrollTo(0) }
+                            // TODO(SIR-34): auto-open the first failing required attribute editor
+                        } else {
+                            viewModel.onEvent(PreviewAdEvent.Publish)
+                        }
+                    },
+                )
+            }
         },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(bottom = AppDimens.Spacing.xl3),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
         ) {
+            AnimatedVisibility(
+                visible = showErrors && !isValid,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                ValidationBanner(
+                    errors = validationErrors,
+                    modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
+                )
+            }
+
             PhotoCarousel(images = state.images)
 
             PreviewAdContent(
@@ -180,6 +268,103 @@ fun PreviewAdScreen(
                 state = state,
                 titleState = viewModel.titleState,
                 descriptionState = viewModel.descriptionState
+            )
+        }
+    }
+}
+
+@Composable
+private fun ValidationBanner(
+    errors: List<String>,
+    modifier: Modifier = Modifier,
+) {
+    val errorColor = AppTheme.colors.error
+    val displayErrors = errors.take(3)
+    val remaining = errors.size - displayErrors.size
+
+    AppCard(
+        modifier = modifier.fillMaxWidth(),
+        containerColor = errorColor.copy(alpha = 0.12f),
+        contentColor = errorColor,
+    ) {
+        Row(
+            modifier = Modifier.padding(AppDimens.Spacing.xl3),
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_circle_alert),
+                contentDescription = null,
+                tint = errorColor,
+                modifier = Modifier
+                    .size(AppDimens.Size.xl5)
+                    .padding(top = AppDimens.Spacing.xs2),
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs)) {
+                displayErrors.forEach { error ->
+                    Text(
+                        text = "• $error",
+                        style = AppTheme.typography.body,
+                        color = errorColor,
+                    )
+                }
+                if (remaining > 0) {
+                    Text(
+                        text = stringResource(Res.string.validation_errors_more, remaining),
+                        style = AppTheme.typography.caption,
+                        color = errorColor.copy(alpha = 0.70f),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ValidationStatusCard(
+    isValid: Boolean,
+    errorCount: Int,
+    modifier: Modifier = Modifier,
+) {
+    val bgColor: Color
+    val contentColor: Color
+    val icon: Painter
+    val text: String
+
+    if (isValid) {
+        bgColor = AppTheme.colors.success.copy(alpha = 0.12f)
+        contentColor = AppTheme.colors.success
+        icon = painterResource(Res.drawable.ic_circle_check_big)
+        text = stringResource(Res.string.validation_all_valid)
+    } else {
+        bgColor = AppTheme.colors.warning.copy(alpha = 0.12f)
+        contentColor = AppTheme.colors.warning
+        icon = painterResource(Res.drawable.ic_circle_alert)
+        text = stringResource(Res.string.validation_fields_remaining, errorCount)
+    }
+
+    AppCard(
+        modifier = modifier.fillMaxWidth(),
+        containerColor = bgColor,
+        contentColor = contentColor,
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = AppDimens.Spacing.xl3)
+                .padding(vertical = AppDimens.Spacing.m),
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = null,
+                tint = contentColor,
+                modifier = Modifier.size(AppDimens.Size.xl5),
+            )
+            Text(
+                text = text,
+                style = AppTheme.typography.body,
+                color = contentColor,
+                fontWeight = FontWeight.Medium,
             )
         }
     }
@@ -609,6 +794,64 @@ private fun AdLocationCard(
     )
 }
 
+@Composable
+private fun ValidationError.toDisplayString(): String = when (this) {
+    ValidationError.Required -> stringResource(Res.string.error_attr_required)
+    ValidationError.MustBeNumeric -> stringResource(Res.string.error_attr_must_be_numeric)
+    is ValidationError.BelowMinimum -> stringResource(Res.string.error_attr_below_minimum, min)
+    is ValidationError.AboveMaximum -> stringResource(Res.string.error_attr_above_maximum, max)
+    is ValidationError.InvalidSelection -> stringResource(Res.string.error_attr_invalid_selection)
+    ValidationError.MultipleValuesNotAllowed -> stringResource(Res.string.error_attr_multiple_values_not_allowed)
+}
+
+// region Previews
+
+@PreviewLightDark
+@Composable
+private fun ValidationBannerPreview() {
+    AppTheme {
+        Surface(color = AppTheme.colors.background) {
+            ValidationBanner(
+                errors = listOf(
+                    "Title: at least 10 characters",
+                    "Description: at least 30 characters",
+                    "Select a category",
+                    "Add your location",
+                ),
+                modifier = Modifier.padding(AppDimens.Spacing.xl3),
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ValidationStatusCardValidPreview() {
+    AppTheme {
+        Surface(color = AppTheme.colors.background) {
+            ValidationStatusCard(
+                isValid = true,
+                errorCount = 0,
+                modifier = Modifier.padding(AppDimens.Spacing.xl3),
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ValidationStatusCardInvalidPreview() {
+    AppTheme {
+        Surface(color = AppTheme.colors.background) {
+            ValidationStatusCard(
+                isValid = false,
+                errorCount = 3,
+                modifier = Modifier.padding(AppDimens.Spacing.xl3),
+            )
+        }
+    }
+}
+
 @PreviewLightDark
 @Composable
 private fun PhotoCarouselEmptyPreview() {
@@ -662,3 +905,5 @@ private val photoCarouselPreviewImages = listOf(
     "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=1200",
     "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=1200",
 )
+
+// endregion

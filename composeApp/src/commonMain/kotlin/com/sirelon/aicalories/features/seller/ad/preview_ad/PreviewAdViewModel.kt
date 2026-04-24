@@ -162,14 +162,8 @@ class PreviewAdViewModel(
     private suspend fun publishAdvert() {
         val s = state.value
 
-        val category = s.selectedCategory ?: run {
-            postEffect(ShowMessage("Please select a category before publishing."))
-            return
-        }
-        val location = s.location ?: run {
-            postEffect(ShowMessage("Location is required. Please allow location access and try again."))
-            return
-        }
+        val category = s.selectedCategory ?: return
+        val location = s.location ?: return
 
         val validatedItems = s.attributeItems.map { item ->
             val valuesToValidate = when (item.attribute.inputType) {
@@ -188,7 +182,6 @@ class PreviewAdViewModel(
         val hasErrors = validatedItems.any { it.error != null }
         if (hasErrors) {
             setState { it.copy(attributeItems = validatedItems) }
-            postEffect(ShowMessage("Please fix attribute errors before publishing."))
             return
         }
 
