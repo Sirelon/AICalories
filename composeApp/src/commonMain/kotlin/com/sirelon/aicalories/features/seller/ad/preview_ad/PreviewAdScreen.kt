@@ -59,6 +59,9 @@ import com.sirelon.aicalories.designsystem.AppAsyncImage
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppScaffold
 import com.sirelon.aicalories.designsystem.AppTheme
+import com.sirelon.aicalories.designsystem.AiGeneratedBadge
+import com.sirelon.aicalories.designsystem.CopyPill
+import com.sirelon.aicalories.designsystem.ErrorPill
 import com.sirelon.aicalories.designsystem.InputWithCopy
 import com.sirelon.aicalories.designsystem.ObserveAsEvents
 import com.sirelon.aicalories.designsystem.buttons.AppButton
@@ -110,6 +113,9 @@ private val PhotoCarouselShape = RoundedCornerShape(
     bottomStart = AppDimens.BorderRadius.xl11,
     bottomEnd = AppDimens.BorderRadius.xl11,
 )
+
+private const val TitleMinLength = 10
+private const val DescriptionMinLength = 30
 
 @Composable
 fun PreviewAdScreen(
@@ -226,13 +232,24 @@ private fun PreviewAdContent(
     state: PreviewAdContract.PreviewAdState,
     onEvent: (PreviewAdEvent) -> Unit,
 ) {
+    val titleText = titleState.text.toString()
+    val descriptionText = descriptionState.text.toString()
+    val isTitleInvalid = remember(titleText) { titleText.trim().length < TitleMinLength }
+    val isDescriptionInvalid = remember(descriptionText) { descriptionText.trim().length < DescriptionMinLength }
+
     Column(
         modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl)
     ) {
-        AdTitleCard(titleState = titleState)
+        AdTitleCard(
+            titleState = titleState,
+            isInvalid = isTitleInvalid,
+        )
 
-        AdDescriptionCard(descriptionState = descriptionState)
+        AdDescriptionCard(
+            descriptionState = descriptionState,
+            isInvalid = isDescriptionInvalid,
+        )
 
         val priceTextFieldState = rememberTextFieldState(state.price.roundToInt().toString())
 
@@ -378,6 +395,7 @@ private fun PageDots(
 private fun PreviewSectionCard(
     label: String,
     onClick: (() -> Unit)? = null,
+    headerTrailing: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     Card(
@@ -388,11 +406,27 @@ private fun PreviewSectionCard(
         },
     ) {
         Column(modifier = Modifier.padding(vertical = AppDimens.Spacing.xl3)) {
-            Text(
-                modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
-                text = label,
-                style = AppTheme.typography.subTitle,
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = AppDimens.Spacing.xl3),
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = label,
+                    style = AppTheme.typography.subTitle,
+                )
+                if (headerTrailing != null) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.s),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        headerTrailing()
+                    }
+                }
+            }
 
             content()
         }
@@ -404,33 +438,60 @@ private fun PreviewSectionInputCard(
     label: String,
     textFieldState: TextFieldState,
     maxCharacters: Int,
+    isInvalid: Boolean = false,
+    headerTrailing: (@Composable () -> Unit)? = null,
 ) {
     PreviewSectionCard(
         label = label,
+        headerTrailing = headerTrailing,
         content = {
             InputWithCopy(
                 state = textFieldState,
                 maxCharacters = maxCharacters,
+                isError = isInvalid,
+                showTrailingCopyButton = false,
             )
         }
     )
 }
 
 @Composable
-private fun AdTitleCard(titleState: TextFieldState) {
+private fun AdTitleCard(
+    titleState: TextFieldState,
+    isInvalid: Boolean,
+) {
     PreviewSectionInputCard(
         label = stringResource(Res.string.ad_title_label),
         textFieldState = titleState,
         maxCharacters = 140,
+        isInvalid = isInvalid,
+        headerTrailing = {
+            if (isInvalid) {
+                ErrorPill()
+            }
+            CopyPill(value = titleState.text.toString())
+            AiGeneratedBadge()
+        },
     )
 }
 
 @Composable
-private fun AdDescriptionCard(descriptionState: TextFieldState) {
+private fun AdDescriptionCard(
+    descriptionState: TextFieldState,
+    isInvalid: Boolean,
+) {
     PreviewSectionInputCard(
         label = stringResource(Res.string.ad_description_label),
         textFieldState = descriptionState,
         maxCharacters = 9000,
+        isInvalid = isInvalid,
+        headerTrailing = {
+            if (isInvalid) {
+                ErrorPill()
+            }
+            CopyPill(value = descriptionState.text.toString())
+            AiGeneratedBadge()
+        },
     )
 }
 
@@ -662,3 +723,49 @@ private val photoCarouselPreviewImages = listOf(
     "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=1200",
     "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=1200",
 )
+
+@PreviewLightDark
+@Composable
+private fun PreviewAdEditableSectionsValidPreview() {
+    PreviewAdEditableSectionsPreview(
+        title = "Nike Air Max 90 Size 42",
+        description = "Well-kept sneakers with minor wear on the outsole and clean upper panels.",
+    )
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewAdEditableSectionsInvalidPreview() {
+    PreviewAdEditableSectionsPreview(
+        title = "Too short",
+        description = "Needs more detail",
+    )
+}
+
+@Composable
+private fun PreviewAdEditableSectionsPreview(
+    title: String,
+    description: String,
+) {
+    AppTheme {
+        Surface(
+            color = AppTheme.colors.background,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(AppDimens.Spacing.xl3),
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
+            ) {
+                AdTitleCard(
+                    titleState = rememberTextFieldState(title),
+                    isInvalid = title.trim().length < TitleMinLength,
+                )
+                AdDescriptionCard(
+                    descriptionState = rememberTextFieldState(description),
+                    isInvalid = description.trim().length < DescriptionMinLength,
+                )
+            }
+        }
+    }
+}
