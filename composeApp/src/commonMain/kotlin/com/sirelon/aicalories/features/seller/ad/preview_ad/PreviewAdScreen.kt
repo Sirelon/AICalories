@@ -43,7 +43,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,6 +79,7 @@ import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
+import com.sirelon.aicalories.features.seller.categories.domain.ValidationError
 import com.sirelon.aicalories.features.seller.categories.ui.AttributeItem
 import com.sirelon.aicalories.features.seller.location.OlxLocation
 import com.sirelon.aicalories.generated.resources.Res
@@ -105,6 +105,12 @@ import com.sirelon.aicalories.generated.resources.location_settings_message_ios
 import com.sirelon.aicalories.generated.resources.location_settings_title
 import com.sirelon.aicalories.generated.resources.not_now
 import com.sirelon.aicalories.generated.resources.open_settings
+import com.sirelon.aicalories.generated.resources.error_attr_above_maximum
+import com.sirelon.aicalories.generated.resources.error_attr_below_minimum
+import com.sirelon.aicalories.generated.resources.error_attr_invalid_selection
+import com.sirelon.aicalories.generated.resources.error_attr_multiple_values_not_allowed
+import com.sirelon.aicalories.generated.resources.error_attr_must_be_numeric
+import com.sirelon.aicalories.generated.resources.error_attr_required
 import com.sirelon.aicalories.generated.resources.publish_errors
 import com.sirelon.aicalories.generated.resources.publish_on_olx
 import com.sirelon.aicalories.generated.resources.retry
@@ -176,20 +182,20 @@ fun PreviewAdScreen(
     val noCategoryLabel = stringResource(Res.string.validation_error_no_category)
     val noLocationLabel = stringResource(Res.string.validation_error_no_location)
 
-    val validationErrors by remember(titleTooShortLabel, descTooShortLabel, noCategoryLabel, noLocationLabel) {
-        derivedStateOf {
-            buildList {
-                if (viewModel.titleState.text.length < 10) add(titleTooShortLabel)
-                if (viewModel.descriptionState.text.length < 30) add(descTooShortLabel)
-                if (state.selectedCategory == null) add(noCategoryLabel)
-                if (state.location == null) add(noLocationLabel)
-                for (item in state.attributeItems) {
-                    when {
-                        item.error != null -> add("${item.attribute.label}: ${item.error}")
-                        item.attribute.validationRules.required && item.selectedValues.isEmpty() ->
-                            add(item.attribute.label)
-                    }
-                }
+    // @Composable reads of TextFieldState.text trigger recomposition on change.
+    val titleText = viewModel.titleState.text
+    val descText = viewModel.descriptionState.text
+    val validationErrors = buildList {
+        if (titleText.length < 10) add(titleTooShortLabel)
+        if (descText.length < 30) add(descTooShortLabel)
+        if (state.selectedCategory == null) add(noCategoryLabel)
+        if (state.location == null) add(noLocationLabel)
+        for (item in state.attributeItems) {
+            when {
+                item.error != null ->
+                    add("${item.attribute.label}: ${item.error.toDisplayString()}")
+                item.attribute.validationRules.required && item.selectedValues.isEmpty() ->
+                    add(item.attribute.label)
             }
         }
     }
@@ -786,6 +792,16 @@ private fun AdLocationCard(
             }
         },
     )
+}
+
+@Composable
+private fun ValidationError.toDisplayString(): String = when (this) {
+    ValidationError.Required -> stringResource(Res.string.error_attr_required)
+    ValidationError.MustBeNumeric -> stringResource(Res.string.error_attr_must_be_numeric)
+    is ValidationError.BelowMinimum -> stringResource(Res.string.error_attr_below_minimum, min)
+    is ValidationError.AboveMaximum -> stringResource(Res.string.error_attr_above_maximum, max)
+    is ValidationError.InvalidSelection -> stringResource(Res.string.error_attr_invalid_selection)
+    ValidationError.MultipleValuesNotAllowed -> stringResource(Res.string.error_attr_multiple_values_not_allowed)
 }
 
 // region Previews
