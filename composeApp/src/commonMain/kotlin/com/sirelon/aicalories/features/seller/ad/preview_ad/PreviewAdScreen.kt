@@ -18,8 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.InputTransformation
-import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -64,8 +62,10 @@ import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppScaffold
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.CopyPill
+import com.sirelon.aicalories.designsystem.DigitOnlyInputTransformation
 import com.sirelon.aicalories.designsystem.InputWithCopy
 import com.sirelon.aicalories.designsystem.ObserveAsEvents
+import com.sirelon.aicalories.designsystem.ThousandSeparatorOutputTransformation
 import com.sirelon.aicalories.designsystem.formatPrice
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
@@ -441,23 +441,6 @@ private fun AdDescriptionCard(descriptionState: TextFieldState) {
     )
 }
 
-private val DigitOnlyInputTransformation = InputTransformation {
-    val text = asCharSequence().toString()
-    val digitsOnly = text.filter { it.isDigit() }
-    if (digitsOnly != text) {
-        replace(0, length, digitsOnly)
-    }
-}
-
-private val PriceOutputTransformation = OutputTransformation {
-    val text = toString()
-    if (text.isEmpty()) return@OutputTransformation
-    val formatted = text.reversed().chunked(3).joinToString(" ").reversed()
-    if (formatted != text) {
-        replace(0, length, formatted)
-    }
-}
-
 @Composable
 private fun AdPriceCard(
     priceTextFieldState: TextFieldState,
@@ -479,7 +462,7 @@ private fun AdPriceCard(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     lineLimits = TextFieldLineLimits.SingleLine,
                     inputTransformation = DigitOnlyInputTransformation,
-                    outputTransformation = PriceOutputTransformation,
+                    outputTransformation = ThousandSeparatorOutputTransformation,
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = AppTheme.colors.surfaceLow,
                         unfocusedContainerColor = AppTheme.colors.surfaceLow,
