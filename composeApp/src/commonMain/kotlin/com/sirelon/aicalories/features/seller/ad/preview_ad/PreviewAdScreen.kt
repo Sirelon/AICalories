@@ -1,5 +1,6 @@
 package com.sirelon.aicalories.features.seller.ad.preview_ad
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
@@ -29,10 +34,8 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.carousel.CarouselItemScope
-import androidx.compose.material3.carousel.HorizontalCenteredHeroCarousel
-import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,17 +43,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.mohamedrejeb.calf.permissions.CoarseLocation
 import com.mohamedrejeb.calf.permissions.Permission
+import com.sirelon.aicalories.designsystem.AppAsyncImage
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppScaffold
 import com.sirelon.aicalories.designsystem.AppTheme
@@ -58,7 +63,6 @@ import com.sirelon.aicalories.designsystem.InputWithCopy
 import com.sirelon.aicalories.designsystem.ObserveAsEvents
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
-import com.sirelon.aicalories.designsystem.utils.generateRandomColor
 import com.sirelon.aicalories.features.media.PermissionDialogContent
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
@@ -77,6 +81,7 @@ import com.sirelon.aicalories.generated.resources.ad_title_label
 import com.sirelon.aicalories.generated.resources.ad_your_price
 import com.sirelon.aicalories.generated.resources.cancel
 import com.sirelon.aicalories.generated.resources.ic_arrow_right
+import com.sirelon.aicalories.generated.resources.ic_camera
 import com.sirelon.aicalories.generated.resources.ic_chevron_right
 import com.sirelon.aicalories.generated.resources.ic_layout_grid
 import com.sirelon.aicalories.generated.resources.location_detecting
@@ -98,6 +103,13 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.roundToInt
+
+private val PhotoCarouselShape = RoundedCornerShape(
+    topStart = 0.dp,
+    topEnd = 0.dp,
+    bottomStart = AppDimens.BorderRadius.xl11,
+    bottomEnd = AppDimens.BorderRadius.xl11,
+)
 
 @Composable
 fun PreviewAdScreen(
@@ -161,7 +173,7 @@ fun PreviewAdScreen(
                 .padding(bottom = AppDimens.Spacing.xl3),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
         ) {
-            ImagesCarousel(images = state.images)
+            PhotoCarousel(images = state.images)
 
             PreviewAdContent(
                 onEvent = viewModel::onEvent,
@@ -262,35 +274,103 @@ private fun PreviewAdContent(
 }
 
 @Composable
-private fun ImagesCarousel(images: List<String>) {
-    val carouselState = rememberCarouselState { images.size }
+fun PhotoCarousel(
+    images: List<String>,
+    modifier: Modifier = Modifier,
+) {
+    val containerModifier = modifier
+        .fillMaxWidth()
+        .height(AppDimens.Size.xl25)
+        .clip(PhotoCarouselShape)
+        .background(AppTheme.colors.surfaceLow)
 
-    HorizontalCenteredHeroCarousel(
-        modifier = Modifier.height(AppDimens.Size.xl24),
-        state = carouselState,
-    ) { pageIndex ->
-        val randomColor = remember(pageIndex) { generateRandomColor() }
-        CarouselItem(background = randomColor, image = images[pageIndex])
+    if (images.isEmpty()) {
+        EmptyPhotoCarousel(modifier = containerModifier)
+        return
+    }
+
+    Box(
+        modifier = containerModifier,
+    ) {
+        val pagerState = rememberPagerState(pageCount = { images.size })
+
+        HorizontalPager(
+            modifier = Modifier.fillMaxSize(),
+            state = pagerState,
+        ) { pageIndex ->
+            PhotoCarouselPage(image = images[pageIndex])
+        }
+
+        if (images.size > 1) {
+            PageDots(
+                pageCount = images.size,
+                currentPage = pagerState.currentPage,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = AppDimens.Spacing.xl3),
+            )
+        }
     }
 }
 
 @Composable
-private fun CarouselItemScope.CarouselItem(
-    background: Color,
-    image: String,
-) {
+private fun PhotoCarouselPage(image: String) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .maskClip(MaterialTheme.shapes.large)
-            .background(background)
+        modifier = Modifier.fillMaxSize(),
     ) {
-        AsyncImage(
-            modifier = Modifier.fillMaxSize(),
+        // TODO(SIR-41): Add tap-to-open fullscreen lightbox.
+        AppAsyncImage(
             model = image,
-            contentDescription = null,
-            contentScale = ContentScale.FillHeight,
+            modifier = Modifier.fillMaxSize(),
         )
+    }
+}
+
+@Composable
+private fun EmptyPhotoCarousel(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            painter = painterResource(Res.drawable.ic_camera),
+            contentDescription = null,
+            tint = AppTheme.colors.onSurfaceMuted,
+            modifier = Modifier.size(AppDimens.Size.xl12),
+        )
+    }
+}
+
+@Composable
+private fun PageDots(
+    pageCount: Int,
+    currentPage: Int,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.s),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        repeat(pageCount) { pageIndex ->
+            val dotWidth by animateDpAsState(
+                targetValue = if (pageIndex == currentPage) AppDimens.Size.xl4 else AppDimens.Size.s,
+                label = "pageDotWidth",
+            )
+
+            Box(
+                modifier = Modifier
+                    .size(width = dotWidth, height = AppDimens.Size.s)
+                    .clip(CircleShape)
+                    .background(
+                        color = if (pageIndex == currentPage) {
+                            Color.White
+                        } else {
+                            Color.White.copy(alpha = 0.55f)
+                        }
+                    )
+            )
+        }
     }
 }
 
@@ -528,3 +608,57 @@ private fun AdLocationCard(
         },
     )
 }
+
+@PreviewLightDark
+@Composable
+private fun PhotoCarouselEmptyPreview() {
+    PhotoCarouselPreviewSurface {
+        PhotoCarousel(images = emptyList())
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun PhotoCarouselSinglePreview() {
+    PhotoCarouselPreviewSurface {
+        PhotoCarousel(images = photoCarouselPreviewImages.take(1))
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun PhotoCarouselThreeImagesPreview() {
+    PhotoCarouselPreviewSurface {
+        PhotoCarousel(images = photoCarouselPreviewImages.take(3))
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun PhotoCarouselEightImagesPreview() {
+    PhotoCarouselPreviewSurface {
+        PhotoCarousel(images = List(8) { index -> photoCarouselPreviewImages[index % photoCarouselPreviewImages.size] })
+    }
+}
+
+@Composable
+private fun PhotoCarouselPreviewSurface(
+    content: @Composable () -> Unit,
+) {
+    AppTheme {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = AppTheme.colors.background,
+        ) {
+            Box(modifier = Modifier.padding(bottom = AppDimens.Spacing.xl5)) {
+                content()
+            }
+        }
+    }
+}
+
+private val photoCarouselPreviewImages = listOf(
+    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200",
+    "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=1200",
+    "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=1200",
+)

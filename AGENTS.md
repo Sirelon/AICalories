@@ -238,6 +238,8 @@ Most features use some combination of:
 - `compose.resources` generates public resources class:
   - package `com.sirelon.aicalories.generated.resources`
 - Android resources are enabled for the KMP library target.
+- In this workspace, `./gradlew` may fail because `gradle/wrapper/gradle-wrapper.jar` is missing.
+- If that happens, rerun builds with a locally installed `gradle` that matches `gradle/wrapper/gradle-wrapper.properties` (currently `9.3.1`).
 
 ## Common Commands
 - Build Android debug: `./gradlew :composeApp:assembleDebug`
