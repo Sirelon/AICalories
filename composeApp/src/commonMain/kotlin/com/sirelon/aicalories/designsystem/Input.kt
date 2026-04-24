@@ -1,5 +1,6 @@
 package com.sirelon.aicalories.designsystem
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -132,7 +133,9 @@ fun InputWithCopy(
     lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
     minCharacters: Int = -1,
     maxCharacters: Int = Int.MIN_VALUE,
-    prefix: @Composable (() -> Unit)? = null
+    prefix: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    showTrailingCopyButton: Boolean = true,
 ) {
     val clipboard = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
@@ -147,12 +150,26 @@ fun InputWithCopy(
         colors = TextFieldDefaults.colors(
             focusedContainerColor = AppTheme.colors.surfaceLow,
             unfocusedContainerColor = AppTheme.colors.surfaceLow,
+            errorContainerColor = AppTheme.colors.surfaceLow,
             focusedIndicatorColor = AppTheme.colors.primary,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
+            errorIndicatorColor = AppTheme.colors.error,
         ),
         state = state,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                if (isError) {
+                    Modifier.border(
+                        width = AppDimens.BorderWidth.m,
+                        color = AppTheme.colors.error,
+                        shape = TextFieldDefaults.shape,
+                    )
+                } else {
+                    Modifier
+                }
+            ),
         prefix = prefix,
         keyboardOptions = keyboardOptions,
         lineLimits = lineLimits,
@@ -165,22 +182,27 @@ fun InputWithCopy(
                 )
             }
         },
-        trailingIcon = {
-            TextButton(
-                onClick = {
-                    scope.launch {
-                        clipboard.setText(AnnotatedString(state.text.toString()))
-                    }
-                },
-            ) {
-                Icon(
-                    modifier = Modifier.size(AppDimens.Size.xl3),
-                    painter = painterResource(Res.drawable.ic_copy),
-                    contentDescription = null
-                )
-                Spacer(modifier = Modifier.width(AppDimens.Spacing.l))
-                Text(stringResource(Res.string.copy), style = AppTheme.typography.label)
+        trailingIcon = if (showTrailingCopyButton) {
+            {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            clipboard.setText(AnnotatedString(state.text.toString()))
+                        }
+                    },
+                ) {
+                    Icon(
+                        modifier = Modifier.size(AppDimens.Size.xl3),
+                        painter = painterResource(Res.drawable.ic_copy),
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(AppDimens.Spacing.l))
+                    Text(stringResource(Res.string.copy), style = AppTheme.typography.label)
+                }
             }
+        } else {
+            null
         },
+        isError = isError,
     )
 }
