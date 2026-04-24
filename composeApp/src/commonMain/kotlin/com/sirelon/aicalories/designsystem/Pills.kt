@@ -30,6 +30,7 @@ import com.sirelon.aicalories.generated.resources.error_pill_default
 import com.sirelon.aicalories.generated.resources.ic_circle_alert
 import com.sirelon.aicalories.generated.resources.ic_circle_check_big
 import com.sirelon.aicalories.generated.resources.ic_copy
+import com.sirelon.aicalories.generated.resources.ic_sparkles
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -131,6 +132,40 @@ fun ErrorPill(
     }
 }
 
+@Composable
+fun AiGeneratedBadge(
+    label: String = "AI",
+    modifier: Modifier = Modifier,
+) {
+    val accentColor = AppTheme.colors.primary
+
+    Surface(
+        modifier = modifier.height(PillHeight),
+        shape = PillShape,
+        color = accentColor.copy(alpha = 0.18f),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = PillHorizontalPadding, vertical = PillVerticalPadding),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_sparkles),
+                contentDescription = null,
+                tint = accentColor,
+                modifier = Modifier.size(PillIconSize),
+            )
+            Spacer(Modifier.width(AppDimens.Spacing.xs))
+            Text(
+                text = label,
+                style = AppTheme.typography.caption.copy(
+                    fontWeight = FontWeight.Bold,
+                ),
+                color = accentColor,
+            )
+        }
+    }
+}
+
 @PreviewLightDark
 @Composable
 private fun CopyPillPreview() {
@@ -144,5 +179,13 @@ private fun CopyPillPreview() {
 private fun ErrorPillPreview() {
     AppTheme {
         ErrorPill()
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun AiGeneratedBadgePreview() {
+    AppTheme {
+        AiGeneratedBadge()
     }
 }

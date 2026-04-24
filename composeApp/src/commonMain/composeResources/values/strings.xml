@@ -50,6 +50,15 @@
 
     <!-- Preview Ad Screen -->
     <string name="publish_to_olx">Publish to OLX</string>
+    <string name="publish_on_olx">Publish on OLX</string>
+    <string name="publish_errors">Publish · %1$d errors</string>
+    <string name="validation_all_valid">Verified. All required fields filled.</string>
+    <string name="validation_fields_remaining">%1$d fields remaining</string>
+    <string name="validation_error_title_too_short">Title: at least 10 characters</string>
+    <string name="validation_error_desc_too_short">Description: at least 30 characters</string>
+    <string name="validation_error_no_category">Select a category</string>
+    <string name="validation_error_no_location">Add your location</string>
+    <string name="validation_errors_more">…and %1$d more</string>
     <string name="character_count">%1$d characters</string>
     <string name="min_characters">Type at least %1$d characters</string>
     <string name="character_count_range">%1$d/%2$d</string>
