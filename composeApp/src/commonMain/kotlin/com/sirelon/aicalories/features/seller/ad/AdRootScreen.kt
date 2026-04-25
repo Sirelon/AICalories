@@ -38,7 +38,15 @@ sealed interface AdDestination {
 }
 
 @Composable
-fun AdRootScreen(onExit: () -> Unit) {
+fun AdRootScreen(
+    onExit: () -> Unit,
+    onPublishSuccess: (
+        url: String,
+        title: String,
+        priceFormatted: String,
+        primaryImageUrl: String?,
+    ) -> Unit,
+) {
 
     val navBackStack = remember {
         mutableStateListOf<AdDestination>(AdDestination.GenerateAd)
@@ -83,9 +91,9 @@ fun AdRootScreen(onExit: () -> Unit) {
                 PreviewAdScreen(
                     advertisement = destination.advertisement,
                     onChangeCategoryClick = { navBackStack.add(AdDestination.SelectRootCategory) },
+                    onPublishSuccess = onPublishSuccess,
                     pendingCategory = pendingCategory,
                     onCategoryConsumed = { pendingCategory = null },
-                    onPublishSuccess = onExit, // SIR-39 will replace with success screen navigation
                 )
             }
 

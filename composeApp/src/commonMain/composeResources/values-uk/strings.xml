@@ -307,6 +307,19 @@
     <string name="select_category">Обрати категорію</string>
     <string name="subcategory_count">%d підкатегорій</string>
 
+    <!-- Publish Success Screen -->
+    <string name="publish_success_title">Опубліковано! 🎉</string>
+    <string name="publish_success_subtitle">Ваше оголошення тепер активне. Перші перегляди з\'являться за 10-15 хвилин.</string>
+    <string name="publish_success_listing_url_label">Посилання на оголошення</string>
+    <string name="publish_success_status_active">Активне</string>
+    <string name="publish_success_status_label">Статус</string>
+    <string name="publish_success_status_caption">На модерації · до 2 хв</string>
+    <string name="publish_success_total_time_value">~90с</string>
+    <string name="publish_success_total_time_label">Загальний час</string>
+    <string name="publish_success_total_time_caption">Від фото до публікації</string>
+    <string name="publish_success_view_on_olx">Переглянути на OLX</string>
+    <string name="publish_success_create_another">Створити ще одне</string>
+
     <!-- Team Settings Screen -->
     <string name="team_settings_title">Налаштування команди</string>
     <string name="team_size_capacity">Розмір та обсяг команди</string>

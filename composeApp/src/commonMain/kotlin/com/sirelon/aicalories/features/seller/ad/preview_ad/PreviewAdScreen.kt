@@ -159,9 +159,14 @@ private const val DescriptionMinLength = 30
 fun PreviewAdScreen(
     advertisement: AdvertisementWithAttributes,
     onChangeCategoryClick: () -> Unit,
+    onPublishSuccess: (
+        url: String,
+        title: String,
+        priceFormatted: String,
+        primaryImageUrl: String?,
+    ) -> Unit,
     pendingCategory: OlxCategory?,
     onCategoryConsumed: () -> Unit,
-    onPublishSuccess: () -> Unit = {},
 ) {
     val viewModel: PreviewAdViewModel = koinViewModel { parametersOf(advertisement) }
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -171,6 +176,16 @@ fun PreviewAdScreen(
     var showPublishingOverlay by remember { mutableStateOf(false) }
     var publishingStartMs by remember { mutableLongStateOf(0L) }
     var navigateOnOverlayDismiss by remember { mutableStateOf(false) }
+    var pendingPublishedUrl by remember { mutableStateOf<String?>(null) }
+
+    val emitPublishSuccess: () -> Unit = {
+        onPublishSuccess(
+            pendingPublishedUrl.orEmpty(),
+            viewModel.titleState.text.toString(),
+            "₴ ${formatPrice(state.price)}",
+            state.images.firstOrNull(),
+        )
+    }
 
     LaunchedEffect(pendingCategory) {
         if (pendingCategory != null) {
@@ -188,10 +203,11 @@ fun PreviewAdScreen(
             PreviewAdContract.PreviewAdEffect.GoToGategoryPicker -> onChangeCategoryClick()
 
             is PreviewAdContract.PreviewAdEffect.PublishSuccess -> {
+                pendingPublishedUrl = effect.advertUrl
                 if (showPublishingOverlay) {
                     navigateOnOverlayDismiss = true
                 } else {
-                    onPublishSuccess()
+                    emitPublishSuccess()
                 }
             }
         }
@@ -208,7 +224,7 @@ fun PreviewAdScreen(
             showPublishingOverlay = false
             if (navigateOnOverlayDismiss) {
                 navigateOnOverlayDismiss = false
-                onPublishSuccess()
+                emitPublishSuccess()
             }
         }
     }

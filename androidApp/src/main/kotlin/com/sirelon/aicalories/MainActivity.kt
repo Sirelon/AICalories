@@ -9,12 +9,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.sirelon.aicalories.datastore.initAndroidKeyValueStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthCallbackBridge
+import com.sirelon.aicalories.platform.initAndroidUrlOpener
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         initAndroidKeyValueStore(filesDir.absolutePath)
+        initAndroidUrlOpener(this)
         publishOlxCallback(intent)
 
         setContent {
