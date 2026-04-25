@@ -283,6 +283,11 @@
     <string name="error_attr_multiple_values_not_allowed">Дозволено лише одне значення</string>
 
     <!-- Preview Ad Screen -->
+    <string name="publish_confirm_title">Опублікувати зараз?</string>
+    <string name="publish_confirm_subtitle">Ваше оголошення з'явиться на OLX протягом 1–2 хвилин.</string>
+    <string name="publish_confirm_yes">Так, опублікувати</string>
+    <string name="publish_confirm_back">Повернутися до редагування</string>
+    <string name="publishing">Публікуємо…</string>
     <string name="copy">Копіювати</string>
     <string name="copy_pill_default">Копіювати</string>
     <string name="copy_pill_copied">Скопійовано</string>

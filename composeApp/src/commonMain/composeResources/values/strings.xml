@@ -289,6 +289,11 @@
     <string name="error_attr_multiple_values_not_allowed">Only one value allowed</string>
 
     <!-- Preview Ad Screen -->
+    <string name="publish_confirm_title">Publish now?</string>
+    <string name="publish_confirm_subtitle">Your listing will appear on OLX within 1–2 minutes.</string>
+    <string name="publish_confirm_yes">Yes, publish</string>
+    <string name="publish_confirm_back">Back to editing</string>
+    <string name="publishing">Publishing…</string>
     <string name="copy">Copy</string>
     <string name="copy_pill_default">Copy</string>
     <string name="copy_pill_copied">Copied</string>

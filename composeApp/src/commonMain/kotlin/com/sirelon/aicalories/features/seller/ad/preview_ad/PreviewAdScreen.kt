@@ -46,6 +46,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -130,10 +131,14 @@ import com.sirelon.aicalories.generated.resources.validation_error_no_location
 import com.sirelon.aicalories.generated.resources.validation_error_title_too_short
 import com.sirelon.aicalories.generated.resources.validation_errors_more
 import com.sirelon.aicalories.generated.resources.validation_fields_remaining
+import com.sirelon.aicalories.features.seller.ad.preview_ad.ui.PublishConfirmSheet
+import com.sirelon.aicalories.features.seller.ad.preview_ad.ui.PublishingOverlay
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -167,6 +172,21 @@ fun PreviewAdScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    var showConfirmSheet by remember { mutableStateOf(false) }
+    var showPublishingOverlay by remember { mutableStateOf(false) }
+    var publishingStartMs by remember { mutableLongStateOf(0L) }
+    var navigateOnOverlayDismiss by remember { mutableStateOf(false) }
+    var pendingPublishedUrl by remember { mutableStateOf<String?>(null) }
+
+    val emitPublishSuccess: () -> Unit = {
+        onPublishSuccess(
+            pendingPublishedUrl.orEmpty(),
+            viewModel.titleState.text.toString(),
+            "₴ ${formatPrice(state.price)}",
+            state.images.firstOrNull(),
+        )
+    }
+
     LaunchedEffect(pendingCategory) {
         if (pendingCategory != null) {
             viewModel.onEvent(CategorySelected(pendingCategory))
@@ -183,12 +203,28 @@ fun PreviewAdScreen(
             PreviewAdContract.PreviewAdEffect.GoToGategoryPicker -> onChangeCategoryClick()
 
             is PreviewAdContract.PreviewAdEffect.PublishSuccess -> {
-                onPublishSuccess(
-                    effect.advertUrl.orEmpty(),
-                    viewModel.titleState.text.toString(),
-                    "₴ ${formatPrice(state.price)}",
-                    state.images.firstOrNull(),
-                )
+                pendingPublishedUrl = effect.advertUrl
+                if (showPublishingOverlay) {
+                    navigateOnOverlayDismiss = true
+                } else {
+                    emitPublishSuccess()
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(state.isPublishing) {
+        if (state.isPublishing) {
+            publishingStartMs = Clock.System.now().toEpochMilliseconds()
+            showPublishingOverlay = true
+        } else if (showPublishingOverlay) {
+            val elapsed = Clock.System.now().toEpochMilliseconds() - publishingStartMs
+            val remaining = 1200L - elapsed
+            if (remaining > 0) delay(remaining)
+            showPublishingOverlay = false
+            if (navigateOnOverlayDismiss) {
+                navigateOnOverlayDismiss = false
+                emitPublishSuccess()
             }
         }
     }
@@ -223,71 +259,95 @@ fun PreviewAdScreen(
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
 
-    AppScaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
+    Box(modifier = Modifier.fillMaxSize()) {
+        AppScaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            bottomBar = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = AppDimens.Spacing.xl3)
+                        .padding(bottom = AppDimens.Spacing.m),
+                    verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
+                ) {
+                    ValidationStatusCard(
+                        isValid = isValid,
+                        errorCount = validationErrors.size,
+                    )
+                    AppButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        style = if (isValid) AppButtonDefaults.success() else AppButtonDefaults.primary(),
+                        text = if (isValid) {
+                            stringResource(Res.string.publish_on_olx)
+                        } else {
+                            stringResource(Res.string.publish_errors, validationErrors.size)
+                        },
+                        trailingIcon = if (state.isPublishing) null else painterResource(Res.drawable.ic_arrow_right),
+                        enabled = !state.isPublishing,
+                        onClick = {
+                            if (!isValid) {
+                                showErrors = true
+                                coroutineScope.launch { scrollState.animateScrollTo(0) }
+                                // TODO(SIR-34): auto-open the first failing required attribute editor
+                            } else {
+                                showConfirmSheet = true
+                            }
+                        },
+                    )
+                }
+            },
+        ) { paddingValues ->
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = AppDimens.Spacing.xl3)
-                    .padding(bottom = AppDimens.Spacing.m),
-                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
+                    .padding(paddingValues)
+                    .verticalScroll(scrollState)
+                    .padding(bottom = AppDimens.Spacing.xl3),
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
             ) {
-                ValidationStatusCard(
-                    isValid = isValid,
-                    errorCount = validationErrors.size,
-                )
-                AppButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    style = if (isValid) AppButtonDefaults.success() else AppButtonDefaults.primary(),
-                    text = if (isValid) {
-                        stringResource(Res.string.publish_on_olx)
-                    } else {
-                        stringResource(Res.string.publish_errors, validationErrors.size)
-                    },
-                    trailingIcon = if (state.isPublishing) null else painterResource(Res.drawable.ic_arrow_right),
-                    enabled = !state.isPublishing,
-                    onClick = {
-                        if (!isValid) {
-                            showErrors = true
-                            coroutineScope.launch { scrollState.animateScrollTo(0) }
-                            // TODO(SIR-34): auto-open the first failing required attribute editor
-                        } else {
-                            viewModel.onEvent(PreviewAdEvent.Publish)
-                        }
-                    },
+                AnimatedVisibility(
+                    visible = showErrors && !isValid,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically(),
+                ) {
+                    ValidationBanner(
+                        errors = validationErrors,
+                        modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
+                    )
+                }
+
+                PhotoCarousel(images = state.images)
+
+                PreviewAdContent(
+                    onEvent = viewModel::onEvent,
+                    state = state,
+                    titleState = viewModel.titleState,
+                    descriptionState = viewModel.descriptionState
                 )
             }
-        },
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .verticalScroll(scrollState)
-                .padding(bottom = AppDimens.Spacing.xl3),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
-        ) {
-            AnimatedVisibility(
-                visible = showErrors && !isValid,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically(),
-            ) {
-                ValidationBanner(
-                    errors = validationErrors,
-                    modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
-                )
-            }
-
-            PhotoCarousel(images = state.images)
-
-            PreviewAdContent(
-                onEvent = viewModel::onEvent,
-                state = state,
-                titleState = viewModel.titleState,
-                descriptionState = viewModel.descriptionState
-            )
         }
+
+        AnimatedVisibility(
+            visible = showPublishingOverlay,
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            PublishingOverlay()
+        }
+    }
+
+    if (showConfirmSheet) {
+        PublishConfirmSheet(
+            imageUrl = state.images.firstOrNull(),
+            title = viewModel.titleState.text.toString(),
+            categoryLabel = state.categoryLabel,
+            priceFormatted = "₴ ${formatPrice(state.price)}",
+            onConfirm = {
+                showConfirmSheet = false
+                viewModel.onEvent(PreviewAdEvent.Publish)
+            },
+            onDismiss = { showConfirmSheet = false },
+        )
     }
 }
 

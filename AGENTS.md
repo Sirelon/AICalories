@@ -175,12 +175,17 @@ Most features use some combination of:
 - Important classes:
   - auth repo: `features/seller/auth/data/OlxAuthRepository.kt`
   - API client: `features/seller/auth/data/OlxApiClient.kt`
-  - session/token stores: `OlxAuthSessionStore`, `OlxTokenStore`
+  - HTTP client factory: `features/seller/auth/data/OlxHttpClientFactory.kt`
+  - redirect parsing: `features/seller/auth/data/DefaultOlxRedirectHandler.kt`
+  - error parsing: `features/seller/auth/data/OlxRemoteErrorParser.kt`
+  - session/token stores: `OlxAuthSessionStore`, `OlxTokenStore` (in `OlxContracts.kt`)
   - redirect bridge: `OlxAuthCallbackBridge.kt`
+  - domain models / errors: `features/seller/auth/domain/OlxModels.kt` (also currently holds `OlxMeResponse`/`OlxUserResponse`, which are misplaced — see `BUGS.md`)
 - Deep link callback handling exists on:
   - Android via `MainActivity`
   - Web via `wasmJsMain/main.kt`
 - Redirect URI default: `selolxai://olx-auth/callback`
+- Full breakdown of the seller/OLX flow lives in **Seller / OLX Deep Dive** at the bottom of this file.
 
 ## Analyze / Supabase Flow
 - Shared Supabase wrapper: `shared/.../supabase/SupabaseClient.kt`
@@ -285,6 +290,18 @@ Most features use some combination of:
   - `androidApp/.../MainActivity.kt`
 - Change web callback behavior:
   - `composeApp/src/wasmJsMain/.../main.kt`
+- Change ad publish behavior / publish button state machine:
+  - `features/seller/ad/preview_ad/PreviewAdViewModel.kt`
+  - `features/seller/ad/data/PostAdvertRequestMapper.kt`
+- Change AI ad generation pipeline:
+  - `features/seller/ad/generate_ad/GenerateAdViewModel.kt`
+  - `features/seller/openai/OpenAIClient.kt`
+- Change which OLX top-level categories are user-facing:
+  - `features/seller/categories/data/CategoriesRepository.kt` (`notSupportedParentIds`)
+- Change attribute validation rules:
+  - `features/seller/categories/domain/AttributeValidator.kt`
+- Change price formatting / thousand-separator behavior:
+  - `designsystem/InputTransformations.kt` (`DigitOnlyInputTransformation`, `ThousandSeparatorOutputTransformation`)
 
 ## Documentation / Lookup Rules
 - For Android or Google APIs/libraries, use the Google dev MCP tools instead of memory or generic web search.
@@ -331,3 +348,140 @@ These rules apply to every class that directly maps a JSON API response (OLX, Su
 - `server` is currently minimal; most business logic is client/shared-side.
 - `App.kt` should stay a rendering shell, not a dumping ground.
 - When a change touches platform behavior, check for corresponding actual implementations in `androidMain`, `jvmMain`, `jsMain`, and `wasmJsMain`.
+
+## Seller / OLX Deep Dive
+
+Concrete map of the seller/OLX feature tree under `composeApp/src/commonMain/kotlin/com/sirelon/aicalories/features/seller/`. Pair this with `BUGS.md` for known issues in the same code paths.
+
+### Seller package layout
+
+- `auth/` — OAuth + token + API client
+  - `data/`: `OlxAuthRepository.kt`, `OlxApiClient.kt`, `OlxAuthCallbackBridge.kt`, `OlxConfig.kt`, `OlxContracts.kt` (token/session stores), `OlxHttpClientFactory.kt`, `OlxRemoteErrorParser.kt`, `DefaultOlxRedirectHandler.kt`, `OlxAdvertModels.kt`, `response/PostAdvertResponse.kt`
+  - `domain/OlxModels.kt` — tokens, callback, session state, errors. Currently also holds `OlxMeResponse` / `OlxUserResponse` which belong under `data/response/` (see `BUGS.md`).
+  - `presentation/`: `SellerAuthViewModel.kt`, `SellerAuthContract.kt`, `SellerLandingScreen.kt`, `OlxAuthWebView.kt` (expect/actual)
+  - `di/SellerAuthModule.kt`
+- `ad/` — ad creation pipeline
+  - `Advertisement.kt`, `AdvertisementWithAttributes.kt`, `AdRootScreen.kt`
+  - `data/`: `GeneratedAdMapper.kt`, `PostAdvertRequestMapper.kt`
+  - `generate_ad/`: `GenerateAdViewModel.kt`, `GenerateAdContract.kt`, `GenerateAdScreen.kt`, `AiProcessingContent.kt`, `di/GenerateAdModule.kt`
+  - `preview_ad/`: `PreviewAdViewModel.kt`, `PreviewAdContract.kt`, `PreviewAdScreen.kt`, `di/PreviewAdModule.kt`
+- `categories/` — OLX category tree + attribute editor
+  - `data/CategoriesRepository.kt`, `data/responses/` (note: plural — convention says `response/`, see `BUGS.md`)
+  - `domain/`: `CategoriesMapper.kt`, `AttributeValidator.kt`, `AttributeModels.kt`, `OlxCategory.kt`
+  - `presentation/`: `CategoryPickerViewModel.kt`, `CategoryPickerContract.kt`, `CategoryPickerScreens.kt`, `CategoryIcons.kt`
+  - `ui/AttributesScreen.kt`, `ui/AttributeItem.kt`
+  - `CategoriesModule.kt`
+- `location/` — geo lookup
+  - `LocationProvider.kt` (expect/actual), `OlxLocation.kt`
+  - `data/LocationRepository.kt`, `data/response/OlxLocationResponse.kt`
+- `openai/` — OpenAI clients used during ad generation (separate from the analyze-flow OpenAI usage in `features/analyze/`)
+  - `OpenAIClient.kt`, `requests/`, `responses/` (plural — see `BUGS.md`)
+- `onboarding/OnboardingScreen.kt` — 3-page HorizontalPager carousel; no ViewModel.
+
+### OLX OAuth flow (end-to-end)
+
+1. `SellerAuthViewModel.startAuthorization()` calls `OlxAuthRepository.createAuthorizationRequest()`. The repository builds the auth URL with a UUID `state`, persists `OlxPendingAuthSession` in `OlxAuthSessionStore`, and returns the URL.
+2. `OlxAuthWebView.kt` (expect/actual) loads the URL. Android intercepts the redirect URI in `WebViewClient.shouldOverrideUrlLoading`. The WebView also rewrites `m.olx.ua` → `www.olx.ua` to dodge OLX's mobile redirect.
+3. The redirect URL routes through `OlxAuthCallbackBridge` (a global object that buffers a single URL until a listener subscribes) and ends in `SellerAuthViewModel.onCallbackReceived(url)`.
+4. `OlxAuthRepository.completeAuthorization(url)` parses the callback (`DefaultOlxRedirectHandler`), validates that `state` matches the pending session, exchanges the code at `POST /api/{authTokenPath}`, persists the `OlxTokens` via `OlxTokenStore`, and clears the pending session.
+5. `SellerAuthViewModel` emits `OpenHome`; `AppNavigationViewModel` switches the top-level destination to `Seller`.
+6. Token refresh — two paths exist and must stay in agreement:
+   - `OlxAuthRepository.refreshIfNeeded(force)` — called explicitly by repositories before sensitive calls; uses `OlxTokens.isExpired(now, safetyWindow=60s)`.
+   - Ktor `Auth { bearer { ... } }` plugin in `OlxHttpClientFactory.createOlxAuthorizedHttpClient` — auto-refreshes on `401` via `refreshOlxBearerTokens`. On terminal errors (`InvalidGrant`, `InvalidToken`) the token store is cleared; on transient errors it isn't.
+
+### Ad publishing state machine (delivered across SIR-32 / SIR-33 / SIR-34)
+
+- `GenerateAdScreen` runs a 5-step async pipeline through `GenerateAdViewModel`:
+  1. Upload images via `MediaUploadHelper.publicUrl(path)`.
+  2. `OpenAIClient.analyzeThing()` produces title, description, suggested/min/max price, image list.
+  3. `CategoriesRepository.categorySuggestion(title)` → suggested `OlxCategory`.
+  4. `CategoriesRepository.getAttributes(categoryId)` → required + optional attributes.
+  5. `OpenAIClient.fillAdditionalInfo()` → attribute values.
+
+  Result is `AdvertisementWithAttributes`, surfaced via `OpenAdPreview` effect.
+- `PreviewAdScreen` shows:
+  - Editable title / description (`TextFieldState` based)
+  - Image gallery (HorizontalPager)
+  - Price card (Slider with min/max coercion + AI-suggested band — SIR-33)
+  - Category pill with debounced re-suggestion (300 ms on title change; see `PreviewAdViewModel.init` block)
+  - Location chip with on-demand geo fetch (`FetchLocation` event)
+  - Attributes section driven by `AttributeInputType` (`SingleSelect`, `MultiSelect`, `NumericInput`, `TextInput`)
+  - Page-level validation banner + status card + publish button state (SIR-34)
+- Publish path: `PreviewAdViewModel.publishAdvert()` validates every attribute via `AttributeValidator`, fetches the contact name via `getAuthenticatedUser()`, builds `PostAdvertRequest` via `PostAdvertRequestMapper.map`, posts to `OlxApiClient.postAdvert`, then emits `PublishSuccess(advertUrl)` or `ShowMessage`. The `isPublishing` flag drives the button enabled/loading state.
+
+### OLX API endpoints wrapped
+
+All wrappers live in `OlxApiClient.kt` unless stated.
+
+| Endpoint | Method | Wrapper | Returns |
+| --- | --- | --- | --- |
+| `users/me` | GET | `getAuthenticatedUser()` (returns `Result`) | `OlxMeResponse` |
+| `categories` | GET | `loadCategories()` (throws) | `List<OlxCategoryResponse>` |
+| `categories/suggestion?q=` | GET | `loadCategorySuggestionId(query)` (throws) | `Int?` |
+| `categories/{id}/attributes` | GET | `loadAttributes(categoryId)` (throws) | `List<OlxAttributeResponse>` |
+| `locations?latitude=&longitude=` | GET | `getLocations(lat, lng)` (throws) | `OlxLocationsRootResponse` |
+| `adverts` | POST | `postAdvert(req)` (returns `Result`) | `PostAdvertResult` (carries `advertUrl`) |
+| `/api/{authTokenPath}` | POST | internal — `OlxAuthRepository.exchangeAuthorizationCode` / `refreshAccessToken`, plus `OlxHttpClientFactory.refreshOlxBearerTokens` | `OlxTokens` |
+
+The mixed throws-vs-`Result<T>` surface is **intentional today but should be unified** — see `BUGS.md`.
+
+### Response-class conventions vs reality
+
+- The general convention (declared earlier in this file) is followed by most files in `seller/.../data/response/` and `seller/.../data/responses/`.
+- Two known violations: `OlxMeResponse` and `OlxUserResponse` live in `auth/domain/OlxModels.kt` as public `data class` with field defaults. They should move under `auth/data/response/` and become `internal class` with all fields nullable + no defaults. Tracked in `BUGS.md`.
+- Folder name disagreement: some packages use `response/` (singular — what the rules say), others use `responses/`. Tracked in `BUGS.md`.
+
+### ViewModel / state pattern (seller-wide)
+
+- Every seller VM extends `BaseViewModel<State, Event, Effect>` from `features/common/presentation/BaseViewModel.kt`.
+- Contracts live in `*Contract.kt` files with sealed `Event` and sealed `Effect` interfaces.
+- State updates use `setState { it.copy(...) }`. One-shot side effects use `postEffect(...)`.
+- Repositories return `Flow<T>`; VMs subscribe via `.launchIn(viewModelScope)` and use `.catch { ... }` to keep the stream alive across transient errors. `PreviewAdViewModel` is the canonical reference.
+- `CategoriesRepository` caches the (filtered) category tree via `shareIn(GlobalScope, Lazily, 1)` — see `BUGS.md` for why this is on the cleanup list.
+
+### Category filtering
+
+`CategoriesRepository.notSupportedParentIds` blocklist removes top-level OLX categories that aren't part of this product:
+
+| ID | Category |
+| --- | --- |
+| 1 | Real estate (нерухомість) |
+| 6 | Work (робота) |
+| 7 | Business & services (бізнес і послуги) |
+| 35 | Animals (тварини — incl. zoo goods, currently unsupported) |
+| 1532 | Auto transport |
+| 3428 | Rental & leasing (Оренда та прокат) |
+| 3709 | Daily rentals (житло подобово) |
+
+Update this list when adding or hiding categories.
+
+### Attribute validation
+
+- `AttributeValidator.validate(attribute, selectedValues)` returns `AttributeValidationResult.Invalid` with a `reason` (`Required`, `MustBeNumeric`, `BelowMinimum`, `AboveMaximum`, `InvalidSelection`, `MultipleValuesNotAllowed`) or success.
+- Errors are rendered inline in `PreviewAdScreen` via the `ErrorPill` component. The publish button stays interactive but `publishAdvert()` short-circuits when any required attribute fails. The follow-up to auto-scroll/expand the first failing field is tracked under SIR-34 (see `BUGS.md`).
+
+### Currency / formatting
+
+- Currency is hardcoded to UAH (₴) in `PostAdvertRequestMapper` and the price card UI. SIR-15 deferred — see `BUGS.md`.
+- Thousand-separator handling uses `DigitOnlyInputTransformation` and `ThousandSeparatorOutputTransformation` from `designsystem/InputTransformations.kt`.
+
+### OLX deep-link / callback wiring
+
+- Default redirect URI: `selolxai://olx-auth/callback` (configurable via `OLX_REDIRECT_URI` BuildKonfig key).
+- Android — `MainActivity.publishOlxCallback(intent)` reads `intent.data` and forwards the URL to `OlxAuthCallbackBridge.publishCallback(url)`. The intent filter must match the configured scheme; verify `androidApp/.../AndroidManifest.xml` whenever the scheme changes.
+- Web (Wasm) — `composeApp/src/wasmJsMain/.../main.kt` checks `window.location` for `code=` / `error=` query parameters before mounting Compose, then calls `OlxAuthCallbackBridge.publishCallback`.
+- The bridge is a global object (`OlxAuthCallbackBridge`); listener is set inside the seller landing screen lifecycle. Concurrency / replay caveats in `BUGS.md`.
+
+### OLX HTTP client config (`OlxHttpClientFactory.kt`)
+
+- `ContentNegotiation` JSON: `ignoreUnknownKeys = true`, `isLenient = true`, `explicitNulls = false`. The `isLenient = true` is intentional — OLX sends mixed int/string id fields that would otherwise need a custom serializer.
+- `Logging` plugin set to `LogLevel.INFO`. This logs request/response bodies, including `Authorization: Bearer …` headers and refresh tokens — see `BUGS.md`.
+- `defaultRequest.url(SupabaseConfig.OLX_API_BASE_URL)` — the OLX base URL is currently read from `SupabaseConfig`. Cross-package coupling, tracked in `BUGS.md`.
+- `expectSuccess = false` — every endpoint must check `response.status.isSuccess()` manually and parse failures via `OlxRemoteErrorParser`.
+- No `HttpTimeout` plugin installed — see `BUGS.md`.
+
+### Top-level docs to know
+
+- `SELLER_ICON_REPLACEMENTS.md` — five seller screens use custom `Res.drawable.ic_*` (VectorDrawable) instead of Material icons. Reference this when editing `PreviewAdScreen.kt`, `GenerateAdScreen.kt`, `AiProcessingContent.kt`, `SellerLandingScreen.kt`, `OnboardingScreen.kt`.
+- `DEPENDENCY_UPDATE_SUMMARY.md` — record of recent dependency bumps (Kotlin 2.3, Koin 4.2, etc.). Useful when the build breaks after a dependency change.
+- `BUGS.md` — known seller/OLX pitfalls and convention violations; drive future fix-up tickets from this list.
