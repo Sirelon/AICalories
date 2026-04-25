@@ -24,9 +24,11 @@ import com.sirelon.aicalories.features.analyze.ui.AnalyzeScreen
 import com.sirelon.aicalories.features.datagenerator.ui.DataGeneratorScreen
 import com.sirelon.aicalories.features.history.ui.HistoryScreenRoute
 import com.sirelon.aicalories.features.seller.ad.AdRootScreen
+import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessScreen
 import com.sirelon.aicalories.features.seller.auth.presentation.SellerLandingScreenRoute
 import com.sirelon.aicalories.features.seller.onboarding.OnboardingScreen
 import com.sirelon.aicalories.navigation.AppDestination
+import com.sirelon.aicalories.platform.openUrl
 import com.sirelon.aicalories.startup.AppNavigationViewModel
 import org.koin.compose.KoinApplication
 import org.koin.compose.viewmodel.koinViewModel
@@ -86,7 +88,21 @@ fun App() {
                     }
 
                     entry<AppDestination.Seller> {
-                        AdRootScreen(onExit = navVm::popDestination)
+                        AdRootScreen(
+                            onExit = navVm::popDestination,
+                            onPublishSuccess = navVm::navigateToPublishSuccess,
+                        )
+                    }
+
+                    entry<AppDestination.SellerPublishSuccess> { destination ->
+                        PublishSuccessScreen(
+                            url = destination.url,
+                            title = destination.title,
+                            priceFormatted = destination.priceFormatted,
+                            primaryImageUrl = destination.primaryImageUrl,
+                            onViewOnOlx = { openUrl(destination.url) },
+                            onCreateAnother = navVm::popToAdRoot,
+                        )
                     }
 
                     entry<AppDestination.Agile> {

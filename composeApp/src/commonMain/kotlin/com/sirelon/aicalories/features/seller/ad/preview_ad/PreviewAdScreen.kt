@@ -154,6 +154,12 @@ private const val DescriptionMinLength = 30
 fun PreviewAdScreen(
     advertisement: AdvertisementWithAttributes,
     onChangeCategoryClick: () -> Unit,
+    onPublishSuccess: (
+        url: String,
+        title: String,
+        priceFormatted: String,
+        primaryImageUrl: String?,
+    ) -> Unit,
     pendingCategory: OlxCategory?,
     onCategoryConsumed: () -> Unit,
 ) {
@@ -177,12 +183,12 @@ fun PreviewAdScreen(
             PreviewAdContract.PreviewAdEffect.GoToGategoryPicker -> onChangeCategoryClick()
 
             is PreviewAdContract.PreviewAdEffect.PublishSuccess -> {
-                val message = if (effect.advertUrl != null) {
-                    "Ad published! View at: ${effect.advertUrl}"
-                } else {
-                    "Ad published successfully."
-                }
-                snackbarHostState.showSnackbar(message)
+                onPublishSuccess(
+                    effect.advertUrl.orEmpty(),
+                    viewModel.titleState.text.toString(),
+                    "₴ ${formatPrice(state.price)}",
+                    state.images.firstOrNull(),
+                )
             }
         }
     }

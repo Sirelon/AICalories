@@ -45,6 +45,26 @@ class AppNavigationViewModel(
         }
     }
 
+    fun navigateToPublishSuccess(
+        url: String,
+        title: String,
+        priceFormatted: String,
+        primaryImageUrl: String?,
+    ) {
+        navigateTo(
+            AppDestination.SellerPublishSuccess(
+                url = url,
+                title = title,
+                priceFormatted = priceFormatted,
+                primaryImageUrl = primaryImageUrl,
+            )
+        )
+    }
+
+    fun popToAdRoot() {
+        _backStack.value = listOf(AppDestination.Seller)
+    }
+
     fun replaceWith(destination: AppDestination) {
         _backStack.value = listOf(destination)
     }

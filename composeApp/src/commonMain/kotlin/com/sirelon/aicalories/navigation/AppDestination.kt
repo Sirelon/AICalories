@@ -21,6 +21,14 @@ sealed interface AppDestination : NavKey {
     data object Seller : AppDestination
 
     @Serializable
+    data class SellerPublishSuccess(
+        val url: String,
+        val title: String,
+        val priceFormatted: String,
+        val primaryImageUrl: String?,
+    ) : AppDestination
+
+    @Serializable
     data object Analyze : AppDestination
 
     @Serializable
