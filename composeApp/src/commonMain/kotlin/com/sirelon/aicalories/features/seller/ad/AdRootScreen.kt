@@ -85,6 +85,7 @@ fun AdRootScreen(onExit: () -> Unit) {
                     onChangeCategoryClick = { navBackStack.add(AdDestination.SelectRootCategory) },
                     pendingCategory = pendingCategory,
                     onCategoryConsumed = { pendingCategory = null },
+                    onPublishSuccess = onExit, // SIR-39 will replace with success screen navigation
                 )
             }
 
