@@ -41,6 +41,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -70,9 +72,12 @@ import com.sirelon.aicalories.designsystem.AppScaffold
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.AiGeneratedBadge
 import com.sirelon.aicalories.designsystem.CopyPill
+import com.sirelon.aicalories.designsystem.DigitOnlyInputTransformation
 import com.sirelon.aicalories.designsystem.ErrorPill
 import com.sirelon.aicalories.designsystem.InputWithCopy
 import com.sirelon.aicalories.designsystem.ObserveAsEvents
+import com.sirelon.aicalories.designsystem.ThousandSeparatorOutputTransformation
+import com.sirelon.aicalories.designsystem.formatPrice
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.features.media.PermissionDialogContent
@@ -91,6 +96,7 @@ import com.sirelon.aicalories.generated.resources.ad_category_label
 import com.sirelon.aicalories.generated.resources.ad_description_label
 import com.sirelon.aicalories.generated.resources.ad_location_label
 import com.sirelon.aicalories.generated.resources.ad_title_label
+import com.sirelon.aicalories.generated.resources.ad_price_ai_estimated_range
 import com.sirelon.aicalories.generated.resources.ad_your_price
 import com.sirelon.aicalories.generated.resources.cancel
 import com.sirelon.aicalories.generated.resources.ic_arrow_right
@@ -686,54 +692,82 @@ private fun AdPriceCard(
     minPrice: Float,
     maxPrice: Float,
 ) {
-    PreviewSectionCard(
-        label = stringResource(Res.string.ad_your_price),
-    ) {
-        Column {
+    PreviewSectionCard(label = stringResource(Res.string.ad_your_price)) {
+        Column(verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)) {
+            val price = remember(priceTextFieldState.text) {
+                (priceTextFieldState.text.toString().toFloatOrNull() ?: ((maxPrice + minPrice) / 2f))
+                    .coerceIn(minPrice, maxPrice)
+            }
+
             val textStyle = AppTheme.typography.headline
             ProvideTextStyle(textStyle) {
-                InputWithCopy(
+                TextField(
                     state = priceTextFieldState,
+                    modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     lineLimits = TextFieldLineLimits.SingleLine,
+                    inputTransformation = DigitOnlyInputTransformation,
+                    outputTransformation = ThousandSeparatorOutputTransformation,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = AppTheme.colors.surfaceLow,
+                        unfocusedContainerColor = AppTheme.colors.surfaceLow,
+                        focusedIndicatorColor = AppTheme.colors.primary,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                    ),
                     prefix = {
-                        // TODO: change currency
-                        Text(text = "$", style = textStyle)
+                        // TODO: change currency (SIR-15)
+                        Text(text = "₴", style = textStyle)
                     },
                 )
             }
 
-            val price = remember(priceTextFieldState.text) {
-                (priceTextFieldState.text.toString().toFloatOrNull() ?: ((maxPrice + minPrice) / 2))
-            }
-            Slider(
+            CopyPill(
                 modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
-                value = price,
-                onValueChange = {
-                    priceTextFieldState.setTextAndPlaceCursorAtEnd(it.fastRoundToInt().toString())
-                },
-                valueRange = minPrice..maxPrice,
-                colors = SliderDefaults.colors(
-                    thumbColor = AppTheme.colors.primary,
-                    activeTrackColor = AppTheme.colors.primary.copy(alpha = 0.24f)
-                )
+                // TODO: change currency (SIR-15)
+                value = "₴ ${formatPrice(price)}",
             )
 
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = AppDimens.Spacing.xl3),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = AppDimens.Spacing.xl3),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    "€${minPrice.toInt()}",
+                    text = formatPrice(minPrice),
                     style = AppTheme.typography.label,
-                    color = AppTheme.colors.outline
+                    color = AppTheme.colors.outline,
+                )
+                Slider(
+                    modifier = Modifier.weight(1f),
+                    value = price,
+                    onValueChange = {
+                        priceTextFieldState.setTextAndPlaceCursorAtEnd(it.fastRoundToInt().toString())
+                    },
+                    valueRange = minPrice..maxPrice,
+                    colors = SliderDefaults.colors(
+                        thumbColor = AppTheme.colors.primary,
+                        activeTrackColor = AppTheme.colors.primary.copy(alpha = 0.24f),
+                    ),
                 )
                 Text(
-                    "€${maxPrice.toInt()}",
+                    text = formatPrice(maxPrice),
                     style = AppTheme.typography.label,
-                    color = AppTheme.colors.outline
+                    color = AppTheme.colors.outline,
                 )
             }
+
+            Text(
+                modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
+                text = stringResource(
+                    Res.string.ad_price_ai_estimated_range,
+                    formatPrice(minPrice),
+                    formatPrice(maxPrice),
+                ),
+                style = AppTheme.typography.caption,
+                color = AppTheme.colors.onSurfaceMuted,
+            )
         }
     }
 }
@@ -969,11 +1003,39 @@ private val photoCarouselPreviewImages = listOf(
 
 @PreviewLightDark
 @Composable
+private fun AdPriceCardMinPreview() {
+    AppTheme {
+        Surface {
+            AdPriceCard(
+                priceTextFieldState = rememberTextFieldState("1000"),
+                minPrice = 1000f,
+                maxPrice = 50000f,
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
 private fun PreviewAdEditableSectionsValidPreview() {
     PreviewAdEditableSectionsPreview(
         title = "Nike Air Max 90 Size 42",
         description = "Well-kept sneakers with minor wear on the outsole and clean upper panels.",
     )
+}
+
+@PreviewLightDark
+@Composable
+private fun AdPriceCardMidPreview() {
+    AppTheme {
+        Surface {
+            AdPriceCard(
+                priceTextFieldState = rememberTextFieldState("25500"),
+                minPrice = 1000f,
+                maxPrice = 50000f,
+            )
+        }
+    }
 }
 
 @PreviewLightDark
@@ -1009,6 +1071,20 @@ private fun PreviewAdEditableSectionsPreview(
                     isInvalid = description.trim().length < DescriptionMinLength,
                 )
             }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun AdPriceCardMaxPreview() {
+    AppTheme {
+        Surface {
+            AdPriceCard(
+                priceTextFieldState = rememberTextFieldState("50000"),
+                minPrice = 1000f,
+                maxPrice = 50000f,
+            )
         }
     }
 }
