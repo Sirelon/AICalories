@@ -121,10 +121,11 @@ class OlxAuthRepository(
     }
 
     suspend fun currentSession(): OlxSessionState {
+        val isGuestModeEnabled = guestModeStore.isGuest()
         val tokens = tokenStore.read()
         val mode = when {
+            isGuestModeEnabled -> SellerSessionMode.Guest
             tokens != null -> SellerSessionMode.Authenticated
-            guestModeStore.isGuest() -> SellerSessionMode.Guest
             else -> SellerSessionMode.Unauthenticated
         }
         return OlxSessionState(
