@@ -9,6 +9,10 @@
     <string name="benefit_manage">Керуйте всіма оголошеннями в одному місці</string>
     <string name="continue_as_guest">Продовжити як гість</string>
     <string name="guest_description">Ви можете створювати оголошення та копіювати вміст. Вам потрібно буде вручну розмістити на OLX.</string>
+    <string name="guest_mode_banner_title">Гостьовий режим</string>
+    <string name="guest_mode_banner_message">Щоб публікувати на OLX, потрібен акаунт. Скопіюйте заголовок, опис і ціну нижче та вставте їх на OLX.</string>
+    <string name="guest_connect_olx_cta">Підключити OLX для публікації</string>
+    <string name="guest_copy_hint">Скористайтеся кнопками копіювання для назви, опису та ціни, коли будете готові вставити це оголошення в OLX.</string>
     <string name="continue_with_olx">Продовжити з OLX</string>
     <string name="terms_privacy_prefix">Продовжуючи, ви погоджуєтесь з нашими </string>
     <string name="terms_of_service">Умовами обслуговування</string>
@@ -252,11 +256,13 @@
     <string name="ai_analyzing_photo">Наш ШІ аналізує ваше фото та створює ідеальну назву, опис і ціну...</string>
     <string name="ai_step_uploading_photos">Завантаження фото</string>
     <string name="ai_step_analyzing_image">Аналіз зображення</string>
+    <string name="ai_step_preparing_guest_ad">Підготовка тексту оголошення</string>
     <string name="ai_step_generating_title">Генерація назви</string>
     <string name="ai_step_writing_description">Написання опису</string>
     <string name="ai_step_calculating_price">Розрахунок ціни</string>
     <string name="ai_processing_status_in_progress">У процесі…</string>
     <string name="ai_processing_status_done">Готово</string>
+    <string name="ai_processing_tip_connect_olx_faster">Порада: підключіть OLX, щоб автоматично заповнювати фінальні деталі й завершувати наступне оголошення до 5 разів швидше.</string>
     <string name="ai_processing_tip_good_lighting">Порада: тримайте фото добре освітленими для кращого результату ШІ.</string>
     <string name="ai_processing_tip_capture_details">Порада: додавайте крупні плани важливих деталей і слідів використання.</string>
     <string name="ai_processing_tip_keep_background_clean">Порада: використовуйте чистий фон, щоб річ краще виділялася.</string>

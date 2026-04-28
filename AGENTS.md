@@ -134,6 +134,7 @@ AI-optimized repo map for agents working in this workspace. Read this first; onl
 - `appModule` includes feature modules; `networkModule` provides shared networking clients.
 - Feature modules typically live in each feature’s `di/` package.
 - Prefer adding dependencies via Koin modules, not manual singleton objects.
+- When calling constructors or factory functions with more than 2 arguments, use named parameters.
 
 ## Feature Layout Patterns
 

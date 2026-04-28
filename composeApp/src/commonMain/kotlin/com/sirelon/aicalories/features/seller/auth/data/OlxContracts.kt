@@ -49,6 +49,21 @@ class OlxAuthSessionStore internal constructor(private val storage: KeyValueStor
     }
 }
 
+class GuestModeStore internal constructor(private val storage: KeyValueStore) {
+    constructor() : this(createKeyValueStore("seller_session"))
+
+    suspend fun isGuest(): Boolean = storage.getString(KEY) == VALUE_TRUE
+
+    suspend fun setGuest(enabled: Boolean) {
+        if (enabled) storage.putString(KEY, VALUE_TRUE) else storage.remove(KEY)
+    }
+
+    private companion object {
+        const val KEY = "guest_mode"
+        const val VALUE_TRUE = "true"
+    }
+}
+
 interface OlxRedirectHandler {
     fun buildRedirectUri(platform: PlatformTargets = PlatformTargets): String
 
