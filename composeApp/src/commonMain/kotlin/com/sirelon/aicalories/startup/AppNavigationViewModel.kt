@@ -2,6 +2,7 @@ package com.sirelon.aicalories.startup
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sirelon.aicalories.features.seller.ad.AdFlowTimerStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
 import com.sirelon.aicalories.navigation.AppDestination
@@ -14,6 +15,7 @@ class AppNavigationViewModel(
     private val authRepository: OlxAuthRepository,
     private val olxApiClient: OlxApiClient,
     private val startupStore: AppStartupStore,
+    private val adFlowTimerStore: AdFlowTimerStore,
 ) : ViewModel() {
 
     private val _backStack = MutableStateFlow<List<AppDestination>>(listOf(AppDestination.Splash))
@@ -57,11 +59,13 @@ class AppNavigationViewModel(
                 title = title,
                 priceFormatted = priceFormatted,
                 primaryImageUrl = primaryImageUrl,
+                totalElapsedMs = adFlowTimerStore.totalElapsedMs(),
             )
         )
     }
 
     fun popToAdRoot() {
+        adFlowTimerStore.clear()
         _backStack.value = listOf(AppDestination.Seller)
     }
 

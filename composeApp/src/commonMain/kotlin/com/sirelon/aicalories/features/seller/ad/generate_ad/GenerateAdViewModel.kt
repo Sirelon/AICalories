@@ -6,6 +6,7 @@ import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.media.upload.MediaUploadHelper
 import com.sirelon.aicalories.features.media.upload.MediaUploadUpdate
 import com.sirelon.aicalories.features.media.upload.UploadingItem
+import com.sirelon.aicalories.features.seller.ad.AdFlowTimerStore
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
 import com.sirelon.aicalories.features.seller.openai.OpenAIClient
@@ -26,6 +27,7 @@ class GenerateAdViewModel(
     private val mediaUploadHelper: MediaUploadHelper,
     private val categoriesRepository: CategoriesRepository,
     private val openAi: OpenAIClient,
+    private val adFlowTimerStore: AdFlowTimerStore,
 ) : BaseViewModel<GenerateAdContract.GenerateAdState, GenerateAdContract.GenerateAdEvent, GenerateAdContract.GenerateAdEffect>() {
 
     override fun initialState(): GenerateAdContract.GenerateAdState =
@@ -59,7 +61,14 @@ class GenerateAdViewModel(
     private suspend fun submit() {
         flowOf(1)
             .onStart {
-                setState { it.copy(isLoading = true, completedSteps = 0, errorMessage = null) }
+                setState {
+                    it.copy(
+                        isLoading = true,
+                        completedSteps = 0,
+                        errorMessage = null,
+                    )
+                }
+                adFlowTimerStore.markGenerationStarted()
             }
 
             .map { uploadFilesAndGetPublicUrls() }
@@ -98,7 +107,8 @@ class GenerateAdViewModel(
             }
 
             .onEach {
-                postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(it))
+                adFlowTimerStore.markGenerationCompleted()
+                postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(ad = it))
             }
             .catch { error ->
                 setState { it.copy(isLoading = false, errorMessage = error.message) }

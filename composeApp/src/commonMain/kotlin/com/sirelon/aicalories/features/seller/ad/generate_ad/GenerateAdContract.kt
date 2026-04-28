@@ -31,7 +31,7 @@ interface GenerateAdContract {
         data class ShowMessage(val message: String) : GenerateAdEffect
 
         data class OpenAdPreview(
-            val ad: AdvertisementWithAttributes
+            val ad: AdvertisementWithAttributes,
         ) : GenerateAdEffect
     }
 }

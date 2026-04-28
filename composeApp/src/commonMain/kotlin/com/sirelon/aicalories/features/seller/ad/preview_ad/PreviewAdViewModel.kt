@@ -4,6 +4,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewModelScope
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
+import com.sirelon.aicalories.features.seller.ad.AdFlowTimerStore
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.features.seller.ad.data.PostAdvertRequestMapper
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEffect
@@ -36,6 +37,7 @@ class PreviewAdViewModel(
     private val locationRepository: LocationRepository,
     private val olxApiClient: OlxApiClient,
     private val attributeValidator: AttributeValidator,
+    private val adFlowTimerStore: AdFlowTimerStore,
 ) : BaseViewModel<PreviewAdState, PreviewAdEvent, PreviewAdEffect>() {
 
     private val advertisement = filledAdvertisement.advertisement
@@ -93,6 +95,7 @@ class PreviewAdViewModel(
 
     override fun initialState() = PreviewAdState(
         categoryLabel = "",
+        generationElapsedMs = adFlowTimerStore.generationElapsedMs(),
         price = advertisement.suggestedPrice,
         minPrice = advertisement.minPrice,
         maxPrice = advertisement.maxPrice,

@@ -52,6 +52,7 @@
     <string name="publish_to_olx">Publish to OLX</string>
     <string name="publish_on_olx">Publish on OLX</string>
     <string name="publish_errors">Publish · %1$d errors</string>
+    <string name="banner_ready_in">Ready in %1$ds. Check and change anything before publishing.</string>
     <string name="validation_all_valid">Verified. All required fields filled.</string>
     <string name="validation_fields_remaining">%1$d fields remaining</string>
     <string name="validation_error_title_too_short">Title: at least 10 characters</string>
@@ -321,11 +322,12 @@
     <string name="publish_success_status_active">Active</string>
     <string name="publish_success_status_label">Status</string>
     <string name="publish_success_status_caption">Under review · up to 2 min</string>
-    <string name="publish_success_total_time_value">~90s</string>
     <string name="publish_success_total_time_label">Total time</string>
     <string name="publish_success_total_time_caption">From photo to publish</string>
     <string name="publish_success_view_on_olx">View on OLX</string>
     <string name="publish_success_create_another">Create another</string>
+    <string name="time_unit_seconds">%1$ds</string>
+    <string name="time_unit_minutes_seconds">%1$dm %2$ds</string>
 
     <!-- Team Settings Screen -->
     <string name="team_settings_title">Team settings</string>

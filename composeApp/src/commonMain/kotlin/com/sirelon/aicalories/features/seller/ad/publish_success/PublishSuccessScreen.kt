@@ -30,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,12 +70,15 @@ import com.sirelon.aicalories.generated.resources.publish_success_subtitle
 import com.sirelon.aicalories.generated.resources.publish_success_title
 import com.sirelon.aicalories.generated.resources.publish_success_total_time_caption
 import com.sirelon.aicalories.generated.resources.publish_success_total_time_label
-import com.sirelon.aicalories.generated.resources.publish_success_total_time_value
 import com.sirelon.aicalories.generated.resources.publish_success_view_on_olx
+import com.sirelon.aicalories.generated.resources.time_unit_minutes_seconds
+import com.sirelon.aicalories.generated.resources.time_unit_seconds
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.sin
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 private const val ConfettiPiecesCount = 24
 private const val ConfettiDurationMs = 2500
@@ -85,6 +89,7 @@ fun PublishSuccessScreen(
     title: String,
     priceFormatted: String,
     primaryImageUrl: String?,
+    totalElapsedMs: Long,
     onViewOnOlx: () -> Unit,
     onCreateAnother: () -> Unit,
     modifier: Modifier = Modifier,
@@ -155,7 +160,7 @@ fun PublishSuccessScreen(
                     )
                     StatMiniCard(
                         modifier = Modifier.weight(1f),
-                        value = stringResource(Res.string.publish_success_total_time_value),
+                        value = formatElapsedTime(totalElapsedMs),
                         label = stringResource(Res.string.publish_success_total_time_label),
                         caption = stringResource(Res.string.publish_success_total_time_caption),
                     )
@@ -165,6 +170,25 @@ fun PublishSuccessScreen(
         }
     }
 }
+
+@Composable
+private fun formatElapsedTime(totalElapsedMs: Long): String {
+    val duration = elapsedDuration(totalElapsedMs)
+    if (duration < 60.seconds) {
+        return stringResource(Res.string.time_unit_seconds, duration.inWholeSeconds.toInt())
+    }
+
+    return stringResource(
+        Res.string.time_unit_minutes_seconds,
+        duration.inWholeMinutes.toInt(),
+        (duration.inWholeSeconds % 60L).toInt(),
+    )
+}
+
+@ReadOnlyComposable
+@Composable
+private fun elapsedDuration(totalElapsedMs: Long): Duration =
+    (((totalElapsedMs.coerceAtLeast(0L)) + 999L) / 1000L).seconds
 
 @Composable
 private fun ConfettiCanvas(modifier: Modifier = Modifier) {
@@ -459,6 +483,7 @@ private fun PublishSuccessScreenPreview() {
             title = "Кросівки Nike Air Max 90, розмір 42",
             priceFormatted = "₴ 1 850",
             primaryImageUrl = null,
+            totalElapsedMs = 92_000L,
             onViewOnOlx = {},
             onCreateAnother = {},
         )

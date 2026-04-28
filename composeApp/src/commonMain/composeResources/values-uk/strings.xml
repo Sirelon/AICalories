@@ -53,6 +53,7 @@
     <string name="publish_to_olx">Опублікувати на OLX</string>
     <string name="publish_on_olx">Опублікувати на OLX</string>
     <string name="publish_errors">Публікація · %1$d помилок</string>
+    <string name="banner_ready_in">Готово за %1$dс. Перевірте та змініть будь-що перед публікацією.</string>
     <string name="validation_all_valid">Перевірено. Усі обов\'язкові поля заповнені.</string>
     <string name="validation_fields_remaining">%1$d поля не заповнені</string>
     <string name="validation_error_title_too_short">Назва: щонайменше 10 символів</string>
@@ -314,11 +315,12 @@
     <string name="publish_success_status_active">Активне</string>
     <string name="publish_success_status_label">Статус</string>
     <string name="publish_success_status_caption">На модерації · до 2 хв</string>
-    <string name="publish_success_total_time_value">~90с</string>
     <string name="publish_success_total_time_label">Загальний час</string>
     <string name="publish_success_total_time_caption">Від фото до публікації</string>
     <string name="publish_success_view_on_olx">Переглянути на OLX</string>
     <string name="publish_success_create_another">Створити ще одне</string>
+    <string name="time_unit_seconds">%1$dс</string>
+    <string name="time_unit_minutes_seconds">%1$dхв %2$dс</string>
 
     <!-- Team Settings Screen -->
     <string name="team_settings_title">Налаштування команди</string>

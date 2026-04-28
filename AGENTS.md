@@ -247,10 +247,11 @@ Most features use some combination of:
   - package `com.sirelon.aicalories.generated.resources`
 - Android resources are enabled for the KMP library target.
 - In this workspace, `./gradlew` may fail because `gradle/wrapper/gradle-wrapper.jar` is missing.
-- If that happens, rerun builds with a locally installed `gradle` that matches `gradle/wrapper/gradle-wrapper.properties` (currently `9.3.1`).
+- If that happens, rerun builds with a local Gradle binary that matches `gradle/wrapper/gradle-wrapper.properties` (currently `9.4.1`).
+- `:composeApp` is an Android KMP library target, not the app wrapper. It does not expose `assembleDebug`; use `:composeApp:assemble` for the library artifact or `:androidApp:assembleDebug` for the installable Android APK.
 
 ## Common Commands
-- Build Android debug: `./gradlew :composeApp:assembleDebug`
+- Build `composeApp` Android library artifact: `./gradlew :composeApp:assemble`
 - Build Android app wrapper APK: `./gradlew :androidApp:assembleDebug`
 - Build desktop JVM artifact: `./gradlew :composeApp:jvmJar`
 - Run desktop app: `./gradlew :composeApp:run`
@@ -293,6 +294,11 @@ Most features use some combination of:
 - Change ad publish behavior / publish button state machine:
   - `features/seller/ad/preview_ad/PreviewAdViewModel.kt`
   - `features/seller/ad/data/PostAdvertRequestMapper.kt`
+- Change seller ad flow timing / ready-to-publish elapsed-time behavior:
+  - `features/seller/ad/AdFlowTimerStore.kt`
+  - `features/seller/ad/generate_ad/GenerateAdViewModel.kt`
+  - `features/seller/ad/preview_ad/PreviewAdScreen.kt`
+  - `features/seller/ad/publish_success/PublishSuccessScreen.kt`
 - Change AI ad generation pipeline:
   - `features/seller/ad/generate_ad/GenerateAdViewModel.kt`
   - `features/seller/openai/OpenAIClient.kt`
@@ -361,7 +367,7 @@ Concrete map of the seller/OLX feature tree under `composeApp/src/commonMain/kot
   - `presentation/`: `SellerAuthViewModel.kt`, `SellerAuthContract.kt`, `SellerLandingScreen.kt`, `OlxAuthWebView.kt` (expect/actual)
   - `di/SellerAuthModule.kt`
 - `ad/` — ad creation pipeline
-  - `Advertisement.kt`, `AdvertisementWithAttributes.kt`, `AdRootScreen.kt`
+  - `Advertisement.kt`, `AdvertisementWithAttributes.kt`, `AdRootScreen.kt`, `AdFlowTimerStore.kt`
   - `data/`: `GeneratedAdMapper.kt`, `PostAdvertRequestMapper.kt`
   - `generate_ad/`: `GenerateAdViewModel.kt`, `GenerateAdContract.kt`, `GenerateAdScreen.kt`, `AiProcessingContent.kt`, `di/GenerateAdModule.kt`
   - `preview_ad/`: `PreviewAdViewModel.kt`, `PreviewAdContract.kt`, `PreviewAdScreen.kt`, `di/PreviewAdModule.kt`
@@ -399,15 +405,18 @@ Concrete map of the seller/OLX feature tree under `composeApp/src/commonMain/kot
   5. `OpenAIClient.fillAdditionalInfo()` → attribute values.
 
   Result is `AdvertisementWithAttributes`, surfaced via `OpenAdPreview` effect.
+  Timing for this flow is tracked in `AdFlowTimerStore`, a Koin `singleOf` singleton. `GenerateAdViewModel` starts the timer before the pipeline and marks generation complete before opening preview.
 - `PreviewAdScreen` shows:
   - Editable title / description (`TextFieldState` based)
   - Image gallery (HorizontalPager)
+  - Green "ready in Xs" banner sourced from `PreviewAdViewModel`, which reads `AdFlowTimerStore.generationElapsedMs()`
   - Price card (Slider with min/max coercion + AI-suggested band — SIR-33)
   - Category pill with debounced re-suggestion (300 ms on title change; see `PreviewAdViewModel.init` block)
   - Location chip with on-demand geo fetch (`FetchLocation` event)
   - Attributes section driven by `AttributeInputType` (`SingleSelect`, `MultiSelect`, `NumericInput`, `TextInput`)
   - Page-level validation banner + status card + publish button state (SIR-34)
 - Publish path: `PreviewAdViewModel.publishAdvert()` validates every attribute via `AttributeValidator`, fetches the contact name via `getAuthenticatedUser()`, builds `PostAdvertRequest` via `PostAdvertRequestMapper.map`, posts to `OlxApiClient.postAdvert`, then emits `PublishSuccess(advertUrl)` or `ShowMessage`. The `isPublishing` flag drives the button enabled/loading state.
+  `AppNavigationViewModel.navigateToPublishSuccess()` reads `AdFlowTimerStore.totalElapsedMs()` into `AppDestination.SellerPublishSuccess`, and `popToAdRoot()` clears the store before returning to `Seller`.
 
 ### OLX API endpoints wrapped
 

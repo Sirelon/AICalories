@@ -19,6 +19,7 @@ interface PreviewAdContract {
         val categoryLabel: String,
         val selectedCategory: OlxCategory? = null,
         val isPublishing: Boolean = false,
+        val generationElapsedMs: Long = 0L,
         val price: Float,
         val minPrice: Float,
         val maxPrice: Float,
