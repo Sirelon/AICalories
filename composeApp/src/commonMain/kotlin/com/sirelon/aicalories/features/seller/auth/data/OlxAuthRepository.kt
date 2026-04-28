@@ -7,6 +7,7 @@ import com.sirelon.aicalories.features.seller.auth.domain.OlxAuthorizationReques
 import com.sirelon.aicalories.features.seller.auth.domain.OlxPendingAuthSession
 import com.sirelon.aicalories.features.seller.auth.domain.OlxSessionState
 import com.sirelon.aicalories.features.seller.auth.domain.OlxTokens
+import com.sirelon.aicalories.features.seller.auth.domain.SellerSessionMode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -28,6 +29,7 @@ class OlxAuthRepository(
     private val tokenStore: OlxTokenStore,
     private val authSessionStore: OlxAuthSessionStore,
     private val redirectHandler: OlxRedirectHandler,
+    private val guestModeStore: GuestModeStore,
 ) {
     suspend fun createAuthorizationRequest(): OlxAuthorizationRequest {
         val state = Uuid.random().toString()
@@ -75,6 +77,7 @@ class OlxAuthRepository(
         )
         tokenStore.write(tokenResponse)
         authSessionStore.clear()
+        guestModeStore.setGuest(false)
         tokenResponse
     }.onFailure {
         authSessionStore.clear()
@@ -106,12 +109,26 @@ class OlxAuthRepository(
     suspend fun logout() {
         tokenStore.clear()
         authSessionStore.clear()
+        guestModeStore.setGuest(false)
+    }
+
+    suspend fun enterGuestMode() {
+        guestModeStore.setGuest(true)
+    }
+
+    suspend fun exitGuestMode() {
+        guestModeStore.setGuest(false)
     }
 
     suspend fun currentSession(): OlxSessionState {
         val tokens = tokenStore.read()
+        val mode = when {
+            tokens != null -> SellerSessionMode.Authenticated
+            guestModeStore.isGuest() -> SellerSessionMode.Guest
+            else -> SellerSessionMode.Unauthenticated
+        }
         return OlxSessionState(
-            isAuthorized = tokens != null,
+            mode = mode,
             accessTokenExpiresAtEpochSeconds = tokens?.expiresAtEpochSeconds,
         )
     }

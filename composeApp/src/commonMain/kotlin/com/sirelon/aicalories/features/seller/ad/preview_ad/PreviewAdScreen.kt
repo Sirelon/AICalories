@@ -100,6 +100,10 @@ import com.sirelon.aicalories.generated.resources.ad_title_label
 import com.sirelon.aicalories.generated.resources.ad_price_ai_estimated_range
 import com.sirelon.aicalories.generated.resources.ad_your_price
 import com.sirelon.aicalories.generated.resources.cancel
+import com.sirelon.aicalories.generated.resources.guest_connect_olx_cta
+import com.sirelon.aicalories.generated.resources.guest_copy_hint
+import com.sirelon.aicalories.generated.resources.guest_mode_banner_message
+import com.sirelon.aicalories.generated.resources.guest_mode_banner_title
 import com.sirelon.aicalories.generated.resources.ic_arrow_right
 import com.sirelon.aicalories.generated.resources.ic_camera
 import com.sirelon.aicalories.generated.resources.ic_chevron_right
@@ -167,6 +171,7 @@ fun PreviewAdScreen(
     ) -> Unit,
     pendingCategory: OlxCategory?,
     onCategoryConsumed: () -> Unit,
+    onConnectOlxClick: () -> Unit,
 ) {
     val viewModel: PreviewAdViewModel = koinViewModel { parametersOf(advertisement) }
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -229,7 +234,9 @@ fun PreviewAdScreen(
         }
     }
 
-    LocationPermissionsBlock(viewModel::onEvent)
+    if (state.isSessionResolved && !state.isGuest) {
+        LocationPermissionsBlock(viewModel::onEvent)
+    }
 
     val titleTooShortLabel = stringResource(Res.string.validation_error_title_too_short)
     val descTooShortLabel = stringResource(Res.string.validation_error_desc_too_short)
@@ -242,14 +249,16 @@ fun PreviewAdScreen(
     val validationErrors = buildList {
         if (titleText.length < 10) add(titleTooShortLabel)
         if (descText.length < 30) add(descTooShortLabel)
-        if (state.selectedCategory == null) add(noCategoryLabel)
-        if (state.location == null) add(noLocationLabel)
-        for (item in state.attributeItems) {
-            when {
-                item.error != null ->
-                    add("${item.attribute.label}: ${item.error.toDisplayString()}")
-                item.attribute.validationRules.required && item.selectedValues.isEmpty() ->
-                    add(item.attribute.label)
+        if (state.isSessionResolved && !state.isGuest) {
+            if (state.selectedCategory == null) add(noCategoryLabel)
+            if (state.location == null) add(noLocationLabel)
+            for (item in state.attributeItems) {
+                when {
+                    item.error != null ->
+                        add("${item.attribute.label}: ${item.error.toDisplayString()}")
+                    item.attribute.validationRules.required && item.selectedValues.isEmpty() ->
+                        add(item.attribute.label)
+                }
             }
         }
     }
@@ -271,30 +280,40 @@ fun PreviewAdScreen(
                         .padding(bottom = AppDimens.Spacing.m),
                     verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
                 ) {
-                    ValidationStatusCard(
-                        isValid = isValid,
-                        errorCount = validationErrors.size,
-                    )
-                    AppButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        style = if (isValid) AppButtonDefaults.success() else AppButtonDefaults.primary(),
-                        text = if (isValid) {
-                            stringResource(Res.string.publish_on_olx)
-                        } else {
-                            stringResource(Res.string.publish_errors, validationErrors.size)
-                        },
-                        trailingIcon = if (state.isPublishing) null else painterResource(Res.drawable.ic_arrow_right),
-                        enabled = !state.isPublishing,
-                        onClick = {
-                            if (!isValid) {
-                                showErrors = true
-                                coroutineScope.launch { scrollState.animateScrollTo(0) }
-                                // TODO(SIR-34): auto-open the first failing required attribute editor
+                    if (state.isSessionResolved && state.isGuest) {
+                        GuestModeBanner()
+                        AppButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            style = AppButtonDefaults.primary(),
+                            text = stringResource(Res.string.guest_connect_olx_cta),
+                            onClick = onConnectOlxClick,
+                        )
+                    } else if (state.isSessionResolved) {
+                        ValidationStatusCard(
+                            isValid = isValid,
+                            errorCount = validationErrors.size,
+                        )
+                        AppButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            style = if (isValid) AppButtonDefaults.success() else AppButtonDefaults.primary(),
+                            text = if (isValid) {
+                                stringResource(Res.string.publish_on_olx)
                             } else {
-                                showConfirmSheet = true
-                            }
-                        },
-                    )
+                                stringResource(Res.string.publish_errors, validationErrors.size)
+                            },
+                            trailingIcon = if (state.isPublishing) null else painterResource(Res.drawable.ic_arrow_right),
+                            enabled = !state.isPublishing,
+                            onClick = {
+                                if (!isValid) {
+                                    showErrors = true
+                                    coroutineScope.launch { scrollState.animateScrollTo(0) }
+                                    // TODO(SIR-34): auto-open the first failing required attribute editor
+                                } else {
+                                    showConfirmSheet = true
+                                }
+                            },
+                        )
+                    }
                 }
             },
         ) { paddingValues ->
@@ -449,6 +468,41 @@ private fun ValidationStatusCard(
 }
 
 @Composable
+private fun GuestModeBanner(modifier: Modifier = Modifier) {
+    AppCard(
+        modifier = modifier.fillMaxWidth(),
+        containerColor = AppTheme.colors.warning.copy(alpha = 0.12f),
+        contentColor = AppTheme.colors.warning,
+    ) {
+        Column(
+            modifier = Modifier.padding(AppDimens.Spacing.xl3),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xs),
+        ) {
+            Text(
+                text = stringResource(Res.string.guest_mode_banner_title),
+                style = AppTheme.typography.subTitle,
+                color = AppTheme.colors.warning,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                text = stringResource(Res.string.guest_mode_banner_message),
+                style = AppTheme.typography.body,
+                color = AppTheme.colors.warning,
+            )
+        }
+    }
+}
+
+@Composable
+private fun GuestCopyHint() {
+    Text(
+        text = stringResource(Res.string.guest_copy_hint),
+        style = AppTheme.typography.caption,
+        color = AppTheme.colors.onSurfaceMuted,
+    )
+}
+
+@Composable
 private fun LocationPermissionsBlock(onEvent: (PreviewAdEvent) -> Unit) {
     val locationPermissionController =
         rememberPermissionController(permission = Permission.CoarseLocation)
@@ -508,6 +562,10 @@ private fun PreviewAdContent(
             isInvalid = isDescriptionInvalid,
         )
 
+        if (state.isSessionResolved && state.isGuest) {
+            GuestCopyHint()
+        }
+
         val priceTextFieldState = rememberTextFieldState(state.price.roundToInt().toString())
 
         LaunchedEffect(null) {
@@ -528,22 +586,24 @@ private fun PreviewAdContent(
             maxPrice = state.maxPrice,
         )
 
-        AdCategoryCard(
-            categoryLabel = state.categoryLabel,
-            onChangeClick = { onEvent(PreviewAdEvent.OnChangeCategoryClick) },
-        )
+        if (state.isSessionResolved && !state.isGuest) {
+            AdCategoryCard(
+                categoryLabel = state.categoryLabel,
+                onChangeClick = { onEvent(PreviewAdEvent.OnChangeCategoryClick) },
+            )
 
-        if (state.attributeItems.isNotEmpty()) {
-            AdAttributesCard(
-                items = state.attributeItems,
-                onEvent = onEvent,
+            if (state.attributeItems.isNotEmpty()) {
+                AdAttributesCard(
+                    items = state.attributeItems,
+                    onEvent = onEvent,
+                )
+            }
+
+            AdLocationCard(
+                location = state.location,
+                isLoading = state.locationLoading,
             )
         }
-
-        AdLocationCard(
-            location = state.location,
-            isLoading = state.locationLoading,
-        )
     }
 }
 

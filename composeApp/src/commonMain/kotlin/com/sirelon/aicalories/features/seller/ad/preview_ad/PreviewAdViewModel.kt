@@ -14,6 +14,8 @@ import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.Pr
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.Publish
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdState
 import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
+import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
+import com.sirelon.aicalories.features.seller.auth.domain.SellerSessionMode
 import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
 import com.sirelon.aicalories.features.seller.categories.domain.AttributeInputType
 import com.sirelon.aicalories.features.seller.categories.domain.AttributeValidationResult
@@ -36,6 +38,7 @@ class PreviewAdViewModel(
     private val locationRepository: LocationRepository,
     private val olxApiClient: OlxApiClient,
     private val attributeValidator: AttributeValidator,
+    private val authRepository: OlxAuthRepository,
 ) : BaseViewModel<PreviewAdState, PreviewAdEvent, PreviewAdEffect>() {
 
     private val advertisement = filledAdvertisement.advertisement
@@ -46,49 +49,55 @@ class PreviewAdViewModel(
     private val selectedCategoryId = MutableStateFlow<Int?>(null)
 
     init {
-        snapshotFlow { titleState.text }
-            .distinctUntilChanged()
-            .debounce(300L)
-            .flatMapLatest {
-                categoriesRepository.categorySuggestion(it.toString())
-            }
-            .onEach {
-                updateSelectedCategory(category = it)
-            }
-            .flatMapLatest {
-                categoriesRepository.getAttributes(it.id)
-            }
-            .onEach { attributes ->
-                setState { it.copy(attributes = attributes) }
-            }
-            .catch {
-                it.printStackTrace()
-            }
-            .launchIn(viewModelScope)
+        viewModelScope.launch {
+            val isGuest = authRepository.currentSession().mode == SellerSessionMode.Guest
+            setState { it.copy(isGuest = isGuest, isSessionResolved = true) }
+            if (isGuest) return@launch
 
-        selectedCategoryId
-            .filterNotNull()
-            .flatMapLatest { categoryId ->
-                categoriesRepository.getAttributes(categoryId)
-            }
-            .onEach { attributes ->
-                setState {
-                    it.copy(
-                        attributeItems = attributes.map { attribute ->
-                            OlxAttributeState(
-                                attribute = attribute,
-                                selectedValues = filledAdvertisement.filledAttributes[attribute.code].orEmpty(),
-                            )
-                        }
-                    )
+            snapshotFlow { titleState.text }
+                .distinctUntilChanged()
+                .debounce(300L)
+                .flatMapLatest {
+                    categoriesRepository.categorySuggestion(it.toString())
                 }
-            }
-            .catch {
-                it.printStackTrace()
-                // Keep the stream alive so subsequent category changes can retry attribute loading.
-                setState { state -> state.copy(attributeItems = emptyList()) }
-            }
-            .launchIn(viewModelScope)
+                .onEach {
+                    updateSelectedCategory(category = it)
+                }
+                .flatMapLatest {
+                    categoriesRepository.getAttributes(it.id)
+                }
+                .onEach { attributes ->
+                    setState { it.copy(attributes = attributes) }
+                }
+                .catch {
+                    it.printStackTrace()
+                }
+                .launchIn(viewModelScope)
+
+            selectedCategoryId
+                .filterNotNull()
+                .flatMapLatest { categoryId ->
+                    categoriesRepository.getAttributes(categoryId)
+                }
+                .onEach { attributes ->
+                    setState {
+                        it.copy(
+                            attributeItems = attributes.map { attribute ->
+                                OlxAttributeState(
+                                    attribute = attribute,
+                                    selectedValues = filledAdvertisement.filledAttributes[attribute.code].orEmpty(),
+                                )
+                            }
+                        )
+                    }
+                }
+                .catch {
+                    it.printStackTrace()
+                    // Keep the stream alive so subsequent category changes can retry attribute loading.
+                    setState { state -> state.copy(attributeItems = emptyList()) }
+                }
+                .launchIn(viewModelScope)
+        }
     }
 
     override fun initialState() = PreviewAdState(

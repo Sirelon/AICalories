@@ -90,6 +90,7 @@ fun App() {
                     entry<AppDestination.Seller> {
                         AdRootScreen(
                             onExit = navVm::popDestination,
+                            onConnectOlxClick = navVm::exitGuestModeToLanding,
                             onPublishSuccess = navVm::navigateToPublishSuccess,
                         )
                     }
