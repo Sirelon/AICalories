@@ -3,6 +3,7 @@ package com.sirelon.aicalories.features.auth.data
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthSessionStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxCredentialsProvider
+import com.sirelon.aicalories.features.seller.auth.data.GuestModeStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxRedirectHandler
 import com.sirelon.aicalories.features.seller.auth.data.OlxTokenStore
 import com.sirelon.aicalories.features.seller.auth.data.createOlxHttpClient
@@ -41,7 +42,7 @@ class OlxAuthRepositoryTest {
         assertContains(request.url, "response_type=code")
         assertContains(request.url, "client_id=test-client-id")
         assertContains(request.url, "scope=v2+read+write")
-        assertContains(request.url, "redirect_uri=aicalories%3A%2F%2Folx-auth%2Fcallback")
+        assertContains(request.url, "redirect_uri=selolxai%3A%2F%2Folx-auth%2Fcallback")
         assertTrue(request.state.isNotBlank())
         assertEquals(savedSession?.state, request.state)
         assertEquals(savedSession?.redirectUri, request.redirectUri)
@@ -57,6 +58,7 @@ class OlxAuthRepositoryTest {
         assertTrue(result.isFailure)
         assertIs<OlxApiException>(result.exceptionOrNull())
         assertIs<OlxApiError.InvalidState>((result.exceptionOrNull() as OlxApiException).error)
+        Unit
     }
 
     @Test
@@ -186,6 +188,7 @@ class OlxAuthRepositoryTest {
             tokenStore = tokenStore,
             authSessionStore = sessionStore,
             redirectHandler = TestRedirectHandler(),
+            guestModeStore = GuestModeStore(InMemoryOlxKeyValueStore()),
         )
     }
 

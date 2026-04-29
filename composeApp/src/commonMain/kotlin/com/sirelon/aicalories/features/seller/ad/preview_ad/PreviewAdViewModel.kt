@@ -52,6 +52,11 @@ class PreviewAdViewModel(
 
     init {
         viewModelScope.launch {
+            val savedLocation = locationRepository.getSavedLocation()
+            if (savedLocation != null) {
+                setState { it.copy(location = savedLocation) }
+            }
+
             val isGuest = authRepository.currentSession().mode == SellerSessionMode.Guest
             setState { it.copy(isGuest = isGuest, isSessionResolved = true) }
             if (isGuest) return@launch

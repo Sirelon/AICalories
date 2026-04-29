@@ -165,6 +165,18 @@
     <string name="profile_field_status">Status</string>
     <string name="profile_field_phone">Phone</string>
     <string name="profile_field_business">Business</string>
+    <string name="profile_field_created_at">Created at</string>
+    <string name="profile_field_last_login_at">Last login</string>
+    <string name="profile_screen_title">Profile</string>
+    <string name="profile_guest_title">Guest profile</string>
+    <string name="profile_guest_description">Connect OLX to publish listings from SellSnap and show account details here.</string>
+    <string name="profile_olx_account">OLX account</string>
+    <string name="profile_location_title">Selling location</string>
+    <string name="profile_location_subtitle">Used as the default location for future OLX listings.</string>
+    <string name="profile_logout">Log out</string>
+    <string name="profile_not_provided">Not provided</string>
+    <string name="profile_value_yes">Yes</string>
+    <string name="profile_value_no">No</string>
     <string name="from_note">From note</string>
 
     <!-- Navigation -->

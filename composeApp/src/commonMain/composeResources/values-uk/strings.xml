@@ -158,6 +158,18 @@
     <string name="profile_field_status">Статус</string>
     <string name="profile_field_phone">Телефон</string>
     <string name="profile_field_business">Бізнес</string>
+    <string name="profile_field_created_at">Створено</string>
+    <string name="profile_field_last_login_at">Останній вхід</string>
+    <string name="profile_screen_title">Профіль</string>
+    <string name="profile_guest_title">Гостьовий профіль</string>
+    <string name="profile_guest_description">Підключіть OLX, щоб публікувати оголошення з SellSnap і бачити дані акаунта тут.</string>
+    <string name="profile_olx_account">OLX акаунт</string>
+    <string name="profile_location_title">Локація продажу</string>
+    <string name="profile_location_subtitle">Використовуватиметься як типова локація для майбутніх OLX оголошень.</string>
+    <string name="profile_logout">Вийти</string>
+    <string name="profile_not_provided">Не вказано</string>
+    <string name="profile_value_yes">Так</string>
+    <string name="profile_value_no">Ні</string>
     <string name="from_note">З нотатки</string>
 
     <!-- Photos Section -->

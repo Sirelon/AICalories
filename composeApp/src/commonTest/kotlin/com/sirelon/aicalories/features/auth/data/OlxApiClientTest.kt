@@ -4,11 +4,13 @@ import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthSessionStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxCredentialsProvider
+import com.sirelon.aicalories.features.seller.auth.data.GuestModeStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxRedirectHandler
 import com.sirelon.aicalories.features.seller.auth.data.OlxTokenStore
 import com.sirelon.aicalories.features.seller.auth.data.createOlxAuthorizedHttpClient
 import com.sirelon.aicalories.features.seller.auth.data.createOlxHttpClient
 import com.sirelon.aicalories.features.seller.auth.domain.OlxAuthCallback
+import com.sirelon.aicalories.features.seller.auth.domain.OlxApiException
 import com.sirelon.aicalories.features.seller.auth.domain.OlxTokens
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -72,6 +74,61 @@ class OlxApiClientTest {
         assertTrue(result.isSuccess)
         assertEquals("Bearer active-token", authorizationHeader)
         assertEquals("2.0", versionHeader)
+    }
+
+    @Test
+    fun `getAuthenticatedUser maps olx user response fields`() = runBlocking {
+        val tokenStore = OlxTokenStore(InMemoryOlxKeyValueStore()).apply {
+            write(
+                OlxTokens(
+                    accessToken = "active-token",
+                    refreshToken = "refresh-token",
+                    expiresInSeconds = 86_400,
+                    tokenType = "bearer",
+                    scope = "v2 read write",
+                    issuedAtEpochSeconds = 4_102_444_800,
+                ),
+            )
+        }
+        val engine = MockEngine {
+            respond(
+                content = """
+                    {
+                      "id": 77,
+                      "email": "seller@example.com",
+                      "status": "confirmed",
+                      "name": "Seller",
+                      "phone": "+380501112233",
+                      "created_at": "2026-01-01T10:00:00+02:00",
+                      "last_login_at": "2026-04-28T11:00:00+02:00",
+                      "avatar": "https://example.com/avatar.png",
+                      "is_business": true
+                    }
+                """.trimIndent(),
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
+            )
+        }
+        val apiClient = OlxApiClient(
+            createOlxAuthorizedHttpClient(
+                authRefreshClient = createOlxHttpClient(engine),
+                credentialsProvider = TestCredentialsProvider(),
+                tokenStore = tokenStore,
+                engine = engine,
+            ),
+        )
+
+        val user = apiClient.getAuthenticatedUser().getOrThrow()
+
+        assertEquals(77L, user.id)
+        assertEquals("seller@example.com", user.email)
+        assertEquals("confirmed", user.status)
+        assertEquals("Seller", user.name)
+        assertEquals("+380501112233", user.phone)
+        assertEquals("2026-01-01T10:00:00+02:00", user.createdAt)
+        assertEquals("2026-04-28T11:00:00+02:00", user.lastLoginAt)
+        assertEquals("https://example.com/avatar.png", user.avatar)
+        assertEquals(true, user.isBusiness)
     }
 
     @Test
@@ -153,7 +210,7 @@ class OlxApiClientTest {
         val result = apiClient.getAuthenticatedUser()
 
         assertTrue(result.isSuccess)
-        assertEquals(listOf("Bearer stale-token", "Bearer refreshed-token"), seenAuthorizationHeaders)
+        assertEquals(listOf<String?>("Bearer stale-token", "Bearer refreshed-token"), seenAuthorizationHeaders)
         assertEquals("refreshed-token", tokenStore.read()?.accessToken)
     }
 
@@ -232,6 +289,7 @@ class OlxApiClientTest {
                 tokenStore = tokenStore,
                 authSessionStore = OlxAuthSessionStore(InMemoryOlxKeyValueStore()),
                 redirectHandler = TestRedirectHandler(),
+                guestModeStore = GuestModeStore(InMemoryOlxKeyValueStore()),
             ),
         )
     }

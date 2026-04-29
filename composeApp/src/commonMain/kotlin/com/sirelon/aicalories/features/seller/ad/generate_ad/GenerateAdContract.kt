@@ -13,6 +13,8 @@ interface GenerateAdContract {
         val completedSteps: Int = 0,
         val errorMessage: String? = null,
         val uploads: Map<KmpFile, UploadingItem> = emptyMap(),
+        val profileName: String? = null,
+        val profileAvatarUrl: String? = null,
     ) {
         val canSubmit: Boolean
             get() = !isLoading && uploads.isNotEmpty()
