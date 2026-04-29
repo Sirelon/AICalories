@@ -26,6 +26,7 @@ sealed interface AppDestination : NavKey {
         val title: String,
         val priceFormatted: String,
         val primaryImageUrl: String?,
+        val totalElapsedMs: Long,
     ) : AppDestination
 
     @Serializable

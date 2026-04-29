@@ -101,6 +101,7 @@ fun App() {
                             title = destination.title,
                             priceFormatted = destination.priceFormatted,
                             primaryImageUrl = destination.primaryImageUrl,
+                            totalElapsedMs = destination.totalElapsedMs,
                             onViewOnOlx = { openUrl(destination.url) },
                             onCreateAnother = navVm::popToAdRoot,
                         )

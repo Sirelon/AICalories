@@ -99,6 +99,7 @@ import com.sirelon.aicalories.generated.resources.ad_location_label
 import com.sirelon.aicalories.generated.resources.ad_title_label
 import com.sirelon.aicalories.generated.resources.ad_price_ai_estimated_range
 import com.sirelon.aicalories.generated.resources.ad_your_price
+import com.sirelon.aicalories.generated.resources.banner_ready_in
 import com.sirelon.aicalories.generated.resources.cancel
 import com.sirelon.aicalories.generated.resources.guest_connect_olx_cta
 import com.sirelon.aicalories.generated.resources.guest_copy_hint
@@ -335,6 +336,10 @@ fun PreviewAdScreen(
                     )
                 }
 
+                ReadyBanner(
+                    elapsedMs = state.generationElapsedMs,
+                    modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
+                )
                 PhotoCarousel(images = state.images)
 
                 PreviewAdContent(
@@ -367,6 +372,45 @@ fun PreviewAdScreen(
             },
             onDismiss = { showConfirmSheet = false },
         )
+    }
+}
+
+@Composable
+private fun ReadyBanner(
+    elapsedMs: Long,
+    modifier: Modifier = Modifier,
+) {
+    val successColor = AppTheme.colors.success
+
+    AppCard(
+        modifier = modifier.fillMaxWidth(),
+        containerColor = successColor.copy(alpha = 0.12f),
+        contentColor = successColor,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = AppDimens.Spacing.xl3)
+                .padding(vertical = AppDimens.Spacing.m),
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_circle_check_big),
+                contentDescription = null,
+                tint = successColor,
+                modifier = Modifier.size(AppDimens.Size.xl5),
+            )
+            Text(
+                text = stringResource(
+                    Res.string.banner_ready_in,
+                    elapsedMs.toDisplaySeconds(),
+                ),
+                style = AppTheme.typography.body,
+                color = successColor,
+                fontWeight = FontWeight.Medium,
+            )
+        }
     }
 }
 
@@ -415,6 +459,9 @@ private fun ValidationBanner(
         }
     }
 }
+
+private fun Long.toDisplaySeconds(): Int =
+    (((coerceAtLeast(0L)) + 999L) / 1000L).coerceAtLeast(1L).toInt()
 
 @Composable
 private fun ValidationStatusCard(
