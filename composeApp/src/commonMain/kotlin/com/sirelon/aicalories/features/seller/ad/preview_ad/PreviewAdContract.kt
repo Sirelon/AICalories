@@ -20,6 +20,7 @@ interface PreviewAdContract {
         val selectedCategory: OlxCategory? = null,
         val isPublishing: Boolean = false,
         val generationElapsedMs: Long = 0L,
+        val isSessionResolved: Boolean = false,
         val price: Float,
         val minPrice: Float,
         val maxPrice: Float,
@@ -28,6 +29,7 @@ interface PreviewAdContract {
         val location: OlxLocation? = null,
         val locationLoading: Boolean = false,
         val attributeItems: List<OlxAttributeState> = emptyList(),
+        val isGuest: Boolean = false,
     )
 
     sealed interface PreviewAdEvent {

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.sirelon.aicalories.features.seller.ad.AdFlowTimerStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
+import com.sirelon.aicalories.features.seller.auth.domain.SellerSessionMode
 import com.sirelon.aicalories.navigation.AppDestination
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -73,22 +74,30 @@ class AppNavigationViewModel(
         _backStack.value = listOf(destination)
     }
 
+    fun exitGuestModeToLanding() {
+        viewModelScope.launch {
+            authRepository.exitGuestMode()
+            _backStack.value = listOf(AppDestination.SellerLanding)
+        }
+    }
+
     private suspend fun resolveStartupDestination() {
         val initial: AppDestination = if (!startupStore.hasSeenOnboarding()) {
             startupStore.markOnboardingSeen()
             AppDestination.SellerOnboarding
         } else {
             val session = authRepository.currentSession()
-            if (session.isAuthorized) {
-                olxApiClient
+            when (session.mode) {
+                SellerSessionMode.Authenticated -> olxApiClient
                     .getAuthenticatedUser()
                     .map { AppDestination.Seller }
                     .getOrElse {
                         it.printStackTrace()
                         AppDestination.SellerLanding
                     }
-            } else {
-                AppDestination.SellerLanding
+
+                SellerSessionMode.Guest -> AppDestination.Seller
+                SellerSessionMode.Unauthenticated -> AppDestination.SellerLanding
             }
         }
         _backStack.value = listOf(initial)

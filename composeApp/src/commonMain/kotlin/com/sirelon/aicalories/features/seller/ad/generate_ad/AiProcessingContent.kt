@@ -52,12 +52,14 @@ import com.sirelon.aicalories.generated.resources.ai_analyzing_photo
 import com.sirelon.aicalories.generated.resources.ai_creating_ad_title
 import com.sirelon.aicalories.generated.resources.ai_processing_status_done
 import com.sirelon.aicalories.generated.resources.ai_processing_status_in_progress
+import com.sirelon.aicalories.generated.resources.ai_processing_tip_connect_olx_faster
 import com.sirelon.aicalories.generated.resources.ai_processing_tip_capture_details
 import com.sirelon.aicalories.generated.resources.ai_processing_tip_good_lighting
 import com.sirelon.aicalories.generated.resources.ai_processing_tip_keep_background_clean
 import com.sirelon.aicalories.generated.resources.ai_step_analyzing_image
 import com.sirelon.aicalories.generated.resources.ai_step_calculating_price
 import com.sirelon.aicalories.generated.resources.ai_step_generating_title
+import com.sirelon.aicalories.generated.resources.ai_step_preparing_guest_ad
 import com.sirelon.aicalories.generated.resources.ai_step_uploading_photos
 import com.sirelon.aicalories.generated.resources.ai_step_writing_description
 import com.sirelon.aicalories.generated.resources.ic_check
@@ -73,28 +75,40 @@ private enum class ProcessingStepStatus {
 }
 
 @Composable
-private fun processingSteps() = listOf(
-    stringResource(Res.string.ai_step_uploading_photos),
-    stringResource(Res.string.ai_step_analyzing_image),
-    stringResource(Res.string.ai_step_generating_title),
-    stringResource(Res.string.ai_step_writing_description),
-    stringResource(Res.string.ai_step_calculating_price),
-)
+private fun processingSteps(isGuestMode: Boolean) = if (isGuestMode) {
+    listOf(
+        stringResource(Res.string.ai_step_uploading_photos),
+        stringResource(Res.string.ai_step_analyzing_image),
+        stringResource(Res.string.ai_step_preparing_guest_ad),
+    )
+} else {
+    listOf(
+        stringResource(Res.string.ai_step_uploading_photos),
+        stringResource(Res.string.ai_step_analyzing_image),
+        stringResource(Res.string.ai_step_generating_title),
+        stringResource(Res.string.ai_step_writing_description),
+        stringResource(Res.string.ai_step_calculating_price),
+    )
+}
 
 @Composable
-private fun processingTips() = listOf(
-    stringResource(Res.string.ai_processing_tip_good_lighting),
-    stringResource(Res.string.ai_processing_tip_capture_details),
-    stringResource(Res.string.ai_processing_tip_keep_background_clean),
-)
+private fun processingTips(isGuestMode: Boolean) = buildList {
+    if (isGuestMode) {
+        add(stringResource(Res.string.ai_processing_tip_connect_olx_faster))
+    }
+    add(stringResource(Res.string.ai_processing_tip_good_lighting))
+    add(stringResource(Res.string.ai_processing_tip_capture_details))
+    add(stringResource(Res.string.ai_processing_tip_keep_background_clean))
+}
 
 @Composable
 fun AiProcessingContent(
     completedSteps: Int,
+    isGuestMode: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val steps = processingSteps()
-    val tips = processingTips()
+    val steps = processingSteps(isGuestMode = isGuestMode)
+    val tips = processingTips(isGuestMode = isGuestMode)
 
     Column(
         modifier = modifier
@@ -406,10 +420,16 @@ private fun AiProcessingContentCompletePreview() {
 }
 
 @Composable
-private fun AiProcessingContentPreview(completedSteps: Int) {
+private fun AiProcessingContentPreview(
+    completedSteps: Int,
+    isGuestMode: Boolean = false,
+) {
     AppTheme {
         Surface(color = AppTheme.colors.background) {
-            AiProcessingContent(completedSteps = completedSteps)
+            AiProcessingContent(
+                completedSteps = completedSteps,
+                isGuestMode = isGuestMode,
+            )
         }
     }
 }

@@ -8,6 +8,10 @@
     <string name="benefit_manage">Manage all ads in one place</string>
     <string name="continue_as_guest">Continue as Guest</string>
     <string name="guest_description">You can create ads and copy the content. You'll need to manually post to OLX.</string>
+    <string name="guest_mode_banner_title">Guest mode</string>
+    <string name="guest_mode_banner_message">Posting to OLX needs an account. Copy your title, description, and price below, then paste them on OLX to publish.</string>
+    <string name="guest_connect_olx_cta">Connect OLX to publish</string>
+    <string name="guest_copy_hint">Use the copy buttons on title, description, and price when you are ready to paste this ad into OLX.</string>
     <string name="continue_with_olx">Continue with OLX</string>
     <string name="terms_privacy_prefix">By continuing, you agree to our </string>
     <string name="terms_of_service">Terms of Service</string>
@@ -259,11 +263,13 @@
     <string name="ai_analyzing_photo">Our AI is analyzing your photo and crafting the perfect title, description, and price...</string>
     <string name="ai_step_uploading_photos">Uploading photos</string>
     <string name="ai_step_analyzing_image">Analyzing image</string>
+    <string name="ai_step_preparing_guest_ad">Preparing your ad copy</string>
     <string name="ai_step_generating_title">Generating title</string>
     <string name="ai_step_writing_description">Writing description</string>
     <string name="ai_step_calculating_price">Calculating price</string>
     <string name="ai_processing_status_in_progress">In progress…</string>
     <string name="ai_processing_status_done">Done</string>
+    <string name="ai_processing_tip_connect_olx_faster">Tip: connect OLX to auto-fill the final ad details and finish the next listing up to 5x faster.</string>
     <string name="ai_processing_tip_good_lighting">Tip: keep photos well-lit for cleaner AI results.</string>
     <string name="ai_processing_tip_capture_details">Tip: include close-ups of important details and wear.</string>
     <string name="ai_processing_tip_keep_background_clean">Tip: use a clean background so the item stands out.</string>

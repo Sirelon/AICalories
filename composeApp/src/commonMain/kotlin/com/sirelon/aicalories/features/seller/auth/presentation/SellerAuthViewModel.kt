@@ -16,7 +16,10 @@ class SellerAuthViewModel(
         when (event) {
             SellerAuthContract.SellerAuthEvent.OlxAuthClicked -> startAuthorization()
             SellerAuthContract.SellerAuthEvent.ContinueAsGuestClicked -> {
-                postEffect(SellerAuthContract.SellerAuthEffect.OpenHome)
+                viewModelScope.launch {
+                    authRepository.enterGuestMode()
+                    postEffect(SellerAuthContract.SellerAuthEffect.OpenHome)
+                }
             }
 
             SellerAuthContract.SellerAuthEvent.OnPrivacyClicked -> {
