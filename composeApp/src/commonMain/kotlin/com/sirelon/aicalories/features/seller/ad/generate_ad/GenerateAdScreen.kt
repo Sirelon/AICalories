@@ -109,7 +109,10 @@ fun GenerateAdScreen(
 
     AnimatedContent(state.isLoading) {
         if (it) {
-            AiProcessingContent(completedSteps = state.completedSteps)
+            AiProcessingContent(
+                completedSteps = state.completedSteps,
+                isGuestMode = state.isGuestMode,
+            )
         } else {
             GenerateAdScreenContent(
                 state = state,

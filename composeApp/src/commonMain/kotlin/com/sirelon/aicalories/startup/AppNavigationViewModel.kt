@@ -2,8 +2,10 @@ package com.sirelon.aicalories.startup
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sirelon.aicalories.features.seller.ad.AdFlowTimerStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
+import com.sirelon.aicalories.features.seller.auth.domain.SellerSessionMode
 import com.sirelon.aicalories.navigation.AppDestination
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,6 +16,7 @@ class AppNavigationViewModel(
     private val authRepository: OlxAuthRepository,
     private val olxApiClient: OlxApiClient,
     private val startupStore: AppStartupStore,
+    private val adFlowTimerStore: AdFlowTimerStore,
 ) : ViewModel() {
 
     private val _backStack = MutableStateFlow<List<AppDestination>>(listOf(AppDestination.Splash))
@@ -57,16 +60,25 @@ class AppNavigationViewModel(
                 title = title,
                 priceFormatted = priceFormatted,
                 primaryImageUrl = primaryImageUrl,
+                totalElapsedMs = adFlowTimerStore.totalElapsedMs(),
             )
         )
     }
 
     fun popToAdRoot() {
+        adFlowTimerStore.clear()
         _backStack.value = listOf(AppDestination.Seller)
     }
 
     fun replaceWith(destination: AppDestination) {
         _backStack.value = listOf(destination)
+    }
+
+    fun exitGuestModeToLanding() {
+        viewModelScope.launch {
+            authRepository.exitGuestMode()
+            _backStack.value = listOf(AppDestination.SellerLanding)
+        }
     }
 
     private suspend fun resolveStartupDestination() {
@@ -75,16 +87,17 @@ class AppNavigationViewModel(
             AppDestination.SellerOnboarding
         } else {
             val session = authRepository.currentSession()
-            if (session.isAuthorized) {
-                olxApiClient
+            when (session.mode) {
+                SellerSessionMode.Authenticated -> olxApiClient
                     .getAuthenticatedUser()
                     .map { AppDestination.Seller }
                     .getOrElse {
                         it.printStackTrace()
                         AppDestination.SellerLanding
                     }
-            } else {
-                AppDestination.SellerLanding
+
+                SellerSessionMode.Guest -> AppDestination.Seller
+                SellerSessionMode.Unauthenticated -> AppDestination.SellerLanding
             }
         }
         _backStack.value = listOf(initial)

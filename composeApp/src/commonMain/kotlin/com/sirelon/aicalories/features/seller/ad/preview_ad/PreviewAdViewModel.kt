@@ -4,6 +4,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewModelScope
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
+import com.sirelon.aicalories.features.seller.ad.AdFlowTimerStore
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.features.seller.ad.data.PostAdvertRequestMapper
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEffect
@@ -14,6 +15,8 @@ import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.Pr
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.Publish
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdState
 import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
+import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
+import com.sirelon.aicalories.features.seller.auth.domain.SellerSessionMode
 import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
 import com.sirelon.aicalories.features.seller.categories.domain.AttributeInputType
 import com.sirelon.aicalories.features.seller.categories.domain.AttributeValidationResult
@@ -36,6 +39,8 @@ class PreviewAdViewModel(
     private val locationRepository: LocationRepository,
     private val olxApiClient: OlxApiClient,
     private val attributeValidator: AttributeValidator,
+    private val authRepository: OlxAuthRepository,
+    private val adFlowTimerStore: AdFlowTimerStore,
 ) : BaseViewModel<PreviewAdState, PreviewAdEvent, PreviewAdEffect>() {
 
     private val advertisement = filledAdvertisement.advertisement
@@ -51,55 +56,59 @@ class PreviewAdViewModel(
             if (savedLocation != null) {
                 setState { it.copy(location = savedLocation) }
             }
-        }
 
-        snapshotFlow { titleState.text }
-            .distinctUntilChanged()
-            .debounce(300L)
-            .flatMapLatest {
-                categoriesRepository.categorySuggestion(it.toString())
-            }
-            .onEach {
-                updateSelectedCategory(category = it)
-            }
-            .flatMapLatest {
-                categoriesRepository.getAttributes(it.id)
-            }
-            .onEach { attributes ->
-                setState { it.copy(attributes = attributes) }
-            }
-            .catch {
-                it.printStackTrace()
-            }
-            .launchIn(viewModelScope)
+            val isGuest = authRepository.currentSession().mode == SellerSessionMode.Guest
+            setState { it.copy(isGuest = isGuest, isSessionResolved = true) }
+            if (isGuest) return@launch
 
-        selectedCategoryId
-            .filterNotNull()
-            .flatMapLatest { categoryId ->
-                categoriesRepository.getAttributes(categoryId)
-            }
-            .onEach { attributes ->
-                setState {
-                    it.copy(
-                        attributeItems = attributes.map { attribute ->
-                            OlxAttributeState(
-                                attribute = attribute,
-                                selectedValues = filledAdvertisement.filledAttributes[attribute.code].orEmpty(),
-                            )
-                        }
-                    )
+            snapshotFlow { titleState.text }
+                .distinctUntilChanged()
+                .debounce(300L)
+                .flatMapLatest {
+                    categoriesRepository.categorySuggestion(it.toString())
                 }
-            }
-            .catch {
-                it.printStackTrace()
-                // Keep the stream alive so subsequent category changes can retry attribute loading.
-                setState { state -> state.copy(attributeItems = emptyList()) }
-            }
-            .launchIn(viewModelScope)
+                .onEach {
+                    updateSelectedCategory(category = it)
+                }
+                .flatMapLatest {
+                    categoriesRepository.getAttributes(it.id)
+                }
+                .onEach { attributes ->
+                    setState { it.copy(attributes = attributes) }
+                }
+                .catch {
+                    it.printStackTrace()
+                }
+                .launchIn(viewModelScope)
+
+            selectedCategoryId
+                .filterNotNull()
+                .flatMapLatest { categoryId ->
+                    categoriesRepository.getAttributes(categoryId)
+                }
+                .onEach { attributes ->
+                    setState {
+                        it.copy(
+                            attributeItems = attributes.map { attribute ->
+                                OlxAttributeState(
+                                    attribute = attribute,
+                                    selectedValues = filledAdvertisement.filledAttributes[attribute.code].orEmpty(),
+                                )
+                            }
+                        )
+                    }
+                }
+                .catch {
+                    it.printStackTrace()
+                    setState { state -> state.copy(attributeItems = emptyList()) }
+                }
+                .launchIn(viewModelScope)
+        }
     }
 
     override fun initialState() = PreviewAdState(
         categoryLabel = "",
+        generationElapsedMs = adFlowTimerStore.generationElapsedMs(),
         price = advertisement.suggestedPrice,
         minPrice = advertisement.minPrice,
         maxPrice = advertisement.maxPrice,
@@ -144,10 +153,9 @@ class PreviewAdViewModel(
                     AttributeInputType.NumericInput, AttributeInputType.TextInput ->
                         event.values.map { it.label }
                 }
-                val error = (attributeValidator.validate(
-                    item.attribute,
-                    valuesToValidate
-                ) as? AttributeValidationResult.Invalid)?.reason
+                val error = (
+                    attributeValidator.validate(item.attribute, valuesToValidate) as? AttributeValidationResult.Invalid
+                    )?.reason
                 val updatedItems = currentState.attributeItems.toMutableList()
                 updatedItems[index] = item.copy(selectedValues = event.values, error = error)
                 currentState.copy(attributeItems = updatedItems)
@@ -180,10 +188,9 @@ class PreviewAdViewModel(
                 AttributeInputType.NumericInput, AttributeInputType.TextInput ->
                     item.selectedValues.map { it.label }
             }
-            val error = (attributeValidator.validate(
-                item.attribute,
-                valuesToValidate
-            ) as? AttributeValidationResult.Invalid)?.reason
+            val error = (
+                attributeValidator.validate(item.attribute, valuesToValidate) as? AttributeValidationResult.Invalid
+                )?.reason
             item.copy(error = error)
         }
         val hasErrors = validatedItems.any { it.error != null }

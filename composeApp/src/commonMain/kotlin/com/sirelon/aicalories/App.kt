@@ -90,6 +90,7 @@ fun App() {
                     entry<AppDestination.Seller> {
                         AdRootScreen(
                             onExit = navVm::popDestination,
+                            onConnectOlxClick = navVm::exitGuestModeToLanding,
                             onPublishSuccess = navVm::navigateToPublishSuccess,
                         )
                     }
@@ -100,6 +101,7 @@ fun App() {
                             title = destination.title,
                             priceFormatted = destination.priceFormatted,
                             primaryImageUrl = destination.primaryImageUrl,
+                            totalElapsedMs = destination.totalElapsedMs,
                             onViewOnOlx = { openUrl(destination.url) },
                             onCreateAnother = navVm::popToAdRoot,
                         )

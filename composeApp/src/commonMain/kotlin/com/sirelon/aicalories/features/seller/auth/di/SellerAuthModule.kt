@@ -2,6 +2,7 @@ package com.sirelon.aicalories.features.seller.auth.di
 
 import com.sirelon.aicalories.features.seller.auth.data.BuildConfigOlxCredentialsProvider
 import com.sirelon.aicalories.features.seller.auth.data.DefaultOlxRedirectHandler
+import com.sirelon.aicalories.features.seller.auth.data.GuestModeStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthSessionStore
@@ -32,8 +33,18 @@ val sellerAuthModule = module {
     single { BuildConfigOlxCredentialsProvider() } bind OlxCredentialsProvider::class
     single { OlxTokenStore() }
     single { OlxAuthSessionStore() }
+    single { GuestModeStore() }
     single { DefaultOlxRedirectHandler() } bind OlxRedirectHandler::class
-    single { OlxAuthRepository(get(olxHttpClientQualifier), get(), get(), get(), get()) }
+    single {
+        OlxAuthRepository(
+            httpClient = get(olxHttpClientQualifier),
+            credentialsProvider = get(),
+            tokenStore = get(),
+            authSessionStore = get(),
+            redirectHandler = get(),
+            guestModeStore = get(),
+        )
+    }
     single { OlxApiClient(get(olxAuthorizedHttpClientQualifier)) }
     viewModelOf(::SellerAuthViewModel)
 }

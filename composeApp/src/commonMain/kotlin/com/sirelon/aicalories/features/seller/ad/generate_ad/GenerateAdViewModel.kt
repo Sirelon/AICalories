@@ -6,7 +6,10 @@ import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.media.upload.MediaUploadHelper
 import com.sirelon.aicalories.features.media.upload.MediaUploadUpdate
 import com.sirelon.aicalories.features.media.upload.UploadingItem
+import com.sirelon.aicalories.features.seller.ad.AdFlowTimerStore
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
+import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
+import com.sirelon.aicalories.features.seller.auth.domain.SellerSessionMode
 import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
 import com.sirelon.aicalories.features.seller.openai.OpenAIClient
 import com.sirelon.aicalories.features.seller.profile.data.SellerAccountRepository
@@ -23,11 +26,16 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 
+private const val GuestProcessingStepCount = 3
+private const val AuthenticatedProcessingStepCount = 5
+
 class GenerateAdViewModel(
     private val mediaUploadHelper: MediaUploadHelper,
     private val categoriesRepository: CategoriesRepository,
     private val openAi: OpenAIClient,
     private val accountRepository: SellerAccountRepository,
+    private val authRepository: OlxAuthRepository,
+    private val adFlowTimerStore: AdFlowTimerStore,
 ) : BaseViewModel<GenerateAdContract.GenerateAdState, GenerateAdContract.GenerateAdEvent, GenerateAdContract.GenerateAdEffect>() {
 
     init {
@@ -70,15 +78,31 @@ class GenerateAdViewModel(
             is GenerateAdContract.GenerateAdEvent.UploadFilesResult -> onFileResult(event)
 
             is GenerateAdContract.GenerateAdEvent.RemovePhoto -> {
-                setState { current -> current.copy(uploads = current.uploads - event.file) }
+                setState { current ->
+                    val updatedUploads = current.uploads - event.file
+                    if (updatedUploads.isEmpty()) {
+                        adFlowTimerStore.clear()
+                    }
+                    current.copy(uploads = updatedUploads)
+                }
             }
         }
     }
 
     private suspend fun submit() {
+        val isGuest = authRepository.currentSession().mode == SellerSessionMode.Guest
+
         flowOf(1)
             .onStart {
-                setState { it.copy(isLoading = true, completedSteps = 0, errorMessage = null) }
+                adFlowTimerStore.markFlowStartedIfNeeded()
+                setState {
+                    it.copy(
+                        isLoading = true,
+                        isGuestMode = isGuest,
+                        completedSteps = 0,
+                        errorMessage = null,
+                    )
+                }
             }
 
             .map { uploadFilesAndGetPublicUrls() }
@@ -91,33 +115,45 @@ class GenerateAdViewModel(
             .map { openAi.analyzeThing(images = it, sellerPrompt = state.value.prompt) }
             .onEach { setState { it.copy(completedSteps = 2) } }
 
-            // get category, attributes, so on
             .flatMapLatest { data ->
-                categoriesRepository
-                    .categorySuggestion(data.second.title)
-                    .onEach { setState { it.copy(completedSteps = 3) } }
-
-                    .flatMapLatest { categoriesRepository.getAttributes(it.id) }
-                    .onEach { setState { it.copy(completedSteps = 4) } }
-                    // load openAi for fill attributes
-                    .map {
-                        openAi.fillAdditionalInfo(
-                            previousResponseId = data.first,
-                            attributes = it,
-                            sellerPrompt = state.value.prompt
-                        )
-                    }
-                    .onEach { setState { it.copy(completedSteps = 5) } }
-                    .map {
+                if (isGuest) {
+                    flowOf(
                         AdvertisementWithAttributes(
                             advertisement = data.second,
-                            filledAttributes = it
+                            filledAttributes = emptyMap(),
                         )
+                    ).onEach {
+                        setState { it.copy(completedSteps = GuestProcessingStepCount) }
                     }
+                } else {
+                    categoriesRepository
+                        .categorySuggestion(data.second.title)
+                        .onEach { setState { it.copy(completedSteps = 3) } }
+
+                        .flatMapLatest { categoriesRepository.getAttributes(it.id) }
+                        .onEach { setState { it.copy(completedSteps = 4) } }
+                        .map {
+                            openAi.fillAdditionalInfo(
+                                previousResponseId = data.first,
+                                attributes = it,
+                                sellerPrompt = state.value.prompt
+                            )
+                        }
+                        .onEach {
+                            setState { it.copy(completedSteps = AuthenticatedProcessingStepCount) }
+                        }
+                        .map {
+                            AdvertisementWithAttributes(
+                                advertisement = data.second,
+                                filledAttributes = it
+                            )
+                        }
+                }
             }
 
             .onEach {
-                postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(it))
+                adFlowTimerStore.markGenerationCompleted()
+                postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(ad = it))
             }
             .catch { error ->
                 setState { it.copy(isLoading = false, errorMessage = error.message) }
@@ -134,14 +170,13 @@ class GenerateAdViewModel(
             .filter { (_, item) -> item.isPending }
             .keys.toList()
 
-        val uploadedUrls = mediaUploadHelper
+        return mediaUploadHelper
             .uploadPreparedFiles(pendingFiles)
             .onEach(::handleUploadUpdate)
             .filterIsInstance<MediaUploadUpdate.Success>()
             .map { it.uploadedFile }
             .toList()
             .map { mediaUploadHelper.publicUrl(it.path) }
-        return uploadedUrls
     }
 
     private fun onFileResult(event: GenerateAdContract.GenerateAdEvent.UploadFilesResult) {
@@ -149,6 +184,9 @@ class GenerateAdViewModel(
             mediaUploadHelper
                 .prepareFiles(selectionResult = event.result)
                 .onSuccess { files ->
+                    if (files.isNotEmpty() && currentState().uploads.isEmpty()) {
+                        adFlowTimerStore.markFlowStartedIfNeeded()
+                    }
                     setState { current ->
                         val newEntries = files
                             .filter { file -> !current.uploads.containsKey(file) }
@@ -233,9 +271,13 @@ class GenerateAdViewModel(
 
     private fun handleUploadFailure(file: KmpFile, message: String) {
         setState { current ->
+            val updatedUploads = current.uploads - file
+            if (updatedUploads.isEmpty()) {
+                adFlowTimerStore.clear()
+            }
             current.copy(
                 errorMessage = message,
-                uploads = current.uploads - file,
+                uploads = updatedUploads,
             )
         }
         postEffect(GenerateAdContract.GenerateAdEffect.ShowMessage(message))

@@ -52,6 +52,7 @@ sealed interface AdDestination {
 @Composable
 fun AdRootScreen(
     onExit: () -> Unit,
+    onConnectOlxClick: () -> Unit,
     onPublishSuccess: (
         url: String,
         title: String,
@@ -111,6 +112,7 @@ fun AdRootScreen(
                     onPublishSuccess = onPublishSuccess,
                     pendingCategory = pendingCategory,
                     onCategoryConsumed = { pendingCategory = null },
+                    onConnectOlxClick = onConnectOlxClick,
                 )
             }
 

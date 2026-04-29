@@ -3,6 +3,7 @@ package com.sirelon.aicalories.features.auth.data
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthSessionStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxCredentialsProvider
+import com.sirelon.aicalories.features.seller.auth.data.GuestModeStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxRedirectHandler
 import com.sirelon.aicalories.features.seller.auth.data.OlxTokenStore
 import com.sirelon.aicalories.features.seller.auth.data.createOlxHttpClient
@@ -187,6 +188,7 @@ class OlxAuthRepositoryTest {
             tokenStore = tokenStore,
             authSessionStore = sessionStore,
             redirectHandler = TestRedirectHandler(),
+            guestModeStore = GuestModeStore(InMemoryOlxKeyValueStore()),
         )
     }
 

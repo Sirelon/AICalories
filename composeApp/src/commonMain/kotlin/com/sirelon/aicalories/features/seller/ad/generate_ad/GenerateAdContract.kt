@@ -9,6 +9,7 @@ interface GenerateAdContract {
     data class GenerateAdState(
         val prompt: String = "",
         val isLoading: Boolean = false,
+        val isGuestMode: Boolean = false,
         val completedSteps: Int = 0,
         val errorMessage: String? = null,
         val uploads: Map<KmpFile, UploadingItem> = emptyMap(),
@@ -33,7 +34,7 @@ interface GenerateAdContract {
         data class ShowMessage(val message: String) : GenerateAdEffect
 
         data class OpenAdPreview(
-            val ad: AdvertisementWithAttributes
+            val ad: AdvertisementWithAttributes,
         ) : GenerateAdEffect
     }
 }

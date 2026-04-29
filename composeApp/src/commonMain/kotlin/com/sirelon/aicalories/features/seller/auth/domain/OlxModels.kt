@@ -41,12 +41,20 @@ data class OlxPendingAuthSession(
     val createdAtEpochSeconds: Long,
 )
 
+enum class SellerSessionMode {
+    Authenticated,
+    Guest,
+    Unauthenticated,
+}
+
 data class OlxSessionState(
-    val isAuthorized: Boolean,
+    val mode: SellerSessionMode,
     val isRefreshing: Boolean = false,
     val accessTokenExpiresAtEpochSeconds: Long? = null,
     val lastError: String? = null,
-)
+) {
+    val isAuthorized: Boolean get() = mode == SellerSessionMode.Authenticated
+}
 
 data class OlxUser(
     val id: Long,
