@@ -7,7 +7,10 @@ import com.sirelon.aicalories.features.seller.location.OlxLocation
 class LocationRepository(
     private val locationProvider: LocationProvider,
     private val olxApiClient: OlxApiClient,
+    private val locationStore: LocationStore,
 ) {
+    suspend fun getSavedLocation(): OlxLocation? = locationStore.read()
+
     suspend fun fetchUserLocation(): OlxLocation? {
         val deviceLocation = locationProvider.getCurrentLocation() ?: return null
 
@@ -28,6 +31,7 @@ class LocationRepository(
             )
         }
 
+        firstValidLocation?.let { locationStore.write(it) }
         return firstValidLocation
     }
 }

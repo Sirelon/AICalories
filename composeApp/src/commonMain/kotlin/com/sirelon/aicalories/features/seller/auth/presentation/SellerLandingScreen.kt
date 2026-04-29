@@ -15,11 +15,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,7 +45,6 @@ import com.sirelon.aicalories.designsystem.buttons.AppButtonStyle
 import com.sirelon.aicalories.designsystem.screens.LoadingOverlay
 import com.sirelon.aicalories.designsystem.templates.TermsAndPrivacy
 import com.sirelon.aicalories.designsystem.templates.TitleWithSubtitle
-import com.sirelon.aicalories.features.seller.auth.data.OlxConfig
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.benefit_manage
 import com.sirelon.aicalories.generated.resources.benefit_publish
@@ -59,7 +55,6 @@ import com.sirelon.aicalories.generated.resources.guest_description
 import com.sirelon.aicalories.generated.resources.ic_check
 import com.sirelon.aicalories.generated.resources.ic_snap_logo
 import com.sirelon.aicalories.generated.resources.ic_user
-import com.sirelon.aicalories.generated.resources.ic_x
 import com.sirelon.aicalories.generated.resources.or_divider
 import com.sirelon.aicalories.generated.resources.welcome_subtitle
 import com.sirelon.aicalories.generated.resources.welcome_to_sellsnap
@@ -106,30 +101,14 @@ fun SellerLandingScreenRoute(openHome: () -> Unit) {
             onDismissRequest = { webViewUrl = null },
             properties = DialogProperties(usePlatformDefaultWidth = false),
         ) {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text("Connect OLX Account") },
-                        navigationIcon = {
-                            IconButton(onClick = { webViewUrl = null }) {
-                                Icon(painterResource(Res.drawable.ic_x), contentDescription = "Close")
-                            }
-                        },
-                    )
+            OlxAuthDialogScreen(
+                url = url,
+                onDismiss = { webViewUrl = null },
+                onCallbackReceived = { callbackUrl ->
+                    webViewUrl = null
+                    viewModel.onCallbackReceived(callbackUrl)
                 },
-            ) { paddingValues ->
-                OlxAuthWebView(
-                    url = url,
-                    redirectUri = OlxConfig.redirectUri,
-                    onUrlIntercepted = { callbackUrl ->
-                        webViewUrl = null
-                        viewModel.onCallbackReceived(callbackUrl)
-                    },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                )
-            }
+            )
         }
     }
 }

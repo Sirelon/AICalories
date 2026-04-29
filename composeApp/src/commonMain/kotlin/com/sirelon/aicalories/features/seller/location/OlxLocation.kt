@@ -1,5 +1,8 @@
 package com.sirelon.aicalories.features.seller.location
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class OlxLocation(
     val cityId: Int,
     val cityName: String,

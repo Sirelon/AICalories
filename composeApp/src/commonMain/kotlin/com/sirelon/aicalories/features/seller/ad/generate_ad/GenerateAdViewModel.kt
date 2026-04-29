@@ -9,6 +9,7 @@ import com.sirelon.aicalories.features.media.upload.UploadingItem
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
 import com.sirelon.aicalories.features.seller.openai.OpenAIClient
+import com.sirelon.aicalories.features.seller.profile.data.SellerAccountRepository
 import com.sirelon.aicalories.supabase.error.RemoteException
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterIsInstance
@@ -26,7 +27,25 @@ class GenerateAdViewModel(
     private val mediaUploadHelper: MediaUploadHelper,
     private val categoriesRepository: CategoriesRepository,
     private val openAi: OpenAIClient,
+    private val accountRepository: SellerAccountRepository,
 ) : BaseViewModel<GenerateAdContract.GenerateAdState, GenerateAdContract.GenerateAdEvent, GenerateAdContract.GenerateAdEffect>() {
+
+    init {
+        accountRepository.user
+            .onEach { user ->
+                setState {
+                    it.copy(
+                        profileName = user?.name?.takeIf { name -> name.isNotBlank() },
+                        profileAvatarUrl = user?.avatar,
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+
+        viewModelScope.launch {
+            accountRepository.refreshProfile()
+        }
+    }
 
     override fun initialState(): GenerateAdContract.GenerateAdState =
         GenerateAdContract.GenerateAdState()

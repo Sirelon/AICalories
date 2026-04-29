@@ -48,22 +48,16 @@ data class OlxSessionState(
     val lastError: String? = null,
 )
 
-@Serializable
-data class OlxMeResponse(
-    @SerialName("data") val user: OlxUserResponse
-)
-
-@Serializable
-data class OlxUserResponse(
-    @SerialName("id") val id: Long,
-    @SerialName("email") val email: String? = null,
-    @SerialName("status") val status: String? = null,
-    @SerialName("name") val name: String? = null,
-    @SerialName("phone") val phone: String? = null,
-    @SerialName("created_at") val createdAt: String? = null,
-    @SerialName("last_login_at") val lastLoginAt: String? = null,
-    @SerialName("avatar") val avatar: String? = null,
-    @SerialName("is_business") val isBusiness: Boolean? = null,
+data class OlxUser(
+    val id: Long,
+    val email: String,
+    val status: String,
+    val name: String,
+    val phone: String,
+    val createdAt: String,
+    val lastLoginAt: String,
+    val avatar: String?,
+    val isBusiness: Boolean,
 )
 
 sealed interface OlxLaunchResult {

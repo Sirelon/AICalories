@@ -46,6 +46,13 @@ class PreviewAdViewModel(
     private val selectedCategoryId = MutableStateFlow<Int?>(null)
 
     init {
+        viewModelScope.launch {
+            val savedLocation = locationRepository.getSavedLocation()
+            if (savedLocation != null) {
+                setState { it.copy(location = savedLocation) }
+            }
+        }
+
         snapshotFlow { titleState.text }
             .distinctUntilChanged()
             .debounce(300L)

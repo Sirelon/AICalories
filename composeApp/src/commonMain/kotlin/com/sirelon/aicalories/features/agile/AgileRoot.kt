@@ -126,7 +126,7 @@ fun AgileRoot(
             backStack = navBackStack,
             onBack = { navBackStack.removeLastOrNull() },
             entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AgileDestination>()),
-            sceneStrategies = listOf(sceneStrategy),
+            sceneStrategy = sceneStrategy,
             entryProvider = entryBuilder,
         )
     }

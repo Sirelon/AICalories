@@ -33,11 +33,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.permissions.Camera
 import com.mohamedrejeb.calf.permissions.Permission
+import com.sirelon.aicalories.designsystem.AppAsyncImage
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.IconWithBackground
@@ -80,6 +82,7 @@ private const val MAX_PROMPT_CHARS = 120
 fun GenerateAdScreen(
     onBack: () -> Unit,
     openAdPreview: (AdvertisementWithAttributes) -> Unit,
+    onProfileClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val viewModel: GenerateAdViewModel = koinViewModel()
@@ -132,6 +135,7 @@ fun GenerateAdScreen(
                         viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit)
                     }
                 },
+                onProfileClick = onProfileClick,
                 modifier = modifier,
             )
         }
@@ -151,13 +155,18 @@ private fun GenerateAdScreenContent(
     onUploadClick: () -> Unit,
     onRemovePhoto: (KmpFile) -> Unit,
     onSubmitClick: () -> Unit,
+    onProfileClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize().systemBarsPadding(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            SlimHeader()
+            SlimHeader(
+                profileName = state.profileName,
+                avatarUrl = state.profileAvatarUrl,
+                onProfileClick = onProfileClick,
+            )
         },
         bottomBar = {
             Box(
@@ -253,7 +262,12 @@ private fun MagicCtaBar(
 }
 
 @Composable
-private fun SlimHeader(modifier: Modifier = Modifier) {
+private fun SlimHeader(
+    profileName: String?,
+    avatarUrl: String?,
+    onProfileClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -288,21 +302,36 @@ private fun SlimHeader(modifier: Modifier = Modifier) {
                     modifier = Modifier.size(AppDimens.Size.xl6),
                 )
             }
-            // TODO SIR-40: show user first name when account info is wired
             Text(
-                text = stringResource(Res.string.welcome_greeting),
+                text = profileName ?: stringResource(Res.string.welcome_greeting),
                 fontSize = AppDimens.TextSize.xl4,
                 fontWeight = FontWeight.SemiBold,
                 color = AppTheme.colors.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
-        // TODO SIR-40: wire logout/account menu on click
-        IconButton(onClick = {}) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_user),
-                contentDescription = null,
-                tint = AppTheme.colors.onSurface,
-            )
+        IconButton(onClick = onProfileClick) {
+            Box(
+                modifier = Modifier
+                    .size(AppDimens.Size.xl8)
+                    .clip(CircleShape)
+                    .background(AppTheme.colors.surfaceHigh),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (!avatarUrl.isNullOrBlank()) {
+                    AppAsyncImage(
+                        model = avatarUrl,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_user),
+                        contentDescription = null,
+                        tint = AppTheme.colors.onSurface,
+                    )
+                }
+            }
         }
     }
 }
@@ -532,6 +561,7 @@ private fun GenerateAdScreenEmptyPreview() {
             onUploadClick = {},
             onRemovePhoto = {},
             onSubmitClick = {},
+            onProfileClick = {},
         )
     }
 }
@@ -550,6 +580,7 @@ private fun GenerateAdScreenWithPromptPreview() {
             onUploadClick = {},
             onRemovePhoto = {},
             onSubmitClick = {},
+            onProfileClick = {},
         )
     }
 }

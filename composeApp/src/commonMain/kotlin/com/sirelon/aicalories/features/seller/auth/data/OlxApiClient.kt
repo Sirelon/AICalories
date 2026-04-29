@@ -1,8 +1,8 @@
 package com.sirelon.aicalories.features.seller.auth.data
 
 import com.sirelon.aicalories.features.seller.auth.data.response.PostAdvertRootResponse
-import com.sirelon.aicalories.features.seller.auth.domain.OlxMeResponse
-import com.sirelon.aicalories.features.seller.auth.domain.OlxUserResponse
+import com.sirelon.aicalories.features.seller.auth.data.response.OlxUserResponse
+import com.sirelon.aicalories.features.seller.auth.domain.OlxUser
 import com.sirelon.aicalories.features.seller.categories.data.responses.OlxAttributeResponse
 import com.sirelon.aicalories.features.seller.categories.data.responses.OlxAttributesResponse
 import com.sirelon.aicalories.features.seller.categories.data.responses.OlxCategoriesRootResponse
@@ -24,13 +24,13 @@ import io.ktor.http.isSuccess
 class OlxApiClient(
     private val httpClient: HttpClient,
 ) {
-    suspend fun getAuthenticatedUser(): Result<OlxUserResponse> = runCatching {
+    suspend fun getAuthenticatedUser(): Result<OlxUser> = runCatching {
         val response = httpClient.get("users/me")
         if (!response.status.isSuccess()) {
             throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
         }
 
-        response.body<OlxMeResponse>().user
+        response.body<OlxUserResponse>().toDomain()
     }
 
     suspend fun loadCategories(): List<OlxCategoryResponse> {
