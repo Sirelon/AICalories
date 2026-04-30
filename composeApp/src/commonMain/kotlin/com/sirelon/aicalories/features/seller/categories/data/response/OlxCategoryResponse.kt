@@ -1,18 +1,18 @@
-package com.sirelon.aicalories.features.seller.categories.data.responses
+package com.sirelon.aicalories.features.seller.categories.data.response
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class OlxCategoriesRootResponse(
+internal class OlxCategoriesRootResponse(
     @SerialName("data")
-    val data: List<OlxCategoryResponse>,
+    val data: List<OlxCategoryResponse>?,
 )
 
 @Serializable
-class OlxCategoryResponse(
+internal class OlxCategoryResponse(
     @SerialName("id")
-    val id: Int,
+    val id: Int?,
 
     @SerialName("name")
     val label: String?,

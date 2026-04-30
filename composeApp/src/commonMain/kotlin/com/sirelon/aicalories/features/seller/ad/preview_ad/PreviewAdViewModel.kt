@@ -201,7 +201,7 @@ class PreviewAdViewModel(
 
         setState { it.copy(isPublishing = true) }
 
-        val contactName = olxApiClient.getAuthenticatedUser().getOrNull()?.name
+        val contactName = runCatching { olxApiClient.getAuthenticatedUser() }.getOrNull()?.name
         if (contactName == null) {
             setState { it.copy(isPublishing = false) }
             postEffect(ShowMessage("Could not fetch user profile."))
@@ -219,15 +219,14 @@ class PreviewAdViewModel(
             attributeItems = validatedItems,
         )
 
-        olxApiClient.postAdvert(request)
-            .onSuccess { data ->
-                setState { it.copy(isPublishing = false) }
-                postEffect(PreviewAdEffect.PublishSuccess(data.url))
-            }
-            .onFailure { error ->
-                setState { it.copy(isPublishing = false) }
-                postEffect(ShowMessage(error.message ?: "Publishing failed. Please try again."))
-            }
+        try {
+            val data = olxApiClient.postAdvert(request)
+            setState { it.copy(isPublishing = false) }
+            postEffect(PreviewAdEffect.PublishSuccess(data.url))
+        } catch (error: Throwable) {
+            setState { it.copy(isPublishing = false) }
+            postEffect(ShowMessage(error.message ?: "Publishing failed. Please try again."))
+        }
     }
 
     private suspend fun updateSelectedCategory(category: OlxCategory) {

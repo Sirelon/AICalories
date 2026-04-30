@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal class OlxLocationsRootResponse(
     @SerialName("data")
-    val data: List<OlxLocationResponse>,
+    val data: List<OlxLocationResponse>?,
 )
 
 

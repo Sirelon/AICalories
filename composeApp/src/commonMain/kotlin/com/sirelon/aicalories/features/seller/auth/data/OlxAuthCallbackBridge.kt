@@ -1,28 +1,29 @@
 package com.sirelon.aicalories.features.seller.auth.data
 
-object OlxAuthCallbackBridge {
-    private var cachedUrl: String? = null
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.channels.BufferOverflow
 
-    var listener: ((String) -> Unit)? = null
-        set(value) {
-            field = value
-            if (value != null) {
-                cachedUrl?.let { url ->
-                    value.invoke(url)
-                    cachedUrl = null
-                }
-            }
-        }
+object OlxAuthCallbackBridge {
+    private val callbackEvents = MutableSharedFlow<String>(
+        replay = 1,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val callbacks: Flow<String> = callbackEvents
+        .asSharedFlow()
+        .onEach { callbackEvents.resetReplayCache() }
 
     fun onNewUri(url: String) {
-        cachedUrl = url
-        listener?.let { activeListener ->
-            activeListener.invoke(url)
-            cachedUrl = null
-        }
+        publishCallback(url)
     }
 
     fun publishCallback(url: String) {
-        onNewUri(url)
+        callbackEvents.tryEmit(url)
     }
 }

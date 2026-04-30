@@ -37,10 +37,13 @@ class SellerAccountRepository(
             return@runCatching null
         }
 
-        olxApiClient.getAuthenticatedUser()
-            .onSuccess { _user.value = it }
-            .onFailure { _user.value = null }
-            .getOrThrow()
+        try {
+            olxApiClient.getAuthenticatedUser()
+                .also { _user.value = it }
+        } catch (error: Throwable) {
+            _user.value = null
+            throw error
+        }
     }
 
     suspend fun logout() {
