@@ -91,6 +91,7 @@ fun App() {
                         AdRootScreen(
                             onExit = navVm::popDestination,
                             onConnectOlxClick = navVm::exitGuestModeToLanding,
+                            onLogout = { navVm.replaceWith(AppDestination.SellerLanding) },
                             onPublishSuccess = navVm::navigateToPublishSuccess,
                         )
                     }

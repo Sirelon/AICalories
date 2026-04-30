@@ -53,6 +53,7 @@ sealed interface AdDestination {
 fun AdRootScreen(
     onExit: () -> Unit,
     onConnectOlxClick: () -> Unit,
+    onLogout: () -> Unit,
     onPublishSuccess: (
         url: String,
         title: String,
@@ -151,6 +152,7 @@ fun AdRootScreen(
                 ProfileScreenRoute(
                     onBack = { navBackStack.removeAt(navBackStack.lastIndex) },
                     onOpenOlxAuth = { url -> navBackStack.add(AdDestination.ProfileAuth(url)) },
+                    onLogout = onLogout,
                 )
             }
 
