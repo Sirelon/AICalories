@@ -11,6 +11,24 @@ object OlxRemoteErrorParser {
     private val json = Json { ignoreUnknownKeys = true }
 
     fun parse(status: HttpStatusCode, payload: String): OlxApiException {
+        if (payload.isBlank()) {
+            return when (status) {
+                HttpStatusCode.Unauthorized -> OlxApiException(
+                    OlxApiError.InvalidToken("OLX rejected the current token with an empty response."),
+                )
+
+                HttpStatusCode.Forbidden -> OlxApiException(
+                    OlxApiError.InsufficientScope("OLX rejected the request with an empty forbidden response."),
+                )
+
+                else -> OlxApiException(
+                    OlxApiError.Unknown(
+                        "OLX request failed with HTTP ${status.value} ${status.description}; response body was empty.",
+                    ),
+                )
+            }
+        }
+
         val oauthError = runCatching {
             json.decodeFromString(OAuthErrorPayload.serializer(), payload)
         }.getOrNull()

@@ -1,4 +1,4 @@
-package com.sirelon.aicalories.features.seller.categories.data.responses
+package com.sirelon.aicalories.features.seller.categories.data.response
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

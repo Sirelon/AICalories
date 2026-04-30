@@ -88,9 +88,10 @@ class AppNavigationViewModel(
         } else {
             val session = authRepository.currentSession()
             when (session.mode) {
-                SellerSessionMode.Authenticated -> olxApiClient
-                    .getAuthenticatedUser()
-                    .map { AppDestination.Seller }
+                SellerSessionMode.Authenticated -> runCatching {
+                    olxApiClient.getAuthenticatedUser()
+                    AppDestination.Seller
+                }
                     .getOrElse {
                         it.printStackTrace()
                         AppDestination.SellerLanding

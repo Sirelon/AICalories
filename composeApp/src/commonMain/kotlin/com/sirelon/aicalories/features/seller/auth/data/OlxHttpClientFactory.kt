@@ -3,12 +3,12 @@ package com.sirelon.aicalories.features.seller.auth.data
 import com.sirelon.aicalories.features.seller.auth.domain.OlxApiError
 import com.sirelon.aicalories.features.seller.auth.domain.OlxApiException
 import com.sirelon.aicalories.features.seller.auth.domain.OlxTokens
-import com.sirelon.aicalories.supabase.SupabaseConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
@@ -96,13 +96,18 @@ private fun commonOlxHttpClientConfig(): HttpClientConfig<*>.() -> Unit = {
     install(Logging) {
         level = LogLevel.INFO
     }
+    install(HttpTimeout) {
+        requestTimeoutMillis = 60_000
+        connectTimeoutMillis = 15_000
+        socketTimeoutMillis = 60_000
+    }
     install(DefaultRequest) {
         header(HttpHeaders.Accept, ContentType.Application.Json)
         header("Version", OlxConfig.apiVersion)
     }
     expectSuccess = false
     defaultRequest {
-        url(SupabaseConfig.OLX_API_BASE_URL)
+        url(OlxConfig.apiBaseUrl)
     }
 }
 

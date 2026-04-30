@@ -5,10 +5,12 @@ import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthSessionStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxCredentialsProvider
 import com.sirelon.aicalories.features.seller.auth.data.GuestModeStore
+import com.sirelon.aicalories.features.seller.auth.data.OlxRemoteErrorParser
 import com.sirelon.aicalories.features.seller.auth.data.OlxRedirectHandler
 import com.sirelon.aicalories.features.seller.auth.data.OlxTokenStore
 import com.sirelon.aicalories.features.seller.auth.data.createOlxAuthorizedHttpClient
 import com.sirelon.aicalories.features.seller.auth.data.createOlxHttpClient
+import com.sirelon.aicalories.features.seller.auth.domain.OlxApiError
 import com.sirelon.aicalories.features.seller.auth.domain.OlxAuthCallback
 import com.sirelon.aicalories.features.seller.auth.domain.OlxApiException
 import com.sirelon.aicalories.features.seller.auth.domain.OlxTokens
@@ -21,6 +23,7 @@ import io.ktor.http.headersOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
@@ -69,9 +72,8 @@ class OlxApiClientTest {
                 engine = holder.engine,
             ),
         )
-        val result = apiClient.getAuthenticatedUser()
+        apiClient.getAuthenticatedUser()
 
-        assertTrue(result.isSuccess)
         assertEquals("Bearer active-token", authorizationHeader)
         assertEquals("2.0", versionHeader)
     }
@@ -118,7 +120,7 @@ class OlxApiClientTest {
             ),
         )
 
-        val user = apiClient.getAuthenticatedUser().getOrThrow()
+        val user = apiClient.getAuthenticatedUser()
 
         assertEquals(77L, user.id)
         assertEquals("seller@example.com", user.email)
@@ -207,9 +209,8 @@ class OlxApiClientTest {
             ),
         )
 
-        val result = apiClient.getAuthenticatedUser()
+        apiClient.getAuthenticatedUser()
 
-        assertTrue(result.isSuccess)
         assertEquals(listOf<String?>("Bearer stale-token", "Bearer refreshed-token"), seenAuthorizationHeaders)
         assertEquals("refreshed-token", tokenStore.read()?.accessToken)
     }
@@ -271,10 +272,19 @@ class OlxApiClientTest {
         )
 
         assertFailsWith<OlxApiException> {
-            apiClient.getAuthenticatedUser().getOrThrow()
+            apiClient.getAuthenticatedUser()
         }
         assertEquals(1, refreshRequestCount)
         assertNull(tokenStore.read())
+    }
+
+    @Test
+    fun `remote error parser keeps status detail when error response is empty`() {
+        val exception = OlxRemoteErrorParser.parse(HttpStatusCode.BadGateway, "")
+
+        val error = assertIs<OlxApiError.Unknown>(exception.error)
+        assertTrue(error.userMessage.contains("HTTP 502"))
+        assertTrue(error.userMessage.contains("empty"))
     }
 
     private fun createRepository(

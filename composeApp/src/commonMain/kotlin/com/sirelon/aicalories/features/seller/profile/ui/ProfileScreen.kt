@@ -24,7 +24,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -105,15 +105,9 @@ fun ProfileScreenRoute(
     val snackbarHostState = remember { SnackbarHostState() }
     val locationPermissionController = rememberPermissionController(permission = Permission.CoarseLocation)
 
-    DisposableEffect(viewModel) {
-        val listener: (String) -> Unit = { callbackUrl ->
+    LaunchedEffect(viewModel) {
+        OlxAuthCallbackBridge.callbacks.collect { callbackUrl ->
             viewModel.onCallbackReceived(callbackUrl)
-        }
-        OlxAuthCallbackBridge.listener = listener
-        onDispose {
-            if (OlxAuthCallbackBridge.listener == listener) {
-                OlxAuthCallbackBridge.listener = null
-            }
         }
     }
 

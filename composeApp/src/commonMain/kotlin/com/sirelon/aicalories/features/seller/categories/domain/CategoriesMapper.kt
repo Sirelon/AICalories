@@ -1,18 +1,21 @@
 package com.sirelon.aicalories.features.seller.categories.domain
 
-import com.sirelon.aicalories.features.seller.categories.data.responses.OlxAttributeResponse
-import com.sirelon.aicalories.features.seller.categories.data.responses.OlxAttributeValidationResponse
-import com.sirelon.aicalories.features.seller.categories.data.responses.OlxAttributeValueResponse
-import com.sirelon.aicalories.features.seller.categories.data.responses.OlxCategoryResponse
+import com.sirelon.aicalories.features.seller.categories.data.response.OlxAttributeResponse
+import com.sirelon.aicalories.features.seller.categories.data.response.OlxAttributeValidationResponse
+import com.sirelon.aicalories.features.seller.categories.data.response.OlxAttributeValueResponse
+import com.sirelon.aicalories.features.seller.categories.data.response.OlxCategoryResponse
 
 class CategoriesMapper {
 
-    fun mapCategory(response: OlxCategoryResponse): OlxCategory = OlxCategory(
-        id = response.id,
-        label = response.label.orEmpty(),
-        parentId = response.parentId?.takeIf { it > 0 },
-        isLeaf = response.isLeaf == true,
-    )
+    internal fun mapCategory(response: OlxCategoryResponse): OlxCategory? {
+        val id = response.id ?: return null
+        return OlxCategory(
+            id = id,
+            label = response.label.orEmpty(),
+            parentId = response.parentId?.takeIf { it > 0 },
+            isLeaf = response.isLeaf == true,
+        )
+    }
 
     internal fun mapAttributes(responses: List<OlxAttributeResponse>): List<OlxAttribute> =
         responses.mapNotNull { mapAttribute(it) }

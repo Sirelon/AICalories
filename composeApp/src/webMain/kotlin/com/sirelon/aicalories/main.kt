@@ -1,7 +1,7 @@
 package com.sirelon.aicalories
 
 import androidx.compose.ui.window.ComposeViewport
-import com.sirelon.aicalories.features.sellerauth.data.OlxAuthCallbackBridge
+import com.sirelon.aicalories.features.seller.auth.data.OlxAuthCallbackBridge
 import kotlinx.browser.window
 
 fun main() {

@@ -15,9 +15,9 @@ import com.sirelon.aicalories.features.seller.categories.domain.OlxAttributeValu
 import com.sirelon.aicalories.features.seller.openai.requests.OpenAIAttributeOptionRequest
 import com.sirelon.aicalories.features.seller.openai.requests.OpenAIAttributeRequest
 import com.sirelon.aicalories.features.seller.openai.requests.OpenAIAttributesRequest
-import com.sirelon.aicalories.features.seller.openai.responses.OpenAIAttributeSuggestionResponse
-import com.sirelon.aicalories.features.seller.openai.responses.OpenAIAttributeSuggestionsResponse
-import com.sirelon.aicalories.features.seller.openai.responses.OpenAIGeneratedAd
+import com.sirelon.aicalories.features.seller.openai.response.OpenAIAttributeSuggestionResponse
+import com.sirelon.aicalories.features.seller.openai.response.OpenAIAttributeSuggestionsResponse
+import com.sirelon.aicalories.features.seller.openai.response.OpenAIGeneratedAd
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject

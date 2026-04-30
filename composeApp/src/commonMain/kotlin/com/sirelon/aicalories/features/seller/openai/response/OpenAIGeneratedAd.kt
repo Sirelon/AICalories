@@ -1,19 +1,18 @@
-package com.sirelon.aicalories.features.seller.openai.responses
+package com.sirelon.aicalories.features.seller.openai.response
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class OpenAIGeneratedAd(
+internal class OpenAIGeneratedAd(
     @SerialName("title")
-    val title: String,
+    val title: String?,
     @SerialName("description")
-    val description: String,
+    val description: String?,
     @SerialName("suggestedPrice")
-    val suggestedPrice: Float,
+    val suggestedPrice: Float?,
     @SerialName("minPrice")
-    val minPrice: Float,
+    val minPrice: Float?,
     @SerialName("maxPrice")
-    val maxPrice: Float,
+    val maxPrice: Float?,
 )
-
