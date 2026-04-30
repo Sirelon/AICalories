@@ -26,5 +26,6 @@ interface ProfileContract {
     sealed interface ProfileEffect {
         data class LaunchOlxAuthFlow(val url: String) : ProfileEffect
         data class ShowMessage(val message: String) : ProfileEffect
+        data object NavigateToLanding : ProfileEffect
     }
 }

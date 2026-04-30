@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -33,6 +35,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Slider
@@ -58,12 +61,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import com.mohamedrejeb.calf.permissions.CoarseLocation
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.designsystem.AppAsyncImage
@@ -111,6 +118,7 @@ import com.sirelon.aicalories.generated.resources.ic_chevron_right
 import com.sirelon.aicalories.generated.resources.ic_circle_alert
 import com.sirelon.aicalories.generated.resources.ic_circle_check_big
 import com.sirelon.aicalories.generated.resources.ic_layout_grid
+import com.sirelon.aicalories.generated.resources.ic_x
 import com.sirelon.aicalories.generated.resources.location_detecting
 import com.sirelon.aicalories.generated.resources.location_not_available
 import com.sirelon.aicalories.generated.resources.location_rationale_message
@@ -670,6 +678,8 @@ fun PhotoCarousel(
         return
     }
 
+    var lightboxInitialPage by remember { mutableStateOf<Int?>(null) }
+
     Box(
         modifier = containerModifier,
     ) {
@@ -679,7 +689,10 @@ fun PhotoCarousel(
             modifier = Modifier.fillMaxSize(),
             state = pagerState,
         ) { pageIndex ->
-            PhotoCarouselPage(image = images[pageIndex])
+            PhotoCarouselPage(
+                image = images[pageIndex],
+                onTap = { lightboxInitialPage = pageIndex },
+            )
         }
 
         if (images.size > 1) {
@@ -692,18 +705,88 @@ fun PhotoCarousel(
             )
         }
     }
+
+    lightboxInitialPage?.let { initialPage ->
+        PhotoLightbox(
+            images = images,
+            initialPage = initialPage,
+            onDismiss = { lightboxInitialPage = null },
+        )
+    }
 }
 
 @Composable
-private fun PhotoCarouselPage(image: String) {
+private fun PhotoCarouselPage(image: String, onTap: () -> Unit) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(onClick = onTap),
     ) {
-        // TODO(SIR-41): Add tap-to-open fullscreen lightbox.
         AppAsyncImage(
             model = image,
             modifier = Modifier.fillMaxSize(),
         )
+    }
+}
+
+@Composable
+private fun PhotoLightbox(
+    images: List<String>,
+    initialPage: Int,
+    onDismiss: () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black),
+        ) {
+            val pagerState = rememberPagerState(
+                initialPage = initialPage,
+                pageCount = { images.size },
+            )
+
+            HorizontalPager(
+                modifier = Modifier.fillMaxSize(),
+                state = pagerState,
+            ) { pageIndex ->
+                AsyncImage(
+                    model = images[pageIndex],
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit,
+                )
+            }
+
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .systemBarsPadding()
+                    .padding(AppDimens.Spacing.xl3),
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_x),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(AppDimens.Size.xl6),
+                )
+            }
+
+            if (images.size > 1) {
+                PageDots(
+                    pageCount = images.size,
+                    currentPage = pagerState.currentPage,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .systemBarsPadding()
+                        .padding(bottom = AppDimens.Spacing.xl6),
+                )
+            }
+        }
     }
 }
 

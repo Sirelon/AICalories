@@ -80,14 +80,7 @@ class ProfileViewModel(
     private fun logout() {
         viewModelScope.launch {
             accountRepository.logout()
-            setState {
-                it.copy(
-                    isAuthenticating = false,
-                    user = null,
-                    errorMessage = null,
-                )
-            }
-            postEffect(ProfileEffect.ShowMessage("Logged out."))
+            postEffect(ProfileEffect.NavigateToLanding)
         }
     }
 

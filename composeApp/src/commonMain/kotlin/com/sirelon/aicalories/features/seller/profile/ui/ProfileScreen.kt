@@ -99,6 +99,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ProfileScreenRoute(
     onBack: () -> Unit,
     onOpenOlxAuth: (String) -> Unit,
+    onLogout: () -> Unit,
 ) {
     val viewModel: ProfileViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -126,6 +127,8 @@ fun ProfileScreenRoute(
             is ProfileContract.ProfileEffect.ShowMessage -> {
                 snackbarHostState.showSnackbar(effect.message)
             }
+
+            ProfileContract.ProfileEffect.NavigateToLanding -> onLogout()
         }
     }
 
