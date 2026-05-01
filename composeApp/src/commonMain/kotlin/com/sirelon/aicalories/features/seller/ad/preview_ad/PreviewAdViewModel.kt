@@ -8,7 +8,6 @@ import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.seller.ad.AdFlowTimerStore
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.features.seller.ad.data.PostAdvertRequestMapper
-import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEffect
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEffect.ShowMessage
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
@@ -16,6 +15,7 @@ import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.Pr
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.FetchLocation
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.Publish
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdState
+import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
 import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
 import com.sirelon.aicalories.features.seller.auth.domain.SellerSessionMode
@@ -34,7 +34,6 @@ import com.sirelon.aicalories.generated.resources.error_publish_missing_category
 import com.sirelon.aicalories.generated.resources.error_user_profile_fetch_failed
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
-import org.jetbrains.compose.resources.getString
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -42,6 +41,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 
 class PreviewAdViewModel(
     private val filledAdvertisement: AdvertisementWithAttributes,
@@ -213,14 +213,13 @@ class PreviewAdViewModel(
             return
         }
 
-        setState { it.copy(isPublishing = true, publishSuccessData = null, publishFailureMessage = null) }
+        setState { it.copy(publishSuccessData = null, publishFailureMessage = null) }
 
         val contactName = runCatching { olxApiClient.getAuthenticatedUser() }.getOrNull()?.name
         if (contactName == null) {
             val failureMessage = getString(Res.string.error_user_profile_fetch_failed)
             setState {
                 it.copy(
-                    isPublishing = false,
                     publishFailureMessage = failureMessage,
                 )
             }
@@ -247,12 +246,11 @@ class PreviewAdViewModel(
                 primaryImageUrl = s.images.firstOrNull(),
                 totalElapsedMs = adFlowTimerStore.totalElapsedMs(),
             )
-            setState { it.copy(isPublishing = false, publishSuccessData = successData) }
+            setState { it.copy(publishSuccessData = successData) }
         } catch (error: Throwable) {
             val failureMessage = error.message ?: getString(Res.string.error_publish_failed)
             setState {
                 it.copy(
-                    isPublishing = false,
                     publishSuccessData = null,
                     publishFailureMessage = failureMessage,
                 )

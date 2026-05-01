@@ -50,6 +50,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -61,16 +63,15 @@ import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.mohamedrejeb.calf.permissions.CoarseLocation
 import com.mohamedrejeb.calf.permissions.Permission
-import com.sirelon.aicalories.designsystem.AiGeneratedBadge
 import com.sirelon.aicalories.designsystem.AppCard
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppScaffold
 import com.sirelon.aicalories.designsystem.AppTheme
-import com.sirelon.aicalories.designsystem.CopyPill
 import com.sirelon.aicalories.designsystem.DigitOnlyInputTransformation
 import com.sirelon.aicalories.designsystem.ErrorPill
 import com.sirelon.aicalories.designsystem.InputWithCopy
 import com.sirelon.aicalories.designsystem.ObserveAsEvents
+import com.sirelon.aicalories.designsystem.Pill
 import com.sirelon.aicalories.designsystem.ThousandSeparatorOutputTransformation
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
@@ -99,6 +100,8 @@ import com.sirelon.aicalories.generated.resources.ad_title_label
 import com.sirelon.aicalories.generated.resources.ad_your_price
 import com.sirelon.aicalories.generated.resources.banner_ready_in
 import com.sirelon.aicalories.generated.resources.cancel
+import com.sirelon.aicalories.generated.resources.copy_pill_copied
+import com.sirelon.aicalories.generated.resources.copy_pill_default
 import com.sirelon.aicalories.generated.resources.error_attr_above_maximum
 import com.sirelon.aicalories.generated.resources.error_attr_below_minimum
 import com.sirelon.aicalories.generated.resources.error_attr_invalid_selection
@@ -113,7 +116,9 @@ import com.sirelon.aicalories.generated.resources.ic_arrow_right
 import com.sirelon.aicalories.generated.resources.ic_chevron_right
 import com.sirelon.aicalories.generated.resources.ic_circle_alert
 import com.sirelon.aicalories.generated.resources.ic_circle_check_big
+import com.sirelon.aicalories.generated.resources.ic_copy
 import com.sirelon.aicalories.generated.resources.ic_layout_grid
+import com.sirelon.aicalories.generated.resources.ic_sparkles
 import com.sirelon.aicalories.generated.resources.location_detecting
 import com.sirelon.aicalories.generated.resources.location_not_available
 import com.sirelon.aicalories.generated.resources.location_rationale_message
@@ -134,11 +139,11 @@ import com.sirelon.aicalories.generated.resources.validation_error_title_too_sho
 import com.sirelon.aicalories.generated.resources.validation_errors_more
 import com.sirelon.aicalories.generated.resources.validation_fields_remaining
 import com.sirelon.aicalories.navigation.BottomSheetSceneStrategy
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -147,17 +152,6 @@ import kotlin.math.roundToInt
 
 private const val TitleMinLength = 10
 private const val DescriptionMinLength = 30
-
-private sealed interface PreviewAdDestination {
-    @Serializable
-    data object Content : PreviewAdDestination
-
-    @Serializable
-    data object PublishConfirm : PreviewAdDestination
-
-    @Serializable
-    data object Publishing : PreviewAdDestination
-}
 
 @Composable
 fun PreviewAdScreen(
@@ -213,11 +207,6 @@ fun PreviewAdScreen(
                             navBackStack.add(PreviewAdDestination.PublishConfirm)
                         }
                     },
-                    onPublishingStarted = {
-                        if (navBackStack.lastOrNull() !is PreviewAdDestination.Publishing) {
-                            navBackStack.add(PreviewAdDestination.Publishing)
-                        }
-                    },
                     showImagesPreview = showImagesPreview,
                 )
             }
@@ -234,6 +223,9 @@ fun PreviewAdScreen(
                     priceFormatted = "₴ ${formatPrice(state.price)}",
                     onConfirm = {
                         dismissPublishConfirm()
+                        if (navBackStack.lastOrNull() !is PreviewAdDestination.Publishing) {
+                            navBackStack.add(PreviewAdDestination.Publishing)
+                        }
                         viewModel.onEvent(PreviewAdEvent.Publish)
                     },
                     onDismiss = dismissPublishConfirm,
@@ -262,7 +254,6 @@ private fun PreviewAdContentRoute(
     onCategoryConsumed: () -> Unit,
     onConnectOlxClick: () -> Unit,
     onPublishConfirmationRequested: () -> Unit,
-    onPublishingStarted: () -> Unit,
     showImagesPreview: (List<String>, Int) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -282,12 +273,6 @@ private fun PreviewAdContentRoute(
             }
 
             PreviewAdContract.PreviewAdEffect.GoToGategoryPicker -> onChangeCategoryClick()
-        }
-    }
-
-    LaunchedEffect(state.isPublishing) {
-        if (state.isPublishing) {
-            onPublishingStarted()
         }
     }
 
@@ -358,8 +343,7 @@ private fun PreviewAdContentRoute(
                         } else {
                             stringResource(Res.string.publish_errors, validationErrors.size)
                         },
-                        trailingIcon = if (state.isPublishing) null else painterResource(Res.drawable.ic_arrow_right),
-                        enabled = !state.isPublishing,
+                        trailingIcon = painterResource(Res.drawable.ic_arrow_right),
                         onClick = {
                             if (!isValid) {
                                 showErrors = true
@@ -393,15 +377,17 @@ private fun PreviewAdContentRoute(
                 )
             }
 
-            ReadyBanner(
-                elapsedMs = state.generationElapsedMs,
-                modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
-            )
             ImagesCarousel(
                 images = state.images,
                 onImageClick = {
                     showImagesPreview(state.images, it)
-                })
+                },
+            )
+
+            ReadyBanner(
+                elapsedMs = state.generationElapsedMs,
+                modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
+            )
 
             PreviewAdContent(
                 onEvent = viewModel::onEvent,
@@ -1002,6 +988,58 @@ private fun AdLocationCard(
         },
     )
 }
+
+@Composable
+private fun AiGeneratedBadge(
+    label: String = "AI",
+    modifier: Modifier = Modifier,
+) {
+    Pill(
+        color = AppTheme.colors.primary,
+        text = label,
+        iconResource = Res.drawable.ic_sparkles,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun CopyPill(
+    value: String,
+    modifier: Modifier = Modifier,
+) {
+    val clipboard = LocalClipboardManager.current
+    val scope = rememberCoroutineScope()
+    var copied by remember { mutableStateOf(false) }
+
+    val containerColor = if (copied) {
+        AppTheme.colors.success.copy(alpha = 0.18f)
+    } else {
+        AppTheme.colors.surfaceLow
+    }
+    val contentColor = if (copied) AppTheme.colors.success else AppTheme.colors.primary
+
+    Pill(
+        bgColor = contentColor,
+        color = containerColor,
+        onClick = {
+            scope.launch {
+                clipboard.setText(AnnotatedString(value))
+                copied = true
+            }
+        },
+        text = stringResource(if (copied) Res.string.copy_pill_copied else Res.string.copy_pill_default),
+        iconResource = if (copied) Res.drawable.ic_circle_check_big else Res.drawable.ic_copy,
+        modifier = modifier
+    )
+
+    if (copied) {
+        LaunchedEffect(Unit) {
+            delay(1400L)
+            copied = false
+        }
+    }
+}
+
 
 @Composable
 private fun ValidationError.toDisplayString(): String = when (this) {
