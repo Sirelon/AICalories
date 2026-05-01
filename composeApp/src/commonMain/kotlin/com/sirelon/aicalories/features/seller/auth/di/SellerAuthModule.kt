@@ -48,6 +48,6 @@ val sellerAuthModule = module {
             errorParser = get(),
         )
     }
-    single { OlxApiClient(get(olxAuthorizedHttpClientQualifier), get(), get()) }
+    single { OlxApiClient(httpClient = get(olxAuthorizedHttpClientQualifier), json = get(), errorParser = get()) }
     viewModelOf(::SellerAuthViewModel)
 }
