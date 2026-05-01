@@ -15,33 +15,33 @@ androidx-espresso = "3.7.0"
 androidx-lifecycle = "2.10.0"
 androidx-testExt = "1.3.0"
 coil3 = "3.4.0"
-composeHotReload = "1.0.0"
+composeHotReload = "1.1.0"
 # https://github.com/JetBrains/compose-multiplatform/releases
-composeMultiplatform = "1.11.0-beta02"
+composeMultiplatform = "1.11.0-beta03"
 junit = "4.13.2"
 # https://github.com/InsertKoinIO/koin/releases
 koin = "4.2.1"
-kotlin = "2.3.20"
+kotlin = "2.3.21"
 kotlinx-coroutines = "1.10.2"
 # https://github.com/Kotlin/kotlinx.serialization/releases
 kotlinx-serialization = "1.11.0"
 # https://github.com/ktorio/ktor/releases
-ktor = "3.4.2"
+ktor = "3.4.3"
 logback = "1.5.32"
 # https://mvnrepository.com/artifact/org.jetbrains.compose.material3/material3
-material3 = "1.11.0-alpha06"
+material3 = "1.11.0-alpha07"
 # https://mvnrepository.com/artifact/org.jetbrains.compose.material3.adaptive/adaptive
-material3-adaptive = "1.3.0-alpha06"
+material3-adaptive = "1.3.0-alpha07"
 materialIconsExtended = "1.7.3"
-navigation3Runtime = "1.1.0"
+navigation3Runtime = "1.1.1"
 lifecycleViewmodelNav3 = "2.10.0"
-navigation3Ui = "1.0.0-alpha06"
+navigation3Ui = "1.1.0"
 # https://github.com/MohamedRejeb/Calf/releases
 calf = "0.12.0"
 # https://github.com/supabase-community/supabase-kt/releases
-supabase = "3.5.0"
+supabase = "3.6.0"
 buildKonfig = "0.18.0"
-compose = "1.11.0-beta02"
+compose = "1.11.0-beta03"
 playServicesLocation = "21.3.0"
 
 [libraries]
