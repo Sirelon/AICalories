@@ -29,15 +29,17 @@ class CategoriesRepository(
         3428, // Оренда та прокат ?
     )
 
-    private val categoriesCache: SharedFlow<List<OlxCategory>> = flow {
-        emit(loadSupportedCategories())
+    // Errors are wrapped as Result so the sharing coroutine is never cancelled by a network failure.
+    // Callers unwrap with getOrThrow(), propagating the exception to their own collector/caller.
+    private val categoriesCache: SharedFlow<Result<List<OlxCategory>>> = flow {
+        emit(runCatching { loadSupportedCategories() })
     }.shareIn(
         scope = scope,
         started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000),
         replay = 1,
     )
 
-    fun loadCategories(): Flow<List<OlxCategory>> = categoriesCache
+    fun loadCategories(): Flow<List<OlxCategory>> = categoriesCache.map { it.getOrThrow() }
 
     fun getRootCategories(): Flow<List<OlxCategory>> =
         loadCategories().map { all -> all.filter { it.parentId == null } }
@@ -46,7 +48,7 @@ class CategoriesRepository(
         loadCategories().map { all -> all.filter { it.parentId == parentId } }
 
     suspend fun getCategoryById(id: Int): OlxCategory? =
-        categoriesCache.first().find { it.id == id }
+        categoriesCache.first().getOrThrow().find { it.id == id }
 
     fun getAttributes(categoryId: Int): Flow<List<OlxAttribute>> = flow {
         val response = olxApiClient.loadAttributes(categoryId)
