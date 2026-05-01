@@ -9,11 +9,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,7 +28,6 @@ import com.sirelon.aicalories.generated.resources.publish_confirm_title
 import com.sirelon.aicalories.generated.resources.publish_confirm_yes
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PublishConfirmSheet(
     imageUrl: String?,
@@ -41,60 +37,53 @@ fun PublishConfirmSheet(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = AppTheme.colors.surface,
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = AppDimens.Spacing.xl4)
+            .padding(bottom = AppDimens.Spacing.xl5),
+        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = AppDimens.Spacing.xl4)
-                .padding(bottom = AppDimens.Spacing.xl5),
-            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
-        ) {
-            if (imageUrl != null) {
-                AppAsyncImage(
-                    model = imageUrl,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(AppDimens.Size.xl25)
-                        .clip(RoundedCornerShape(AppDimens.BorderRadius.l)),
-                )
-            }
-
-            Text(
-                text = stringResource(Res.string.publish_confirm_title),
-                style = AppTheme.typography.headline,
-                color = AppTheme.colors.onBackground,
-            )
-
-            Text(
-                text = stringResource(Res.string.publish_confirm_subtitle),
-                style = AppTheme.typography.body,
-                color = AppTheme.colors.onSurfaceMuted,
-            )
-
-            AdSummaryRow(label = title)
-            AdSummaryRow(label = categoryLabel)
-            AdSummaryRow(label = priceFormatted, isBold = true)
-
-            Spacer(modifier = Modifier.height(AppDimens.Spacing.m))
-
-            AppButton(
-                modifier = Modifier.fillMaxWidth(),
-                style = AppButtonDefaults.success(),
-                text = stringResource(Res.string.publish_confirm_yes),
-                onClick = onConfirm,
-            )
-            AppButton(
-                modifier = Modifier.fillMaxWidth(),
-                style = AppButtonDefaults.secondary(),
-                text = stringResource(Res.string.publish_confirm_back),
-                onClick = onDismiss,
+        if (imageUrl != null) {
+            AppAsyncImage(
+                model = imageUrl,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(AppDimens.Size.xl25)
+                    .clip(RoundedCornerShape(AppDimens.BorderRadius.l)),
             )
         }
+
+        Text(
+            text = stringResource(Res.string.publish_confirm_title),
+            style = AppTheme.typography.headline,
+            color = AppTheme.colors.onBackground,
+        )
+
+        Text(
+            text = stringResource(Res.string.publish_confirm_subtitle),
+            style = AppTheme.typography.body,
+            color = AppTheme.colors.onSurfaceMuted,
+        )
+
+        AdSummaryRow(label = title)
+        AdSummaryRow(label = categoryLabel)
+        AdSummaryRow(label = priceFormatted, isBold = true)
+
+        Spacer(modifier = Modifier.height(AppDimens.Spacing.m))
+
+        AppButton(
+            modifier = Modifier.fillMaxWidth(),
+            style = AppButtonDefaults.success(),
+            text = stringResource(Res.string.publish_confirm_yes),
+            onClick = onConfirm,
+        )
+        AppButton(
+            modifier = Modifier.fillMaxWidth(),
+            style = AppButtonDefaults.secondary(),
+            text = stringResource(Res.string.publish_confirm_back),
+            onClick = onDismiss,
+        )
     }
 }
 
@@ -112,7 +101,6 @@ private fun AdSummaryRow(label: String, isBold: Boolean = false) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @PreviewLightDark
 @Composable
 private fun PublishConfirmSheetPreview() {

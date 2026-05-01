@@ -80,14 +80,17 @@ fun AdRootScreen(
     }
 
     var pendingCategory by remember { mutableStateOf<OlxCategory?>(null) }
-    val sceneStrategy = remember {
-        DialogSceneStrategy<AdDestination>().then(SinglePaneSceneStrategy())
+    val sceneStrategies = remember {
+        listOf(
+            DialogSceneStrategy<AdDestination>(),
+            SinglePaneSceneStrategy<AdDestination>(),
+        )
     }
 
     NavDisplay(
         modifier = Modifier.fillMaxSize(),
         backStack = navBackStack,
-        sceneStrategy = sceneStrategy,
+        sceneStrategies = sceneStrategies,
         transitionSpec = {
             slideInHorizontally(initialOffsetX = { it }) togetherWith
                     slideOutHorizontally(targetOffsetX = { -it })

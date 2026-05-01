@@ -50,6 +50,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -70,6 +71,10 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastRoundToInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.scene.SinglePaneSceneStrategy
+import androidx.navigation3.ui.NavDisplay
 import coil3.compose.AsyncImage
 import com.mohamedrejeb.calf.permissions.CoarseLocation
 import com.mohamedrejeb.calf.permissions.Permission
@@ -146,11 +151,13 @@ import com.sirelon.aicalories.generated.resources.validation_errors_more
 import com.sirelon.aicalories.generated.resources.validation_fields_remaining
 import com.sirelon.aicalories.features.seller.ad.preview_ad.ui.PublishConfirmSheet
 import com.sirelon.aicalories.features.seller.ad.preview_ad.ui.PublishingOverlay
+import com.sirelon.aicalories.navigation.BottomSheetSceneStrategy
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import kotlin.time.Clock
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -168,6 +175,14 @@ private val PhotoCarouselShape = RoundedCornerShape(
 private const val TitleMinLength = 10
 private const val DescriptionMinLength = 30
 
+private sealed interface PreviewAdDestination {
+    @Serializable
+    data object Content : PreviewAdDestination
+
+    @Serializable
+    data object PublishConfirm : PreviewAdDestination
+}
+
 @Composable
 fun PreviewAdScreen(
     advertisement: AdvertisementWithAttributes,
@@ -183,10 +198,87 @@ fun PreviewAdScreen(
     onConnectOlxClick: () -> Unit,
 ) {
     val viewModel: PreviewAdViewModel = koinViewModel { parametersOf(advertisement) }
+    val navBackStack = remember {
+        mutableStateListOf<PreviewAdDestination>(PreviewAdDestination.Content)
+    }
+    val sceneStrategies = remember {
+        listOf(
+            BottomSheetSceneStrategy<PreviewAdDestination>(),
+            SinglePaneSceneStrategy<PreviewAdDestination>(),
+        )
+    }
+    val dismissPublishConfirm: () -> Unit = {
+        if (navBackStack.lastOrNull() is PreviewAdDestination.PublishConfirm) {
+            navBackStack.removeAt(navBackStack.lastIndex)
+        }
+    }
+
+    NavDisplay(
+        modifier = Modifier.fillMaxSize(),
+        backStack = navBackStack,
+        onBack = {
+            if (navBackStack.size > 1) {
+                navBackStack.removeAt(navBackStack.lastIndex)
+            }
+        },
+        sceneStrategies = sceneStrategies,
+        entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<PreviewAdDestination>()),
+        entryProvider = entryProvider {
+            entry<PreviewAdDestination.Content> {
+                PreviewAdContentRoute(
+                    viewModel = viewModel,
+                    onChangeCategoryClick = onChangeCategoryClick,
+                    onPublishSuccess = onPublishSuccess,
+                    pendingCategory = pendingCategory,
+                    onCategoryConsumed = onCategoryConsumed,
+                    onConnectOlxClick = onConnectOlxClick,
+                    onPublishConfirmationRequested = {
+                        if (navBackStack.lastOrNull() !is PreviewAdDestination.PublishConfirm) {
+                            navBackStack.add(PreviewAdDestination.PublishConfirm)
+                        }
+                    },
+                )
+            }
+
+            entry<PreviewAdDestination.PublishConfirm>(
+                metadata = BottomSheetSceneStrategy.bottomSheet(),
+            ) {
+                val state by viewModel.state.collectAsStateWithLifecycle()
+
+                PublishConfirmSheet(
+                    imageUrl = state.images.firstOrNull(),
+                    title = viewModel.titleState.text.toString(),
+                    categoryLabel = state.categoryLabel,
+                    priceFormatted = "₴ ${formatPrice(state.price)}",
+                    onConfirm = {
+                        dismissPublishConfirm()
+                        viewModel.onEvent(PreviewAdEvent.Publish)
+                    },
+                    onDismiss = dismissPublishConfirm,
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun PreviewAdContentRoute(
+    viewModel: PreviewAdViewModel,
+    onChangeCategoryClick: () -> Unit,
+    onPublishSuccess: (
+        url: String,
+        title: String,
+        priceFormatted: String,
+        primaryImageUrl: String?,
+    ) -> Unit,
+    pendingCategory: OlxCategory?,
+    onCategoryConsumed: () -> Unit,
+    onConnectOlxClick: () -> Unit,
+    onPublishConfirmationRequested: () -> Unit,
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var showConfirmSheet by remember { mutableStateOf(false) }
     var showPublishingOverlay by remember { mutableStateOf(false) }
     var publishingStartMs by remember { mutableLongStateOf(0L) }
     var navigateOnOverlayDismiss by remember { mutableStateOf(false) }
@@ -318,7 +410,7 @@ fun PreviewAdScreen(
                                     coroutineScope.launch { scrollState.animateScrollTo(0) }
                                     // TODO(SIR-34): auto-open the first failing required attribute editor
                                 } else {
-                                    showConfirmSheet = true
+                                    onPublishConfirmationRequested()
                                 }
                             },
                         )
@@ -366,20 +458,6 @@ fun PreviewAdScreen(
         ) {
             PublishingOverlay()
         }
-    }
-
-    if (showConfirmSheet) {
-        PublishConfirmSheet(
-            imageUrl = state.images.firstOrNull(),
-            title = viewModel.titleState.text.toString(),
-            categoryLabel = state.categoryLabel,
-            priceFormatted = "₴ ${formatPrice(state.price)}",
-            onConfirm = {
-                showConfirmSheet = false
-                viewModel.onEvent(PreviewAdEvent.Publish)
-            },
-            onDismiss = { showConfirmSheet = false },
-        )
     }
 }
 
