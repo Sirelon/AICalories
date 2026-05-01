@@ -73,6 +73,9 @@ sealed interface OlxLaunchResult {
     data class Unsupported(val reason: String) : OlxLaunchResult
 }
 
+// Language policy: [userMessage] is a stable, English developer-facing diagnostic string
+// used for logging and OlxApiException.message. User-visible copy must come from
+// localized string resources resolved in the presentation layer.
 sealed interface OlxApiError {
     val userMessage: String
 

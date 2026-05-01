@@ -14,7 +14,10 @@ import com.sirelon.aicalories.features.seller.categories.data.CategoriesReposito
 import com.sirelon.aicalories.features.seller.openai.OpenAIClient
 import com.sirelon.aicalories.features.seller.profile.data.SellerAccountRepository
 import com.sirelon.aicalories.supabase.error.RemoteException
+import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.error_generate_ad_failed
 import kotlinx.coroutines.flow.catch
+import org.jetbrains.compose.resources.getString
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -108,10 +111,6 @@ class GenerateAdViewModel(
             .map { uploadFilesAndGetPublicUrls() }
             .onEach { setState { it.copy(completedSteps = 1) } }
 
-            .catch { error ->
-                setState { it.copy(isLoading = false) }
-                showError(error.message ?: "Upload failed")
-            }
             .map { openAi.analyzeThing(images = it, sellerPrompt = state.value.prompt) }
             .onEach { setState { it.copy(completedSteps = 2) } }
 
@@ -156,7 +155,7 @@ class GenerateAdViewModel(
                 postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(ad = it))
             }
             .catch { error ->
-                setState { it.copy(isLoading = false, errorMessage = error.message) }
+                showError(error.message ?: getString(Res.string.error_generate_ad_failed))
             }
             .onCompletion {
                 setState { it.copy(isLoading = false) }
