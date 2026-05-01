@@ -28,12 +28,9 @@ import kotlinx.serialization.json.Json
 
 class OlxApiClient(
     private val httpClient: HttpClient,
+    private val json: Json,
+    private val errorParser: OlxRemoteErrorParser,
 ) {
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        explicitNulls = false
-    }
 
     suspend fun getAuthenticatedUser(): OlxUser {
         val response = httpClient.get("users/me")
@@ -99,7 +96,7 @@ class OlxApiClient(
 
     private suspend fun HttpResponse.ensureSuccess() {
         if (!status.isSuccess()) {
-            throw OlxRemoteErrorParser.parse(status, bodyAsText())
+            throw errorParser.parse(status, bodyAsText())
         }
     }
 

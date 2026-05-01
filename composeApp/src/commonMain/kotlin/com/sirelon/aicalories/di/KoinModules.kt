@@ -49,10 +49,11 @@ val networkModule = module {
         Json {
             ignoreUnknownKeys = true
             isLenient = true
-            encodeDefaults = true
+            encodeDefaults = false
+            explicitNulls = false
         }
     }
     single { createOpenAI(get()) }
-    singleOf(::OpenAIClient)
+    single { OpenAIClient(get(), get(), get()) }
     singleOf(::SupabaseClient)
 }

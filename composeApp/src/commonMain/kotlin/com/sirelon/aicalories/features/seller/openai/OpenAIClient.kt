@@ -89,17 +89,10 @@ The response must start with `{` and end with `}`.
 class OpenAIClient(
     private val openAI: OpenAI,
     private val json: Json,
+    private val compactJson: Json,
 ) {
 
     private val mapper = GeneratedAdMapper()
-
-    // Compact serializer for prompt-side payloads so we don't waste tokens on nulls/defaults.
-    private val compactJson = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        encodeDefaults = false
-        explicitNulls = false
-    }
 
     suspend fun fillAdditionalInfo(
         previousResponseId: ResponseId,

@@ -7,8 +7,9 @@ import kotlinx.serialization.json.Json
 
 class LocationStore internal constructor(
     private val storage: KeyValueStore,
+    private val json: Json,
 ) {
-    constructor() : this(createKeyValueStore("olx_location"))
+    constructor(json: Json) : this(createKeyValueStore("olx_location"), json)
 
     suspend fun read(): OlxLocation? =
         storage.getString(KEY)?.let { json.decodeFromString<OlxLocation>(it) }
@@ -23,6 +24,5 @@ class LocationStore internal constructor(
 
     private companion object {
         const val KEY = "selected_location"
-        val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     }
 }

@@ -42,6 +42,7 @@ fun createOlxAuthorizedHttpClient(
     authRefreshClient: HttpClient,
     credentialsProvider: OlxCredentialsProvider,
     tokenStore: OlxTokenStore,
+    errorParser: OlxRemoteErrorParser,
     engine: HttpClientEngine? = null,
 ): HttpClient {
     val configure: HttpClientConfig<*>.() -> Unit = {
@@ -57,6 +58,7 @@ fun createOlxAuthorizedHttpClient(
                             client = authRefreshClient,
                             credentialsProvider = credentialsProvider,
                             refreshToken = oldTokens?.refreshToken,
+                            errorParser = errorParser,
                         )
                         if (refreshedTokens == null) {
                             tokenStore.clear()
@@ -97,9 +99,9 @@ private fun commonOlxHttpClientConfig(): HttpClientConfig<*>.() -> Unit = {
         level = LogLevel.INFO
     }
     install(HttpTimeout) {
-        requestTimeoutMillis = 60_000
+        requestTimeoutMillis = 90_000
         connectTimeoutMillis = 15_000
-        socketTimeoutMillis = 60_000
+        socketTimeoutMillis = 90_000
     }
     install(DefaultRequest) {
         header(HttpHeaders.Accept, ContentType.Application.Json)
@@ -115,6 +117,7 @@ private suspend fun refreshOlxBearerTokens(
     client: HttpClient,
     credentialsProvider: OlxCredentialsProvider,
     refreshToken: String?,
+    errorParser: OlxRemoteErrorParser,
 ): OlxTokens? {
     if (refreshToken.isNullOrBlank()) return null
 
@@ -131,7 +134,7 @@ private suspend fun refreshOlxBearerTokens(
     }
 
     if (!response.status.isSuccess()) {
-        throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
+        throw errorParser.parse(response.status, response.bodyAsText())
     }
 
     return response.body<RefreshTokenResponse>().toDomain()

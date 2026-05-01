@@ -11,7 +11,7 @@ import org.koin.dsl.module
 
 val profileModule = module {
     single { createLocationProvider() }
-    singleOf<LocationStore>(::LocationStore)
+    single { LocationStore(get()) }
     singleOf(::LocationRepository)
     singleOf(::SellerAccountRepository)
     viewModelOf(::ProfileViewModel)
