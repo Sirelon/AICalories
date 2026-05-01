@@ -15,6 +15,7 @@ import com.sirelon.aicalories.features.seller.auth.data.createOlxHttpClient
 import com.sirelon.aicalories.features.seller.auth.presentation.SellerAuthViewModel
 import io.ktor.client.HttpClient
 import org.koin.core.module.dsl.viewModelOf
+import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
 

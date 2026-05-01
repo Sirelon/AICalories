@@ -19,11 +19,11 @@ import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import com.sirelon.aicalories.features.seller.ad.generate_ad.GenerateAdScreen
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdScreen
+import com.sirelon.aicalories.features.seller.auth.data.OlxAuthCallbackBridge
+import com.sirelon.aicalories.features.seller.auth.presentation.OlxAuthDialogScreen
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import com.sirelon.aicalories.features.seller.categories.presentation.SelectRootCategoryScreen
 import com.sirelon.aicalories.features.seller.categories.presentation.SelectSubcategoryScreen
-import com.sirelon.aicalories.features.seller.auth.data.OlxAuthCallbackBridge
-import com.sirelon.aicalories.features.seller.auth.presentation.OlxAuthDialogScreen
 import com.sirelon.aicalories.features.seller.profile.ui.ProfileScreenRoute
 import kotlinx.serialization.Serializable
 
@@ -87,7 +87,7 @@ fun AdRootScreen(
     NavDisplay(
         modifier = Modifier.fillMaxSize(),
         backStack = navBackStack,
-        sceneStrategy = sceneStrategy,
+        sceneStrategies = listOf(sceneStrategy),
         transitionSpec = {
             slideInHorizontally(initialOffsetX = { it }) togetherWith
                     slideOutHorizontally(targetOffsetX = { -it })
