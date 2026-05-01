@@ -48,7 +48,7 @@ class CategoriesRepository(
         loadCategories().map { all -> all.filter { it.parentId == parentId } }
 
     suspend fun getCategoryById(id: Int): OlxCategory? =
-        categoriesCache.first().getOrThrow().find { it.id == id }
+        loadCategories().first().find { it.id == id }
 
     fun getAttributes(categoryId: Int): Flow<List<OlxAttribute>> = flow {
         val response = olxApiClient.loadAttributes(categoryId)
