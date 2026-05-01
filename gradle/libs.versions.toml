@@ -1,9 +1,9 @@
 
 [versions]
 agp = "9.2.0"
-android-compileSdk = "36"
+android-compileSdk = "37"
 android-minSdk = "24"
-android-targetSdk = "36"
+android-targetSdk = "37"
 # https://developer.android.com/jetpack/androidx/releases/activity
 androidx-activity = "1.13.0"
 androidx-datastore = "1.2.1"
