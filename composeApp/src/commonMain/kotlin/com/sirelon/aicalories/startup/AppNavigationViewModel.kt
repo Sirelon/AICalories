@@ -3,7 +3,6 @@ package com.sirelon.aicalories.startup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sirelon.aicalories.features.seller.ad.AdFlowTimerStore
-import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
 import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
 import com.sirelon.aicalories.features.seller.auth.domain.SellerSessionMode
@@ -47,14 +46,6 @@ class AppNavigationViewModel(
         if (index >= 0) {
             _backStack.value = current.subList(0, index + 1)
         }
-    }
-
-    fun navigateToPublishSuccess(data: PublishSuccessData) {
-        navigateTo(
-            AppDestination.SellerPublishSuccess(
-                data = data,
-            )
-        )
     }
 
     fun popToAdRoot() {

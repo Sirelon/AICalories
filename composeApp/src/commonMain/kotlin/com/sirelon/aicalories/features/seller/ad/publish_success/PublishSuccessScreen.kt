@@ -78,6 +78,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.sin
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 private const val ConfettiPiecesCount = 24
@@ -302,7 +303,7 @@ private fun AnimatedTitle(modifier: Modifier = Modifier) {
     )
 
     LaunchedEffect(Unit) {
-        delay(80L)
+        delay(80L.milliseconds)
         entered = true
     }
 

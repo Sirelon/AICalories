@@ -1,30 +1,20 @@
 package com.sirelon.aicalories.features.seller.ad.preview_ad
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
@@ -36,7 +26,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Slider
@@ -58,28 +47,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastRoundToInt
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
-import coil3.compose.AsyncImage
 import com.mohamedrejeb.calf.permissions.CoarseLocation
 import com.mohamedrejeb.calf.permissions.Permission
 import com.sirelon.aicalories.designsystem.AiGeneratedBadge
-import com.sirelon.aicalories.designsystem.AppAsyncImage
 import com.sirelon.aicalories.designsystem.AppCard
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppScaffold
@@ -93,15 +75,16 @@ import com.sirelon.aicalories.designsystem.ThousandSeparatorOutputTransformation
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.designsystem.formatPrice
+import com.sirelon.aicalories.designsystem.pager.ImagesCarousel
 import com.sirelon.aicalories.features.media.PermissionDialogContent
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
-import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
 import com.sirelon.aicalories.features.seller.ad.preview_ad.ui.PublishConfirmSheet
 import com.sirelon.aicalories.features.seller.ad.preview_ad.ui.PublishingScreen
+import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import com.sirelon.aicalories.features.seller.categories.domain.ValidationError
 import com.sirelon.aicalories.features.seller.categories.ui.AttributeItem
@@ -127,12 +110,10 @@ import com.sirelon.aicalories.generated.resources.guest_copy_hint
 import com.sirelon.aicalories.generated.resources.guest_mode_banner_message
 import com.sirelon.aicalories.generated.resources.guest_mode_banner_title
 import com.sirelon.aicalories.generated.resources.ic_arrow_right
-import com.sirelon.aicalories.generated.resources.ic_camera
 import com.sirelon.aicalories.generated.resources.ic_chevron_right
 import com.sirelon.aicalories.generated.resources.ic_circle_alert
 import com.sirelon.aicalories.generated.resources.ic_circle_check_big
 import com.sirelon.aicalories.generated.resources.ic_layout_grid
-import com.sirelon.aicalories.generated.resources.ic_x
 import com.sirelon.aicalories.generated.resources.location_detecting
 import com.sirelon.aicalories.generated.resources.location_not_available
 import com.sirelon.aicalories.generated.resources.location_rationale_message
@@ -164,13 +145,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.roundToInt
 
-private val PhotoCarouselShape = RoundedCornerShape(
-    topStart = 0.dp,
-    topEnd = 0.dp,
-    bottomStart = AppDimens.BorderRadius.xl11,
-    bottomEnd = AppDimens.BorderRadius.xl11,
-)
-
 private const val TitleMinLength = 10
 private const val DescriptionMinLength = 30
 
@@ -193,6 +167,7 @@ fun PreviewAdScreen(
     pendingCategory: OlxCategory?,
     onCategoryConsumed: () -> Unit,
     onConnectOlxClick: () -> Unit,
+    showImagesPreview: (List<String>, Int) -> Unit
 ) {
     val viewModel: PreviewAdViewModel = koinViewModel { parametersOf(advertisement) }
     val navBackStack = remember {
@@ -243,6 +218,7 @@ fun PreviewAdScreen(
                             navBackStack.add(PreviewAdDestination.Publishing)
                         }
                     },
+                    showImagesPreview = showImagesPreview,
                 )
             }
 
@@ -287,6 +263,7 @@ private fun PreviewAdContentRoute(
     onConnectOlxClick: () -> Unit,
     onPublishConfirmationRequested: () -> Unit,
     onPublishingStarted: () -> Unit,
+    showImagesPreview: (List<String>, Int) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -336,6 +313,7 @@ private fun PreviewAdContentRoute(
                 when {
                     item.error != null ->
                         add("${item.attribute.label}: ${item.error.toDisplayString()}")
+
                     item.attribute.validationRules.required && item.selectedValues.isEmpty() ->
                         add(item.attribute.label)
                 }
@@ -349,86 +327,90 @@ private fun PreviewAdContentRoute(
     val coroutineScope = rememberCoroutineScope()
 
     AppScaffold(
-            snackbarHost = { SnackbarHost(snackbarHostState) },
-            bottomBar = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(horizontal = AppDimens.Spacing.xl3)
-                        .padding(bottom = AppDimens.Spacing.m),
-                    verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-                ) {
-                    if (state.isSessionResolved && state.isGuest) {
-                        GuestModeBanner()
-                        AppButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            style = AppButtonDefaults.primary(),
-                            text = stringResource(Res.string.guest_connect_olx_cta),
-                            onClick = onConnectOlxClick,
-                        )
-                    } else if (state.isSessionResolved) {
-                        ValidationStatusCard(
-                            isValid = isValid,
-                            errorCount = validationErrors.size,
-                        )
-                        AppButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            style = if (isValid) AppButtonDefaults.success() else AppButtonDefaults.primary(),
-                            text = if (isValid) {
-                                stringResource(Res.string.publish_on_olx)
-                            } else {
-                                stringResource(Res.string.publish_errors, validationErrors.size)
-                            },
-                            trailingIcon = if (state.isPublishing) null else painterResource(Res.drawable.ic_arrow_right),
-                            enabled = !state.isPublishing,
-                            onClick = {
-                                if (!isValid) {
-                                    showErrors = true
-                                    coroutineScope.launch { scrollState.animateScrollTo(0) }
-                                    // TODO(SIR-34): auto-open the first failing required attribute editor
-                                } else {
-                                    onPublishConfirmationRequested()
-                                }
-                            },
-                        )
-                    }
-                }
-            },
-        ) { paddingValues ->
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
             Column(
                 modifier = Modifier
-                    .padding(paddingValues)
-                    .consumeWindowInsets(paddingValues)
-                    .verticalScroll(scrollState)
-                    .padding(bottom = AppDimens.Spacing.xl3),
-                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = AppDimens.Spacing.xl3)
+                    .padding(bottom = AppDimens.Spacing.m),
+                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
             ) {
-                AnimatedVisibility(
-                    visible = showErrors && !isValid,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically(),
-                ) {
-                    ValidationBanner(
-                        errors = validationErrors,
-                        modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
+                if (state.isSessionResolved && state.isGuest) {
+                    GuestModeBanner()
+                    AppButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        style = AppButtonDefaults.primary(),
+                        text = stringResource(Res.string.guest_connect_olx_cta),
+                        onClick = onConnectOlxClick,
+                    )
+                } else if (state.isSessionResolved) {
+                    ValidationStatusCard(
+                        isValid = isValid,
+                        errorCount = validationErrors.size,
+                    )
+                    AppButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        style = if (isValid) AppButtonDefaults.success() else AppButtonDefaults.primary(),
+                        text = if (isValid) {
+                            stringResource(Res.string.publish_on_olx)
+                        } else {
+                            stringResource(Res.string.publish_errors, validationErrors.size)
+                        },
+                        trailingIcon = if (state.isPublishing) null else painterResource(Res.drawable.ic_arrow_right),
+                        enabled = !state.isPublishing,
+                        onClick = {
+                            if (!isValid) {
+                                showErrors = true
+                                coroutineScope.launch { scrollState.animateScrollTo(0) }
+                                // TODO(SIR-34): auto-open the first failing required attribute editor
+                            } else {
+                                onPublishConfirmationRequested()
+                            }
+                        },
                     )
                 }
-
-                ReadyBanner(
-                    elapsedMs = state.generationElapsedMs,
+            }
+        },
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .consumeWindowInsets(paddingValues)
+                .verticalScroll(scrollState)
+                .padding(bottom = AppDimens.Spacing.xl3),
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
+        ) {
+            AnimatedVisibility(
+                visible = showErrors && !isValid,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                ValidationBanner(
+                    errors = validationErrors,
                     modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
                 )
-                PhotoCarousel(images = state.images)
-
-                PreviewAdContent(
-                    onEvent = viewModel::onEvent,
-                    state = state,
-                    titleState = viewModel.titleState,
-                    descriptionState = viewModel.descriptionState
-                )
             }
+
+            ReadyBanner(
+                elapsedMs = state.generationElapsedMs,
+                modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
+            )
+            ImagesCarousel(
+                images = state.images,
+                onImageClick = {
+                    showImagesPreview(state.images, it)
+                })
+
+            PreviewAdContent(
+                onEvent = viewModel::onEvent,
+                state = state,
+                titleState = viewModel.titleState,
+                descriptionState = viewModel.descriptionState
+            )
         }
+    }
 }
 
 @Composable
@@ -649,7 +631,8 @@ private fun PreviewAdContent(
     val titleText = titleState.text.toString()
     val descriptionText = descriptionState.text.toString()
     val isTitleInvalid = remember(titleText) { titleText.trim().length < TitleMinLength }
-    val isDescriptionInvalid = remember(descriptionText) { descriptionText.trim().length < DescriptionMinLength }
+    val isDescriptionInvalid =
+        remember(descriptionText) { descriptionText.trim().length < DescriptionMinLength }
 
     Column(
         modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
@@ -705,185 +688,6 @@ private fun PreviewAdContent(
             AdLocationCard(
                 location = state.location,
                 isLoading = state.locationLoading,
-            )
-        }
-    }
-}
-
-@Composable
-fun PhotoCarousel(
-    images: List<String>,
-    modifier: Modifier = Modifier,
-) {
-    val containerModifier = modifier
-        .fillMaxWidth()
-        .height(AppDimens.Size.xl25)
-        .clip(PhotoCarouselShape)
-        .background(AppTheme.colors.surfaceLow)
-
-    if (images.isEmpty()) {
-        EmptyPhotoCarousel(modifier = containerModifier)
-        return
-    }
-
-    var lightboxInitialPage by remember { mutableStateOf<Int?>(null) }
-
-    Box(
-        modifier = containerModifier,
-    ) {
-        val pagerState = rememberPagerState(pageCount = { images.size })
-
-        HorizontalPager(
-            modifier = Modifier.fillMaxSize(),
-            state = pagerState,
-        ) { pageIndex ->
-            PhotoCarouselPage(
-                image = images[pageIndex],
-                onTap = { lightboxInitialPage = pageIndex },
-            )
-        }
-
-        if (images.size > 1) {
-            PageDots(
-                pageCount = images.size,
-                currentPage = pagerState.currentPage,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = AppDimens.Spacing.xl3),
-            )
-        }
-    }
-
-    lightboxInitialPage?.let { initialPage ->
-        PhotoLightbox(
-            images = images,
-            initialPage = initialPage,
-            onDismiss = { lightboxInitialPage = null },
-        )
-    }
-}
-
-@Composable
-private fun PhotoCarouselPage(image: String, onTap: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable(onClick = onTap),
-    ) {
-        AppAsyncImage(
-            model = image,
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
-}
-
-@Composable
-private fun PhotoLightbox(
-    images: List<String>,
-    initialPage: Int,
-    onDismiss: () -> Unit,
-) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = false,
-        ),
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black),
-        ) {
-            val pagerState = rememberPagerState(
-                initialPage = initialPage,
-                pageCount = { images.size },
-            )
-
-            HorizontalPager(
-                modifier = Modifier.fillMaxSize(),
-                state = pagerState,
-            ) { pageIndex ->
-                AsyncImage(
-                    model = images[pageIndex],
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Fit,
-                )
-            }
-
-            IconButton(
-                onClick = onDismiss,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .systemBarsPadding()
-                    .padding(AppDimens.Spacing.xl3),
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_x),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(AppDimens.Size.xl6),
-                )
-            }
-
-            if (images.size > 1) {
-                PageDots(
-                    pageCount = images.size,
-                    currentPage = pagerState.currentPage,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .systemBarsPadding()
-                        .padding(bottom = AppDimens.Spacing.xl6),
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun EmptyPhotoCarousel(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            painter = painterResource(Res.drawable.ic_camera),
-            contentDescription = null,
-            tint = AppTheme.colors.onSurfaceMuted,
-            modifier = Modifier.size(AppDimens.Size.xl12),
-        )
-    }
-}
-
-@Composable
-private fun PageDots(
-    pageCount: Int,
-    currentPage: Int,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.s),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        repeat(pageCount) { pageIndex ->
-            val dotWidth by animateDpAsState(
-                targetValue = if (pageIndex == currentPage) AppDimens.Size.xl4 else AppDimens.Size.s,
-                label = "pageDotWidth",
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(width = dotWidth, height = AppDimens.Size.s)
-                    .clip(CircleShape)
-                    .background(
-                        color = if (pageIndex == currentPage) {
-                            Color.White
-                        } else {
-                            Color.White.copy(alpha = 0.55f)
-                        }
-                    )
             )
         }
     }
@@ -1002,7 +806,8 @@ private fun AdPriceCard(
     PreviewSectionCard(label = stringResource(Res.string.ad_your_price)) {
         Column(verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)) {
             val price = remember(priceTextFieldState.text) {
-                (priceTextFieldState.text.toString().toFloatOrNull() ?: ((maxPrice + minPrice) / 2f))
+                (priceTextFieldState.text.toString().toFloatOrNull()
+                    ?: ((maxPrice + minPrice) / 2f))
                     .coerceIn(minPrice, maxPrice)
             }
 
@@ -1050,7 +855,9 @@ private fun AdPriceCard(
                     modifier = Modifier.weight(1f),
                     value = price,
                     onValueChange = {
-                        priceTextFieldState.setTextAndPlaceCursorAtEnd(it.fastRoundToInt().toString())
+                        priceTextFieldState.setTextAndPlaceCursorAtEnd(
+                            it.fastRoundToInt().toString()
+                        )
                     },
                     valueRange = minPrice..maxPrice,
                     colors = SliderDefaults.colors(
@@ -1254,59 +1061,6 @@ private fun ValidationStatusCardInvalidPreview() {
     }
 }
 
-@PreviewLightDark
-@Composable
-private fun PhotoCarouselEmptyPreview() {
-    PhotoCarouselPreviewSurface {
-        PhotoCarousel(images = emptyList())
-    }
-}
-
-@PreviewLightDark
-@Composable
-private fun PhotoCarouselSinglePreview() {
-    PhotoCarouselPreviewSurface {
-        PhotoCarousel(images = photoCarouselPreviewImages.take(1))
-    }
-}
-
-@PreviewLightDark
-@Composable
-private fun PhotoCarouselThreeImagesPreview() {
-    PhotoCarouselPreviewSurface {
-        PhotoCarousel(images = photoCarouselPreviewImages.take(3))
-    }
-}
-
-@PreviewLightDark
-@Composable
-private fun PhotoCarouselEightImagesPreview() {
-    PhotoCarouselPreviewSurface {
-        PhotoCarousel(images = List(8) { index -> photoCarouselPreviewImages[index % photoCarouselPreviewImages.size] })
-    }
-}
-
-@Composable
-private fun PhotoCarouselPreviewSurface(
-    content: @Composable () -> Unit,
-) {
-    AppTheme {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = AppTheme.colors.background,
-        ) {
-            Box(modifier = Modifier.padding(bottom = AppDimens.Spacing.xl5)) {
-                content()
-            }
-        }
-    }
-}
-
-private val photoCarouselPreviewImages = listOf(
-    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200",
-    "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=1200",
-    "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=1200",
-)
 
 @PreviewLightDark
 @Composable

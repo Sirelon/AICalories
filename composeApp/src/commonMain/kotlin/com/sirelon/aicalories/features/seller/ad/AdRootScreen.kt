@@ -17,45 +17,25 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
+import com.sirelon.aicalories.designsystem.screens.ImagesPreview
 import com.sirelon.aicalories.features.seller.ad.generate_ad.GenerateAdScreen
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdScreen
-import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
+import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessScreen
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthCallbackBridge
 import com.sirelon.aicalories.features.seller.auth.presentation.OlxAuthDialogScreen
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import com.sirelon.aicalories.features.seller.categories.presentation.SelectRootCategoryScreen
 import com.sirelon.aicalories.features.seller.categories.presentation.SelectSubcategoryScreen
 import com.sirelon.aicalories.features.seller.profile.ui.ProfileScreenRoute
-import kotlinx.serialization.Serializable
+import com.sirelon.aicalories.platform.openUrl
 
-
-sealed interface AdDestination {
-
-    @Serializable
-    data object GenerateAd : AdDestination
-
-    @Serializable
-    data class PreviewAd(val advertisement: AdvertisementWithAttributes) : AdDestination
-
-    @Serializable
-    data object SelectRootCategory : AdDestination
-
-    @Serializable
-    data class SelectSubcategory(val category: OlxCategory) : AdDestination
-
-    @Serializable
-    data object Profile : AdDestination
-
-    @Serializable
-    data class ProfileAuth(val url: String) : AdDestination
-}
 
 @Composable
 fun AdRootScreen(
     onExit: () -> Unit,
     onConnectOlxClick: () -> Unit,
     onLogout: () -> Unit,
-    onPublishSuccess: (PublishSuccessData) -> Unit,
+    popToAdRoot: () -> Unit,
 ) {
 
     val navBackStack = remember {
@@ -75,6 +55,7 @@ fun AdRootScreen(
 //        )
     }
 
+    // TODO: WHat is it???
     var pendingCategory by remember { mutableStateOf<OlxCategory?>(null) }
     val sceneStrategies = remember {
         listOf(
@@ -109,10 +90,15 @@ fun AdRootScreen(
                 PreviewAdScreen(
                     advertisement = destination.advertisement,
                     onChangeCategoryClick = { navBackStack.add(AdDestination.SelectRootCategory) },
-                    onPublishSuccess = onPublishSuccess,
+                    onPublishSuccess = {
+                        navBackStack.add(AdDestination.SellerPublishSuccess(it))
+                    },
                     pendingCategory = pendingCategory,
                     onCategoryConsumed = { pendingCategory = null },
                     onConnectOlxClick = onConnectOlxClick,
+                    showImagesPreview = { images, initialPage ->
+                        navBackStack.add(AdDestination.ImagesPreview(images, initialPage))
+                    },
                 )
             }
 
@@ -167,6 +153,23 @@ fun AdRootScreen(
                         navBackStack.removeAt(navBackStack.lastIndex)
                         OlxAuthCallbackBridge.publishCallback(callbackUrl)
                     },
+                )
+            }
+
+            entry<AdDestination.ImagesPreview> {
+                ImagesPreview(
+                    images = it.images,
+                    initialPage = it.initialPage,
+                    onDismiss = { navBackStack.removeAt(navBackStack.lastIndex) },
+                )
+            }
+
+
+            entry<AdDestination.SellerPublishSuccess> { destination ->
+                PublishSuccessScreen(
+                    data = destination.data,
+                    onViewOnOlx = { openUrl(destination.data.url) },
+                    onCreateAnother = popToAdRoot,
                 )
             }
         },
