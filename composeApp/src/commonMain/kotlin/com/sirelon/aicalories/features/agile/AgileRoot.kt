@@ -40,8 +40,10 @@ fun AgileRoot(
         mutableStateListOf<AgileDestination>(AgileDestination.TeamPicker)
     }
 
-    val sceneStrategy = rememberListDetailSceneStrategy<AgileDestination>()
-        .then(rememberThreePaneSceneStrategy())
+    val sceneStrategies = listOf(
+        rememberListDetailSceneStrategy<AgileDestination>(),
+        rememberThreePaneSceneStrategy(),
+    )
 
     val popDestination: () -> Unit = {
         if (navBackStack.size > 1) {
@@ -126,7 +128,7 @@ fun AgileRoot(
             backStack = navBackStack,
             onBack = { navBackStack.removeLastOrNull() },
             entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator<AgileDestination>()),
-            sceneStrategies = listOf(sceneStrategy),
+            sceneStrategies = sceneStrategies,
             entryProvider = entryBuilder,
         )
     }
