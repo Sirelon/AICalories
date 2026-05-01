@@ -4,16 +4,20 @@ import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.categories.domain.CategoriesMapper
 import com.sirelon.aicalories.features.seller.categories.domain.OlxAttribute
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.flow.shareIn
 
 class CategoriesRepository(
     private val olxApiClient: OlxApiClient,
     private val mapper: CategoriesMapper,
+    private val scope: CoroutineScope,
 ) {
     private val notSupportedParentIds = listOf(
         1, // нерухомість
@@ -25,12 +29,15 @@ class CategoriesRepository(
         3428, // Оренда та прокат ?
     )
 
-    private val categoriesCacheMutex = Mutex()
-    private var cachedCategories: List<OlxCategory>? = null
+    private val categoriesCache: SharedFlow<List<OlxCategory>> = flow {
+        emit(loadSupportedCategories())
+    }.shareIn(
+        scope = scope,
+        started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000),
+        replay = 1,
+    )
 
-    fun loadCategories(): Flow<List<OlxCategory>> = flow {
-        emit(getSupportedCategories())
-    }
+    fun loadCategories(): Flow<List<OlxCategory>> = categoriesCache
 
     fun getRootCategories(): Flow<List<OlxCategory>> =
         loadCategories().map { all -> all.filter { it.parentId == null } }
@@ -39,7 +46,7 @@ class CategoriesRepository(
         loadCategories().map { all -> all.filter { it.parentId == parentId } }
 
     suspend fun getCategoryById(id: Int): OlxCategory? =
-        getSupportedCategories().find { it.id == id }
+        categoriesCache.first().find { it.id == id }
 
     fun getAttributes(categoryId: Int): Flow<List<OlxAttribute>> = flow {
         val response = olxApiClient.loadAttributes(categoryId)
@@ -62,11 +69,6 @@ class CategoriesRepository(
 
         return normalize(data)
     }
-
-    private suspend fun getSupportedCategories(): List<OlxCategory> =
-        cachedCategories ?: categoriesCacheMutex.withLock {
-            cachedCategories ?: loadSupportedCategories().also { cachedCategories = it }
-        }
 
     private fun normalize(data: List<OlxCategory>): List<OlxCategory> {
         val grouppedData = data.groupBy { it.parentId }.toMutableMap()

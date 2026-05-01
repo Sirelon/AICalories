@@ -67,10 +67,6 @@ val olxAuthBaseUrl =
     resolveSecret("OLX_AUTH_BASE_URL", "olx.auth.base.url")
         ?: "https://www.olx.ua/oauth/authorize"
 
-val olxApiBaseUrl =
-    resolveSecret("OLX_API_BASE_URL", "olx.api.base.url")
-        ?: "https://www.olx.ua/api/partner/"
-
 val olxRedirectUri =
     resolveSecret("OLX_REDIRECT_URI", "olx.redirect.uri")
         ?: "selolxai://olx-auth/callback"
@@ -148,7 +144,6 @@ buildkonfig {
         buildConfigField(STRING, "OLX_CLIENT_SECRET", olxClientSecret)
         buildConfigField(STRING, "OLX_SCOPE", olxScope)
         buildConfigField(STRING, "OLX_AUTH_BASE_URL", olxAuthBaseUrl)
-        buildConfigField(STRING, "OLX_API_BASE_URL", olxApiBaseUrl)
         buildConfigField(STRING, "OLX_REDIRECT_URI", olxRedirectUri)
     }
 }

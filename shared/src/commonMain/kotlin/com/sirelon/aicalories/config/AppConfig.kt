@@ -15,9 +15,6 @@ object AppConfig {
     val olxAuthBaseUrl: String
         get() = SupabaseConfig.OLX_AUTH_BASE_URL
 
-    val olxApiBaseUrl: String
-        get() = SupabaseConfig.OLX_API_BASE_URL
-
     val olxRedirectUri: String
         get() = SupabaseConfig.OLX_REDIRECT_URI
 }

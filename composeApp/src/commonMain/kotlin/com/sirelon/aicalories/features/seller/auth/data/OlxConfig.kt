@@ -19,8 +19,7 @@ object OlxConfig {
     val authBaseUrl: String
         get() = AppConfig.olxAuthBaseUrl
 
-    val apiBaseUrl: String
-        get() = AppConfig.olxApiBaseUrl
+    const val apiBaseUrl = "https://www.olx.ua/api/partner/"
 
     val redirectUri: String
         get() = AppConfig.olxRedirectUri

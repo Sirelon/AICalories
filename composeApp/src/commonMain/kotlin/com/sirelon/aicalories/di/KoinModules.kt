@@ -18,9 +18,15 @@ import com.sirelon.aicalories.network.createOpenAI
 import com.sirelon.aicalories.startup.appStartupModule
 import com.sirelon.aicalories.supabase.SupabaseClient
 import com.sirelon.aicalories.supabase.SupabaseConfig
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
+
+val applicationScopeQualifier = named("applicationScope")
 
 val appModule = module {
     includes(
@@ -37,6 +43,9 @@ val appModule = module {
         categoriesModule,
     )
     single { Greeting() }
+    single<CoroutineScope>(applicationScopeQualifier) {
+        CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    }
 }
 
 val networkModule = module {
