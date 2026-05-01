@@ -54,6 +54,6 @@ val networkModule = module {
         }
     }
     single { createOpenAI(get()) }
-    single { OpenAIClient(get(), get(), get()) }
+    single { OpenAIClient(openAI = get(), json = get(), compactJson = get()) }
     singleOf(::SupabaseClient)
 }
