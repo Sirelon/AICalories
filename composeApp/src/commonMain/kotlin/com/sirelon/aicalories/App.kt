@@ -98,12 +98,8 @@ fun App() {
 
                     entry<AppDestination.SellerPublishSuccess> { destination ->
                         PublishSuccessScreen(
-                            url = destination.url,
-                            title = destination.title,
-                            priceFormatted = destination.priceFormatted,
-                            primaryImageUrl = destination.primaryImageUrl,
-                            totalElapsedMs = destination.totalElapsedMs,
-                            onViewOnOlx = { openUrl(destination.url) },
+                            data = destination.data,
+                            onViewOnOlx = { openUrl(destination.data.url) },
                             onCreateAnother = navVm::popToAdRoot,
                         )
                     }

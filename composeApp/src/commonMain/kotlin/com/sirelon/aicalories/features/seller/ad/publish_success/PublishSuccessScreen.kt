@@ -85,11 +85,7 @@ private const val ConfettiDurationMs = 2500
 
 @Composable
 fun PublishSuccessScreen(
-    url: String,
-    title: String,
-    priceFormatted: String,
-    primaryImageUrl: String?,
-    totalElapsedMs: Long,
+    data: PublishSuccessData,
     onViewOnOlx: () -> Unit,
     onCreateAnother: () -> Unit,
     modifier: Modifier = Modifier,
@@ -111,7 +107,7 @@ fun PublishSuccessScreen(
                     text = stringResource(Res.string.publish_success_view_on_olx),
                     style = AppButtonDefaults.success(),
                     trailingIcon = painterResource(Res.drawable.ic_arrow_right),
-                    enabled = url.isNotBlank(),
+                    enabled = data.url.isNotBlank(),
                     onClick = onViewOnOlx,
                 )
                 AppButton(
@@ -143,10 +139,10 @@ fun PublishSuccessScreen(
                 SuccessHero()
                 AnimatedTitle()
                 ListingSummaryCard(
-                    title = title,
-                    priceFormatted = priceFormatted,
-                    primaryImageUrl = primaryImageUrl,
-                    url = url,
+                    title = data.title,
+                    priceFormatted = data.priceFormatted,
+                    primaryImageUrl = data.primaryImageUrl,
+                    url = data.url,
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -160,7 +156,7 @@ fun PublishSuccessScreen(
                     )
                     StatMiniCard(
                         modifier = Modifier.weight(1f),
-                        value = formatElapsedTime(totalElapsedMs),
+                        value = formatElapsedTime(data.totalElapsedMs),
                         label = stringResource(Res.string.publish_success_total_time_label),
                         caption = stringResource(Res.string.publish_success_total_time_caption),
                     )
@@ -479,11 +475,13 @@ private fun String.toDisplayUrl(): String {
 private fun PublishSuccessScreenPreview() {
     AppTheme {
         PublishSuccessScreen(
-            url = "https://www.olx.ua/d/uk/obyavlenie/krosvki-nike-air-max-ID123456.html",
-            title = "Кросівки Nike Air Max 90, розмір 42",
-            priceFormatted = "₴ 1 850",
-            primaryImageUrl = null,
-            totalElapsedMs = 92_000L,
+            data = PublishSuccessData(
+                url = "https://www.olx.ua/d/uk/obyavlenie/krosvki-nike-air-max-ID123456.html",
+                title = "Кросівки Nike Air Max 90, розмір 42",
+                priceFormatted = "₴ 1 850",
+                primaryImageUrl = null,
+                totalElapsedMs = 92_000L,
+            ),
             onViewOnOlx = {},
             onCreateAnother = {},
         )

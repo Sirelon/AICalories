@@ -3,6 +3,7 @@ package com.sirelon.aicalories.startup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sirelon.aicalories.features.seller.ad.AdFlowTimerStore
+import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
 import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
 import com.sirelon.aicalories.features.seller.auth.domain.SellerSessionMode
@@ -48,19 +49,10 @@ class AppNavigationViewModel(
         }
     }
 
-    fun navigateToPublishSuccess(
-        url: String,
-        title: String,
-        priceFormatted: String,
-        primaryImageUrl: String?,
-    ) {
+    fun navigateToPublishSuccess(data: PublishSuccessData) {
         navigateTo(
             AppDestination.SellerPublishSuccess(
-                url = url,
-                title = title,
-                priceFormatted = priceFormatted,
-                primaryImageUrl = primaryImageUrl,
-                totalElapsedMs = adFlowTimerStore.totalElapsedMs(),
+                data = data,
             )
         )
     }
