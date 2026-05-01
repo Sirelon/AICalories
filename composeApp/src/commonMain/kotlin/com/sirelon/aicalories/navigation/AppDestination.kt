@@ -1,6 +1,7 @@
 package com.sirelon.aicalories.navigation
 
 import androidx.navigation3.runtime.NavKey
+import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
 import kotlinx.serialization.Serializable
 
 /**
@@ -22,11 +23,7 @@ sealed interface AppDestination : NavKey {
 
     @Serializable
     data class SellerPublishSuccess(
-        val url: String,
-        val title: String,
-        val priceFormatted: String,
-        val primaryImageUrl: String?,
-        val totalElapsedMs: Long,
+        val data: PublishSuccessData,
     ) : AppDestination
 
     @Serializable

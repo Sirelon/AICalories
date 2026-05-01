@@ -50,7 +50,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -98,10 +97,11 @@ import com.sirelon.aicalories.features.media.PermissionDialogContent
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
+import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
 import com.sirelon.aicalories.features.seller.ad.preview_ad.ui.PublishConfirmSheet
-import com.sirelon.aicalories.features.seller.ad.preview_ad.ui.PublishingOverlay
+import com.sirelon.aicalories.features.seller.ad.preview_ad.ui.PublishingScreen
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import com.sirelon.aicalories.features.seller.categories.domain.ValidationError
 import com.sirelon.aicalories.features.seller.categories.ui.AttributeItem
@@ -153,7 +153,6 @@ import com.sirelon.aicalories.generated.resources.validation_error_title_too_sho
 import com.sirelon.aicalories.generated.resources.validation_errors_more
 import com.sirelon.aicalories.generated.resources.validation_fields_remaining
 import com.sirelon.aicalories.navigation.BottomSheetSceneStrategy
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
@@ -164,7 +163,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.roundToInt
-import kotlin.time.Clock
 
 private val PhotoCarouselShape = RoundedCornerShape(
     topStart = 0.dp,
@@ -182,18 +180,16 @@ private sealed interface PreviewAdDestination {
 
     @Serializable
     data object PublishConfirm : PreviewAdDestination
+
+    @Serializable
+    data object Publishing : PreviewAdDestination
 }
 
 @Composable
 fun PreviewAdScreen(
     advertisement: AdvertisementWithAttributes,
     onChangeCategoryClick: () -> Unit,
-    onPublishSuccess: (
-        url: String,
-        title: String,
-        priceFormatted: String,
-        primaryImageUrl: String?,
-    ) -> Unit,
+    onPublishSuccess: (PublishSuccessData) -> Unit,
     pendingCategory: OlxCategory?,
     onCategoryConsumed: () -> Unit,
     onConnectOlxClick: () -> Unit,
@@ -213,6 +209,11 @@ fun PreviewAdScreen(
             navBackStack.removeAt(navBackStack.lastIndex)
         }
     }
+    val dismissPublishing: () -> Unit = {
+        if (navBackStack.lastOrNull() is PreviewAdDestination.Publishing) {
+            navBackStack.removeAt(navBackStack.lastIndex)
+        }
+    }
 
     NavDisplay(
         modifier = Modifier.fillMaxSize(),
@@ -229,13 +230,17 @@ fun PreviewAdScreen(
                 PreviewAdContentRoute(
                     viewModel = viewModel,
                     onChangeCategoryClick = onChangeCategoryClick,
-                    onPublishSuccess = onPublishSuccess,
                     pendingCategory = pendingCategory,
                     onCategoryConsumed = onCategoryConsumed,
                     onConnectOlxClick = onConnectOlxClick,
                     onPublishConfirmationRequested = {
                         if (navBackStack.lastOrNull() !is PreviewAdDestination.PublishConfirm) {
                             navBackStack.add(PreviewAdDestination.PublishConfirm)
+                        }
+                    },
+                    onPublishingStarted = {
+                        if (navBackStack.lastOrNull() !is PreviewAdDestination.Publishing) {
+                            navBackStack.add(PreviewAdDestination.Publishing)
                         }
                     },
                 )
@@ -258,6 +263,17 @@ fun PreviewAdScreen(
                     onDismiss = dismissPublishConfirm,
                 )
             }
+
+            entry<PreviewAdDestination.Publishing> {
+                PublishingScreen(
+                    viewModel = viewModel,
+                    onPublishSuccess = { data ->
+                        dismissPublishing()
+                        onPublishSuccess(data)
+                    },
+                    onPublishFinishedWithoutSuccess = dismissPublishing,
+                )
+            }
         },
     )
 }
@@ -266,33 +282,14 @@ fun PreviewAdScreen(
 private fun PreviewAdContentRoute(
     viewModel: PreviewAdViewModel,
     onChangeCategoryClick: () -> Unit,
-    onPublishSuccess: (
-        url: String,
-        title: String,
-        priceFormatted: String,
-        primaryImageUrl: String?,
-    ) -> Unit,
     pendingCategory: OlxCategory?,
     onCategoryConsumed: () -> Unit,
     onConnectOlxClick: () -> Unit,
     onPublishConfirmationRequested: () -> Unit,
+    onPublishingStarted: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-
-    var showPublishingOverlay by remember { mutableStateOf(false) }
-    var publishingStartMs by remember { mutableLongStateOf(0L) }
-    var navigateOnOverlayDismiss by remember { mutableStateOf(false) }
-    var pendingPublishedUrl by remember { mutableStateOf<String?>(null) }
-
-    val emitPublishSuccess: () -> Unit = {
-        onPublishSuccess(
-            pendingPublishedUrl.orEmpty(),
-            viewModel.titleState.text.toString(),
-            "₴ ${formatPrice(state.price)}",
-            state.images.firstOrNull(),
-        )
-    }
 
     LaunchedEffect(pendingCategory) {
         if (pendingCategory != null) {
@@ -308,31 +305,12 @@ private fun PreviewAdContentRoute(
             }
 
             PreviewAdContract.PreviewAdEffect.GoToGategoryPicker -> onChangeCategoryClick()
-
-            is PreviewAdContract.PreviewAdEffect.PublishSuccess -> {
-                pendingPublishedUrl = effect.advertUrl
-                if (showPublishingOverlay) {
-                    navigateOnOverlayDismiss = true
-                } else {
-                    emitPublishSuccess()
-                }
-            }
         }
     }
 
     LaunchedEffect(state.isPublishing) {
         if (state.isPublishing) {
-            publishingStartMs = Clock.System.now().toEpochMilliseconds()
-            showPublishingOverlay = true
-        } else if (showPublishingOverlay) {
-            val elapsed = Clock.System.now().toEpochMilliseconds() - publishingStartMs
-            val remaining = 1200L - elapsed
-            if (remaining > 0) delay(remaining)
-            showPublishingOverlay = false
-            if (navigateOnOverlayDismiss) {
-                navigateOnOverlayDismiss = false
-                emitPublishSuccess()
-            }
+            onPublishingStarted()
         }
     }
 
@@ -370,8 +348,7 @@ private fun PreviewAdContentRoute(
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        AppScaffold(
+    AppScaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
                 Column(
@@ -452,15 +429,6 @@ private fun PreviewAdContentRoute(
                 )
             }
         }
-
-        AnimatedVisibility(
-            visible = showPublishingOverlay,
-            enter = fadeIn(),
-            exit = fadeOut(),
-        ) {
-            PublishingOverlay()
-        }
-    }
 }
 
 @Composable

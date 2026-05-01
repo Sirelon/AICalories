@@ -3,10 +3,12 @@ package com.sirelon.aicalories.features.seller.ad.preview_ad
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.viewModelScope
+import com.sirelon.aicalories.designsystem.formatPrice
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.seller.ad.AdFlowTimerStore
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.features.seller.ad.data.PostAdvertRequestMapper
+import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEffect
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEffect.ShowMessage
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
@@ -211,12 +213,17 @@ class PreviewAdViewModel(
             return
         }
 
-        setState { it.copy(isPublishing = true) }
+        setState { it.copy(isPublishing = true, publishSuccessData = null, publishFailureMessage = null) }
 
         val contactName = runCatching { olxApiClient.getAuthenticatedUser() }.getOrNull()?.name
         if (contactName == null) {
-            setState { it.copy(isPublishing = false) }
-            postEffect(ShowMessage(getString(Res.string.error_user_profile_fetch_failed)))
+            val failureMessage = getString(Res.string.error_user_profile_fetch_failed)
+            setState {
+                it.copy(
+                    isPublishing = false,
+                    publishFailureMessage = failureMessage,
+                )
+            }
             return
         }
 
@@ -233,11 +240,23 @@ class PreviewAdViewModel(
 
         try {
             val data = olxApiClient.postAdvert(request)
-            setState { it.copy(isPublishing = false) }
-            postEffect(PreviewAdEffect.PublishSuccess(data.url))
+            val successData = PublishSuccessData(
+                url = data.url.orEmpty(),
+                title = titleState.text.toString(),
+                priceFormatted = "₴ ${formatPrice(s.price)}",
+                primaryImageUrl = s.images.firstOrNull(),
+                totalElapsedMs = adFlowTimerStore.totalElapsedMs(),
+            )
+            setState { it.copy(isPublishing = false, publishSuccessData = successData) }
         } catch (error: Throwable) {
-            setState { it.copy(isPublishing = false) }
-            postEffect(ShowMessage(error.message ?: getString(Res.string.error_publish_failed)))
+            val failureMessage = error.message ?: getString(Res.string.error_publish_failed)
+            setState {
+                it.copy(
+                    isPublishing = false,
+                    publishSuccessData = null,
+                    publishFailureMessage = failureMessage,
+                )
+            }
         }
     }
 

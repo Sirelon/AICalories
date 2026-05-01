@@ -1,5 +1,6 @@
 package com.sirelon.aicalories.features.seller.ad.preview_ad
 
+import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
 import com.sirelon.aicalories.features.seller.categories.domain.OlxAttribute
 import com.sirelon.aicalories.features.seller.categories.domain.OlxAttributeValue
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
@@ -30,6 +31,8 @@ interface PreviewAdContract {
         val locationLoading: Boolean = false,
         val attributeItems: List<OlxAttributeState> = emptyList(),
         val isGuest: Boolean = false,
+        val publishSuccessData: PublishSuccessData? = null,
+        val publishFailureMessage: String? = null,
     )
 
     sealed interface PreviewAdEvent {
@@ -52,6 +55,5 @@ interface PreviewAdContract {
     sealed interface PreviewAdEffect {
         data class ShowMessage(val message: String) : PreviewAdEffect
         data object GoToGategoryPicker : PreviewAdEffect
-        data class PublishSuccess(val advertUrl: String?) : PreviewAdEffect
     }
 }
