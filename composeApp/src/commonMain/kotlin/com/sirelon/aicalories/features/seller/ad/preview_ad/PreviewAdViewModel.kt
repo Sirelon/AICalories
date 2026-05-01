@@ -23,8 +23,16 @@ import com.sirelon.aicalories.features.seller.categories.domain.AttributeValidat
 import com.sirelon.aicalories.features.seller.categories.domain.AttributeValidator
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import com.sirelon.aicalories.features.seller.location.data.LocationRepository
+import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.error_attributes_load_failed
+import com.sirelon.aicalories.generated.resources.error_category_suggestion_failed
+import com.sirelon.aicalories.generated.resources.error_location_fetch_failed
+import com.sirelon.aicalories.generated.resources.error_publish_failed
+import com.sirelon.aicalories.generated.resources.error_publish_missing_category_or_location
+import com.sirelon.aicalories.generated.resources.error_user_profile_fetch_failed
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
+import org.jetbrains.compose.resources.getString
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -77,7 +85,7 @@ class PreviewAdViewModel(
                     setState { it.copy(attributes = attributes) }
                 }
                 .catch {
-                    it.printStackTrace()
+                    postEffect(ShowMessage(it.message ?: getString(Res.string.error_category_suggestion_failed)))
                 }
                 .launchIn(viewModelScope)
 
@@ -99,8 +107,8 @@ class PreviewAdViewModel(
                     }
                 }
                 .catch {
-                    it.printStackTrace()
                     setState { state -> state.copy(attributeItems = emptyList()) }
+                    postEffect(ShowMessage(it.message ?: getString(Res.string.error_attributes_load_failed)))
                 }
                 .launchIn(viewModelScope)
         }
@@ -169,16 +177,20 @@ class PreviewAdViewModel(
             val location = locationRepository.fetchUserLocation()
             setState { it.copy(location = location, locationLoading = false) }
         } catch (e: Exception) {
-            e.printStackTrace()
             setState { it.copy(locationLoading = false) }
+            postEffect(ShowMessage(e.message ?: getString(Res.string.error_location_fetch_failed)))
         }
     }
 
     private suspend fun publishAdvert() {
         val s = state.value
 
-        val category = s.selectedCategory ?: return
-        val location = s.location ?: return
+        val category = s.selectedCategory
+        val location = s.location
+        if (category == null || location == null) {
+            postEffect(ShowMessage(getString(Res.string.error_publish_missing_category_or_location)))
+            return
+        }
 
         val validatedItems = s.attributeItems.map { item ->
             val valuesToValidate = when (item.attribute.inputType) {
@@ -204,7 +216,7 @@ class PreviewAdViewModel(
         val contactName = runCatching { olxApiClient.getAuthenticatedUser() }.getOrNull()?.name
         if (contactName == null) {
             setState { it.copy(isPublishing = false) }
-            postEffect(ShowMessage("Could not fetch user profile."))
+            postEffect(ShowMessage(getString(Res.string.error_user_profile_fetch_failed)))
             return
         }
 
@@ -225,7 +237,7 @@ class PreviewAdViewModel(
             postEffect(PreviewAdEffect.PublishSuccess(data.url))
         } catch (error: Throwable) {
             setState { it.copy(isPublishing = false) }
-            postEffect(ShowMessage(error.message ?: "Publishing failed. Please try again."))
+            postEffect(ShowMessage(error.message ?: getString(Res.string.error_publish_failed)))
         }
     }
 

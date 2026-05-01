@@ -10,6 +10,7 @@ import com.sirelon.aicalories.features.seller.auth.data.PostAdvertRequest
 import com.sirelon.aicalories.features.seller.categories.domain.AttributeInputType
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import com.sirelon.aicalories.features.seller.location.OlxLocation
+import kotlin.math.roundToInt
 
 internal object PostAdvertRequestMapper {
 
@@ -30,7 +31,7 @@ internal object PostAdvertRequestMapper {
         contact = AdvertContactRequest(name = contactName, phone = null),
         location = AdvertLocationRequest(cityId = location.cityId, districtId = location.districtId),
         images = images.map { AdvertImageRequest(url = it) },
-        price = AdvertPriceRequest(value = price.toInt(), currency = "UAH", negotiable = false),
+        price = AdvertPriceRequest(value = price.roundToInt(), currency = "UAH", negotiable = false),
         attributes = attributeItems
             .filter { it.selectedValues.isNotEmpty() }
             .map { item ->

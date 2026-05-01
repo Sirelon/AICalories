@@ -333,6 +333,15 @@
     <string name="select_category">Select Category</string>
     <string name="subcategory_count">%d subcategories</string>
 
+    <!-- Error Messages -->
+    <string name="error_location_fetch_failed">Could not detect your location.</string>
+    <string name="error_publish_missing_category_or_location">Category or location is missing — please fill them in before publishing.</string>
+    <string name="error_category_suggestion_failed">Could not load category suggestion.</string>
+    <string name="error_attributes_load_failed">Could not load attribute details.</string>
+    <string name="error_user_profile_fetch_failed">Could not fetch user profile.</string>
+    <string name="error_publish_failed">Publishing failed. Please try again.</string>
+    <string name="error_generate_ad_failed">Ad generation failed. Please try again.</string>
+
     <!-- Publish Success Screen -->
     <string name="publish_success_title">Published! 🎉</string>
     <string name="publish_success_subtitle">Your listing is now active. First views should appear in 10-15 minutes.</string>

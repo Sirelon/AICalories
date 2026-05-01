@@ -326,6 +326,15 @@
     <string name="select_category">Обрати категорію</string>
     <string name="subcategory_count">%d підкатегорій</string>
 
+    <!-- Error Messages -->
+    <string name="error_location_fetch_failed">Не вдалося визначити ваше місцезнаходження.</string>
+    <string name="error_publish_missing_category_or_location">Категорія або місцезнаходження відсутні — будь ласка, заповніть їх перед публікацією.</string>
+    <string name="error_category_suggestion_failed">Не вдалося завантажити пропозицію категорії.</string>
+    <string name="error_attributes_load_failed">Не вдалося завантажити деталі атрибутів.</string>
+    <string name="error_user_profile_fetch_failed">Не вдалося отримати профіль користувача.</string>
+    <string name="error_publish_failed">Публікація не вдалася. Будь ласка, спробуйте ще раз.</string>
+    <string name="error_generate_ad_failed">Не вдалося згенерувати оголошення. Будь ласка, спробуйте ще раз.</string>
+
     <!-- Publish Success Screen -->
     <string name="publish_success_title">Опубліковано! 🎉</string>
     <string name="publish_success_subtitle">Ваше оголошення тепер активне. Перші перегляди з\'являться за 10-15 хвилин.</string>
