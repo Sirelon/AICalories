@@ -30,6 +30,7 @@ class OlxAuthRepository(
     private val authSessionStore: OlxAuthSessionStore,
     private val redirectHandler: OlxRedirectHandler,
     private val guestModeStore: GuestModeStore,
+    private val errorParser: OlxRemoteErrorParser,
 ) {
     suspend fun createAuthorizationRequest(): OlxAuthorizationRequest {
         val state = Uuid.random().toString()
@@ -171,7 +172,7 @@ class OlxAuthRepository(
         }
 
         if (!response.status.isSuccess()) {
-            throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
+            throw errorParser.parse(response.status, response.bodyAsText())
         }
 
         return response.body<TokenResponse>().toDomain(currentEpochSeconds())
@@ -194,7 +195,7 @@ class OlxAuthRepository(
         }
 
         if (!response.status.isSuccess()) {
-            throw OlxRemoteErrorParser.parse(response.status, response.bodyAsText())
+            throw errorParser.parse(response.status, response.bodyAsText())
         }
 
         return response.body<TokenResponse>().toDomain(currentEpochSeconds())

@@ -8,12 +8,12 @@ import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthSessionStore
 import com.sirelon.aicalories.features.seller.auth.data.OlxCredentialsProvider
 import com.sirelon.aicalories.features.seller.auth.data.OlxRedirectHandler
+import com.sirelon.aicalories.features.seller.auth.data.OlxRemoteErrorParser
 import com.sirelon.aicalories.features.seller.auth.data.OlxTokenStore
 import com.sirelon.aicalories.features.seller.auth.data.createOlxAuthorizedHttpClient
 import com.sirelon.aicalories.features.seller.auth.data.createOlxHttpClient
 import com.sirelon.aicalories.features.seller.auth.presentation.SellerAuthViewModel
 import io.ktor.client.HttpClient
-import org.koin.core.qualifier.named
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -23,16 +23,18 @@ val olxAuthorizedHttpClientQualifier = named("olxAuthorizedHttpClient")
 
 val sellerAuthModule = module {
     single<HttpClient>(qualifier = olxHttpClientQualifier) { createOlxHttpClient() }
+    single { OlxRemoteErrorParser(get()) }
     single<HttpClient>(qualifier = olxAuthorizedHttpClientQualifier) {
         createOlxAuthorizedHttpClient(
             authRefreshClient = get(olxHttpClientQualifier),
             credentialsProvider = get(),
             tokenStore = get(),
+            errorParser = get(),
         )
     }
     single { BuildConfigOlxCredentialsProvider() } bind OlxCredentialsProvider::class
-    single { OlxTokenStore() }
-    single { OlxAuthSessionStore() }
+    single { OlxTokenStore(get()) }
+    single { OlxAuthSessionStore(get()) }
     single { GuestModeStore() }
     single { DefaultOlxRedirectHandler() } bind OlxRedirectHandler::class
     single {
@@ -43,8 +45,9 @@ val sellerAuthModule = module {
             authSessionStore = get(),
             redirectHandler = get(),
             guestModeStore = get(),
+            errorParser = get(),
         )
     }
-    single { OlxApiClient(get(olxAuthorizedHttpClientQualifier)) }
+    single { OlxApiClient(httpClient = get(olxAuthorizedHttpClientQualifier), json = get(), errorParser = get()) }
     viewModelOf(::SellerAuthViewModel)
 }

@@ -15,8 +15,11 @@ interface OlxCredentialsProvider {
     suspend fun getClientSecret(): String
 }
 
-class OlxTokenStore internal constructor(private val storage: KeyValueStore) {
-    constructor() : this(createKeyValueStore("olx_tokens"))
+class OlxTokenStore internal constructor(
+    private val storage: KeyValueStore,
+    private val json: Json,
+) {
+    constructor(json: Json) : this(createKeyValueStore("olx_tokens"), json)
 
     suspend fun read(): OlxTokens? =
         storage.getString(KEY)?.let { json.decodeFromString<OlxTokens>(it) }
@@ -28,12 +31,14 @@ class OlxTokenStore internal constructor(private val storage: KeyValueStore) {
 
     private companion object {
         const val KEY = "tokens"
-        val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     }
 }
 
-class OlxAuthSessionStore internal constructor(private val storage: KeyValueStore) {
-    constructor() : this(createKeyValueStore("olx_auth_session"))
+class OlxAuthSessionStore internal constructor(
+    private val storage: KeyValueStore,
+    private val json: Json,
+) {
+    constructor(json: Json) : this(createKeyValueStore("olx_auth_session"), json)
 
     suspend fun read(): OlxPendingAuthSession? =
         storage.getString(KEY)?.let { json.decodeFromString<OlxPendingAuthSession>(it) }
@@ -45,7 +50,6 @@ class OlxAuthSessionStore internal constructor(private val storage: KeyValueStor
 
     private companion object {
         const val KEY = "session"
-        val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     }
 }
 
