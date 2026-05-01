@@ -3,7 +3,9 @@ package com.sirelon.aicalories.features.agile.capacity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -124,8 +126,13 @@ private fun CapacityResultContent(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(horizontal = AppDimens.Spacing.xl3, vertical = AppDimens.Spacing.xl3),
+                        .consumeWindowInsets(paddingValues),
+                    contentPadding = PaddingValues(
+                        start = AppDimens.Spacing.xl3,
+                        end = AppDimens.Spacing.xl3,
+                        top = paddingValues.calculateTopPadding() + AppDimens.Spacing.xl3,
+                        bottom = paddingValues.calculateBottomPadding() + AppDimens.Spacing.xl3,
+                    ),
                     verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
                 ) {
                     item {

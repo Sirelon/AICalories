@@ -1,10 +1,11 @@
 package com.sirelon.aicalories.features.agile.teamlist
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -77,7 +78,6 @@ private fun TeamPickerContent(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                modifier = Modifier.navigationBarsPadding(),
                 onClick = { onEvent(TeamPickerContract.TeamPickerEvent.AddTeam) },
                 icon = { Icon(Icons.Outlined.Add, contentDescription = null) },
                 text = { Text(stringResource(Res.string.add_team)) },
@@ -86,10 +86,15 @@ private fun TeamPickerContent(
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
-                .padding(paddingValues)
-                .padding(AppDimens.Spacing.xl3)
+                .consumeWindowInsets(paddingValues)
                 .fillMaxWidth()
                 .heightIn(min = AppDimens.Spacing.xl6),
+            contentPadding = PaddingValues(
+                start = AppDimens.Spacing.xl3,
+                end = AppDimens.Spacing.xl3,
+                top = paddingValues.calculateTopPadding() + AppDimens.Spacing.xl3,
+                bottom = paddingValues.calculateBottomPadding() + AppDimens.Spacing.xl3,
+            ),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl2),
         ) {
             item {

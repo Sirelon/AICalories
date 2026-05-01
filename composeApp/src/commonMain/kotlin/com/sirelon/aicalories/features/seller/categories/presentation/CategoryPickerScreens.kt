@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -76,8 +77,13 @@ fun SelectRootCategoryScreen(
         LoadingOverlay(isLoading = state.isLoading) {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize().padding(padding),
-                contentPadding = PaddingValues(AppDimens.Spacing.xl3),
+                modifier = Modifier.fillMaxSize().consumeWindowInsets(padding),
+                contentPadding = PaddingValues(
+                    start = AppDimens.Spacing.xl3,
+                    end = AppDimens.Spacing.xl3,
+                    top = padding.calculateTopPadding() + AppDimens.Spacing.xl3,
+                    bottom = padding.calculateBottomPadding() + AppDimens.Spacing.xl3,
+                ),
                 horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
                 verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
             ) {

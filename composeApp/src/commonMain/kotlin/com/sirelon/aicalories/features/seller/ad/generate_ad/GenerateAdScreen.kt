@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -162,7 +162,7 @@ private fun GenerateAdScreenContent(
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
-        modifier = modifier.fillMaxSize().systemBarsPadding(),
+        modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             SlimHeader(
@@ -274,9 +274,10 @@ private fun SlimHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .background(AppTheme.colors.background)
+            .statusBarsPadding()
             .padding(horizontal = AppDimens.Spacing.xl3)
-            .padding(bottom = AppDimens.Spacing.xl3)
-            .background(AppTheme.colors.background),
+            .padding(bottom = AppDimens.Spacing.xl3),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {

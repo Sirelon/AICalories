@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -421,6 +422,7 @@ private fun PreviewAdContentRoute(
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
+                    .consumeWindowInsets(paddingValues)
                     .verticalScroll(scrollState)
                     .padding(bottom = AppDimens.Spacing.xl3),
                 verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
@@ -815,7 +817,10 @@ private fun PhotoLightbox(
 ) {
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false,
+        ),
     ) {
         Box(
             modifier = Modifier
