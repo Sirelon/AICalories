@@ -34,8 +34,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -69,10 +67,10 @@ import com.sirelon.aicalories.designsystem.AppScaffold
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.DigitOnlyInputTransformation
 import com.sirelon.aicalories.designsystem.ErrorPill
-import com.sirelon.aicalories.designsystem.InputWithCopy
 import com.sirelon.aicalories.designsystem.ObserveAsEvents
 import com.sirelon.aicalories.designsystem.Pill
 import com.sirelon.aicalories.designsystem.ThousandSeparatorOutputTransformation
+import com.sirelon.aicalories.designsystem.TransparentInput
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.designsystem.formatPrice
@@ -149,6 +147,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val TitleMinLength = 10
 private const val DescriptionMinLength = 30
@@ -366,17 +365,6 @@ private fun PreviewAdContentRoute(
                 .padding(bottom = AppDimens.Spacing.xl3),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
         ) {
-            AnimatedVisibility(
-                visible = showErrors && !isValid,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically(),
-            ) {
-                ValidationBanner(
-                    errors = validationErrors,
-                    modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
-                )
-            }
-
             ImagesCarousel(
                 images = state.images,
                 onImageClick = {
@@ -388,6 +376,17 @@ private fun PreviewAdContentRoute(
                 elapsedMs = state.generationElapsedMs,
                 modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
             )
+
+            AnimatedVisibility(
+                visible = showErrors && !isValid,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                ValidationBanner(
+                    errors = validationErrors,
+                    modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
+                )
+            }
 
             PreviewAdContent(
                 onEvent = viewModel::onEvent,
@@ -733,12 +732,12 @@ private fun PreviewSectionInputCard(
         label = label,
         headerTrailing = headerTrailing,
         content = {
-            InputWithCopy(
+            TransparentInput(
                 state = textFieldState,
                 maxCharacters = maxCharacters,
                 isError = isInvalid,
-                showTrailingCopyButton = false,
-            )
+
+                )
         }
     )
 }
@@ -799,20 +798,13 @@ private fun AdPriceCard(
 
             val textStyle = AppTheme.typography.headline
             ProvideTextStyle(textStyle) {
-                TextField(
+                TransparentInput(
                     state = priceTextFieldState,
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     lineLimits = TextFieldLineLimits.SingleLine,
                     inputTransformation = DigitOnlyInputTransformation,
                     outputTransformation = ThousandSeparatorOutputTransformation,
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = AppTheme.colors.surfaceLow,
-                        unfocusedContainerColor = AppTheme.colors.surfaceLow,
-                        focusedIndicatorColor = AppTheme.colors.primary,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                    ),
                     prefix = {
                         // TODO: change currency (SIR-15)
                         Text(text = "₴", style = textStyle)
@@ -1019,8 +1011,8 @@ fun CopyPill(
     val contentColor = if (copied) AppTheme.colors.success else AppTheme.colors.primary
 
     Pill(
-        bgColor = contentColor,
-        color = containerColor,
+        bgColor = containerColor,
+        color = contentColor,
         onClick = {
             scope.launch {
                 clipboard.setText(AnnotatedString(value))
@@ -1034,7 +1026,7 @@ fun CopyPill(
 
     if (copied) {
         LaunchedEffect(Unit) {
-            delay(1400L)
+            delay(1400L.milliseconds)
             copied = false
         }
     }

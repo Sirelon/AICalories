@@ -53,10 +53,10 @@ import com.sirelon.aicalories.designsystem.AppCard
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppScaffold
 import com.sirelon.aicalories.designsystem.AppTheme
-import com.sirelon.aicalories.designsystem.CopyPill
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.designsystem.templates.TitleWithSubtitle
+import com.sirelon.aicalories.features.seller.ad.preview_ad.CopyPill
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.ic_arrow_right
 import com.sirelon.aicalories.generated.resources.ic_camera

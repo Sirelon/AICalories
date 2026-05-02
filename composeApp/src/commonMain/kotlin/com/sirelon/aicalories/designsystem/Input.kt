@@ -1,33 +1,23 @@
 package com.sirelon.aicalories.designsystem
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.VisualTransformation
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.character_count_range
-import com.sirelon.aicalories.generated.resources.copy
-import com.sirelon.aicalories.generated.resources.ic_copy
 import com.sirelon.aicalories.generated.resources.min_characters
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -55,8 +45,17 @@ fun Input(
     visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
     val characterCountText = when {
-        minCharacters > 0 && value.length < minCharacters -> stringResource(Res.string.min_characters, minCharacters)
-        maxCharacters > 0 -> stringResource(Res.string.character_count_range, value.length, maxCharacters)
+        minCharacters > 0 && value.length < minCharacters -> stringResource(
+            Res.string.min_characters,
+            minCharacters
+        )
+
+        maxCharacters > 0 -> stringResource(
+            Res.string.character_count_range,
+            value.length,
+            maxCharacters
+        )
+
         else -> supportingText
     }
 
@@ -126,7 +125,7 @@ fun Input(
 }
 
 @Composable
-fun InputWithCopy(
+fun TransparentInput(
     state: TextFieldState,
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -135,28 +134,25 @@ fun InputWithCopy(
     maxCharacters: Int = Int.MIN_VALUE,
     prefix: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
-    showTrailingCopyButton: Boolean = true,
+    inputTransformation: InputTransformation? = null,
+    outputTransformation: OutputTransformation? = null,
 ) {
-    val clipboard = LocalClipboardManager.current
-    val scope = rememberCoroutineScope()
-
     val characterCountText = when {
-        minCharacters > 0 && state.text.length < minCharacters -> stringResource(Res.string.min_characters, minCharacters)
-        maxCharacters > 0 -> stringResource(Res.string.character_count_range, state.text.length, maxCharacters)
+        minCharacters > 0 && state.text.length < minCharacters -> stringResource(
+            Res.string.min_characters,
+            minCharacters
+        )
+
+        maxCharacters > 0 -> stringResource(
+            Res.string.character_count_range,
+            state.text.length,
+            maxCharacters
+        )
+
         else -> null
     }
 
     TextField(
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = AppTheme.colors.surfaceLow,
-            unfocusedContainerColor = AppTheme.colors.surfaceLow,
-            errorContainerColor = AppTheme.colors.surfaceLow,
-            focusedIndicatorColor = AppTheme.colors.primary,
-            unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent,
-            errorIndicatorColor = AppTheme.colors.error,
-        ),
-        state = state,
         modifier = modifier
             .fillMaxWidth()
             .then(
@@ -170,39 +166,26 @@ fun InputWithCopy(
                     Modifier
                 }
             ),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            errorContainerColor = Color.Transparent,
+            focusedIndicatorColor = AppTheme.colors.primary,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            errorIndicatorColor = AppTheme.colors.error,
+        ),
+        state = state,
         prefix = prefix,
         keyboardOptions = keyboardOptions,
         lineLimits = lineLimits,
         supportingText = characterCountText?.let {
             {
-                Text(
-                    text = it,
-                    style = AppTheme.typography.caption,
-                    color = AppTheme.colors.outline,
-                )
+                Text(text = it)
             }
-        },
-        trailingIcon = if (showTrailingCopyButton) {
-            {
-                TextButton(
-                    onClick = {
-                        scope.launch {
-                            clipboard.setText(AnnotatedString(state.text.toString()))
-                        }
-                    },
-                ) {
-                    Icon(
-                        modifier = Modifier.size(AppDimens.Size.xl3),
-                        painter = painterResource(Res.drawable.ic_copy),
-                        contentDescription = null
-                    )
-                    Spacer(modifier = Modifier.width(AppDimens.Spacing.l))
-                    Text(stringResource(Res.string.copy), style = AppTheme.typography.label)
-                }
-            }
-        } else {
-            null
         },
         isError = isError,
+        outputTransformation = outputTransformation,
+        inputTransformation = inputTransformation,
     )
 }
