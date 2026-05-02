@@ -10,7 +10,7 @@ SellSnap prototype tokens referenced by `Design/ClaudeDesign/project/ui.jsx`, `s
 | `background` | `background` | `#FFF8F2` | `#1E0D00` | Screen background |
 | `onBackground` | `onBackground` | `#3A1F00` | `#FFEDD8` | Primary text on background |
 | `surface` | `surface` | `#FFF8F2` | `#2A1400` | Base sheet/card surface |
-| `surfaceLowest` | `surfaceLowest` | `#FFFFFF` | `#1E0D00` | Raised cards and source buttons |
+| `surfaceLowest` | `surfaceLowest` | `#FFFFFF` | `#160600` | Raised cards and source buttons |
 | `surfaceLow` | `surfaceLow` | `#FFF0E0` | `#2A1400` | Filled inputs and soft containers |
 | `surfaceHigh` | `surfaceHigh` | `#FFD8B0` | `#472400` | Secondary buttons and stronger tonal surfaces |
 | `onSurface` | `onSurface` | `#3A1F00` | `#FFEDD8` | Text/icons on surfaces |

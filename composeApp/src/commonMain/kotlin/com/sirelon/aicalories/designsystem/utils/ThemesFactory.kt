@@ -40,7 +40,7 @@ object ThemesFactory {
         surface = Color(0xFF2A1400),
         onSurface = Color(0xFFFFEDD8),
         surfaceVariant = Color(0xFF4A2800),
-        surfaceLowest = Color(0xFF1E0D00),
+        surfaceLowest = Color(0xFF160600),
         surfaceLow = Color(0xFF2A1400),
         surfaceHigh = Color(0xFF472400),
         secondaryContainer = Color(0xFF5C2E00),
