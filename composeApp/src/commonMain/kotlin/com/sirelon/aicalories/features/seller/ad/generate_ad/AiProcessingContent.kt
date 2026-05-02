@@ -26,7 +26,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +41,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.sirelon.aicalories.designsystem.AppBackgroundGradient
 import com.sirelon.aicalories.designsystem.AppCard
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
@@ -102,7 +102,21 @@ private fun processingTips(isGuestMode: Boolean) = buildList {
 }
 
 @Composable
-fun AiProcessingContent(
+fun AiProcessingScreen(
+    completedSteps: Int,
+    isGuestMode: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    AppBackgroundGradient(modifier = modifier.fillMaxSize()) {
+        AiProcessingContent(
+            completedSteps = completedSteps,
+            isGuestMode = isGuestMode,
+        )
+    }
+}
+
+@Composable
+private fun AiProcessingContent(
     completedSteps: Int,
     isGuestMode: Boolean,
     modifier: Modifier = Modifier,
@@ -425,11 +439,9 @@ private fun AiProcessingContentPreview(
     isGuestMode: Boolean = false,
 ) {
     AppTheme {
-        Surface(color = AppTheme.colors.background) {
-            AiProcessingContent(
-                completedSteps = completedSteps,
-                isGuestMode = isGuestMode,
-            )
-        }
+        AiProcessingScreen(
+            completedSteps = completedSteps,
+            isGuestMode = isGuestMode,
+        )
     }
 }

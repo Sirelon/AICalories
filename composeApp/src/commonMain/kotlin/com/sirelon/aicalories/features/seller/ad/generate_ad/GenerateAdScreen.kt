@@ -83,7 +83,7 @@ fun GenerateAdScreen(
     onBack: () -> Unit,
     openAdPreview: (AdvertisementWithAttributes) -> Unit,
     onProfileClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val viewModel: GenerateAdViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -109,9 +109,10 @@ fun GenerateAdScreen(
 
     AnimatedContent(state.isLoading) {
         if (it) {
-            AiProcessingContent(
+            AiProcessingScreen(
                 completedSteps = state.completedSteps,
                 isGuestMode = state.isGuestMode,
+                modifier = modifier,
             )
         } else {
             GenerateAdScreenContent(
