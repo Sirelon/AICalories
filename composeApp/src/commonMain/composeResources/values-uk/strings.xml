@@ -65,6 +65,7 @@
     <string name="validation_error_no_category">Оберіть категорію</string>
     <string name="validation_error_no_location">Додайте місцезнаходження</string>
     <string name="validation_errors_more">…і ще %1$d</string>
+    <string name="ad_price_ai_estimated_range">AI рекомендована ціна: %1$s – %2$s ₴</string>
     <string name="character_count">%1$d символів</string>
     <string name="min_characters">Введіть щонайменше %1$d символів</string>
     <string name="character_count_range">%1$d/%2$d</string>

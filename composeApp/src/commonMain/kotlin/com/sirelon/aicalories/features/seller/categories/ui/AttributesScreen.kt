@@ -66,6 +66,7 @@ fun AttributeItem(
             validationError = validationError,
             modifier = modifier,
         )
+
         AttributeInputType.MultiSelect -> AttributeSelectCell(
             attribute = attribute,
             selectedValues = selectedValues,
@@ -74,6 +75,7 @@ fun AttributeItem(
             validationError = validationError,
             modifier = modifier,
         )
+
         AttributeInputType.NumericInput -> AttributeTextInputCell(
             attribute = attribute,
             selectedValues = selectedValues,
@@ -82,6 +84,7 @@ fun AttributeItem(
             validationError = validationError,
             modifier = modifier,
         )
+
         AttributeInputType.TextInput -> AttributeTextInputCell(
             attribute = attribute,
             selectedValues = selectedValues,
@@ -108,20 +111,14 @@ private fun AttributeSelectCell(
 
     Column(modifier = modifier) {
         Cell(
+            transparent = true,
             overline = {
-                Text(
-                    text = label,
-                    style = AppTheme.typography.caption,
-                    color = AppTheme.colors.onSurfaceMuted,
-                )
+                Text(text = label)
             },
             headline = {
                 Text(
-                    text = if (selectedValues.isEmpty()) selectPlaceholder
-                    else selectedValues.joinToString { it.label },
-                    style = AppTheme.typography.body,
-                    color = if (selectedValues.isEmpty()) AppTheme.colors.onSurfaceMuted
-                    else AppTheme.colors.onSurface,
+                    text = if (selectedValues.isEmpty()) selectPlaceholder else selectedValues.joinToString { it.label },
+                    color = if (selectedValues.isEmpty()) AppTheme.colors.onSurfaceMuted else AppTheme.colors.onSurface,
                 )
             },
             trailing = {
@@ -202,6 +199,7 @@ private fun AttributeTextInputCell(
                 append("Max: $it")
             }
         }.takeIf { it.isNotEmpty() }
+
         else -> null
     }
 
@@ -213,7 +211,14 @@ private fun AttributeTextInputCell(
         onValueChange = { newValue ->
             textValue = newValue
             if (newValue.isNotBlank()) {
-                onSelectionChange(listOf(OlxAttributeValue(code = attribute.code, label = newValue)))
+                onSelectionChange(
+                    listOf(
+                        OlxAttributeValue(
+                            code = attribute.code,
+                            label = newValue
+                        )
+                    )
+                )
             } else {
                 onSelectionChange(emptyList())
             }

@@ -52,8 +52,8 @@ import com.sirelon.aicalories.generated.resources.ai_analyzing_photo
 import com.sirelon.aicalories.generated.resources.ai_creating_ad_title
 import com.sirelon.aicalories.generated.resources.ai_processing_status_done
 import com.sirelon.aicalories.generated.resources.ai_processing_status_in_progress
-import com.sirelon.aicalories.generated.resources.ai_processing_tip_connect_olx_faster
 import com.sirelon.aicalories.generated.resources.ai_processing_tip_capture_details
+import com.sirelon.aicalories.generated.resources.ai_processing_tip_connect_olx_faster
 import com.sirelon.aicalories.generated.resources.ai_processing_tip_good_lighting
 import com.sirelon.aicalories.generated.resources.ai_processing_tip_keep_background_clean
 import com.sirelon.aicalories.generated.resources.ai_step_analyzing_image
@@ -67,6 +67,8 @@ import com.sirelon.aicalories.generated.resources.ic_sparkles
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
 
 private enum class ProcessingStepStatus {
     Pending,
@@ -393,7 +395,7 @@ private fun ProcessingTipCard(
         }
 
         while (true) {
-            delay(3_000)
+            delay(Random.nextLong(3_000, 6_000).milliseconds)
             tipIndex = (tipIndex + 1) % tips.size
         }
     }

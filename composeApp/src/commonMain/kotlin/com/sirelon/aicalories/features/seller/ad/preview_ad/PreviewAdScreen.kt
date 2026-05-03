@@ -29,7 +29,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -37,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -330,10 +330,6 @@ private fun PreviewAdContentRoute(
                         onClick = onConnectOlxClick,
                     )
                 } else if (state.isSessionResolved) {
-                    ValidationStatusCard(
-                        isValid = isValid,
-                        errorCount = validationErrors.size,
-                    )
                     AppButton(
                         modifier = Modifier.fillMaxWidth(),
                         style = if (isValid) AppButtonDefaults.success() else AppButtonDefaults.primary(),
@@ -394,6 +390,13 @@ private fun PreviewAdContentRoute(
                 titleState = viewModel.titleState,
                 descriptionState = viewModel.descriptionState
             )
+            if (state.isSessionResolved && !state.isGuest) {
+                ValidationStatusCard(
+                    modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
+                    isValid = isValid,
+                    errorCount = validationErrors.size,
+                )
+            }
         }
     }
 }
@@ -704,6 +707,7 @@ private fun PreviewSectionCard(
                     modifier = Modifier.weight(1f),
                     text = label,
                     style = AppTheme.typography.subTitle,
+                    fontWeight = FontWeight.SemiBold,
                 )
                 if (headerTrailing != null) {
                     Row(
@@ -788,6 +792,7 @@ private fun AdPriceCard(
     minPrice: Float,
     maxPrice: Float,
 ) {
+    val textStyle = AppTheme.typography.headline
     PreviewSectionCard(label = stringResource(Res.string.ad_your_price)) {
         Column(verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m)) {
             val price = remember(priceTextFieldState.text) {
@@ -796,27 +801,27 @@ private fun AdPriceCard(
                     .coerceIn(minPrice, maxPrice)
             }
 
-            val textStyle = AppTheme.typography.headline
-            ProvideTextStyle(textStyle) {
-                TransparentInput(
-                    state = priceTextFieldState,
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    lineLimits = TextFieldLineLimits.SingleLine,
-                    inputTransformation = DigitOnlyInputTransformation,
-                    outputTransformation = ThousandSeparatorOutputTransformation,
-                    prefix = {
-                        // TODO: change currency (SIR-15)
-                        Text(text = "₴", style = textStyle)
-                    },
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                ProvideTextStyle(textStyle) {
+                    TransparentInput(
+                        state = priceTextFieldState,
+                        modifier = Modifier.weight(1f),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        lineLimits = TextFieldLineLimits.SingleLine,
+                        inputTransformation = DigitOnlyInputTransformation,
+                        outputTransformation = ThousandSeparatorOutputTransformation,
+                        prefix = {
+                            // TODO: change currency (SIR-15)
+                            Text(text = "₴", style = textStyle)
+                        },
+                    )
+                }
+
+                CopyPill(
+                    modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
+                    value = price.toString(),
                 )
             }
-
-            CopyPill(
-                modifier = Modifier.padding(horizontal = AppDimens.Spacing.xl3),
-                // TODO: change currency (SIR-15)
-                value = "₴ ${formatPrice(price)}",
-            )
 
             Row(
                 modifier = Modifier
@@ -827,7 +832,7 @@ private fun AdPriceCard(
                 Text(
                     text = formatPrice(minPrice),
                     style = AppTheme.typography.label,
-                    color = AppTheme.colors.outline,
+                    color = AppTheme.colors.onSurface,
                 )
                 Slider(
                     modifier = Modifier.weight(1f),
@@ -838,15 +843,10 @@ private fun AdPriceCard(
                         )
                     },
                     valueRange = minPrice..maxPrice,
-                    colors = SliderDefaults.colors(
-                        thumbColor = AppTheme.colors.primary,
-                        activeTrackColor = AppTheme.colors.primary.copy(alpha = 0.24f),
-                    ),
                 )
                 Text(
                     text = formatPrice(maxPrice),
                     style = AppTheme.typography.label,
-                    color = AppTheme.colors.outline,
                 )
             }
 
@@ -927,14 +927,21 @@ private fun AdAttributesCard(
     PreviewSectionCard(label = stringResource(Res.string.ad_attributes_label)) {
         Column {
             items.forEach { item ->
-                AttributeItem(
-                    attribute = item.attribute,
-                    selectedValues = item.selectedValues,
-                    onSelectionChange = { values ->
-                        onEvent(PreviewAdEvent.AttributeValueChanged(item.attribute.code, values))
-                    },
-                    validationError = item.error,
-                )
+                key(item.attribute.code) {
+                    AttributeItem(
+                        attribute = item.attribute,
+                        selectedValues = item.selectedValues,
+                        onSelectionChange = { values ->
+                            onEvent(
+                                PreviewAdEvent.AttributeValueChanged(
+                                    attributeCode = item.attribute.code,
+                                    values = values
+                                )
+                            )
+                        },
+                        validationError = item.error,
+                    )
+                }
             }
         }
     }
@@ -965,7 +972,6 @@ private fun AdLocationCard(
                     Text(
                         text = location.displayName,
                         style = AppTheme.typography.body,
-//                        fontWeight = FontWeight.Bold,
                     )
                 }
 
