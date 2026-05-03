@@ -1,7 +1,6 @@
 package com.sirelon.aicalories.features.seller.categories.presentation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,12 +17,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,11 +26,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
+import com.sirelon.aicalories.designsystem.Cell
+import com.sirelon.aicalories.designsystem.SearchInput
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.designsystem.screens.LoadingOverlay
@@ -54,9 +50,8 @@ import com.sirelon.aicalories.generated.resources.category_picker_select_with_na
 import com.sirelon.aicalories.generated.resources.category_picker_selected_label
 import com.sirelon.aicalories.generated.resources.ic_chevron_right
 import com.sirelon.aicalories.generated.resources.ic_circle_check_big
-import com.sirelon.aicalories.generated.resources.ic_x
-import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -72,55 +67,15 @@ fun CategoryPickerSheet(
 
     Column(modifier = Modifier.fillMaxHeight(0.92f)) {
         // ── Search bar ────────────────────────────────────────────
-        Row(
-            modifier = Modifier
-                .padding(horizontal = AppDimens.Spacing.xl5, vertical = AppDimens.Spacing.xl)
-                .fillMaxWidth()
-                .background(c.surfaceLow, RoundedCornerShape(AppDimens.BorderRadius.xl))
-                .padding(horizontal = AppDimens.Spacing.xl, vertical = AppDimens.Spacing.l),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
-        ) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = null,
-                tint = c.onSurfaceMuted,
-                modifier = Modifier.size(AppDimens.Size.xl3),
-            )
-            BasicTextField(
-                value = state.searchQuery,
-                onValueChange = { viewModel.onEvent(Search(it)) },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                textStyle = t.body.copy(color = c.onSurface),
-                cursorBrush = SolidColor(c.primary),
-                decorationBox = { inner ->
-                    Box {
-                        if (state.searchQuery.isEmpty()) {
-                            Text(
-                                stringResource(Res.string.category_picker_search_placeholder),
-                                style = t.body,
-                                color = c.onSurfaceMuted,
-                            )
-                        }
-                        inner()
-                    }
-                },
-            )
-            if (state.searchQuery.isNotEmpty()) {
-                IconButton(
-                    onClick = { viewModel.onEvent(Search("")) },
-                    modifier = Modifier.size(AppDimens.Size.xl5),
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_x),
-                        contentDescription = null,
-                        tint = c.onSurfaceMuted,
-                        modifier = Modifier.size(AppDimens.Size.xl2),
-                    )
-                }
-            }
-        }
+        SearchInput(
+            value = state.searchQuery,
+            onValueChange = { viewModel.onEvent(Search(it)) },
+            placeholder = stringResource(Res.string.category_picker_search_placeholder),
+            modifier = Modifier.padding(
+                horizontal = AppDimens.Spacing.xl5,
+                vertical = AppDimens.Spacing.xl,
+            ),
+        )
 
         // ── Breadcrumbs ───────────────────────────────────────────
         if (state.searchQuery.isEmpty() && state.path.isNotEmpty()) {
@@ -176,104 +131,94 @@ fun CategoryPickerSheet(
                 itemsIndexed(state.displayItems, key = { _, item -> item.category.id }) { index, item ->
                     val category = item.category
                     if (isSearchMode) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onCategorySelected(category); onDismiss() }
-                                .padding(
-                                    horizontal = AppDimens.Spacing.xl5,
-                                    vertical = AppDimens.Spacing.xl,
-                                ),
-                        ) {
-                            Text(
-                                category.label,
-                                style = t.body.copy(fontWeight = FontWeight.Medium),
-                                color = c.onSurface,
-                            )
-                            if (item.parentChain.isNotEmpty()) {
-                                Text(item.parentChain, style = t.caption, color = c.onSurfaceMuted)
-                            }
-                        }
+                        Cell(
+                            headline = {
+                                Text(
+                                    category.label,
+                                    style = t.body.copy(fontWeight = FontWeight.Medium),
+                                    color = c.onSurface,
+                                )
+                            },
+                            supporting = if (item.parentChain.isNotEmpty()) {
+                                { Text(item.parentChain, style = t.caption, color = c.onSurfaceMuted) }
+                            } else null,
+                            onClick = { onCategorySelected(category); onDismiss() },
+                        )
                     } else {
                         val isActive = state.path.lastOrNull()?.id == category.id
                         val icon = categoryIconPainter(category.id)
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    if (isActive) c.primary.copy(alpha = 0.06f)
-                                    else Color.Transparent,
+                        Cell(
+                            modifier = Modifier.background(
+                                if (isActive) c.primary.copy(alpha = 0.06f) else Color.Transparent,
+                            ),
+                            headline = {
+                                Text(
+                                    category.label,
+                                    style = t.body.copy(
+                                        fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
+                                    ),
+                                    color = if (isActive) c.primary else c.onSurface,
                                 )
-                                .clickable {
-                                    if (category.isLeaf) {
-                                        onCategorySelected(category)
-                                        onDismiss()
-                                    } else {
-                                        viewModel.onEvent(NavigateTo(category))
+                            },
+                            leading = if (icon != null) {
+                                {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(AppDimens.Size.xl9)
+                                            .background(
+                                                c.surfaceLow,
+                                                RoundedCornerShape(AppDimens.BorderRadius.l),
+                                            ),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            painter = icon,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(AppDimens.Size.xl5),
+                                            tint = c.onSurface,
+                                        )
                                     }
                                 }
-                                .padding(
-                                    horizontal = AppDimens.Spacing.xl5,
-                                    vertical = AppDimens.Spacing.xl2,
-                                ),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
-                        ) {
-                            if (icon != null) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(AppDimens.Size.xl9)
-                                        .background(
-                                            c.surfaceLow,
-                                            RoundedCornerShape(AppDimens.BorderRadius.l),
+                            } else null,
+                            trailing = {
+                                when {
+                                    category.isLeaf && isActive -> Text(
+                                        stringResource(Res.string.category_picker_selected_label),
+                                        style = t.caption.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = c.primary,
                                         ),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    Icon(
-                                        painter = icon,
+                                    )
+                                    category.isLeaf -> Text(
+                                        stringResource(Res.string.category_picker_select_label),
+                                        style = t.caption.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = c.success,
+                                        ),
+                                    )
+                                    isActive -> Icon(
+                                        painter = painterResource(Res.drawable.ic_circle_check_big),
                                         contentDescription = null,
-                                        modifier = Modifier.size(AppDimens.Size.xl5),
-                                        tint = c.onSurface,
+                                        tint = c.primary,
+                                        modifier = Modifier.size(AppDimens.Size.xl3),
+                                    )
+                                    else -> Icon(
+                                        painter = painterResource(Res.drawable.ic_chevron_right),
+                                        contentDescription = null,
+                                        tint = c.onSurface.copy(alpha = 0.34f),
+                                        modifier = Modifier.size(AppDimens.Size.xl2),
                                     )
                                 }
-                            }
-                            Text(
-                                category.label,
-                                modifier = Modifier.weight(1f),
-                                style = t.body.copy(
-                                    fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
-                                ),
-                                color = if (isActive) c.primary else c.onSurface,
-                            )
-                            when {
-                                category.isLeaf && isActive -> Text(
-                                    stringResource(Res.string.category_picker_selected_label),
-                                    style = t.caption.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = c.primary,
-                                    ),
-                                )
-                                category.isLeaf -> Text(
-                                    stringResource(Res.string.category_picker_select_label),
-                                    style = t.caption.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = c.success,
-                                    ),
-                                )
-                                isActive -> Icon(
-                                    painter = painterResource(Res.drawable.ic_circle_check_big),
-                                    contentDescription = null,
-                                    tint = c.primary,
-                                    modifier = Modifier.size(AppDimens.Size.xl3),
-                                )
-                                else -> Icon(
-                                    painter = painterResource(Res.drawable.ic_chevron_right),
-                                    contentDescription = null,
-                                    tint = c.onSurface.copy(alpha = 0.34f),
-                                    modifier = Modifier.size(AppDimens.Size.xl2),
-                                )
-                            }
-                        }
+                            },
+                            onClick = {
+                                if (category.isLeaf) {
+                                    onCategorySelected(category)
+                                    onDismiss()
+                                } else {
+                                    viewModel.onEvent(NavigateTo(category))
+                                }
+                            },
+                        )
                     }
                     if (index < state.displayItems.lastIndex) {
                         HorizontalDivider(color = c.outlineVariant.copy(alpha = 0.13f))
