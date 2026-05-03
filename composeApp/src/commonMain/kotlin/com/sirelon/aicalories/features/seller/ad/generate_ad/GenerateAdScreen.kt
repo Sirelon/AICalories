@@ -202,7 +202,7 @@ private fun GenerateAdScreenContent(
             item {
                 PhotosGrid(
                     files = state.uploads,
-                    onAddPhoto = onUploadClick,
+                    onAddPhoto = onTakePhotoClick,
                     onRemovePhoto = onRemovePhoto,
                     interactionEnabled = !state.isLoading,
                 )

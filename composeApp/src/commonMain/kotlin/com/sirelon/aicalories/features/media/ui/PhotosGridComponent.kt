@@ -1,6 +1,7 @@
 package com.sirelon.aicalories.features.media.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -74,6 +76,22 @@ fun PhotosGridComponent(
 
                         if (upload.isUploading) {
                             UploadStatusIndicator(progress = upload.progress)
+                        }
+
+                        if (upload.hasFailed) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(AppTheme.colors.error.copy(alpha = 0.4f)),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.ErrorOutline,
+                                    contentDescription = null,
+                                    tint = AppTheme.colors.onError,
+                                    modifier = Modifier.size(AppDimens.Size.xl8),
+                                )
+                            }
                         }
                     }
                 )

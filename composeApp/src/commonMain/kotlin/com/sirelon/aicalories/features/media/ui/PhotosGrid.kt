@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -104,6 +105,22 @@ private fun PhotoThumbnailCell(
 
         if (upload.isUploading) {
             UploadStatusIndicator(progress = upload.progress)
+        }
+
+        if (upload.hasFailed) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(AppTheme.colors.error.copy(alpha = 0.4f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ErrorOutline,
+                    contentDescription = null,
+                    tint = AppTheme.colors.onError,
+                    modifier = Modifier.size(AppDimens.Size.xl8),
+                )
+            }
         }
 
         RemovePhotoButton(

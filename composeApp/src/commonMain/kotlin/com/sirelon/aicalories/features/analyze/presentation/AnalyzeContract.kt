@@ -16,7 +16,7 @@ interface AnalyzeContract {
         val hasUploadFailures: Boolean = false,
     ) {
         val hasPendingUploads: Boolean
-            get() = uploads.values.any { !it.isUploaded }
+            get() = uploads.values.any { it.isPending || it.isUploading }
 
         val canSubmit: Boolean
             get() = !isLoading &&
