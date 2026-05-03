@@ -1,7 +1,6 @@
 package com.sirelon.aicalories.features.seller.ad
 
 import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
-import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 import kotlinx.serialization.Serializable
 
 sealed interface AdDestination {
@@ -13,10 +12,7 @@ sealed interface AdDestination {
     data class PreviewAd(val advertisement: AdvertisementWithAttributes) : AdDestination
 
     @Serializable
-    data object SelectRootCategory : AdDestination
-
-    @Serializable
-    data class SelectSubcategory(val category: OlxCategory) : AdDestination
+    data object SelectCategory : AdDestination
 
     @Serializable
     data object Profile : AdDestination
