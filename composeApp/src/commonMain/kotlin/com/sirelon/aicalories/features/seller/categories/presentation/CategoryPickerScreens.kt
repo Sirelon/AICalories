@@ -241,7 +241,8 @@ fun CategoryPickerSheet(
                 style = AppButtonDefaults.secondary(),
                 modifier = Modifier.wrapContentWidth(),
             )
-            val selectedLabel = state.path.lastOrNull()?.label
+            val selectedCategory = state.path.lastOrNull()
+            val selectedLabel = selectedCategory?.label
             AppButton(
                 text = if (selectedLabel != null) {
                     stringResource(Res.string.category_picker_select_with_name, selectedLabel)
@@ -249,9 +250,11 @@ fun CategoryPickerSheet(
                     stringResource(Res.string.category_picker_select)
                 },
                 onClick = {
-                    state.path.lastOrNull()?.let { onCategorySelected(it) }
+                    selectedCategory
+                        ?.takeIf { it.isLeaf }
+                        ?.let { onCategorySelected(it) }
                 },
-                enabled = state.path.isNotEmpty(),
+                enabled = selectedCategory?.isLeaf == true,
                 modifier = Modifier.weight(1f),
             )
         }
