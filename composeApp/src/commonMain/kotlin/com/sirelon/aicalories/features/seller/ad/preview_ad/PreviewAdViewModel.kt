@@ -13,6 +13,7 @@ import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.Pr
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.FetchLocation
+import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.RefreshLocationClicked
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.Publish
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdState
 import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
@@ -142,7 +143,11 @@ class PreviewAdViewModel(
             }
 
             FetchLocation -> viewModelScope.launch {
-                fetchLocation()
+                fetchUserLocation()
+            }
+
+            RefreshLocationClicked -> viewModelScope.launch {
+                fetchUserLocation()
             }
 
             PreviewAdEvent.OnChangeCategoryClick -> postEffect(PreviewAdEffect.GoToGategoryPicker)
@@ -173,7 +178,7 @@ class PreviewAdViewModel(
         }
     }
 
-    private suspend fun fetchLocation() {
+    private suspend fun fetchUserLocation() {
         setState { it.copy(locationLoading = true) }
         try {
             val location = locationRepository.fetchUserLocation()

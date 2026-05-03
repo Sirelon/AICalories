@@ -673,6 +673,7 @@ private fun PreviewAdContent(
             AdLocationCard(
                 location = state.location,
                 isLoading = state.locationLoading,
+                onRefreshClick = { onEvent(PreviewAdEvent.RefreshLocationClicked) },
             )
         }
     }
@@ -944,11 +945,11 @@ private fun AdAttributesCard(
 private fun AdLocationCard(
     location: OlxLocation?,
     isLoading: Boolean,
+    onRefreshClick: () -> Unit = {},
 ) {
     PreviewSectionClickableCard(
         label = stringResource(Res.string.ad_location_label),
-        // TODO: not implemented yet
-        onClick = { },
+        onClick = onRefreshClick,
         icon = rememberVectorPainter(Icons.Default.LocationOn),
         content = {
             when {
