@@ -75,6 +75,7 @@ import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.designsystem.formatPrice
 import com.sirelon.aicalories.designsystem.pager.ImagesCarousel
+import com.sirelon.aicalories.features.media.PermissionController
 import com.sirelon.aicalories.features.media.PermissionDialogContent
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
@@ -257,6 +258,8 @@ private fun PreviewAdContentRoute(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val locationPermissionController =
+        rememberPermissionController(permission = Permission.CoarseLocation)
 
     LaunchedEffect(pendingCategory) {
         if (pendingCategory != null) {
@@ -276,7 +279,7 @@ private fun PreviewAdContentRoute(
     }
 
     if (state.isSessionResolved && !state.isGuest) {
-        LocationPermissionsBlock(viewModel::onEvent)
+        LocationPermissionsBlock(viewModel::onEvent, locationPermissionController)
     }
 
     val titleTooShortLabel = stringResource(Res.string.validation_error_title_too_short)
@@ -392,7 +395,8 @@ private fun PreviewAdContentRoute(
                 onEvent = viewModel::onEvent,
                 state = state,
                 titleState = viewModel.titleState,
-                descriptionState = viewModel.descriptionState
+                descriptionState = viewModel.descriptionState,
+                locationPermissionController = if (state.isSessionResolved && !state.isGuest) locationPermissionController else null,
             )
         }
     }
@@ -573,10 +577,10 @@ private fun GuestCopyHint() {
 }
 
 @Composable
-private fun LocationPermissionsBlock(onEvent: (PreviewAdEvent) -> Unit) {
-    val locationPermissionController =
-        rememberPermissionController(permission = Permission.CoarseLocation)
-
+private fun LocationPermissionsBlock(
+    onEvent: (PreviewAdEvent) -> Unit,
+    locationPermissionController: PermissionController,
+) {
     PermissionDialogs(
         controller = locationPermissionController,
         rationaleContent = PermissionDialogContent(
@@ -612,6 +616,7 @@ private fun PreviewAdContent(
     descriptionState: TextFieldState,
     state: PreviewAdContract.PreviewAdState,
     onEvent: (PreviewAdEvent) -> Unit,
+    locationPermissionController: PermissionController? = null,
 ) {
     val titleText = titleState.text.toString()
     val descriptionText = descriptionState.text.toString()
@@ -673,7 +678,11 @@ private fun PreviewAdContent(
             AdLocationCard(
                 location = state.location,
                 isLoading = state.locationLoading,
-                onRefreshClick = { onEvent(PreviewAdEvent.RefreshLocationClicked) },
+                onRefreshClick = {
+                    locationPermissionController?.requestPermission {
+                        onEvent(PreviewAdEvent.RefreshLocationClicked)
+                    }
+                },
             )
         }
     }
