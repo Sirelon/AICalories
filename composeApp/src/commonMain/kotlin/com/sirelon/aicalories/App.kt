@@ -81,13 +81,12 @@ fun App() {
 
                     entry<AppDestination.SellerLanding> {
                         SellerLandingScreenRoute(
-                            openHome = { navVm.navigateTo(AppDestination.Seller) },
+                            openHome = { navVm.replaceWith(AppDestination.Seller) },
                         )
                     }
 
                     entry<AppDestination.Seller> {
                         AdRootScreen(
-                            onExit = navVm::popDestination,
                             onConnectOlxClick = navVm::exitGuestModeToLanding,
                             onLogout = { navVm.replaceWith(AppDestination.SellerLanding) },
                             popToAdRoot = navVm::popToAdRoot,

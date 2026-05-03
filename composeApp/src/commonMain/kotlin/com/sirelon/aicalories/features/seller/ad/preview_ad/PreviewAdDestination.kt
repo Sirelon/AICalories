@@ -7,6 +7,9 @@ internal sealed interface PreviewAdDestination {
     data object Content : PreviewAdDestination
 
     @Serializable
+    data object BackInfo : PreviewAdDestination
+
+    @Serializable
     data object PublishConfirm : PreviewAdDestination
 
     @Serializable
