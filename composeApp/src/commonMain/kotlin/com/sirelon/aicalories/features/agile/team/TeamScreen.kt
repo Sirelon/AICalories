@@ -2,10 +2,13 @@ package com.sirelon.aicalories.features.agile.team
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import com.sirelon.aicalories.designsystem.AppScaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,10 +54,12 @@ private fun TeamScreenContent(
 
     AppScaffold(
         modifier = Modifier,
-    ) {
+    ) { paddingValues ->
         Column(
             modifier = Modifier
-                .padding(it)
+                .padding(paddingValues)
+                .consumeWindowInsets(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = AppDimens.Spacing.xl3, vertical = AppDimens.Spacing.xl3),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
         ) {

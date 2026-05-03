@@ -9,6 +9,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -105,8 +106,14 @@ fun OnboardingScreen(onClose: () -> Unit) {
         bottomBar = {
             BottomButtons(state = state, onClose = onClose)
         }
-    ) {
-        HorizontalPager(state = state) {
+    ) { paddingValues ->
+        HorizontalPager(
+            state = state,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .consumeWindowInsets(paddingValues),
+        ) {
             OnboardingPage(items[it])
         }
     }
