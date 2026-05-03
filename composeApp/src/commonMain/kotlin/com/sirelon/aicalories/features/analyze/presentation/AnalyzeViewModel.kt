@@ -219,9 +219,12 @@ internal class AnalyzeViewModel(
 
     private fun handleUploadFailure(file: KmpFile, message: String) {
         setState { current ->
+            val existing = current.uploads[file] ?: return@setState current
             current.copy(
-                errorMessage = message,
-                uploads = current.uploads - file,
+                uploads = current.uploads + (file to existing.copy(
+                    isUploading = false,
+                    error = message,
+                )),
                 hasUploadFailures = true,
             )
         }
