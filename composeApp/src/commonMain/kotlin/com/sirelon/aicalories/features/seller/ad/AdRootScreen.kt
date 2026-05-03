@@ -24,8 +24,8 @@ import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessS
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthCallbackBridge
 import com.sirelon.aicalories.features.seller.auth.presentation.OlxAuthDialogScreen
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
-import com.sirelon.aicalories.features.seller.categories.presentation.SelectRootCategoryScreen
-import com.sirelon.aicalories.features.seller.categories.presentation.SelectSubcategoryScreen
+import com.sirelon.aicalories.features.seller.categories.presentation.CategoryPickerSheet
+import com.sirelon.aicalories.navigation.BottomSheetSceneStrategy
 import com.sirelon.aicalories.features.seller.profile.ui.ProfileScreenRoute
 import com.sirelon.aicalories.platform.openUrl
 
@@ -59,6 +59,7 @@ fun AdRootScreen(
     var pendingCategory by remember { mutableStateOf<OlxCategory?>(null) }
     val sceneStrategies = remember {
         listOf(
+            BottomSheetSceneStrategy<AdDestination>(),
             DialogSceneStrategy<AdDestination>(),
             SinglePaneSceneStrategy<AdDestination>(),
         )
@@ -89,7 +90,7 @@ fun AdRootScreen(
             entry<AdDestination.PreviewAd> { destination ->
                 PreviewAdScreen(
                     advertisement = destination.advertisement,
-                    onChangeCategoryClick = { navBackStack.add(AdDestination.SelectRootCategory) },
+                    onChangeCategoryClick = { navBackStack.add(AdDestination.SelectCategory) },
                     onPublishSuccess = {
                         navBackStack.add(AdDestination.SellerPublishSuccess(it))
                     },
@@ -102,33 +103,13 @@ fun AdRootScreen(
                 )
             }
 
-            entry<AdDestination.SelectRootCategory> {
-                SelectRootCategoryScreen(
-                    onBack = { navBackStack.removeAt(navBackStack.lastIndex) },
+            entry<AdDestination.SelectCategory>(
+                metadata = BottomSheetSceneStrategy.bottomSheet(),
+            ) {
+                CategoryPickerSheet(
                     onCategorySelected = { category ->
-                        while (navBackStack.last() !is AdDestination.PreviewAd) {
-                            navBackStack.removeAt(navBackStack.lastIndex)
-                        }
+                        navBackStack.removeAt(navBackStack.lastIndex)
                         pendingCategory = category
-                    },
-                    onNavigateToSubcategory = { category ->
-                        navBackStack.add(AdDestination.SelectSubcategory(category))
-                    },
-                )
-            }
-
-            entry<AdDestination.SelectSubcategory> { destination ->
-                SelectSubcategoryScreen(
-                    category = destination.category,
-                    onBack = { navBackStack.removeAt(navBackStack.lastIndex) },
-                    onCategorySelected = { category ->
-                        while (navBackStack.last() !is AdDestination.PreviewAd) {
-                            navBackStack.removeAt(navBackStack.lastIndex)
-                        }
-                        pendingCategory = category
-                    },
-                    onNavigateToSubcategory = { category ->
-                        navBackStack.add(AdDestination.SelectSubcategory(category))
                     },
                 )
             }

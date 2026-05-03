@@ -56,7 +56,6 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun CategoryPickerSheet(
-    onDismiss: () -> Unit,
     onCategorySelected: (OlxCategory) -> Unit,
 ) {
     val viewModel: CategoryPickerViewModel = koinViewModel()
@@ -105,7 +104,7 @@ fun CategoryPickerSheet(
                     )
                     val isLast = index == state.path.lastIndex
                     TextButton(
-                        onClick = { viewModel.onEvent(NavigateToIndex(index)) },
+                        onClick = { viewModel.onEvent(NavigateToIndex(index + 1)) },
                         contentPadding = PaddingValues(AppDimens.Spacing.xs4),
                     ) {
                         Text(
@@ -142,7 +141,7 @@ fun CategoryPickerSheet(
                             supporting = if (item.parentChain.isNotEmpty()) {
                                 { Text(item.parentChain, style = t.caption, color = c.onSurfaceMuted) }
                             } else null,
-                            onClick = { onCategorySelected(category); onDismiss() },
+                            onClick = { if (category.isLeaf) onCategorySelected(category) },
                         )
                     } else {
                         val isActive = state.path.lastOrNull()?.id == category.id
@@ -213,7 +212,6 @@ fun CategoryPickerSheet(
                             onClick = {
                                 if (category.isLeaf) {
                                     onCategorySelected(category)
-                                    onDismiss()
                                 } else {
                                     viewModel.onEvent(NavigateTo(category))
                                 }
@@ -251,7 +249,7 @@ fun CategoryPickerSheet(
                     stringResource(Res.string.category_picker_select)
                 },
                 onClick = {
-                    state.path.lastOrNull()?.let { onCategorySelected(it); onDismiss() }
+                    state.path.lastOrNull()?.let { onCategorySelected(it) }
                 },
                 enabled = state.path.isNotEmpty(),
                 modifier = Modifier.weight(1f),
