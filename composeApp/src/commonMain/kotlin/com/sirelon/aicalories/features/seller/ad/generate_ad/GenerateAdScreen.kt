@@ -251,7 +251,7 @@ private fun MagicCtaBar(
     onSubmitClick: () -> Unit,
 ) {
     AppButton(
-        
+
         modifier = Modifier.fillMaxWidth(),
         style = AppButtonDefaults.magic(),
         text = if (hasPhotos)
@@ -408,7 +408,7 @@ private fun SellerHeader(
             Text(
                 text = stringResource(Res.string.turn_stuff_into_olx_listings),
                 color = AppTheme.colors.onPrimary,
-                fontSize = AppDimens.TextSize.xl7,
+                fontSize = AppDimens.TextSize.xl6,
                 fontWeight = FontWeight.ExtraBold,
                 lineHeight = AppDimens.TextSize.xl8
             )
@@ -496,35 +496,35 @@ private fun TipsSection(
     modifier: Modifier = Modifier
 ) {
     InfoSection(modifier = modifier) {
-        Row(
+        Column(
             modifier = Modifier.padding(AppDimens.Spacing.xl5),
-            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
+            verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l)
         ) {
-            IconWithBackground(
-                modifier = Modifier.size(AppDimens.Size.xl11),
-                backgroundColor = AppTheme.colors.surface,
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3)
             ) {
-                Icon(
-                    imageVector = Icons.Default.FlashOn,
-                    contentDescription = null,
-                    tint = AppTheme.colors.primary
-                )
-            }
+                IconWithBackground(
+                    modifier = Modifier.size(AppDimens.Size.xl11),
+                    backgroundColor = AppTheme.colors.surface,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FlashOn,
+                        contentDescription = null,
+                        tint = AppTheme.colors.primary
+                    )
+                }
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l)
-            ) {
                 Text(
                     text = stringResource(Res.string.tips_for_better_photos),
                     fontSize = AppDimens.TextSize.xl4,
                     fontWeight = FontWeight.Bold,
                     color = AppTheme.colors.onSurface
                 )
-
-                TipItem(text = stringResource(Res.string.tip_lighting))
-                TipItem(text = stringResource(Res.string.tip_angles))
-                TipItem(text = stringResource(Res.string.tip_defects))
             }
+
+            TipItem(text = stringResource(Res.string.tip_lighting))
+            TipItem(text = stringResource(Res.string.tip_angles))
+            TipItem(text = stringResource(Res.string.tip_defects))
         }
     }
 }
