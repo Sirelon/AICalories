@@ -33,9 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
@@ -67,18 +66,18 @@ fun CategoryPickerSheet(
         // ── Search bar ────────────────────────────────────────────
         Row(
             modifier = Modifier
-                .padding(horizontal = 20.dp, vertical = 12.dp)
+                .padding(horizontal = AppDimens.Spacing.xl5, vertical = AppDimens.Spacing.xl)
                 .fillMaxWidth()
-                .background(c.surfaceLow, RoundedCornerShape(12.dp))
-                .padding(horizontal = 12.dp, vertical = 10.dp),
+                .background(c.surfaceLow, RoundedCornerShape(AppDimens.BorderRadius.xl))
+                .padding(horizontal = AppDimens.Spacing.xl, vertical = AppDimens.Spacing.l),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.m),
         ) {
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
                 tint = c.onSurfaceMuted,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(AppDimens.Size.xl3),
             )
             BasicTextField(
                 value = state.searchQuery,
@@ -99,13 +98,13 @@ fun CategoryPickerSheet(
             if (state.searchQuery.isNotEmpty()) {
                 IconButton(
                     onClick = { viewModel.onEvent(Search("")) },
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(AppDimens.Size.xl5),
                 ) {
                     Icon(
                         painter = painterResource(Res.drawable.ic_x),
                         contentDescription = null,
                         tint = c.onSurfaceMuted,
-                        modifier = Modifier.size(14.dp),
+                        modifier = Modifier.size(AppDimens.Size.xl2),
                     )
                 }
             }
@@ -116,14 +115,14 @@ fun CategoryPickerSheet(
             Row(
                 modifier = Modifier
                     .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp)
-                    .padding(bottom = 12.dp),
+                    .padding(horizontal = AppDimens.Spacing.xl5)
+                    .padding(bottom = AppDimens.Spacing.xl),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.s),
             ) {
                 TextButton(
                     onClick = { viewModel.onEvent(NavigateToIndex(0)) },
-                    contentPadding = PaddingValues(0.dp),
+                    contentPadding = PaddingValues(AppDimens.Spacing.xs4),
                 ) {
                     Text(
                         "Усі",
@@ -132,11 +131,15 @@ fun CategoryPickerSheet(
                     )
                 }
                 state.path.forEachIndexed { index, category ->
-                    Text("›", color = c.onSurface.copy(alpha = 0.34f), fontSize = 12.sp)
+                    Text(
+                        "›",
+                        color = c.onSurface.copy(alpha = 0.34f),
+                        fontSize = AppDimens.TextSize.xl,
+                    )
                     val isLast = index == state.path.lastIndex
                     TextButton(
                         onClick = { viewModel.onEvent(NavigateToIndex(index)) },
-                        contentPadding = PaddingValues(0.dp),
+                        contentPadding = PaddingValues(AppDimens.Spacing.xs4),
                     ) {
                         Text(
                             category.label,
@@ -165,7 +168,10 @@ fun CategoryPickerSheet(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { onCategorySelected(category); onDismiss() }
-                                .padding(horizontal = 20.dp, vertical = 12.dp),
+                                .padding(
+                                    horizontal = AppDimens.Spacing.xl5,
+                                    vertical = AppDimens.Spacing.xl,
+                                ),
                         ) {
                             Text(
                                 category.label,
@@ -194,21 +200,27 @@ fun CategoryPickerSheet(
                                         viewModel.onEvent(NavigateTo(category))
                                     }
                                 }
-                                .padding(horizontal = 20.dp, vertical = 14.dp),
+                                .padding(
+                                    horizontal = AppDimens.Spacing.xl5,
+                                    vertical = AppDimens.Spacing.xl2,
+                                ),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl),
                         ) {
                             if (icon != null) {
                                 Box(
                                     modifier = Modifier
-                                        .size(36.dp)
-                                        .background(c.surfaceLow, RoundedCornerShape(10.dp)),
+                                        .size(AppDimens.Size.xl9)
+                                        .background(
+                                            c.surfaceLow,
+                                            RoundedCornerShape(AppDimens.BorderRadius.l),
+                                        ),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Icon(
                                         painter = icon,
                                         contentDescription = null,
-                                        modifier = Modifier.size(20.dp),
+                                        modifier = Modifier.size(AppDimens.Size.xl5),
                                         tint = c.onSurface,
                                     )
                                 }
@@ -240,13 +252,13 @@ fun CategoryPickerSheet(
                                     painter = painterResource(Res.drawable.ic_circle_check_big),
                                     contentDescription = null,
                                     tint = c.primary,
-                                    modifier = Modifier.size(16.dp),
+                                    modifier = Modifier.size(AppDimens.Size.xl3),
                                 )
                                 else -> Icon(
                                     painter = painterResource(Res.drawable.ic_chevron_right),
                                     contentDescription = null,
                                     tint = c.onSurface.copy(alpha = 0.34f),
-                                    modifier = Modifier.size(14.dp),
+                                    modifier = Modifier.size(AppDimens.Size.xl2),
                                 )
                             }
                         }
@@ -262,10 +274,10 @@ fun CategoryPickerSheet(
         HorizontalDivider(color = c.outlineVariant.copy(alpha = 0.2f))
         Row(
             modifier = Modifier
-                .padding(horizontal = 20.dp, vertical = 12.dp)
+                .padding(horizontal = AppDimens.Spacing.xl5, vertical = AppDimens.Spacing.xl)
                 .navigationBarsPadding()
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.l),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AppButton(
