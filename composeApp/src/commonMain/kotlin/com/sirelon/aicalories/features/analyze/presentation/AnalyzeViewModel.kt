@@ -103,7 +103,10 @@ internal class AnalyzeViewModel(
 
             is MediaUploadUpdate.UploadStarted -> {
                 updateUpload(file = update.file) { item ->
-                    item.copy(isUploading = true)
+                    item.copy(
+                        isUploading = true,
+                        error = null,
+                    )
                 }
             }
 
@@ -116,8 +119,10 @@ internal class AnalyzeViewModel(
             is MediaUploadUpdate.Success -> {
                 updateUpload(file = update.file) { item ->
                     item.copy(
+                        isUploading = false,
                         progress = 100.0,
                         uploadedFile = update.uploadedFile,
+                        error = null,
                     )
                 }
             }
@@ -242,8 +247,10 @@ internal class AnalyzeViewModel(
     ) {
         setState { current ->
             val existing = current.uploads[file] ?: return@setState current
+            val updatedUploads = current.uploads + (file to reducer(existing))
             current.copy(
-                uploads = current.uploads + (file to reducer(existing))
+                uploads = updatedUploads,
+                hasUploadFailures = updatedUploads.values.any { it.error != null },
             )
         }
     }
