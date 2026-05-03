@@ -4,8 +4,7 @@ import androidx.compose.animation.animateBounds
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,9 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,21 +27,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.sp
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppScaffold
 import com.sirelon.aicalories.designsystem.AppTheme
-import com.sirelon.aicalories.designsystem.PulsingCircles
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.designsystem.buttons.AppIconButton
@@ -52,15 +47,14 @@ import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.get_started
 import com.sirelon.aicalories.generated.resources.ic_arrow_left
 import com.sirelon.aicalories.generated.resources.ic_arrow_right
-import com.sirelon.aicalories.generated.resources.ic_camera
-import com.sirelon.aicalories.generated.resources.ic_check
-import com.sirelon.aicalories.generated.resources.ic_sparkles
+import com.sirelon.aicalories.generated.resources.img_seller_onboarding_ai
+import com.sirelon.aicalories.generated.resources.img_seller_onboarding_publish
+import com.sirelon.aicalories.generated.resources.img_seller_onboarding_snap
 import com.sirelon.aicalories.generated.resources.next
 import com.sirelon.aicalories.generated.resources.onboarding_step1_subtitle
 import com.sirelon.aicalories.generated.resources.onboarding_step1_title
 import com.sirelon.aicalories.generated.resources.onboarding_step2_subtitle
 import com.sirelon.aicalories.generated.resources.onboarding_step2_title
-import com.sirelon.aicalories.generated.resources.onboarding_step3_pill
 import com.sirelon.aicalories.generated.resources.onboarding_step3_subtitle
 import com.sirelon.aicalories.generated.resources.onboarding_step3_title
 import kotlinx.coroutines.launch
@@ -190,154 +184,27 @@ private fun FadeInUp(
 
 @Composable
 private fun OnboardingStepIconContent(icon: OnboardingStepIcon) {
-    when (icon) {
-        OnboardingStepIcon.Snap -> SnapStepIcon()
-        OnboardingStepIcon.AiWrites -> AiWritesStepIcon()
-        OnboardingStepIcon.Done -> DoneStepIcon()
-    }
-}
-
-// warningVariant stays a fixed bright yellow in both themes, so the sparkle
-// tint must stay dark for legibility regardless of the active theme.
-private val SparkleBadgeTint = Color(0xFF3A1F00)
-
-@Composable
-private fun SnapStepIcon() {
-    val colors = AppTheme.colors
     val shape = RoundedCornerShape(AppDimens.BorderRadius.xl11)
-    Box(
+    Image(
+        painter = painterResource(
+            when (icon) {
+                OnboardingStepIcon.Snap -> Res.drawable.img_seller_onboarding_snap
+                OnboardingStepIcon.AiWrites -> Res.drawable.img_seller_onboarding_ai
+                OnboardingStepIcon.Done -> Res.drawable.img_seller_onboarding_publish
+            },
+        ),
+        contentDescription = null,
         modifier = Modifier
-            .size(AppDimens.Size.xl22)
-            .padding(AppDimens.Spacing.xl3)
-    ) {
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .shadow(
-                    elevation = AppDimens.Spacing.xl5,
-                    shape = shape,
-                    ambientColor = colors.primary,
-                    spotColor = colors.primary,
-                )
-                .background(
-                    brush = Brush.linearGradient(
-                        listOf(colors.primaryBright, colors.primary),
-                    ),
-                    shape = shape,
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_camera),
-                contentDescription = null,
-                modifier = Modifier.size(AppDimens.Size.xl14),
-                tint = colors.onPrimary,
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(x = AppDimens.Spacing.m, y = -AppDimens.Spacing.m)
-                .size(AppDimens.Size.xl11)
-                .shadow(
-                    elevation = AppDimens.Spacing.m,
-                    shape = CircleShape,
-                    ambientColor = colors.warning,
-                    spotColor = colors.warning,
-                )
-                .background(colors.warningVariant, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_sparkles),
-                contentDescription = null,
-                modifier = Modifier.size(AppDimens.Size.xl6),
-                tint = SparkleBadgeTint,
-            )
-        }
-    }
-}
-
-@Composable
-private fun AiWritesStepIcon() {
-    Box(
-        modifier = Modifier.size(AppDimens.Size.xl22),
-        contentAlignment = Alignment.Center,
-    ) {
-        PulsingCircles {
-            Icon(
-                painter = painterResource(Res.drawable.ic_sparkles),
-                contentDescription = null,
-                modifier = Modifier.size(AppDimens.Size.xl8),
-                tint = AppTheme.colors.onPrimary,
-            )
-        }
-    }
-}
-
-@Composable
-private fun DoneStepIcon() {
-    val colors = AppTheme.colors
-    val shape = RoundedCornerShape(AppDimens.BorderRadius.xl11)
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
-        modifier = Modifier
+            .size(AppDimens.Size.xl23)
             .shadow(
                 elevation = AppDimens.Spacing.xl5,
                 shape = shape,
-                ambientColor = colors.onSurface,
-                spotColor = colors.onSurface,
+                ambientColor = AppTheme.colors.primary,
+                spotColor = AppTheme.colors.primary,
             )
-            .background(
-                brush = Brush.linearGradient(
-                    listOf(colors.surfaceLowest, colors.surfaceLow),
-                ),
-                shape = shape,
-            )
-            .border(
-                width = AppDimens.BorderWidth.s,
-                color = colors.outlineVariant.copy(alpha = 0.33f),
-                shape = shape,
-            )
-            .padding(AppDimens.Spacing.xl8),
-    ) {
-        Box(
-            modifier = Modifier
-                .background(colors.success, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_check),
-                contentDescription = null,
-                modifier = Modifier.size(AppDimens.Size.xl12),
-                tint = colors.onPrimary,
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .padding(bottom = AppDimens.Spacing.xl2)
-                .background(
-                    color = colors.success.copy(alpha = 0.13f),
-                    shape = RoundedCornerShape(AppDimens.BorderRadius.m),
-                )
-                .padding(
-                    horizontal = AppDimens.Spacing.l,
-                    vertical = AppDimens.Spacing.xs,
-                ),
-        ) {
-            Text(
-                text = stringResource(Res.string.onboarding_step3_pill),
-                style = AppTheme.typography.caption.copy(
-                    color = colors.success,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.5.sp,
-                ),
-            )
-        }
-    }
+            .clip(shape),
+        contentScale = ContentScale.Crop,
+    )
 }
 
 @Composable

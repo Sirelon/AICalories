@@ -8,8 +8,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.sirelon.aicalories.datastore.initAndroidKeyValueStore
+import com.sirelon.aicalories.designsystem.AppTheme
+import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
+import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessScreen
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthCallbackBridge
+import com.sirelon.aicalories.features.seller.auth.presentation.SellerAuthContract
+import com.sirelon.aicalories.features.seller.auth.presentation.SellerLandingScreen
 import com.sirelon.aicalories.platform.initAndroidUrlOpener
 
 class MainActivity : ComponentActivity() {
@@ -42,6 +48,30 @@ class MainActivity : ComponentActivity() {
 
 @Preview
 @Composable
-fun AppAndroidPreview() {
-    App()
+private fun SellerLandingScreenPreview() {
+    AppTheme {
+        SellerLandingScreen(
+            state = SellerAuthContract.SellerAuthState(),
+            onEvent = {},
+        )
+    }
+}
+
+@Preview
+@PreviewLightDark
+@Composable
+private fun PublishSuccessScreenPreview() {
+    AppTheme {
+        PublishSuccessScreen(
+            data = PublishSuccessData(
+                url = "https://www.olx.ua/d/uk/obyavlenie/krosvki-nike-air-max-ID123456.html",
+                title = "Кросівки Nike Air Max 90, розмір 42",
+                priceFormatted = "₴ 1 850",
+                primaryImageUrl = null,
+                totalElapsedMs = 92_000L,
+            ),
+            onViewOnOlx = {},
+            onCreateAnother = {},
+        )
+    }
 }

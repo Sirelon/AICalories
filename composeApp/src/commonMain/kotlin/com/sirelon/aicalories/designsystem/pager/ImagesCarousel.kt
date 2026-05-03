@@ -2,28 +2,28 @@ package com.sirelon.aicalories.designsystem.pager
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.sirelon.aicalories.designsystem.AppAsyncImage
 import com.sirelon.aicalories.designsystem.AppDimens
 import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.generated.resources.Res
-import com.sirelon.aicalories.generated.resources.ic_camera
+import com.sirelon.aicalories.generated.resources.img_seller_empty_photo
 import org.jetbrains.compose.resources.painterResource
 
 private val PhotoCarouselShape = RoundedCornerShape(
@@ -99,11 +99,11 @@ private fun EmptyPhotoCarousel(modifier: Modifier = Modifier) {
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            painter = painterResource(Res.drawable.ic_camera),
+        Image(
+            painter = painterResource(Res.drawable.img_seller_empty_photo),
             contentDescription = null,
-            tint = AppTheme.colors.onSurfaceMuted,
-            modifier = Modifier.size(AppDimens.Size.xl12),
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
         )
     }
 }
