@@ -32,7 +32,6 @@ import com.sirelon.aicalories.platform.openUrl
 
 @Composable
 fun AdRootScreen(
-    onExit: () -> Unit,
     onConnectOlxClick: () -> Unit,
     onLogout: () -> Unit,
     popToAdRoot: () -> Unit,
@@ -81,7 +80,6 @@ fun AdRootScreen(
         entryProvider = entryProvider {
             entry<AdDestination.GenerateAd> {
                 GenerateAdScreen(
-                    onBack = onExit,
                     openAdPreview = { navBackStack.add(AdDestination.PreviewAd(it)) },
                     onProfileClick = { navBackStack.add(AdDestination.Profile) },
                 )
@@ -90,6 +88,7 @@ fun AdRootScreen(
             entry<AdDestination.PreviewAd> { destination ->
                 PreviewAdScreen(
                     advertisement = destination.advertisement,
+                    onBackToGenerate = { navBackStack.removeAt(navBackStack.lastIndex) },
                     onChangeCategoryClick = { navBackStack.add(AdDestination.SelectCategory) },
                     onPublishSuccess = {
                         navBackStack.add(AdDestination.SellerPublishSuccess(it))

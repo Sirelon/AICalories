@@ -82,6 +82,7 @@ import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
+import com.sirelon.aicalories.features.seller.ad.preview_ad.ui.PreviewBackInfoSheet
 import com.sirelon.aicalories.features.seller.ad.preview_ad.ui.PublishConfirmSheet
 import com.sirelon.aicalories.features.seller.ad.preview_ad.ui.PublishingScreen
 import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
@@ -156,6 +157,7 @@ private const val DescriptionMinLength = 30
 @Composable
 fun PreviewAdScreen(
     advertisement: AdvertisementWithAttributes,
+    onBackToGenerate: () -> Unit,
     onChangeCategoryClick: () -> Unit,
     onPublishSuccess: (PublishSuccessData) -> Unit,
     pendingCategory: OlxCategory?,
@@ -178,6 +180,11 @@ fun PreviewAdScreen(
             navBackStack.removeAt(navBackStack.lastIndex)
         }
     }
+    val dismissBackInfoSheet: () -> Unit = {
+        if (navBackStack.lastOrNull() is PreviewAdDestination.BackInfo) {
+            navBackStack.removeAt(navBackStack.lastIndex)
+        }
+    }
     val dismissPublishing: () -> Unit = {
         if (navBackStack.lastOrNull() is PreviewAdDestination.Publishing) {
             navBackStack.removeAt(navBackStack.lastIndex)
@@ -188,7 +195,9 @@ fun PreviewAdScreen(
         modifier = Modifier.fillMaxSize(),
         backStack = navBackStack,
         onBack = {
-            if (navBackStack.size > 1) {
+            if (navBackStack.lastOrNull() is PreviewAdDestination.Content) {
+                navBackStack.add(PreviewAdDestination.BackInfo)
+            } else if (navBackStack.size > 1) {
                 navBackStack.removeAt(navBackStack.lastIndex)
             }
         },
@@ -229,6 +238,18 @@ fun PreviewAdScreen(
                         viewModel.onEvent(PreviewAdEvent.Publish)
                     },
                     onDismiss = dismissPublishConfirm,
+                )
+            }
+
+            entry<PreviewAdDestination.BackInfo>(
+                metadata = BottomSheetSceneStrategy.bottomSheet(),
+            ) {
+                PreviewBackInfoSheet(
+                    onStay = dismissBackInfoSheet,
+                    onLeave = {
+                        dismissBackInfoSheet()
+                        onBackToGenerate()
+                    },
                 )
             }
 

@@ -36,6 +36,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.permissions.Camera
 import com.mohamedrejeb.calf.permissions.Permission
@@ -80,7 +83,6 @@ private const val MAX_PROMPT_CHARS = 120
 
 @Composable
 fun GenerateAdScreen(
-    onBack: () -> Unit,
     openAdPreview: (AdvertisementWithAttributes) -> Unit,
     onProfileClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -89,6 +91,13 @@ fun GenerateAdScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val permissionController = rememberPermissionController(permission = Permission.Camera)
+    val navigationEventState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+
+    NavigationBackHandler(
+        state = navigationEventState,
+        isBackEnabled = state.isLoading,
+        onBackCompleted = {},
+    )
 
     val photoPicker = rememberPhotoPickerController(
         permissionController = permissionController,
