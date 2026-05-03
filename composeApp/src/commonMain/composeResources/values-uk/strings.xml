@@ -358,4 +358,13 @@
     <string name="story_points_per_sprint">Стори-пойнти на спринт</string>
     <string name="risk_factor_label">Коефіцієнт ризику</string>
     <string name="risk_factor_hint">0.0 до 1.0 (20%% ризик = 0.2)</string>
+
+    <!-- Category Picker Sheet -->
+    <string name="category_picker_search_placeholder">Пошук категорії</string>
+    <string name="category_picker_all">Усі</string>
+    <string name="category_picker_reset">Скинути</string>
+    <string name="category_picker_select">Обрати</string>
+    <string name="category_picker_select_with_name">Обрати · %1$s</string>
+    <string name="category_picker_selected_label">ОБРАНО</string>
+    <string name="category_picker_select_label">ОБРАТИ</string>
 </resources>

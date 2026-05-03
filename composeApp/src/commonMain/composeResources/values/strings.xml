@@ -365,4 +365,13 @@
     <string name="story_points_per_sprint">Story points per sprint</string>
     <string name="risk_factor_label">Risk factor</string>
     <string name="risk_factor_hint">0.0 to 1.0 (20%% risk = 0.2)</string>
+
+    <!-- Category Picker Sheet -->
+    <string name="category_picker_search_placeholder">Search category</string>
+    <string name="category_picker_all">All</string>
+    <string name="category_picker_reset">Reset</string>
+    <string name="category_picker_select">Select</string>
+    <string name="category_picker_select_with_name">Select · %1$s</string>
+    <string name="category_picker_selected_label">SELECTED</string>
+    <string name="category_picker_select_label">SELECT</string>
 </resources>

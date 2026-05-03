@@ -45,9 +45,17 @@ import com.sirelon.aicalories.features.seller.categories.presentation.CategoryPi
 import com.sirelon.aicalories.features.seller.categories.presentation.CategoryPickerContract.CategoryPickerEvent.Reset
 import com.sirelon.aicalories.features.seller.categories.presentation.CategoryPickerContract.CategoryPickerEvent.Search
 import com.sirelon.aicalories.generated.resources.Res
+import com.sirelon.aicalories.generated.resources.category_picker_all
+import com.sirelon.aicalories.generated.resources.category_picker_reset
+import com.sirelon.aicalories.generated.resources.category_picker_search_placeholder
+import com.sirelon.aicalories.generated.resources.category_picker_select
+import com.sirelon.aicalories.generated.resources.category_picker_select_label
+import com.sirelon.aicalories.generated.resources.category_picker_select_with_name
+import com.sirelon.aicalories.generated.resources.category_picker_selected_label
 import com.sirelon.aicalories.generated.resources.ic_chevron_right
 import com.sirelon.aicalories.generated.resources.ic_circle_check_big
 import com.sirelon.aicalories.generated.resources.ic_x
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -89,7 +97,11 @@ fun CategoryPickerSheet(
                 decorationBox = { inner ->
                     Box {
                         if (state.searchQuery.isEmpty()) {
-                            Text("Пошук категорії", style = t.body, color = c.onSurfaceMuted)
+                            Text(
+                                stringResource(Res.string.category_picker_search_placeholder),
+                                style = t.body,
+                                color = c.onSurfaceMuted,
+                            )
                         }
                         inner()
                     }
@@ -125,7 +137,7 @@ fun CategoryPickerSheet(
                     contentPadding = PaddingValues(AppDimens.Spacing.xs4),
                 ) {
                     Text(
-                        "Усі",
+                        stringResource(Res.string.category_picker_all),
                         style = t.body.copy(fontWeight = FontWeight.SemiBold),
                         color = c.primary,
                     )
@@ -235,14 +247,14 @@ fun CategoryPickerSheet(
                             )
                             when {
                                 category.isLeaf && isActive -> Text(
-                                    "ОБРАНО",
+                                    stringResource(Res.string.category_picker_selected_label),
                                     style = t.caption.copy(
                                         fontWeight = FontWeight.Bold,
                                         color = c.primary,
                                     ),
                                 )
                                 category.isLeaf -> Text(
-                                    "ОБРАТИ",
+                                    stringResource(Res.string.category_picker_select_label),
                                     style = t.caption.copy(
                                         fontWeight = FontWeight.Bold,
                                         color = c.success,
@@ -281,14 +293,18 @@ fun CategoryPickerSheet(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AppButton(
-                text = "Скинути",
+                text = stringResource(Res.string.category_picker_reset),
                 onClick = { viewModel.onEvent(Reset) },
                 style = AppButtonDefaults.secondary(),
                 modifier = Modifier.wrapContentWidth(),
             )
             val selectedLabel = state.path.lastOrNull()?.label
             AppButton(
-                text = if (selectedLabel != null) "Обрати · $selectedLabel" else "Обрати",
+                text = if (selectedLabel != null) {
+                    stringResource(Res.string.category_picker_select_with_name, selectedLabel)
+                } else {
+                    stringResource(Res.string.category_picker_select)
+                },
                 onClick = {
                     state.path.lastOrNull()?.let { onCategorySelected(it); onDismiss() }
                 },
