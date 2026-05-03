@@ -2,17 +2,25 @@ package com.sirelon.aicalories.features.seller.categories.presentation
 
 import com.sirelon.aicalories.features.seller.categories.domain.OlxCategory
 
-data class CategoryWithChildCount(
+data class CategoryDisplayItem(
     val category: OlxCategory,
-    val childCount: Int,
+    val parentChain: String = "",
 )
 
 interface CategoryPickerContract {
 
     data class CategoryPickerState(
-        val categories: List<CategoryWithChildCount> = emptyList(),
+        val allCategories: List<OlxCategory> = emptyList(),
         val isLoading: Boolean = true,
+        val path: List<OlxCategory> = emptyList(),
+        val searchQuery: String = "",
+        val displayItems: List<CategoryDisplayItem> = emptyList(),
     )
 
-    sealed interface CategoryPickerEvent
+    sealed interface CategoryPickerEvent {
+        data class NavigateTo(val category: OlxCategory) : CategoryPickerEvent
+        data class NavigateToIndex(val index: Int) : CategoryPickerEvent
+        data object Reset : CategoryPickerEvent
+        data class Search(val query: String) : CategoryPickerEvent
+    }
 }
