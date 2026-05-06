@@ -19,17 +19,4 @@ sealed interface AppDestination : NavKey {
 
     @Serializable
     data object Seller : AppDestination
-
-    @Serializable
-    data object Analyze : AppDestination
-
-    @Serializable
-    data object History : AppDestination
-
-
-    @Serializable
-    data object Agile : AppDestination
-
-    @Serializable
-    data object DataGenerator : AppDestination
 }

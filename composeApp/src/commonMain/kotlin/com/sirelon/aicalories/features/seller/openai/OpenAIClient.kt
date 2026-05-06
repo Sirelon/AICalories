@@ -153,7 +153,7 @@ class OpenAIClient(
                 store = true,
                 input = ResponseInput(
                     items = listOf(
-                        createAnalyzeUserItem(
+                        createListingAnalysisUserItem(
                             images = images,
                             sellerPrompt = sellerPrompt,
                             imageDetail = imageDetail,
@@ -168,7 +168,7 @@ class OpenAIClient(
         return listingResponse.id to mapper.mapToDomain(generatedAd, images)
     }
 
-    private fun createAnalyzeUserItem(
+    private fun createListingAnalysisUserItem(
         images: List<String>,
         sellerPrompt: String,
         imageDetail: String,
