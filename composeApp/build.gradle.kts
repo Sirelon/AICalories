@@ -188,6 +188,15 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.sirelon.aicalories"
             packageVersion = "1.0.0"
+            macOS {
+                iconFile.set(project.file("src/jvmMain/resources/icons/app-icon.icns"))
+            }
+            windows {
+                iconFile.set(project.file("src/jvmMain/resources/icons/app-icon.ico"))
+            }
+            linux {
+                iconFile.set(project.file("src/jvmMain/resources/icons/app-icon.png"))
+            }
         }
     }
 }

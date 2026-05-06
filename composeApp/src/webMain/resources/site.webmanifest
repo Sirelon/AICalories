@@ -1,0 +1,19 @@
+{
+  "name": "AICalories",
+  "short_name": "AICalories",
+  "icons": [
+    {
+      "src": "icons/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#171A1B",
+  "background_color": "#171A1B",
+  "display": "standalone"
+}
