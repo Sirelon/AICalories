@@ -9,7 +9,7 @@ See [AGENTS.md](AGENTS.md) for the full repo map, module breakdown, and source-s
 ./gradlew :androidApp:assembleDebug
 
 # Compile-check only (fast)
-./gradlew :composeApp:compileKotlinAndroid
+./gradlew :composeApp:compileAndroidMain
 
 # All unit tests
 ./gradlew :composeApp:testDebugUnitTest
@@ -18,7 +18,7 @@ See [AGENTS.md](AGENTS.md) for the full repo map, module breakdown, and source-s
 ./gradlew :composeApp:run
 ```
 
-Always run `:composeApp:compileKotlinAndroid` (or the relevant compile task) before committing or pushing.
+Always run `:composeApp:compileAndroidMain` (or the relevant compile task) before committing or pushing.
 
 ## Architecture Conventions
 
