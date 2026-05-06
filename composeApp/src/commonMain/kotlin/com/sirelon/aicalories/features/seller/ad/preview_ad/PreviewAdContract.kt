@@ -31,8 +31,6 @@ interface PreviewAdContract {
         val locationLoading: Boolean = false,
         val attributeItems: List<OlxAttributeState> = emptyList(),
         val isGuest: Boolean = false,
-        val publishSuccessData: PublishSuccessData? = null,
-        val publishFailureMessage: String? = null,
     )
 
     sealed interface PreviewAdEvent {
@@ -56,5 +54,8 @@ interface PreviewAdContract {
     sealed interface PreviewAdEffect {
         data class ShowMessage(val message: String) : PreviewAdEffect
         data object GoToGategoryPicker : PreviewAdEffect
+        data object NavigateToPublishing : PreviewAdEffect
+        data class PublishSuccess(val data: PublishSuccessData) : PreviewAdEffect
+        data class PublishFailure(val message: String) : PreviewAdEffect
     }
 }
