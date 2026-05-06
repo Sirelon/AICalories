@@ -166,6 +166,7 @@ fun PreviewAdScreen(
     showImagesPreview: (List<String>, Int) -> Unit
 ) {
     val viewModel: PreviewAdViewModel = koinViewModel { parametersOf(advertisement) }
+    val snackbarHostState = remember { SnackbarHostState() }
     val navBackStack = remember {
         mutableStateListOf<PreviewAdDestination>(PreviewAdDestination.Content)
     }
@@ -191,6 +192,32 @@ fun PreviewAdScreen(
         }
     }
 
+    ObserveAsEvents(viewModel.effects) { effect ->
+        when (effect) {
+            is PreviewAdContract.PreviewAdEffect.ShowMessage ->
+                snackbarHostState.showSnackbar(effect.message)
+
+            PreviewAdContract.PreviewAdEffect.GoToGategoryPicker -> onChangeCategoryClick()
+
+            PreviewAdContract.PreviewAdEffect.NavigateToPublishing -> {
+                dismissPublishConfirm()
+                if (navBackStack.lastOrNull() !is PreviewAdDestination.Publishing) {
+                    navBackStack.add(PreviewAdDestination.Publishing)
+                }
+            }
+
+            is PreviewAdContract.PreviewAdEffect.PublishSuccess -> {
+                dismissPublishing()
+                onPublishSuccess(effect.data)
+            }
+
+            is PreviewAdContract.PreviewAdEffect.PublishFailure -> {
+                dismissPublishing()
+                snackbarHostState.showSnackbar(effect.message)
+            }
+        }
+    }
+
     NavDisplay(
         modifier = Modifier.fillMaxSize(),
         backStack = navBackStack,
@@ -207,6 +234,7 @@ fun PreviewAdScreen(
             entry<PreviewAdDestination.Content> {
                 PreviewAdContentRoute(
                     viewModel = viewModel,
+                    snackbarHostState = snackbarHostState,
                     onChangeCategoryClick = onChangeCategoryClick,
                     pendingCategory = pendingCategory,
                     onCategoryConsumed = onCategoryConsumed,
@@ -230,13 +258,7 @@ fun PreviewAdScreen(
                     title = viewModel.titleState.text.toString(),
                     categoryLabel = state.categoryLabel,
                     priceFormatted = "₴ ${formatPrice(state.price)}",
-                    onConfirm = {
-                        dismissPublishConfirm()
-                        if (navBackStack.lastOrNull() !is PreviewAdDestination.Publishing) {
-                            navBackStack.add(PreviewAdDestination.Publishing)
-                        }
-                        viewModel.onEvent(PreviewAdEvent.Publish)
-                    },
+                    onConfirm = { viewModel.onEvent(PreviewAdEvent.Publish) },
                     onDismiss = dismissPublishConfirm,
                 )
             }
@@ -254,14 +276,7 @@ fun PreviewAdScreen(
             }
 
             entry<PreviewAdDestination.Publishing> {
-                PublishingScreen(
-                    viewModel = viewModel,
-                    onPublishSuccess = { data ->
-                        dismissPublishing()
-                        onPublishSuccess(data)
-                    },
-                    onPublishFinishedWithoutSuccess = dismissPublishing,
-                )
+                PublishingScreen()
             }
         },
     )
@@ -270,6 +285,7 @@ fun PreviewAdScreen(
 @Composable
 private fun PreviewAdContentRoute(
     viewModel: PreviewAdViewModel,
+    snackbarHostState: SnackbarHostState,
     onChangeCategoryClick: () -> Unit,
     pendingCategory: OlxCategory?,
     onCategoryConsumed: () -> Unit,
@@ -278,7 +294,6 @@ private fun PreviewAdContentRoute(
     showImagesPreview: (List<String>, Int) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
     val locationPermissionController =
         rememberPermissionController(permission = Permission.CoarseLocation)
 
@@ -286,16 +301,6 @@ private fun PreviewAdContentRoute(
         if (pendingCategory != null) {
             viewModel.onEvent(CategorySelected(pendingCategory))
             onCategoryConsumed()
-        }
-    }
-
-    ObserveAsEvents(viewModel.effects) { effect ->
-        when (effect) {
-            is PreviewAdContract.PreviewAdEffect.ShowMessage -> {
-                snackbarHostState.showSnackbar(effect.message)
-            }
-
-            PreviewAdContract.PreviewAdEffect.GoToGategoryPicker -> onChangeCategoryClick()
         }
     }
 

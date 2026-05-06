@@ -152,8 +152,9 @@ class PreviewAdViewModel(
 
             PreviewAdEvent.OnChangeCategoryClick -> postEffect(PreviewAdEffect.GoToGategoryPicker)
 
-            Publish -> viewModelScope.launch {
-                publishAdvert()
+            Publish -> {
+                postEffect(PreviewAdEffect.NavigateToPublishing)
+                viewModelScope.launch { publishAdvert() }
             }
 
             is PreviewAdEvent.AttributeValueChanged -> setState { currentState ->
@@ -218,16 +219,10 @@ class PreviewAdViewModel(
             return
         }
 
-        setState { it.copy(publishSuccessData = null, publishFailureMessage = null) }
-
         val contactName = runCatching { olxApiClient.getAuthenticatedUser() }.getOrNull()?.name
         if (contactName == null) {
             val failureMessage = getString(Res.string.error_user_profile_fetch_failed)
-            setState {
-                it.copy(
-                    publishFailureMessage = failureMessage,
-                )
-            }
+            postEffect(PreviewAdEffect.PublishFailure(failureMessage))
             return
         }
 
@@ -251,15 +246,10 @@ class PreviewAdViewModel(
                 primaryImageUrl = s.images.firstOrNull(),
                 totalElapsedMs = adFlowTimerStore.totalElapsedMs(),
             )
-            setState { it.copy(publishSuccessData = successData) }
+            postEffect(PreviewAdEffect.PublishSuccess(successData))
         } catch (error: Throwable) {
             val failureMessage = error.message ?: getString(Res.string.error_publish_failed)
-            setState {
-                it.copy(
-                    publishSuccessData = null,
-                    publishFailureMessage = failureMessage,
-                )
-            }
+            postEffect(PreviewAdEffect.PublishFailure(failureMessage))
         }
     }
 
