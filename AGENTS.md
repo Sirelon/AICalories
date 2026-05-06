@@ -4,10 +4,11 @@
 AI-optimized repo map for agents working in this workspace. Read this first; only crawl deeper when the task clearly needs it.
 
 ## Project Snapshot
-- Product scope is mixed-purpose:
-  - food analysis / calorie tracking
+- Product scope is seller-only:
   - OLX seller flow with AI ad generation
-  - agile estimation / team planning tools
+  - seller onboarding/auth/profile
+  - seller media upload, category/attribute editing, location, and publishing
+- Food analysis, history, agile estimation, and data-generator features were extracted out of this checkout. Do not reintroduce them unless explicitly requested.
 - Tech stack:
   - Kotlin `2.3.20`
   - Compose Multiplatform `1.11.0-beta02`
@@ -119,10 +120,6 @@ AI-optimized repo map for agents working in this workspace. Read this first; onl
   - `SellerOnboarding`
   - `SellerLanding`
   - `Seller`
-  - `Analyze`
-  - `History`
-  - `Agile`
-  - `DataGenerator`
 - If adding new app-level navigation, prefer:
   1. add destination to `AppDestination`
   2. update `AppNavigationViewModel`
@@ -154,22 +151,11 @@ Most features use some combination of:
   - screen/render layer in `ui/` or feature root file
 
 ### Feature inventory
-- `features/analyze`
-  - AI-powered meal/food analysis flow.
-  - Uses Supabase + OpenAI-backed logic.
-- `features/history`
-  - Meal/history display.
-  - Navigates back to `Analyze`.
 - `features/seller`
   - OLX auth/onboarding/ad-generation flow.
   - Main subareas: `auth/`, `ad/`, `onboarding/`.
-- `features/agile`
-  - Agile estimation/team capacity tooling.
-  - Contains its own sub-navigation-like flow under `AgileRoot`.
-- `features/datagenerator`
-  - Test/demo data generation UI.
 - `features/media`
-  - Upload, permission, picker, format conversion helpers shared by other features.
+  - Upload, permission, picker, format conversion helpers used by seller ad photos.
 
 ## Seller / OLX Flow
 - This is a real project concern, not sample code.
@@ -188,19 +174,13 @@ Most features use some combination of:
 - Redirect URI default: `selolxai://olx-auth/callback`
 - Full breakdown of the seller/OLX flow lives in **Seller / OLX Deep Dive** at the bottom of this file.
 
-## Analyze / Supabase Flow
+## Supabase Flow
 - Shared Supabase wrapper: `shared/.../supabase/SupabaseClient.kt`
-- Current responsibilities include:
+- Current responsibility is seller media upload:
   - auth with default test credentials when needed
   - file upload to Supabase Storage bucket `test`
-  - create `food_entry`
-  - link uploaded files
-  - invoke edge/function `analize-food`
-  - observe analysis summary/results via realtime/Postgrest
-- Shared models and responses live under:
-  - `shared/.../supabase/model/`
-  - `shared/.../supabase/response/`
-- Expect food-analysis changes to touch both `composeApp` and `shared`.
+  - public URL lookup for uploaded listing photos
+- Food-analysis tables/functions/realtime observers do not belong in this seller-only checkout.
 
 ## Design System Rules
 - Prefer `AppTheme.typography` and `AppTheme.colors`.
@@ -362,7 +342,7 @@ These rules apply to every class that directly maps a JSON API response (OLX, Su
 - The OLX Ktor client is configured with `isLenient = true`, which means numeric JSON primitives are accepted where a `String` is expected — no custom serializer needed for mixed int/string id fields.
 
 ## Working Assumptions
-- This repo is not a pure calorie app anymore; do not remove agile/seller functionality as “unused” without explicit instruction.
+- This repo is seller-only. Do not add calorie-analysis, history, agile, or data-generator functionality back unless explicitly requested.
 - `server` is currently minimal; most business logic is client/shared-side.
 - `App.kt` should stay a rendering shell, not a dumping ground.
 - When a change touches platform behavior, check for corresponding actual implementations in `androidMain`, `jvmMain`, `jsMain`, and `wasmJsMain`.

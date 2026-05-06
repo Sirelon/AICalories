@@ -40,14 +40,6 @@ class AppNavigationViewModel(
         }
     }
 
-    fun popToAnalyze() {
-        val current = _backStack.value
-        val index = current.indexOfLast { it is AppDestination.Analyze }
-        if (index >= 0) {
-            _backStack.value = current.subList(0, index + 1)
-        }
-    }
-
     fun popToAdRoot() {
         adFlowTimerStore.clear()
         _backStack.value = listOf(AppDestination.Seller)

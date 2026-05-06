@@ -180,7 +180,7 @@
     <string name="from_note">From note</string>
 
     <!-- Navigation -->
-    <string name="app_name">AI Calories</string>
+    <string name="app_name">SellSnap</string>
     <string name="nav_analyze">Analyze</string>
     <string name="nav_history">History</string>
     <string name="nav_agile">Agile</string>
@@ -189,7 +189,7 @@
 
     <!-- Permission Dialogs -->
     <string name="camera_permission_title">Camera Permission</string>
-    <string name="camera_permission_message">We need camera access to photograph your meals.</string>
+    <string name="camera_permission_message">We need camera access to photograph items for your listings.</string>
 
     <!-- Estimation -->
     <string name="estimation">Estimation</string>
@@ -288,9 +288,9 @@
 
     <!-- Permission Dialogs -->
     <string name="camera_rationale_title">Camera access needed</string>
-    <string name="camera_rationale_message">We use the camera to photograph your meals. Please allow access so you can keep tracking.</string>
+    <string name="camera_rationale_message">We use the camera to photograph items for your OLX listings. Please allow access to continue.</string>
     <string name="camera_settings_title">Allow camera access in settings</string>
-    <string name="camera_settings_message_ios">Camera access is blocked. Go to Settings → Privacy → Camera and enable AI Calories.</string>
+    <string name="camera_settings_message_ios">Camera access is blocked. Go to Settings → Privacy → Camera and enable SellSnap.</string>
     <string name="camera_settings_message_android">Camera access is blocked. Open the app settings and enable the camera permission.</string>
     <string name="not_now">Not now</string>
     <string name="open_settings">Open settings</string>
@@ -333,7 +333,7 @@
     <string name="location_rationale_message">We need your location to suggest the nearest city for your OLX listing.</string>
     <string name="location_settings_title">Allow location access in settings</string>
     <string name="location_settings_message_android">Location access is blocked. Open the app settings and enable the location permission.</string>
-    <string name="location_settings_message_ios">Location access is blocked. Go to Settings → Privacy → Location Services and enable AI Calories.</string>
+    <string name="location_settings_message_ios">Location access is blocked. Go to Settings → Privacy → Location Services and enable SellSnap.</string>
     <string name="select_category">Select Category</string>
     <string name="subcategory_count">%d subcategories</string>
 

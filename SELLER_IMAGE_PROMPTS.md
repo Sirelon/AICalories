@@ -233,8 +233,7 @@ These are not image prompts, but they affect the same seller polish pass:
 
 - `GenerateAdScreen.kt` hardcodes `Add 1-$MAX_PHOTOS photos. AI will handle the rest.` while resources also contain `new_listing_subtitle` with 1-8 photos. Current `MAX_PHOTOS` is 5.
 - `GenerateAdScreen.kt` account header still shows generic `Welcome`; SIR-40 tracks real account info/logout.
-- Seller camera permission currently falls back to shared camera copy about meal photos and AI Calories.
-- Seller location iOS settings copy also says AI Calories.
+- Seller camera permission and iOS settings copy now use seller/SellSnap wording.
 - `SellerAuthViewModel.kt` sends terms/privacy clicks to malformed `https:google.com` placeholders.
 - The design prototype uses "Torg/torh" placeholder marketplace naming, while the implementation is OLX. Keep generated images brand-neutral and keep final marketplace wording in resources.
 

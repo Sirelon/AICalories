@@ -1,51 +1,24 @@
 package com.sirelon.aicalories.supabase
 
-import com.sirelon.aicalories.supabase.error.RemoteException
-import com.sirelon.aicalories.supabase.model.FoodEntryRecord
-import com.sirelon.aicalories.supabase.model.FoodEntryToFileInsert
-import com.sirelon.aicalories.supabase.model.StorageObjectRecord
-import com.sirelon.aicalories.supabase.response.ReportAnalysisEntryResponse
-import com.sirelon.aicalories.supabase.response.ReportAnalysisSummaryResponse
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.exceptions.RestException
-import io.github.jan.supabase.functions.Functions
-import io.github.jan.supabase.functions.functions
-import io.github.jan.supabase.postgrest.Postgrest
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.filter.FilterOperation
-import io.github.jan.supabase.postgrest.query.filter.FilterOperator
-import io.github.jan.supabase.realtime.Realtime
-import io.github.jan.supabase.realtime.selectAsFlow
 import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.storage.UploadStatus
 import io.github.jan.supabase.storage.storage
 import io.github.jan.supabase.storage.uploadAsFlow
 import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.put
 import kotlin.uuid.Uuid
 
 private const val STORAGE_BUCKET_NAME = "test"
-private const val ANALYZE_FUNCTION_NAME = "analize-food"
-private val remoteErrorParser = Json {
-    ignoreUnknownKeys = true
-}
 
 class SupabaseClient {
     private val sessionMutex = Mutex()
@@ -63,10 +36,7 @@ class SupabaseClient {
                 }
             }
             install(Auth)
-            install(Postgrest)
             install(Storage)
-            install(Functions)
-            install(Realtime)
         }
     }
 
@@ -137,80 +107,6 @@ class SupabaseClient {
         }.getOrNull()
     }
 
-    suspend fun createFoodEntry(note: String?): Long {
-        val userId = ensureAuthenticatedUserId()
-
-        val result = client
-            .postgrest["food_entry"]
-            .insert(
-                mapOf(
-                    "note" to note?.ifBlank { null },
-                    "user_id" to userId,
-                )
-            ) {
-                select()
-            }
-
-        return result.decodeSingle<FoodEntryRecord>().id
-    }
-
-    suspend fun linkFilesToFoodEntry(foodEntryId: Long, fileIds: List<String>) {
-        if (fileIds.isEmpty()) return
-
-        ensureAuthenticatedUserId()
-
-        client
-            .postgrest["food_entry_to_file"]
-            .insert(
-                values = fileIds.map { fileId ->
-                    FoodEntryToFileInsert(
-                        fileId = fileId,
-                        foodEntryId = foodEntryId,
-                    )
-                },
-            )
-    }
-
-    suspend fun fetchStorageObjectIds(paths: List<String>): Map<String, String> {
-        if (paths.isEmpty()) return emptyMap()
-
-        ensureAuthenticatedUserId()
-
-        val result = client
-            .postgrest
-            .from(schema = "storage", table = "objects")
-            .select {
-                filter {
-                    eq(column = "bucket_id", value = STORAGE_BUCKET_NAME)
-                    isIn(column = "name", values = paths)
-                }
-            }
-
-        return result
-            .decodeList<StorageObjectRecord>()
-            .associate { it.name to it.id }
-    }
-
-    suspend fun invokeFoodEntryAnalysis(foodEntryId: Long) {
-        ensureAuthenticatedUserId()
-
-        try {
-            client
-                .functions
-                .invoke(
-                    function = ANALYZE_FUNCTION_NAME,
-                    body = buildJsonObject {
-                        put("foodEntryId", foodEntryId)
-                    },
-                )
-        } catch (error: RestException) {
-            throw RemoteException(
-                message = error.parseRemoteErrorMessage(),
-                cause = error,
-            )
-        }
-    }
-
     private fun buildStoragePath(userId: String, originalPath: String): String {
         val sanitizedName = originalPath
             .substringAfterLast('/')
@@ -225,58 +121,4 @@ class SupabaseClient {
 
         return "$userId/${Uuid.random()}_$safeName"
     }
-
-    fun observeReportSummary(foodEntryId: Long): Flow<ReportAnalysisSummaryResponse?> {
-        return client
-            .postgrest["report_analyse_summary"]
-            .selectAsFlow(
-                primaryKey = ReportAnalysisSummaryResponse::id,
-                filter = FilterOperation(
-                    column = "food_entry_id",
-                    operator = FilterOperator.EQ,
-                    value = foodEntryId,
-                ),
-            )
-            .map { summaries ->
-                summaries.firstOrNull()
-            }
-            .onStart {
-                ensureAuthenticatedUserId()
-            }
-    }
-
-    fun observeReportEntries(reportAnalyseId: Long): Flow<List<ReportAnalysisEntryResponse>> {
-        return client
-            .postgrest["report_analyse_entry"]
-            .selectAsFlow(
-                primaryKey = ReportAnalysisEntryResponse::id,
-                filter = FilterOperation(
-                    column = "report_analyse_id",
-                    operator = FilterOperator.EQ,
-                    value = reportAnalyseId,
-                ),
-            )
-    }
-}
-
-private suspend fun RestException.parseRemoteErrorMessage(): String {
-    val fallbackMessage = description ?: error
-    val rawBody = try {
-        response.bodyAsText()
-    } catch (_: Throwable) {
-        null
-    }
-
-    if (rawBody.isNullOrBlank()) return fallbackMessage
-
-    val parsedMessage = runCatching {
-        val json = remoteErrorParser.parseToJsonElement(rawBody).jsonObject
-        val errorTitle = json["error"]?.jsonPrimitive?.contentOrNull
-        val details = json["details"]?.jsonPrimitive?.contentOrNull
-        listOfNotNull(errorTitle, details)
-            .filter { it.isNotBlank() }
-            .joinToString(": ")
-    }.getOrNull()
-
-    return parsedMessage?.takeIf { it.isNotBlank() } ?: fallbackMessage
 }

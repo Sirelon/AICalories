@@ -182,7 +182,7 @@
     <string name="source_gallery">Галерея</string>
 
     <!-- Navigation -->
-    <string name="app_name">AI Calories</string>
+    <string name="app_name">SellSnap</string>
     <string name="nav_analyze">Аналіз</string>
     <string name="nav_history">Історія</string>
     <string name="nav_agile">Agile</string>
@@ -191,7 +191,7 @@
 
     <!-- Permission Dialogs -->
     <string name="camera_permission_title">Дозвіл на камеру</string>
-    <string name="camera_permission_message">Цьому додатку потрібен доступ до камери для фотографування</string>
+    <string name="camera_permission_message">SellSnap потрібен доступ до камери, щоб фотографувати речі для ваших оголошень.</string>
 
     <!-- Estimation -->
     <string name="estimation">Оцінка</string>
@@ -283,9 +283,9 @@
 
     <!-- Permission Dialogs -->
     <string name="camera_rationale_title">Потрібен дозвіл на камеру</string>
-    <string name="camera_rationale_message">Ми використовуємо камеру для фотографування їжі. Будь ласка, надайте доступ для продовження відстеження.</string>
+    <string name="camera_rationale_message">Ми використовуємо камеру, щоб фотографувати речі для OLX оголошень. Будь ласка, надайте доступ, щоб продовжити.</string>
     <string name="camera_settings_title">Дозволити доступ до камери в налаштуваннях</string>
-    <string name="camera_settings_message_ios">Доступ до камери заблоковано. Відкрийте Налаштування > Конфіденційність > Камера та увімкніть AI Calories.</string>
+    <string name="camera_settings_message_ios">Доступ до камери заблоковано. Відкрийте Налаштування > Конфіденційність > Камера та увімкніть SellSnap.</string>
     <string name="camera_settings_message_android">Доступ до камери заблоковано. Будь ласка, відкрийте налаштування додатку та увімкніть дозвіл на камеру.</string>
     <string name="not_now">Не зараз</string>
     <string name="open_settings">Відкрити налаштування</string>
@@ -327,7 +327,7 @@
     <string name="location_rationale_message">Нам потрібне ваше місцезнаходження, щоб запропонувати найближче місто для вашого оголошення OLX.</string>
     <string name="location_settings_title">Дозволити доступ до місцезнаходження в налаштуваннях</string>
     <string name="location_settings_message_android">Доступ до місцезнаходження заблоковано. Будь ласка, відкрийте налаштування додатку та увімкніть дозвіл на місцезнаходження.</string>
-    <string name="location_settings_message_ios">Доступ до місцезнаходження заблоковано. Відкрийте Налаштування > Конфіденційність > Служби геолокації та увімкніть AI Calories.</string>
+    <string name="location_settings_message_ios">Доступ до місцезнаходження заблоковано. Відкрийте Налаштування > Конфіденційність > Служби геолокації та увімкніть SellSnap.</string>
     <string name="select_category">Обрати категорію</string>
     <string name="subcategory_count">%d підкатегорій</string>
 

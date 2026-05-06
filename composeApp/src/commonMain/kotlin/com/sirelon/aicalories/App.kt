@@ -19,10 +19,6 @@ import com.sirelon.aicalories.designsystem.AppTheme
 import com.sirelon.aicalories.designsystem.screens.LoadingOverlay
 import com.sirelon.aicalories.di.appModule
 import com.sirelon.aicalories.di.networkModule
-import com.sirelon.aicalories.features.agile.AgileRoot
-import com.sirelon.aicalories.features.analyze.ui.AnalyzeScreen
-import com.sirelon.aicalories.features.datagenerator.ui.DataGeneratorScreen
-import com.sirelon.aicalories.features.history.ui.HistoryScreenRoute
 import com.sirelon.aicalories.features.seller.ad.AdRootScreen
 import com.sirelon.aicalories.features.seller.auth.presentation.SellerLandingScreenRoute
 import com.sirelon.aicalories.features.seller.onboarding.OnboardingScreen
@@ -61,8 +57,6 @@ fun App() {
                 }
             }
 
-            val showBackButton: Boolean = navBackStack.size > 1
-
             NavDisplay(
                 modifier = Modifier.fillMaxSize(),
                 backStack = navBackStack,
@@ -91,31 +85,6 @@ fun App() {
                             onLogout = { navVm.replaceWith(AppDestination.SellerLanding) },
                             popToAdRoot = navVm::popToAdRoot,
                         )
-                    }
-
-                    entry<AppDestination.Agile> {
-                        AgileRoot(
-                            onExit = navVm::popDestination,
-                            onOpenDataGenerator = { navVm.navigateTo(AppDestination.DataGenerator) }
-                        )
-                    }
-
-                    entry<AppDestination.Analyze> {
-                        AnalyzeScreen(
-                            onBack = if (showBackButton) navVm::popDestination else null,
-                            onResultConfirmed = { navVm.navigateTo(AppDestination.History) },
-                        )
-                    }
-
-                    entry<AppDestination.History> {
-                        HistoryScreenRoute(
-                            onBack = navVm::popDestination.takeIf { showBackButton },
-                            onCaptureNewMeal = { navVm.popToAnalyze() },
-                        )
-                    }
-
-                    entry<AppDestination.DataGenerator> {
-                        DataGeneratorScreen(onBack = navVm::popDestination.takeIf { showBackButton })
                     }
                 },
             )
