@@ -32,7 +32,8 @@ import com.sirelon.aicalories.generated.resources.error_category_suggestion_fail
 import com.sirelon.aicalories.generated.resources.error_location_fetch_failed
 import com.sirelon.aicalories.generated.resources.error_publish_failed
 import com.sirelon.aicalories.generated.resources.error_publish_missing_category_or_location
-import com.sirelon.aicalories.generated.resources.error_user_profile_fetch_failed
+import com.sirelon.aicalories.generated.resources.validation_error_desc_too_short
+import com.sirelon.aicalories.generated.resources.validation_error_title_too_short
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.debounce
@@ -43,6 +44,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
+
+private const val TitleMinLength = 10
+private const val DescriptionMinLength = 30
 
 class PreviewAdViewModel(
     private val filledAdvertisement: AdvertisementWithAttributes,
@@ -153,7 +157,6 @@ class PreviewAdViewModel(
             PreviewAdEvent.OnChangeCategoryClick -> postEffect(PreviewAdEffect.GoToGategoryPicker)
 
             Publish -> {
-                postEffect(PreviewAdEffect.NavigateToPublishing)
                 viewModelScope.launch { publishAdvert() }
             }
 
@@ -191,7 +194,18 @@ class PreviewAdViewModel(
     }
 
     private suspend fun publishAdvert() {
-        val s = state.value
+        val s = currentState()
+
+        val title = titleState.text.toString()
+        val description = descriptionState.text.toString()
+        if (title.trim().length < TitleMinLength) {
+            postEffect(ShowMessage(getString(Res.string.validation_error_title_too_short)))
+            return
+        }
+        if (description.trim().length < DescriptionMinLength) {
+            postEffect(ShowMessage(getString(Res.string.validation_error_desc_too_short)))
+            return
+        }
 
         val category = s.selectedCategory
         val location = s.location
@@ -216,32 +230,28 @@ class PreviewAdViewModel(
         val hasErrors = validatedItems.any { it.error != null }
         if (hasErrors) {
             setState { it.copy(attributeItems = validatedItems) }
+            postEffect(ShowMessage(getString(Res.string.error_publish_failed)))
             return
         }
 
-        val contactName = runCatching { olxApiClient.getAuthenticatedUser() }.getOrNull()?.name
-        if (contactName == null) {
-            val failureMessage = getString(Res.string.error_user_profile_fetch_failed)
-            postEffect(PreviewAdEffect.PublishFailure(failureMessage))
-            return
-        }
-
-        val request = PostAdvertRequestMapper.map(
-            title = titleState.text.toString(),
-            description = descriptionState.text.toString(),
-            category = category,
-            location = location,
-            images = s.images,
-            price = s.price,
-            contactName = contactName,
-            attributeItems = validatedItems,
-        )
+        postEffect(PreviewAdEffect.NavigateToPublishing)
 
         try {
+            val contactName = olxApiClient.getAuthenticatedUser().name
+            val request = PostAdvertRequestMapper.map(
+                title = title,
+                description = description,
+                category = category,
+                location = location,
+                images = s.images,
+                price = s.price,
+                contactName = contactName,
+                attributeItems = validatedItems,
+            )
             val data = olxApiClient.postAdvert(request)
             val successData = PublishSuccessData(
                 url = data.url.orEmpty(),
-                title = titleState.text.toString(),
+                title = title,
                 priceFormatted = "₴ ${formatPrice(s.price)}",
                 primaryImageUrl = s.images.firstOrNull(),
                 totalElapsedMs = adFlowTimerStore.totalElapsedMs(),
