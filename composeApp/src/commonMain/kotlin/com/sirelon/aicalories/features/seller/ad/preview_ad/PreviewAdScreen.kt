@@ -83,6 +83,7 @@ import com.sirelon.aicalories.features.media.PermissionDialogContent
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
+import com.sirelon.aicalories.features.seller.ad.formatFriendlyElapsedTime
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
 import com.sirelon.aicalories.features.seller.ad.preview_ad.ui.PreviewBackInfoSheet
@@ -134,13 +135,6 @@ import com.sirelon.aicalories.generated.resources.open_settings
 import com.sirelon.aicalories.generated.resources.publish_errors
 import com.sirelon.aicalories.generated.resources.publish_on_olx
 import com.sirelon.aicalories.generated.resources.retry
-import com.sirelon.aicalories.generated.resources.time_duration_minutes
-import com.sirelon.aicalories.generated.resources.time_duration_minutes_seconds
-import com.sirelon.aicalories.generated.resources.time_duration_seconds
-import com.sirelon.aicalories.generated.resources.time_unit_minute_one
-import com.sirelon.aicalories.generated.resources.time_unit_minute_other
-import com.sirelon.aicalories.generated.resources.time_unit_second_one
-import com.sirelon.aicalories.generated.resources.time_unit_second_other
 import com.sirelon.aicalories.generated.resources.validation_all_valid
 import com.sirelon.aicalories.generated.resources.validation_error_desc_too_short
 import com.sirelon.aicalories.generated.resources.validation_error_no_category
@@ -494,7 +488,7 @@ private fun ReadyBanner(
             Text(
                 text = stringResource(
                     Res.string.banner_ready_in,
-                    elapsedMs.toDisplayDuration(),
+                    formatFriendlyElapsedTime(elapsedMs),
                 ),
                 style = AppTheme.typography.body,
                 color = successColor,
@@ -549,60 +543,6 @@ private fun ValidationBanner(
         }
     }
 }
-
-@Composable
-private fun Long.toDisplayDuration(): String {
-    val totalSeconds = (((coerceAtLeast(0L)) + 999L) / 1000L).coerceAtLeast(1L)
-    val minutes = (totalSeconds / 60L).toInt()
-    val seconds = (totalSeconds % 60L).toInt()
-
-    if (minutes == 0) {
-        return stringResource(
-            Res.string.time_duration_seconds,
-            totalSeconds.toInt(),
-            durationUnit(
-                value = totalSeconds.toInt(),
-                one = Res.string.time_unit_second_one,
-                other = Res.string.time_unit_second_other,
-            ),
-        )
-    }
-
-    if (seconds == 0) {
-        return stringResource(
-            Res.string.time_duration_minutes,
-            minutes,
-            durationUnit(
-                value = minutes,
-                one = Res.string.time_unit_minute_one,
-                other = Res.string.time_unit_minute_other,
-            ),
-        )
-    }
-
-    return stringResource(
-        Res.string.time_duration_minutes_seconds,
-        minutes,
-        durationUnit(
-            value = minutes,
-            one = Res.string.time_unit_minute_one,
-            other = Res.string.time_unit_minute_other,
-        ),
-        seconds,
-        durationUnit(
-            value = seconds,
-            one = Res.string.time_unit_second_one,
-            other = Res.string.time_unit_second_other,
-        ),
-    )
-}
-
-@Composable
-private fun durationUnit(
-    value: Int,
-    one: org.jetbrains.compose.resources.StringResource,
-    other: org.jetbrains.compose.resources.StringResource,
-): String = stringResource(if (value == 1) one else other)
 
 @Composable
 private fun ValidationStatusCard(
