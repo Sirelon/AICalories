@@ -143,7 +143,7 @@ fun TransparentInput(
     state: TextFieldState,
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    lineLimits: TextFieldLineLimits = TextFieldLineLimits.SingleLine,
+    lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
     minCharacters: Int = -1,
     maxCharacters: Int = Int.MIN_VALUE,
     prefix: @Composable (() -> Unit)? = null,

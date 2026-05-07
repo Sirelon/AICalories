@@ -60,7 +60,7 @@ fun ImagesCarousel(
         HorizontalPager(
             modifier = Modifier.fillMaxSize(),
             state = pagerState,
-            key = { pageIndex -> images[pageIndex] },
+            key = { pageIndex -> "${pageIndex}:${images[pageIndex]}" },
         ) { pageIndex ->
             PhotoCarouselPage(
                 image = images[pageIndex],
