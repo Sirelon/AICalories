@@ -1,6 +1,7 @@
 package com.sirelon.aicalories.designsystem
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.runtime.Composable
@@ -22,7 +23,9 @@ fun Cell(
     val defaultColors = ListItemDefaults.colors()
     ListItem(
         headlineContent = headline,
-        modifier = modifier.then(clickableModifier),
+        modifier = modifier
+            .fillMaxWidth()
+            .then(clickableModifier),
         overlineContent = overline,
         supportingContent = supporting,
         leadingContent = leading,

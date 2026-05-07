@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -189,6 +190,7 @@ private fun GenerateAdScreenContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .imePadding()
                     .navigationBarsPadding()
                     .padding(AppDimens.Spacing.xl3),
             ) {
@@ -499,8 +501,6 @@ private fun PromptSection(
                 enabled = enabled,
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = stringResource(Res.string.ai_hint_placeholder),
-                minLines = 3,
-                maxLines = 5,
                 maxCharacters = MAX_PROMPT_CHARS,
             )
         }

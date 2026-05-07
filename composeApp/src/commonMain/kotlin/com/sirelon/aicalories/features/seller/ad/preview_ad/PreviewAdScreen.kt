@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -51,6 +52,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.util.fastRoundToInt
@@ -80,6 +82,7 @@ import com.sirelon.aicalories.features.media.PermissionDialogContent
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
+import com.sirelon.aicalories.features.seller.ad.formatFriendlyElapsedTime
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent
 import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.PreviewAdEvent.CategorySelected
 import com.sirelon.aicalories.features.seller.ad.preview_ad.ui.PreviewBackInfoSheet
@@ -351,6 +354,7 @@ private fun PreviewAdContentRoute(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .imePadding()
                     .navigationBarsPadding()
                     .padding(horizontal = AppDimens.Spacing.xl3)
                     .padding(bottom = AppDimens.Spacing.m),
@@ -466,7 +470,7 @@ private fun ReadyBanner(
             Text(
                 text = stringResource(
                     Res.string.banner_ready_in,
-                    elapsedMs.toDisplaySeconds(),
+                    formatFriendlyElapsedTime(elapsedMs),
                 ),
                 style = AppTheme.typography.body,
                 color = successColor,
@@ -521,9 +525,6 @@ private fun ValidationBanner(
         }
     }
 }
-
-private fun Long.toDisplaySeconds(): Int =
-    (((coerceAtLeast(0L)) + 999L) / 1000L).coerceAtLeast(1L).toInt()
 
 @Composable
 private fun ValidationStatusCard(
@@ -848,7 +849,10 @@ private fun AdPriceCard(
                     TransparentInput(
                         state = priceTextFieldState,
                         modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Decimal,
+                            imeAction = ImeAction.Done,
+                        ),
                         lineLimits = TextFieldLineLimits.SingleLine,
                         inputTransformation = DigitOnlyInputTransformation,
                         outputTransformation = ThousandSeparatorOutputTransformation,
