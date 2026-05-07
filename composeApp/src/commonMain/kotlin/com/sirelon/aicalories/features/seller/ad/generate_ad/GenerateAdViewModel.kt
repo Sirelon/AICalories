@@ -5,6 +5,7 @@ import com.mohamedrejeb.calf.io.KmpFile
 import com.sirelon.aicalories.features.common.presentation.BaseViewModel
 import com.sirelon.aicalories.features.media.upload.MediaUploadHelper
 import com.sirelon.aicalories.features.media.upload.MediaUploadUpdate
+import com.sirelon.aicalories.features.media.upload.UploadedFile
 import com.sirelon.aicalories.features.media.upload.UploadingItem
 import com.sirelon.aicalories.features.seller.ad.AdFlowTimerStore
 import com.sirelon.aicalories.features.seller.ad.AdvertisementWithAttributes
@@ -164,19 +165,32 @@ class GenerateAdViewModel(
     }
 
     private suspend fun uploadFilesAndGetPublicUrls(): List<String> {
-        val pendingFiles = currentState()
-            .uploads
+        val uploads = currentState().uploads
+        val pendingFiles = uploads
             .filter { (_, item) -> item.isPending }
             .keys.toList()
+        val uploadedByFile = uploads
+            .mapNotNull { (file, item) -> item.uploadedFile?.let { file to it } }
+            .toMap()
 
-        return mediaUploadHelper
-            .uploadPreparedFiles(pendingFiles)
-            .onEach(::handleUploadUpdate)
-            .filterIsInstance<MediaUploadUpdate.Success>()
-            .map { it.uploadedFile }
-            .toList()
-            .map { mediaUploadHelper.publicUrl(it.path) }
+        val newlyUploadedByFile = if (pendingFiles.isEmpty()) {
+            emptyMap()
+        } else {
+            mediaUploadHelper
+                .uploadPreparedFiles(pendingFiles)
+                .onEach(::handleUploadUpdate)
+                .filterIsInstance<MediaUploadUpdate.Success>()
+                .map { it.file to it.uploadedFile }
+                .toList()
+                .toMap()
+        }
+
+        return uploads.keys.mapNotNull { file ->
+            (newlyUploadedByFile[file] ?: uploadedByFile[file])?.toPublicUrl()
+        }
     }
+
+    private fun UploadedFile.toPublicUrl(): String = mediaUploadHelper.publicUrl(path)
 
     private fun onFileResult(event: GenerateAdContract.GenerateAdEvent.UploadFilesResult) {
         viewModelScope.launch {
@@ -224,6 +238,7 @@ class GenerateAdViewModel(
             is MediaUploadUpdate.Success -> {
                 updateUpload(file = update.file) { item ->
                     item.copy(
+                        isUploading = false,
                         progress = 100.0,
                         uploadedFile = update.uploadedFile,
                     )

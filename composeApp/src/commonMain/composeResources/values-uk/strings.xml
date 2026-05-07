@@ -57,7 +57,7 @@
     <string name="publish_to_olx">Опублікувати на OLX</string>
     <string name="publish_on_olx">Опублікувати на OLX</string>
     <string name="publish_errors">Публікація · %1$d помилок</string>
-    <string name="banner_ready_in">Готово за %1$dс. Перевірте та змініть будь-що перед публікацією.</string>
+    <string name="banner_ready_in">Готово за %1$s. Перевірте та змініть будь-що перед публікацією.</string>
     <string name="validation_all_valid">Перевірено. Усі обов\'язкові поля заповнені.</string>
     <string name="validation_fields_remaining">%1$d поля не заповнені</string>
     <string name="validation_error_title_too_short">Назва: щонайменше 10 символів</string>
@@ -353,6 +353,13 @@
     <string name="publish_success_create_another">Створити ще одне</string>
     <string name="time_unit_seconds">%1$dс</string>
     <string name="time_unit_minutes_seconds">%1$dхв %2$dс</string>
+    <string name="time_duration_seconds">%1$d %2$s</string>
+    <string name="time_duration_minutes">%1$d %2$s</string>
+    <string name="time_duration_minutes_seconds">%1$d %2$s і %3$d %4$s</string>
+    <string name="time_unit_second_one">секунда</string>
+    <string name="time_unit_second_other">секунд</string>
+    <string name="time_unit_minute_one">хвилина</string>
+    <string name="time_unit_minute_other">хвилин</string>
 
     <!-- Team Settings Screen -->
     <string name="team_settings_title">Налаштування команди</string>

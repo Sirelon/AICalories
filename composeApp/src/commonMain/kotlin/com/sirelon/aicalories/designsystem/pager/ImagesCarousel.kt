@@ -13,6 +13,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,6 +60,7 @@ fun ImagesCarousel(
         HorizontalPager(
             modifier = Modifier.fillMaxSize(),
             state = pagerState,
+            key = { pageIndex -> images[pageIndex] },
         ) { pageIndex ->
             PhotoCarouselPage(
                 image = images[pageIndex],
@@ -81,15 +84,19 @@ fun ImagesCarousel(
 
 @Composable
 private fun PhotoCarouselPage(image: String, onTap: () -> Unit) {
+    val imageModel = remember(image) { image.trim() }
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(AppTheme.colors.surfaceLow)
             .clickable(onClick = onTap),
     ) {
-        AppAsyncImage(
-            model = image,
-            modifier = Modifier.fillMaxSize(),
-        )
+        key(imageModel) {
+            AppAsyncImage(
+                model = imageModel,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
     }
 }
 

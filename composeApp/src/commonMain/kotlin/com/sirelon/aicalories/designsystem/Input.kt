@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.KeyboardActionHandler
 import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
@@ -14,6 +15,8 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import com.sirelon.aicalories.generated.resources.Res
 import com.sirelon.aicalories.generated.resources.character_count_range
@@ -44,6 +47,17 @@ fun Input(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
+    val focusManager = LocalFocusManager.current
+    val resolvedKeyboardOptions = if (keyboardOptions.imeAction == ImeAction.Default) {
+        keyboardOptions.copy(imeAction = ImeAction.Done)
+    } else {
+        keyboardOptions
+    }
+    val resolvedKeyboardActions = if (keyboardActions == KeyboardActions.Default) {
+        KeyboardActions(onDone = { focusManager.clearFocus(force = true) })
+    } else {
+        keyboardActions
+    }
     val characterCountText = when {
         minCharacters > 0 && value.length < minCharacters -> stringResource(
             Res.string.min_characters,
@@ -117,8 +131,8 @@ fun Input(
         singleLine = singleLine,
         minLines = minLines,
         maxLines = maxLines,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
+        keyboardOptions = resolvedKeyboardOptions,
+        keyboardActions = resolvedKeyboardActions,
         visualTransformation = visualTransformation,
         textStyle = AppTheme.typography.body,
     )
@@ -137,6 +151,16 @@ fun TransparentInput(
     inputTransformation: InputTransformation? = null,
     outputTransformation: OutputTransformation? = null,
 ) {
+    val focusManager = LocalFocusManager.current
+    val resolvedKeyboardOptions = if (keyboardOptions.imeAction == ImeAction.Default) {
+        keyboardOptions.copy(imeAction = ImeAction.Done)
+    } else {
+        keyboardOptions
+    }
+    val keyboardActionHandler = KeyboardActionHandler { performDefaultAction ->
+        focusManager.clearFocus(force = true)
+        performDefaultAction()
+    }
     val characterCountText = when {
         minCharacters > 0 && state.text.length < minCharacters -> stringResource(
             Res.string.min_characters,
@@ -177,7 +201,8 @@ fun TransparentInput(
         ),
         state = state,
         prefix = prefix,
-        keyboardOptions = keyboardOptions,
+        keyboardOptions = resolvedKeyboardOptions,
+        onKeyboardAction = keyboardActionHandler,
         lineLimits = lineLimits,
         supportingText = characterCountText?.let {
             {

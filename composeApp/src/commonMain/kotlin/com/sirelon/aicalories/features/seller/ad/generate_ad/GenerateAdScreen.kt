@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -29,8 +31,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,6 +57,7 @@ import com.sirelon.aicalories.designsystem.Input
 import com.sirelon.aicalories.designsystem.ObserveAsEvents
 import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
+import com.sirelon.aicalories.designsystem.rememberKeyboardDismissAction
 import com.sirelon.aicalories.features.media.PermissionDialogs
 import com.sirelon.aicalories.features.media.rememberPermissionController
 import com.sirelon.aicalories.features.media.rememberPhotoPickerController
@@ -95,6 +100,7 @@ fun GenerateAdScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val permissionController = rememberPermissionController(permission = Permission.Camera)
     val navigationEventState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+    val dismissKeyboard = rememberKeyboardDismissAction()
 
     NavigationBackHandler(
         state = navigationEventState,
@@ -115,7 +121,10 @@ fun GenerateAdScreen(
                 snackbarHostState.showSnackbar(effect.message)
             }
 
-            is GenerateAdContract.GenerateAdEffect.OpenAdPreview -> openAdPreview(effect.ad)
+            is GenerateAdContract.GenerateAdEffect.OpenAdPreview -> {
+                dismissKeyboard()
+                openAdPreview(effect.ad)
+            }
         }
     }
 
@@ -148,10 +157,12 @@ fun GenerateAdScreen(
                 },
                 onSubmitClick = {
                     if (state.canSubmit) {
+                        dismissKeyboard()
                         viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit)
                     }
                 },
                 onProfileClick = onProfileClick,
+                dismissKeyboard = dismissKeyboard,
                 modifier = modifier,
             )
         }
@@ -172,8 +183,20 @@ private fun GenerateAdScreenContent(
     onRemovePhoto: (KmpFile) -> Unit,
     onSubmitClick: () -> Unit,
     onProfileClick: () -> Unit,
+    dismissKeyboard: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .collect { isScrolling ->
+                if (isScrolling) {
+                    dismissKeyboard()
+                }
+            }
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets.safeDrawing,
@@ -189,6 +212,7 @@ private fun GenerateAdScreenContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .imePadding()
                     .navigationBarsPadding()
                     .padding(AppDimens.Spacing.xl3),
             ) {
@@ -201,6 +225,7 @@ private fun GenerateAdScreenContent(
         }
     ) { padding ->
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .consumeWindowInsets(padding)
@@ -583,6 +608,7 @@ private fun GenerateAdScreenEmptyPreview() {
             onRemovePhoto = {},
             onSubmitClick = {},
             onProfileClick = {},
+            dismissKeyboard = {},
         )
     }
 }
@@ -602,6 +628,7 @@ private fun GenerateAdScreenWithPromptPreview() {
             onRemovePhoto = {},
             onSubmitClick = {},
             onProfileClick = {},
+            dismissKeyboard = {},
         )
     }
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -51,6 +52,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.util.fastRoundToInt
@@ -75,6 +77,7 @@ import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.designsystem.formatPrice
 import com.sirelon.aicalories.designsystem.pager.ImagesCarousel
+import com.sirelon.aicalories.designsystem.rememberKeyboardDismissAction
 import com.sirelon.aicalories.features.media.PermissionController
 import com.sirelon.aicalories.features.media.PermissionDialogContent
 import com.sirelon.aicalories.features.media.PermissionDialogs
@@ -131,6 +134,13 @@ import com.sirelon.aicalories.generated.resources.open_settings
 import com.sirelon.aicalories.generated.resources.publish_errors
 import com.sirelon.aicalories.generated.resources.publish_on_olx
 import com.sirelon.aicalories.generated.resources.retry
+import com.sirelon.aicalories.generated.resources.time_duration_minutes
+import com.sirelon.aicalories.generated.resources.time_duration_minutes_seconds
+import com.sirelon.aicalories.generated.resources.time_duration_seconds
+import com.sirelon.aicalories.generated.resources.time_unit_minute_one
+import com.sirelon.aicalories.generated.resources.time_unit_minute_other
+import com.sirelon.aicalories.generated.resources.time_unit_second_one
+import com.sirelon.aicalories.generated.resources.time_unit_second_other
 import com.sirelon.aicalories.generated.resources.validation_all_valid
 import com.sirelon.aicalories.generated.resources.validation_error_desc_too_short
 import com.sirelon.aicalories.generated.resources.validation_error_no_category
@@ -167,6 +177,7 @@ fun PreviewAdScreen(
 ) {
     val viewModel: PreviewAdViewModel = koinViewModel { parametersOf(advertisement) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val dismissKeyboard = rememberKeyboardDismissAction()
     val navBackStack = remember {
         mutableStateListOf<PreviewAdDestination>(PreviewAdDestination.Content)
     }
@@ -200,6 +211,7 @@ fun PreviewAdScreen(
             PreviewAdContract.PreviewAdEffect.GoToGategoryPicker -> onChangeCategoryClick()
 
             PreviewAdContract.PreviewAdEffect.NavigateToPublishing -> {
+                dismissKeyboard()
                 dismissPublishConfirm()
                 if (navBackStack.lastOrNull() !is PreviewAdDestination.Publishing) {
                     navBackStack.add(PreviewAdDestination.Publishing)
@@ -207,11 +219,13 @@ fun PreviewAdScreen(
             }
 
             is PreviewAdContract.PreviewAdEffect.PublishSuccess -> {
+                dismissKeyboard()
                 dismissPublishing()
                 onPublishSuccess(effect.data)
             }
 
             is PreviewAdContract.PreviewAdEffect.PublishFailure -> {
+                dismissKeyboard()
                 dismissPublishing()
                 snackbarHostState.showSnackbar(effect.message)
             }
@@ -240,11 +254,13 @@ fun PreviewAdScreen(
                     onCategoryConsumed = onCategoryConsumed,
                     onConnectOlxClick = onConnectOlxClick,
                     onPublishConfirmationRequested = {
+                        dismissKeyboard()
                         if (navBackStack.lastOrNull() !is PreviewAdDestination.PublishConfirm) {
                             navBackStack.add(PreviewAdDestination.PublishConfirm)
                         }
                     },
                     showImagesPreview = showImagesPreview,
+                    dismissKeyboard = dismissKeyboard,
                 )
             }
 
@@ -258,7 +274,10 @@ fun PreviewAdScreen(
                     title = viewModel.titleState.text.toString(),
                     categoryLabel = state.categoryLabel,
                     priceFormatted = "₴ ${formatPrice(state.price)}",
-                    onConfirm = { viewModel.onEvent(PreviewAdEvent.Publish) },
+                    onConfirm = {
+                        dismissKeyboard()
+                        viewModel.onEvent(PreviewAdEvent.Publish)
+                    },
                     onDismiss = dismissPublishConfirm,
                 )
             }
@@ -292,6 +311,7 @@ private fun PreviewAdContentRoute(
     onConnectOlxClick: () -> Unit,
     onPublishConfirmationRequested: () -> Unit,
     showImagesPreview: (List<String>, Int) -> Unit,
+    dismissKeyboard: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val locationPermissionController =
@@ -339,12 +359,22 @@ private fun PreviewAdContentRoute(
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(scrollState) {
+        snapshotFlow { scrollState.isScrollInProgress }
+            .collect { isScrolling ->
+                if (isScrolling) {
+                    dismissKeyboard()
+                }
+            }
+    }
+
     AppScaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .imePadding()
                     .navigationBarsPadding()
                     .padding(horizontal = AppDimens.Spacing.xl3)
                     .padding(bottom = AppDimens.Spacing.m),
@@ -356,7 +386,10 @@ private fun PreviewAdContentRoute(
                         modifier = Modifier.fillMaxWidth(),
                         style = AppButtonDefaults.primary(),
                         text = stringResource(Res.string.guest_connect_olx_cta),
-                        onClick = onConnectOlxClick,
+                        onClick = {
+                            dismissKeyboard()
+                            onConnectOlxClick()
+                        },
                     )
                 } else if (state.isSessionResolved) {
                     AppButton(
@@ -369,6 +402,7 @@ private fun PreviewAdContentRoute(
                         },
                         trailingIcon = painterResource(Res.drawable.ic_arrow_right),
                         onClick = {
+                            dismissKeyboard()
                             if (!isValid) {
                                 showErrors = true
                                 coroutineScope.launch { scrollState.animateScrollTo(0) }
@@ -460,7 +494,7 @@ private fun ReadyBanner(
             Text(
                 text = stringResource(
                     Res.string.banner_ready_in,
-                    elapsedMs.toDisplaySeconds(),
+                    elapsedMs.toDisplayDuration(),
                 ),
                 style = AppTheme.typography.body,
                 color = successColor,
@@ -516,8 +550,59 @@ private fun ValidationBanner(
     }
 }
 
-private fun Long.toDisplaySeconds(): Int =
-    (((coerceAtLeast(0L)) + 999L) / 1000L).coerceAtLeast(1L).toInt()
+@Composable
+private fun Long.toDisplayDuration(): String {
+    val totalSeconds = (((coerceAtLeast(0L)) + 999L) / 1000L).coerceAtLeast(1L)
+    val minutes = (totalSeconds / 60L).toInt()
+    val seconds = (totalSeconds % 60L).toInt()
+
+    if (minutes == 0) {
+        return stringResource(
+            Res.string.time_duration_seconds,
+            totalSeconds.toInt(),
+            durationUnit(
+                value = totalSeconds.toInt(),
+                one = Res.string.time_unit_second_one,
+                other = Res.string.time_unit_second_other,
+            ),
+        )
+    }
+
+    if (seconds == 0) {
+        return stringResource(
+            Res.string.time_duration_minutes,
+            minutes,
+            durationUnit(
+                value = minutes,
+                one = Res.string.time_unit_minute_one,
+                other = Res.string.time_unit_minute_other,
+            ),
+        )
+    }
+
+    return stringResource(
+        Res.string.time_duration_minutes_seconds,
+        minutes,
+        durationUnit(
+            value = minutes,
+            one = Res.string.time_unit_minute_one,
+            other = Res.string.time_unit_minute_other,
+        ),
+        seconds,
+        durationUnit(
+            value = seconds,
+            one = Res.string.time_unit_second_one,
+            other = Res.string.time_unit_second_other,
+        ),
+    )
+}
+
+@Composable
+private fun durationUnit(
+    value: Int,
+    one: org.jetbrains.compose.resources.StringResource,
+    other: org.jetbrains.compose.resources.StringResource,
+): String = stringResource(if (value == 1) one else other)
 
 @Composable
 private fun ValidationStatusCard(
@@ -842,7 +927,10 @@ private fun AdPriceCard(
                     TransparentInput(
                         state = priceTextFieldState,
                         modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Decimal,
+                            imeAction = ImeAction.Done,
+                        ),
                         lineLimits = TextFieldLineLimits.SingleLine,
                         inputTransformation = DigitOnlyInputTransformation,
                         outputTransformation = ThousandSeparatorOutputTransformation,
