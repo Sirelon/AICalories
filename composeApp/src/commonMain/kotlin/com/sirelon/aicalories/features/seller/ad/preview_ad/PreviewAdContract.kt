@@ -57,5 +57,6 @@ interface PreviewAdContract {
         data object NavigateToPublishing : PreviewAdEffect
         data class PublishSuccess(val data: PublishSuccessData) : PreviewAdEffect
         data class PublishFailure(val message: String) : PreviewAdEffect
+        data class NavigateToProfile(val reason: String) : PreviewAdEffect
     }
 }

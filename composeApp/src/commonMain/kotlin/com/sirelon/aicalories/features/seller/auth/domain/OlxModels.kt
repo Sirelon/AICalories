@@ -110,6 +110,16 @@ sealed interface OlxApiError {
     data class Unknown(
         override val userMessage: String,
     ) : OlxApiError
+
+    data class ValidationError(
+        val field: String,
+        val fieldDetail: String,
+        override val userMessage: String = "$field: $fieldDetail",
+    ) : OlxApiError
+
+    data class RateLimited(
+        override val userMessage: String = "Too many requests. Please wait before posting again.",
+    ) : OlxApiError
 }
 
 class OlxApiException(val error: OlxApiError) : IllegalStateException(error.userMessage)

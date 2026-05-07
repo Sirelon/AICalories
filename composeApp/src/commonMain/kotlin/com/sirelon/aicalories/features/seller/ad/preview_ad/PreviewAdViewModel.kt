@@ -19,6 +19,8 @@ import com.sirelon.aicalories.features.seller.ad.preview_ad.PreviewAdContract.Pr
 import com.sirelon.aicalories.features.seller.ad.publish_success.PublishSuccessData
 import com.sirelon.aicalories.features.seller.auth.data.OlxApiClient
 import com.sirelon.aicalories.features.seller.auth.data.OlxAuthRepository
+import com.sirelon.aicalories.features.seller.auth.domain.OlxApiError
+import com.sirelon.aicalories.features.seller.auth.domain.OlxApiException
 import com.sirelon.aicalories.features.seller.auth.domain.SellerSessionMode
 import com.sirelon.aicalories.features.seller.categories.data.CategoriesRepository
 import com.sirelon.aicalories.features.seller.categories.domain.AttributeInputType
@@ -32,6 +34,7 @@ import com.sirelon.aicalories.generated.resources.error_category_suggestion_fail
 import com.sirelon.aicalories.generated.resources.error_location_fetch_failed
 import com.sirelon.aicalories.generated.resources.error_publish_failed
 import com.sirelon.aicalories.generated.resources.error_publish_missing_category_or_location
+import com.sirelon.aicalories.generated.resources.error_publish_missing_contact_name
 import com.sirelon.aicalories.generated.resources.validation_error_desc_too_short
 import com.sirelon.aicalories.generated.resources.validation_error_title_too_short
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -238,6 +241,10 @@ class PreviewAdViewModel(
 
         try {
             val contactName = olxApiClient.getAuthenticatedUser().name
+            if (contactName.isBlank()) {
+                postEffect(PreviewAdEffect.NavigateToProfile(getString(Res.string.error_publish_missing_contact_name)))
+                return
+            }
             val request = PostAdvertRequestMapper.map(
                 title = title,
                 description = description,
@@ -258,8 +265,13 @@ class PreviewAdViewModel(
             )
             postEffect(PreviewAdEffect.PublishSuccess(successData))
         } catch (error: Throwable) {
-            val failureMessage = error.message ?: getString(Res.string.error_publish_failed)
-            postEffect(PreviewAdEffect.PublishFailure(failureMessage))
+            val olxError = (error as? OlxApiException)?.error
+            if (olxError is OlxApiError.ValidationError && olxError.field.startsWith("contact.")) {
+                postEffect(PreviewAdEffect.NavigateToProfile(olxError.userMessage))
+            } else {
+                val failureMessage = error.message ?: getString(Res.string.error_publish_failed)
+                postEffect(PreviewAdEffect.PublishFailure(failureMessage))
+            }
         }
     }
 

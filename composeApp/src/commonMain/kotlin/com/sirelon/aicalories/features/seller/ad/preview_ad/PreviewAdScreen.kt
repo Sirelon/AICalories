@@ -163,7 +163,8 @@ fun PreviewAdScreen(
     pendingCategory: OlxCategory?,
     onCategoryConsumed: () -> Unit,
     onConnectOlxClick: () -> Unit,
-    showImagesPreview: (List<String>, Int) -> Unit
+    showImagesPreview: (List<String>, Int) -> Unit,
+    onNavigateToProfile: (String) -> Unit = {},
 ) {
     val viewModel: PreviewAdViewModel = koinViewModel { parametersOf(advertisement) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -214,6 +215,11 @@ fun PreviewAdScreen(
             is PreviewAdContract.PreviewAdEffect.PublishFailure -> {
                 dismissPublishing()
                 snackbarHostState.showSnackbar(effect.message)
+            }
+
+            is PreviewAdContract.PreviewAdEffect.NavigateToProfile -> {
+                dismissPublishing()
+                onNavigateToProfile(effect.reason)
             }
         }
     }

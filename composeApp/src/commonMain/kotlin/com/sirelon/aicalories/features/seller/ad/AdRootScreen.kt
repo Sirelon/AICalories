@@ -81,7 +81,7 @@ fun AdRootScreen(
             entry<AdDestination.GenerateAd> {
                 GenerateAdScreen(
                     openAdPreview = { navBackStack.add(AdDestination.PreviewAd(it)) },
-                    onProfileClick = { navBackStack.add(AdDestination.Profile) },
+                    onProfileClick = { navBackStack.add(AdDestination.Profile()) },
                 )
             }
 
@@ -99,6 +99,9 @@ fun AdRootScreen(
                     showImagesPreview = { images, initialPage ->
                         navBackStack.add(AdDestination.ImagesPreview(images, initialPage))
                     },
+                    onNavigateToProfile = { reason ->
+                        navBackStack.add(AdDestination.Profile(reason))
+                    },
                 )
             }
 
@@ -113,11 +116,12 @@ fun AdRootScreen(
                 )
             }
 
-            entry<AdDestination.Profile> {
+            entry<AdDestination.Profile> { destination ->
                 ProfileScreenRoute(
                     onBack = { navBackStack.removeAt(navBackStack.lastIndex) },
                     onOpenOlxAuth = { url -> navBackStack.add(AdDestination.ProfileAuth(url)) },
                     onLogout = onLogout,
+                    reason = destination.reason,
                 )
             }
 

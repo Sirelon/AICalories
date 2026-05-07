@@ -100,6 +100,7 @@ fun ProfileScreenRoute(
     onBack: () -> Unit,
     onOpenOlxAuth: (String) -> Unit,
     onLogout: () -> Unit,
+    reason: String? = null,
 ) {
     val viewModel: ProfileViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -139,6 +140,7 @@ fun ProfileScreenRoute(
                     viewModel.onEvent(ProfileEvent.ChangeLocationClicked)
                 }
             },
+            reason = reason,
         )
     }
 
@@ -172,6 +174,7 @@ private fun ProfileScreen(
     onBack: () -> Unit,
     onEvent: (ProfileEvent) -> Unit,
     onChangeLocation: () -> Unit,
+    reason: String? = null,
 ) {
     AppScaffold(
         modifier = Modifier.fillMaxSize(),
@@ -207,6 +210,17 @@ private fun ProfileScreen(
                 .padding(AppDimens.Spacing.xl3),
             verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl4),
         ) {
+            if (!reason.isNullOrBlank()) {
+                AppCard(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = reason,
+                        style = AppTheme.typography.body,
+                        color = AppTheme.colors.error,
+                        modifier = Modifier.padding(AppDimens.Spacing.xl5),
+                    )
+                }
+            }
+
             if (state.user == null) {
                 GuestCard(onLogin = { onEvent(ProfileEvent.LoginClicked) })
             } else {

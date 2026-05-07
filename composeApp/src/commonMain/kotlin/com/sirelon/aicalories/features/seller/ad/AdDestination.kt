@@ -15,7 +15,7 @@ sealed interface AdDestination {
     data object SelectCategory : AdDestination
 
     @Serializable
-    data object Profile : AdDestination
+    data class Profile(val reason: String? = null) : AdDestination
 
     @Serializable
     data class ProfileAuth(val url: String) : AdDestination
