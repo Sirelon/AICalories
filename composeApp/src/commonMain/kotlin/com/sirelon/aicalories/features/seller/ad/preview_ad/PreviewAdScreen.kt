@@ -77,7 +77,6 @@ import com.sirelon.aicalories.designsystem.buttons.AppButton
 import com.sirelon.aicalories.designsystem.buttons.AppButtonDefaults
 import com.sirelon.aicalories.designsystem.formatPrice
 import com.sirelon.aicalories.designsystem.pager.ImagesCarousel
-import com.sirelon.aicalories.designsystem.rememberKeyboardDismissAction
 import com.sirelon.aicalories.features.media.PermissionController
 import com.sirelon.aicalories.features.media.PermissionDialogContent
 import com.sirelon.aicalories.features.media.PermissionDialogs
@@ -171,7 +170,6 @@ fun PreviewAdScreen(
 ) {
     val viewModel: PreviewAdViewModel = koinViewModel { parametersOf(advertisement) }
     val snackbarHostState = remember { SnackbarHostState() }
-    val dismissKeyboard = rememberKeyboardDismissAction()
     val navBackStack = remember {
         mutableStateListOf<PreviewAdDestination>(PreviewAdDestination.Content)
     }
@@ -205,7 +203,6 @@ fun PreviewAdScreen(
             PreviewAdContract.PreviewAdEffect.GoToGategoryPicker -> onChangeCategoryClick()
 
             PreviewAdContract.PreviewAdEffect.NavigateToPublishing -> {
-                dismissKeyboard()
                 dismissPublishConfirm()
                 if (navBackStack.lastOrNull() !is PreviewAdDestination.Publishing) {
                     navBackStack.add(PreviewAdDestination.Publishing)
@@ -213,13 +210,11 @@ fun PreviewAdScreen(
             }
 
             is PreviewAdContract.PreviewAdEffect.PublishSuccess -> {
-                dismissKeyboard()
                 dismissPublishing()
                 onPublishSuccess(effect.data)
             }
 
             is PreviewAdContract.PreviewAdEffect.PublishFailure -> {
-                dismissKeyboard()
                 dismissPublishing()
                 snackbarHostState.showSnackbar(effect.message)
             }
@@ -248,13 +243,11 @@ fun PreviewAdScreen(
                     onCategoryConsumed = onCategoryConsumed,
                     onConnectOlxClick = onConnectOlxClick,
                     onPublishConfirmationRequested = {
-                        dismissKeyboard()
                         if (navBackStack.lastOrNull() !is PreviewAdDestination.PublishConfirm) {
                             navBackStack.add(PreviewAdDestination.PublishConfirm)
                         }
                     },
                     showImagesPreview = showImagesPreview,
-                    dismissKeyboard = dismissKeyboard,
                 )
             }
 
@@ -268,10 +261,7 @@ fun PreviewAdScreen(
                     title = viewModel.titleState.text.toString(),
                     categoryLabel = state.categoryLabel,
                     priceFormatted = "₴ ${formatPrice(state.price)}",
-                    onConfirm = {
-                        dismissKeyboard()
-                        viewModel.onEvent(PreviewAdEvent.Publish)
-                    },
+                    onConfirm = { viewModel.onEvent(PreviewAdEvent.Publish) },
                     onDismiss = dismissPublishConfirm,
                 )
             }
@@ -305,7 +295,6 @@ private fun PreviewAdContentRoute(
     onConnectOlxClick: () -> Unit,
     onPublishConfirmationRequested: () -> Unit,
     showImagesPreview: (List<String>, Int) -> Unit,
-    dismissKeyboard: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val locationPermissionController =
@@ -353,15 +342,6 @@ private fun PreviewAdContentRoute(
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(scrollState) {
-        snapshotFlow { scrollState.isScrollInProgress }
-            .collect { isScrolling ->
-                if (isScrolling) {
-                    dismissKeyboard()
-                }
-            }
-    }
-
     AppScaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
@@ -380,10 +360,7 @@ private fun PreviewAdContentRoute(
                         modifier = Modifier.fillMaxWidth(),
                         style = AppButtonDefaults.primary(),
                         text = stringResource(Res.string.guest_connect_olx_cta),
-                        onClick = {
-                            dismissKeyboard()
-                            onConnectOlxClick()
-                        },
+                        onClick = onConnectOlxClick,
                     )
                 } else if (state.isSessionResolved) {
                     AppButton(
@@ -396,7 +373,6 @@ private fun PreviewAdContentRoute(
                         },
                         trailingIcon = painterResource(Res.drawable.ic_arrow_right),
                         onClick = {
-                            dismissKeyboard()
                             if (!isValid) {
                                 showErrors = true
                                 coroutineScope.launch { scrollState.animateScrollTo(0) }
