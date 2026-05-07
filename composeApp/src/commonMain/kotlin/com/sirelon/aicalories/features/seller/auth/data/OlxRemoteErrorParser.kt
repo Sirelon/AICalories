@@ -68,6 +68,15 @@ class OlxRemoteErrorParser(private val json: Json) {
         val apiError = runCatching {
             json.decodeFromString(ApiErrorPayload.serializer(), payload)
         }.getOrNull()
+
+        val fieldErrors = apiError?.error?.validation.orEmpty()
+        if (fieldErrors.isNotEmpty()) {
+            val first = fieldErrors.first()
+            val field = first.field ?: "unknown"
+            val detail = first.detail ?: first.title ?: "Invalid value"
+            return OlxApiException(OlxApiError.ValidationError(field, detail))
+        }
+
         val detail = apiError?.error?.detail ?: apiError?.error?.title
         if (!detail.isNullOrBlank()) {
             return when (status) {
@@ -83,6 +92,7 @@ class OlxRemoteErrorParser(private val json: Json) {
             )
 
             HttpStatusCode.Forbidden -> OlxApiException(OlxApiError.InsufficientScope())
+            HttpStatusCode.TooManyRequests -> OlxApiException(OlxApiError.RateLimited())
             else -> OlxApiException(OlxApiError.Unknown("OLX request failed with HTTP ${status.value}."))
         }
     }
@@ -103,5 +113,13 @@ class OlxRemoteErrorParser(private val json: Json) {
         @SerialName("status") val status: Int? = null,
         @SerialName("title") val title: String? = null,
         @SerialName("detail") val detail: String? = null,
+        @SerialName("validation") val validation: List<FieldError> = emptyList(),
+    )
+
+    @Serializable
+    private class FieldError(
+        @SerialName("field") val field: String? = null,
+        @SerialName("detail") val detail: String? = null,
+        @SerialName("title") val title: String? = null,
     )
 }

@@ -334,6 +334,7 @@
     <!-- Error Messages -->
     <string name="error_location_fetch_failed">Не вдалося визначити ваше місцезнаходження.</string>
     <string name="error_publish_missing_category_or_location">Категорія або місцезнаходження відсутні — будь ласка, заповніть їх перед публікацією.</string>
+    <string name="error_publish_missing_contact_name">У вашому профілі OLX відсутнє ім\'я. Будь ласка, оновіть профіль і спробуйте знову.</string>
     <string name="error_category_suggestion_failed">Не вдалося завантажити пропозицію категорії.</string>
     <string name="error_attributes_load_failed">Не вдалося завантажити деталі атрибутів.</string>
     <string name="error_user_profile_fetch_failed">Не вдалося отримати профіль користувача.</string>

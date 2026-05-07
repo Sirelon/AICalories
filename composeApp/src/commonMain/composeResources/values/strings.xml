@@ -340,6 +340,7 @@
     <!-- Error Messages -->
     <string name="error_location_fetch_failed">Couldn\'t detect your location.</string>
     <string name="error_publish_missing_category_or_location">Category or location is missing — please fill them in before publishing.</string>
+    <string name="error_publish_missing_contact_name">Your OLX profile is missing a name. Please update your profile and try again.</string>
     <string name="error_category_suggestion_failed">Couldn\'t load a category suggestion.</string>
     <string name="error_attributes_load_failed">Couldn\'t load attribute details.</string>
     <string name="error_user_profile_fetch_failed">Couldn\'t load your profile.</string>
