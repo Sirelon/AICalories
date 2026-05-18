@@ -170,6 +170,7 @@ import kotlin.time.Duration.Companion.milliseconds
 private const val TitleMinLength = 10
 private const val DescriptionMinLength = 30
 
+@OptIn(androidx.compose.foundation.layout.ExperimentalGridApi::class)
 @Composable
 fun PreviewAdScreen(
     advertisement: AdvertisementWithAttributes,
@@ -295,7 +296,7 @@ fun PreviewAdScreen(
                 val state by viewModel.state.collectAsStateWithLifecycle()
 
                 PublishConfirmSheet(
-                    imageUrl = state.images.firstOrNull(),
+                    imageUrls = state.images,
                     title = viewModel.titleState.text.toString(),
                     categoryLabel = state.categoryLabel,
                     priceFormatted = "₴ ${formatPrice(state.price)}",
