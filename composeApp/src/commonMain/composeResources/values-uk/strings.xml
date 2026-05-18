@@ -321,10 +321,18 @@
     <string name="ai_step_calculating_price">Шукаємо чесну ціну</string>
     <string name="ai_processing_status_in_progress">Працюємо…</string>
     <string name="ai_processing_status_done">Готово ✓</string>
-    <string name="ai_processing_tip_connect_olx_faster">Лайфхак: підключіть OLX — і наступне оголошення вийде у 5 разів швидше.</string>
-    <string name="ai_processing_tip_good_lighting">Лайфхак: гарне світло = чистіший результат ШІ.</string>
-    <string name="ai_processing_tip_capture_details">Лайфхак: крупні плани деталей і слідів використання — і опис вийде точнішим.</string>
-    <string name="ai_processing_tip_keep_background_clean">Лайфхак: чистий фон допоможе речі краще виділитися.</string>
+    <string name="ai_processing_tip_connect_olx_faster">Лайфгак: підключіть OLX — і наступне оголошення вилетить у 5× швидше 🚀</string>
+    <string name="ai_processing_tip_good_lighting">Лайфгак: гарне світло = чистіший результат ШІ.</string>
+    <string name="ai_processing_tip_capture_details">Лайфгак: крупні плани деталей — і опис вийде точнішим.</string>
+    <string name="ai_processing_tip_keep_background_clean">Лайфгак: чистий фон — і ваша річ виділиться ✨</string>
+    <string name="ai_processing_tip_first_photo_matters">Лайфгак: перше фото — це 80%% успіху. Зробіть його найкращим 📸</string>
+    <string name="ai_processing_tip_reply_fast">Лайфгак: відповіли за годину — і покупець ваш.</string>
+    <string name="ai_processing_tip_honesty_sells">Лайфгак: покажіть подряпини — покупці люблять чесність.</string>
+    <string name="ai_processing_tip_evening_post">Лайфгак: викладайте ввечері — саме тоді покупці гортають OLX.</string>
+    <string name="ai_processing_tip_include_accessories">Лайфгак: додайте у кадр коробку чи зарядку — і річ виглядатиме дорожче.</string>
+    <string name="ai_processing_tip_scale_reference">Лайфгак: покладіть монету поряд — покупці одразу зрозуміють розмір.</string>
+    <string name="ai_processing_tip_wipe_item">Лайфгак: протріть річ перед зйомкою — пил на фото видно вдвічі більше.</string>
+    <string name="ai_processing_tip_daylight">Лайфгак: знімайте біля вікна — денне світло переможе будь-яку лампу 💡</string>
 
     <!-- Permission Dialogs -->
     <string name="camera_rationale_title">Можна нам камеру?</string>

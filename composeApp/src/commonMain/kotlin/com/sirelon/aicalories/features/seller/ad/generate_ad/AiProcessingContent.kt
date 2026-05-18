@@ -57,8 +57,16 @@ import com.sirelon.sellsnap.generated.resources.ai_processing_status_done
 import com.sirelon.sellsnap.generated.resources.ai_processing_status_in_progress
 import com.sirelon.sellsnap.generated.resources.ai_processing_tip_capture_details
 import com.sirelon.sellsnap.generated.resources.ai_processing_tip_connect_olx_faster
+import com.sirelon.sellsnap.generated.resources.ai_processing_tip_daylight
+import com.sirelon.sellsnap.generated.resources.ai_processing_tip_evening_post
+import com.sirelon.sellsnap.generated.resources.ai_processing_tip_first_photo_matters
 import com.sirelon.sellsnap.generated.resources.ai_processing_tip_good_lighting
+import com.sirelon.sellsnap.generated.resources.ai_processing_tip_honesty_sells
+import com.sirelon.sellsnap.generated.resources.ai_processing_tip_include_accessories
 import com.sirelon.sellsnap.generated.resources.ai_processing_tip_keep_background_clean
+import com.sirelon.sellsnap.generated.resources.ai_processing_tip_reply_fast
+import com.sirelon.sellsnap.generated.resources.ai_processing_tip_scale_reference
+import com.sirelon.sellsnap.generated.resources.ai_processing_tip_wipe_item
 import com.sirelon.sellsnap.generated.resources.ai_step_analyzing_image
 import com.sirelon.sellsnap.generated.resources.ai_step_calculating_price
 import com.sirelon.sellsnap.generated.resources.ai_step_generating_title
@@ -104,6 +112,14 @@ private fun processingTips(isGuestMode: Boolean) = buildList {
     add(stringResource(Res.string.ai_processing_tip_good_lighting))
     add(stringResource(Res.string.ai_processing_tip_capture_details))
     add(stringResource(Res.string.ai_processing_tip_keep_background_clean))
+    add(stringResource(Res.string.ai_processing_tip_first_photo_matters))
+    add(stringResource(Res.string.ai_processing_tip_reply_fast))
+    add(stringResource(Res.string.ai_processing_tip_honesty_sells))
+    add(stringResource(Res.string.ai_processing_tip_evening_post))
+    add(stringResource(Res.string.ai_processing_tip_include_accessories))
+    add(stringResource(Res.string.ai_processing_tip_scale_reference))
+    add(stringResource(Res.string.ai_processing_tip_wipe_item))
+    add(stringResource(Res.string.ai_processing_tip_daylight))
 }
 
 @Composable
