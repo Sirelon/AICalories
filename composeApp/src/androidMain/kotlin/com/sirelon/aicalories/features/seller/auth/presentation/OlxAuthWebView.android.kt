@@ -1,12 +1,16 @@
 package com.sirelon.sellsnap.features.seller.auth.presentation
 
+import android.view.WindowManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.DialogWindowProvider
 
 private class OlxWebViewHolder(
     val redirectUri: String,
@@ -22,6 +26,12 @@ actual fun OlxAuthWebView(
 ) {
     val holder = remember(redirectUri) { OlxWebViewHolder(redirectUri, onUrlIntercepted) }
     holder.onUrlIntercepted = onUrlIntercepted
+
+    val view = LocalView.current
+    SideEffect {
+        (view.parent as? DialogWindowProvider)?.window
+            ?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+    }
 
     AndroidView(
         factory = { context ->

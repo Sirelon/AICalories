@@ -3,8 +3,8 @@ package com.sirelon.sellsnap.features.seller.auth.presentation
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -26,7 +26,7 @@ fun OlxAuthDialogScreen(
     onCallbackReceived: (String) -> Unit,
 ) {
     Scaffold(
-        contentWindowInsets = WindowInsets.safeDrawing,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(Res.string.continue_with_olx)) },
@@ -45,7 +45,8 @@ fun OlxAuthDialogScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .consumeWindowInsets(paddingValues),
+                .consumeWindowInsets(paddingValues)
+                .imePadding(),
         )
     }
 }

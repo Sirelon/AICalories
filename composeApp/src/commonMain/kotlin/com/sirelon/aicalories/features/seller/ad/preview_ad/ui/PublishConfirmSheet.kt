@@ -4,13 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalGridApi
 import androidx.compose.foundation.layout.Grid
+import androidx.compose.foundation.layout.GridTrackSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,7 +52,9 @@ fun PublishConfirmSheet(
             Grid(
                 modifier = Modifier.fillMaxWidth(),
                 config = {
-                    repeat(3) { column(1.fr) }
+                    repeat(3) {
+                        column(GridTrackSize.Auto)
+                    }
                     gap(AppDimens.Spacing.l)
                 },
             ) {

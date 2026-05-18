@@ -12,8 +12,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.sirelon.sellsnap.datastore.initAndroidKeyValueStore
 import com.sirelon.sellsnap.designsystem.AppTheme
 import com.sirelon.sellsnap.features.media.upload.initAndroidDraftMediaFileStore
-import com.sirelon.sellsnap.features.seller.ad.publish_success.PublishSuccessData
-import com.sirelon.sellsnap.features.seller.ad.publish_success.PublishSuccessScreen
+import com.sirelon.sellsnap.features.seller.ad.preview_ad.ui.PublishConfirmSheet
 import com.sirelon.sellsnap.features.seller.auth.data.OlxAuthCallbackBridge
 import com.sirelon.sellsnap.features.seller.auth.presentation.SellerAuthContract
 import com.sirelon.sellsnap.features.seller.auth.presentation.SellerLandingScreen
@@ -59,21 +58,24 @@ private fun SellerLandingScreenPreview() {
     }
 }
 
-@Preview
+
 @PreviewLightDark
+@Preview
 @Composable
-private fun PublishSuccessScreenPreview() {
+private fun PublishConfirmSheetPreview() {
     AppTheme {
-        PublishSuccessScreen(
-            data = PublishSuccessData(
-                url = "https://www.olx.ua/d/uk/obyavlenie/krosvki-nike-air-max-ID123456.html",
-                title = "Кросівки Nike Air Max 90, розмір 42",
-                priceFormatted = "₴ 1 850",
-                primaryImageUrl = null,
-                totalElapsedMs = 92_000L,
+        PublishConfirmSheet(
+            imageUrls = listOf(
+                "https://source.unsplash.com/random/",
+                "https://source.unsplash.com/random/",
+                "https://source.unsplash.com/random/"
             ),
-            onViewOnOlx = {},
-            onCreateAnother = {},
+            title = "Nike Air Max 90, size 42, worn 2 months",
+            categoryLabel = "Shoes / Sneakers",
+            priceFormatted = "₴ 1,800",
+            onConfirm = {},
+            onDismiss = {},
         )
     }
 }
+
