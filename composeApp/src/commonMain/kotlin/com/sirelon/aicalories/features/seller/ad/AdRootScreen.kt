@@ -43,7 +43,6 @@ import com.sirelon.sellsnap.features.seller.categories.presentation.CategoryPick
 import com.sirelon.sellsnap.features.seller.my_ads.ui.MyAdvertsScreenRoute
 import com.sirelon.sellsnap.navigation.BottomSheetSceneStrategy
 import com.sirelon.sellsnap.features.seller.profile.ui.ProfileScreenRoute
-import com.sirelon.sellsnap.features.seller.whisper.WhisperDemoScreenRoute
 import com.sirelon.sellsnap.generated.resources.Res
 import com.sirelon.sellsnap.generated.resources.ic_camera
 import com.sirelon.sellsnap.generated.resources.ic_tag
@@ -133,7 +132,6 @@ fun AdRootScreen(
                     ) {
                         GenerateAdScreen(
                             openAdPreview = { navBackStack.add(AdDestination.PreviewAd(it)) },
-                            onWhisperClick = { navBackStack.add(AdDestination.WhisperDemo) },
                             onLoadingChanged = { isGeneratingAd = it },
                         )
                     }
@@ -144,12 +142,6 @@ fun AdRootScreen(
                         MyAdvertsScreenRoute(
                             onConnectOlxClick = onConnectOlxClick,
                             onCreateListingClick = { switchRootTab(SellerRootTab.GenerateAd) },
-                        )
-                    }
-
-                    entry<AdDestination.WhisperDemo> {
-                        WhisperDemoScreenRoute(
-                            onBack = { navBackStack.removeAt(navBackStack.lastIndex) },
                         )
                     }
 

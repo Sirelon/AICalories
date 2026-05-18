@@ -10,9 +10,6 @@ sealed interface AdDestination : NavKey {
     data object GenerateAd : AdDestination
 
     @Serializable
-    data object WhisperDemo : AdDestination
-
-    @Serializable
     data object MyAdverts : AdDestination
 
     @Serializable

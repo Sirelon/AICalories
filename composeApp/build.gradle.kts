@@ -168,7 +168,6 @@ kotlin {
             implementation(libs.calf.filepicker.coil)
             implementation(libs.calf.permissions)
             implementation(libs.calf.permissions.location)
-            implementation(libs.calf.permissions.microphone)
             implementation("com.aallam.openai:openai-client:4.1.0")
         }
         commonTest.dependencies {

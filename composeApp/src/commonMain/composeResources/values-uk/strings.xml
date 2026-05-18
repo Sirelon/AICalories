@@ -304,17 +304,6 @@
     <string name="new_listing">Нове оголошення</string>
     <string name="new_listing_subtitle">Додайте 1–8 фото. Решту зробимо ми.</string>
     <string name="generic_error_retry">Щось пішло не так. Спробуйте ще раз.</string>
-    <string name="whisper_poc_title">Whisper PoC</string>
-    <string name="whisper_start_recording">Почати запис</string>
-    <string name="whisper_stop_recording">Зупинити запис</string>
-    <string name="whisper_start_live_text">Почати живий текст</string>
-    <string name="whisper_stop_live_text">Зупинити живий текст</string>
-    <string name="whisper_transcribe">Транскрибувати</string>
-    <string name="whisper_recording_failed">Не вдалося записати аудіо.</string>
-    <string name="whisper_start_recording_failed">Не вдалося почати запис.</string>
-    <string name="whisper_transcription_failed">Не вдалося транскрибувати аудіо.</string>
-    <string name="whisper_openai_api_key_missing">Немає ключа OpenAI API.</string>
-    <string name="whisper_live_transcription_failed">Не вдалося виконати живу транскрипцію.</string>
     <string name="welcome_greeting">Привіт 👋</string>
     <string name="ai_hint_label">Підкажіть ШІ (необов'язково)</string>
     <string name="ai_hint_placeholder">напр. Nike Air Max 90, розмір 42, носили 2 місяці</string>
