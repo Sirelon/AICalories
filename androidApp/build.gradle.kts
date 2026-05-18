@@ -4,6 +4,12 @@ plugins {
 }
 
 val composeAppProject = project(":composeApp")
+
+val keystorePath = System.getenv("KEYSTORE_PATH")
+val keystorePassword = System.getenv("KEYSTORE_PASSWORD")
+val keyAlias = System.getenv("KEY_ALIAS")
+val keyPassword = System.getenv("KEY_PASSWORD")
+
 android {
     namespace = "com.sirelon.sellsnap"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -16,6 +22,17 @@ android {
         versionName = "1.0"
     }
 
+    signingConfigs {
+        if (keystorePath != null) {
+            create("release") {
+                storeFile = file(keystorePath)
+                storePassword = keystorePassword
+                this.keyAlias = keyAlias
+                this.keyPassword = keyPassword
+            }
+        }
+    }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
@@ -24,6 +41,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = if (keystorePath != null) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 
