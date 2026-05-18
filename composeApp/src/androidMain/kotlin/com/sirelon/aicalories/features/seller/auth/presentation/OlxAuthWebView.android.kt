@@ -4,9 +4,16 @@ import android.view.WindowManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.viewinterop.AndroidView
@@ -27,22 +34,33 @@ actual fun OlxAuthWebView(
     val holder = remember(redirectUri) { OlxWebViewHolder(redirectUri, onUrlIntercepted) }
     holder.onUrlIntercepted = onUrlIntercepted
 
+    var isLoading by remember { mutableStateOf(true) }
+
     val view = LocalView.current
     SideEffect {
         (view.parent as? DialogWindowProvider)?.window
             ?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
     }
 
-    AndroidView(
-        factory = { context ->
-            WebView(context).apply {
-                settings.userAgentString =
-                    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
-                settings.javaScriptEnabled = true
-                settings.domStorageEnabled = true
+    Box(modifier = modifier) {
+        AndroidView(
+            factory = { context ->
+                WebView(context).apply {
+                    settings.userAgentString =
+                        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
+                    settings.javaScriptEnabled = true
+                    settings.domStorageEnabled = true
 
-                webViewClient = object : WebViewClient() {
-                    override fun shouldOverrideUrlLoading(
+                    webViewClient = object : WebViewClient() {
+                        override fun onPageStarted(view: WebView, url: String?, favicon: android.graphics.Bitmap?) {
+                            isLoading = true
+                        }
+
+                        override fun onPageFinished(view: WebView, url: String?) {
+                            isLoading = false
+                        }
+
+                        override fun shouldOverrideUrlLoading(
                         view: WebView,
                         request: WebResourceRequest,
                     ): Boolean {
@@ -66,9 +84,14 @@ actual fun OlxAuthWebView(
                     }
                 }
 
-                loadUrl(url)
-            }
-        },
-        modifier = modifier,
-    )
+                    loadUrl(url)
+                }
+            },
+            modifier = Modifier.fillMaxSize(),
+        )
+
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+    }
 }
