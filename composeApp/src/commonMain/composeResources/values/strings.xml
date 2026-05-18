@@ -323,6 +323,14 @@
     <string name="ai_processing_tip_good_lighting">Pro tip: good light = cleaner AI results.</string>
     <string name="ai_processing_tip_capture_details">Pro tip: close-ups of details and wear help us write better copy.</string>
     <string name="ai_processing_tip_keep_background_clean">Pro tip: a clean background makes your item pop.</string>
+    <string name="ai_processing_tip_first_photo_matters">Pro tip: the first photo is 80%% of the sale — make it your best one 📸</string>
+    <string name="ai_processing_tip_reply_fast">Pro tip: reply within an hour and the buyer is yours.</string>
+    <string name="ai_processing_tip_honesty_sells">Pro tip: show the scratches — buyers love honesty.</string>
+    <string name="ai_processing_tip_evening_post">Pro tip: post in the evening — that’s when buyers scroll OLX.</string>
+    <string name="ai_processing_tip_include_accessories">Pro tip: pop the box or charger in the shot — your item looks pricier.</string>
+    <string name="ai_processing_tip_scale_reference">Pro tip: drop a coin in the frame — buyers instantly get the size.</string>
+    <string name="ai_processing_tip_wipe_item">Pro tip: wipe the item before shooting — dust shows up twice as big on camera.</string>
+    <string name="ai_processing_tip_daylight">Pro tip: shoot near a window — daylight beats any lamp 💡</string>
 
     <!-- Permission Dialogs -->
     <string name="camera_rationale_title">Mind if we use the camera?</string>
