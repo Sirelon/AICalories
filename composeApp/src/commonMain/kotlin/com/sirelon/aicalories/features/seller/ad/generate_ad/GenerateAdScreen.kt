@@ -22,9 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -84,7 +82,6 @@ import com.sirelon.sellsnap.generated.resources.tip_lighting
 import com.sirelon.sellsnap.generated.resources.tips_for_better_photos
 import com.sirelon.sellsnap.generated.resources.turn_stuff_into_olx_listings
 import com.sirelon.sellsnap.generated.resources.welcome_greeting
-import com.sirelon.sellsnap.generated.resources.whisper_poc_title
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -94,7 +91,6 @@ private const val MAX_PROMPT_CHARS = 120
 @Composable
 fun GenerateAdScreen(
     openAdPreview: (AdvertisementWithAttributes) -> Unit,
-    onWhisperClick: () -> Unit,
     modifier: Modifier = Modifier,
     onLoadingChanged: (Boolean) -> Unit = {},
 ) {
@@ -157,7 +153,6 @@ fun GenerateAdScreen(
                     hapticFeedback.performStepFeedback()
                     viewModel.onEvent(GenerateAdContract.GenerateAdEvent.Submit)
                 },
-                onWhisperClick = onWhisperClick,
                 modifier = modifier,
             )
         }
@@ -177,7 +172,6 @@ private fun GenerateAdScreenContent(
     onUploadClick: () -> Unit,
     onRemovePhoto: (KmpFile) -> Unit,
     onSubmitClick: () -> Unit,
-    onWhisperClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val dismissKeyboard = rememberKeyboardDismissAction()
@@ -191,7 +185,6 @@ private fun GenerateAdScreenContent(
         topBar = {
             SlimHeader(
                 profileName = state.profileName,
-                onWhisperClick = onWhisperClick,
             )
         },
         bottomBar = {
@@ -309,7 +302,6 @@ private fun MagicCtaBar(
 @Composable
 private fun SlimHeader(
     profileName: String?,
-    onWhisperClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val primaryBrush = rememberPrimaryBrush()
@@ -349,26 +341,6 @@ private fun SlimHeader(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.s),
-        ) {
-            IconButton(onClick = onWhisperClick) {
-                Box(
-                    modifier = Modifier
-                        .size(AppDimens.Size.xl8)
-                        .clip(CircleShape)
-                        .background(AppTheme.colors.surfaceHigh),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Mic,
-                        contentDescription = stringResource(Res.string.whisper_poc_title),
-                        tint = AppTheme.colors.onSurface,
-                    )
-                }
-            }
         }
     }
 }
@@ -599,7 +571,6 @@ private fun GenerateAdScreenEmptyPreview() {
             onUploadClick = {},
             onRemovePhoto = {},
             onSubmitClick = {},
-            onWhisperClick = {},
         )
     }
 }
@@ -618,7 +589,6 @@ private fun GenerateAdScreenWithPromptPreview() {
             onUploadClick = {},
             onRemovePhoto = {},
             onSubmitClick = {},
-            onWhisperClick = {},
         )
     }
 }

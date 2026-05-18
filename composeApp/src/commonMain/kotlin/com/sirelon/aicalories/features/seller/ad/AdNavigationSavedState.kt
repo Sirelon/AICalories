@@ -12,7 +12,6 @@ val adNavigationSavedStateConfiguration: SavedStateConfiguration =
             polymorphic(NavKey::class) {
                 subclass(AdDestination.GenerateAd::class, AdDestination.GenerateAd.serializer())
                 subclass(AdDestination.MyAdverts::class, AdDestination.MyAdverts.serializer())
-                subclass(AdDestination.WhisperDemo::class, AdDestination.WhisperDemo.serializer())
                 subclass(AdDestination.PreviewAd::class, AdDestination.PreviewAd.serializer())
                 subclass(AdDestination.SelectCategory::class, AdDestination.SelectCategory.serializer())
                 subclass(AdDestination.Profile::class, AdDestination.Profile.serializer())
