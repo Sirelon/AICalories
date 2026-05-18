@@ -2,8 +2,11 @@ package com.sirelon.sellsnap.features.seller.ad.preview_ad.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalGridApi
+import androidx.compose.foundation.layout.Grid
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,9 +31,10 @@ import com.sirelon.sellsnap.generated.resources.publish_confirm_title
 import com.sirelon.sellsnap.generated.resources.publish_confirm_yes
 import org.jetbrains.compose.resources.stringResource
 
+@ExperimentalGridApi
 @Composable
 fun PublishConfirmSheet(
-    imageUrl: String?,
+    imageUrls: List<String>,
     title: String,
     categoryLabel: String,
     priceFormatted: String,
@@ -44,14 +48,23 @@ fun PublishConfirmSheet(
             .padding(bottom = AppDimens.Spacing.xl5),
         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
     ) {
-        if (imageUrl != null) {
-            AppAsyncImage(
-                model = imageUrl,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(AppDimens.Size.xl25)
-                    .clip(RoundedCornerShape(AppDimens.BorderRadius.l)),
-            )
+        if (imageUrls.isNotEmpty()) {
+            Grid(
+                modifier = Modifier.fillMaxWidth(),
+                config = {
+                    repeat(3) { column(1.fr) }
+                    gap(AppDimens.Spacing.l)
+                },
+            ) {
+                imageUrls.forEach { url ->
+                    AppAsyncImage(
+                        model = url,
+                        modifier = Modifier
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(AppDimens.BorderRadius.xl2)),
+                    )
+                }
+            }
         }
 
         Text(
@@ -101,6 +114,7 @@ private fun AdSummaryRow(label: String, isBold: Boolean = false) {
     }
 }
 
+@OptIn(ExperimentalGridApi::class)
 @PreviewLightDark
 @Composable
 private fun PublishConfirmSheetPreview() {
@@ -108,7 +122,7 @@ private fun PublishConfirmSheetPreview() {
         Surface(color = AppTheme.colors.background) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 PublishConfirmSheet(
-                    imageUrl = null,
+                    imageUrls = emptyList(),
                     title = "Nike Air Max 90, size 42, worn 2 months",
                     categoryLabel = "Shoes / Sneakers",
                     priceFormatted = "₴ 1,800",
