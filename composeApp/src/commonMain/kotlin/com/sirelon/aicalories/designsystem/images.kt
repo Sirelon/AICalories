@@ -27,11 +27,11 @@ fun AppAsyncImage(
 ) {
     var isLoading by remember(model) { mutableStateOf(true) }
 
-    Box(modifier = modifier) {
+    Box {
         AsyncImage(
             model = model,
             contentDescription = null,
-            modifier = Modifier.matchParentSize(),
+            modifier = modifier,
             contentScale = ContentScale.Crop,
             onState = { state ->
                 isLoading = state !is AsyncImagePainter.State.Success &&
