@@ -96,6 +96,7 @@ class GenerateAdViewModel(
                     viewModelScope.launch { draftMediaFileStore.delete(listOf(photo)) }
                 }
             }
+
         }
     }
 
@@ -155,9 +156,10 @@ class GenerateAdViewModel(
                 }
             }
 
-            .onEach {
+            .onEach { ad ->
                 adFlowTimerStore.markGenerationCompleted()
-                postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(ad = it))
+                clearDraft()
+                postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(ad = ad))
             }
             .catch { error ->
                 val message = error.toGenerateAdErrorMessage(
@@ -354,6 +356,13 @@ class GenerateAdViewModel(
             )
         }
         return GenerateAdSavedState(prompt = state.prompt, photos = photos)
+    }
+
+    private fun clearDraft() {
+        val photos = readSavedState().photos
+        viewModelScope.launch { draftMediaFileStore.delete(photos) }
+        adFlowTimerStore.clear()
+        setState { GenerateAdContract.GenerateAdState() }
     }
 
     private fun photoForFile(file: KmpFile): DraftPhoto? {
