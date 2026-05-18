@@ -14,9 +14,8 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,9 +35,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigationevent.NavigationEventInfo
@@ -52,11 +50,11 @@ import com.sirelon.sellsnap.designsystem.AppTheme
 import com.sirelon.sellsnap.designsystem.IconWithBackground
 import com.sirelon.sellsnap.designsystem.Input
 import com.sirelon.sellsnap.designsystem.ObserveAsEvents
+import com.sirelon.sellsnap.designsystem.buttons.AppButton
+import com.sirelon.sellsnap.designsystem.buttons.AppButtonDefaults
 import com.sirelon.sellsnap.designsystem.dismissKeyboardOnTapOutside
 import com.sirelon.sellsnap.designsystem.performStepFeedback
 import com.sirelon.sellsnap.designsystem.rememberKeyboardDismissAction
-import com.sirelon.sellsnap.designsystem.buttons.AppButton
-import com.sirelon.sellsnap.designsystem.buttons.AppButtonDefaults
 import com.sirelon.sellsnap.features.media.PermissionDialogs
 import com.sirelon.sellsnap.features.media.rememberPermissionController
 import com.sirelon.sellsnap.features.media.rememberPhotoPickerController
@@ -81,7 +79,6 @@ import com.sirelon.sellsnap.generated.resources.tip_defects
 import com.sirelon.sellsnap.generated.resources.tip_lighting
 import com.sirelon.sellsnap.generated.resources.tips_for_better_photos
 import com.sirelon.sellsnap.generated.resources.turn_stuff_into_olx_listings
-import com.sirelon.sellsnap.generated.resources.welcome_greeting
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -182,11 +179,6 @@ private fun GenerateAdScreenContent(
             .dismissKeyboardOnTapOutside(dismissKeyboard),
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            SlimHeader(
-                profileName = state.profileName,
-            )
-        },
         bottomBar = {
             Box(
                 modifier = Modifier
@@ -297,52 +289,6 @@ private fun MagicCtaBar(
         },
         leadingIcon = if (hasPhotos) painterResource(Res.drawable.ic_sparkles) else null,
     )
-}
-
-@Composable
-private fun SlimHeader(
-    profileName: String?,
-    modifier: Modifier = Modifier,
-) {
-    val primaryBrush = rememberPrimaryBrush()
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(AppTheme.colors.background)
-            .statusBarsPadding()
-            .padding(horizontal = AppDimens.Spacing.xl3)
-            .padding(bottom = AppDimens.Spacing.xl3),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(AppDimens.Size.xl10)
-                    .clip(CircleShape)
-                    .background(primaryBrush),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_snap_logo),
-                    contentDescription = null,
-                    tint = AppTheme.colors.onPrimary,
-                    modifier = Modifier.size(AppDimens.Size.xl6),
-                )
-            }
-            Text(
-                text = profileName ?: stringResource(Res.string.welcome_greeting),
-                fontSize = AppDimens.TextSize.xl4,
-                fontWeight = FontWeight.SemiBold,
-                color = AppTheme.colors.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-    }
 }
 
 @Composable

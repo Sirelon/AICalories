@@ -17,13 +17,11 @@ import com.sirelon.sellsnap.features.seller.auth.data.OlxAuthRepository
 import com.sirelon.sellsnap.features.seller.auth.domain.SellerSessionMode
 import com.sirelon.sellsnap.features.seller.categories.data.CategoriesRepository
 import com.sirelon.sellsnap.features.seller.openai.OpenAIClient
-import com.sirelon.sellsnap.features.seller.profile.data.SellerAccountRepository
 import com.sirelon.sellsnap.generated.resources.Res
 import com.sirelon.sellsnap.generated.resources.error_generate_ad_failed
 import com.sirelon.sellsnap.generated.resources.error_selected_files_process_failed
 import com.sirelon.sellsnap.generated.resources.error_upload_file_failed
 import kotlinx.coroutines.flow.catch
-import org.jetbrains.compose.resources.getString
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterIsInstance
@@ -36,9 +34,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.jetbrains.compose.resources.getString
 
 private const val GuestProcessingStepCount = 3
 private const val AuthenticatedProcessingStepCount = 5
@@ -50,7 +47,6 @@ class GenerateAdViewModel(
     private val draftMediaFileStore: DraftMediaFileStore,
     private val categoriesRepository: CategoriesRepository,
     private val openAi: OpenAIClient,
-    private val accountRepository: SellerAccountRepository,
     private val authRepository: OlxAuthRepository,
     private val adFlowTimerStore: AdFlowTimerStore,
     private val savedStateHandle: SavedStateHandle,
@@ -60,20 +56,6 @@ class GenerateAdViewModel(
     private val restoredSavedState = readSavedState()
 
     init {
-        accountRepository.user
-            .onEach { user ->
-                setState {
-                    it.copy(
-                        profileName = user?.name?.takeIf { name -> name.isNotBlank() },
-                    )
-                }
-            }
-            .launchIn(viewModelScope)
-
-        viewModelScope.launch {
-            accountRepository.refreshProfile()
-        }
-
         state
             .drop(1)
             .map(::toSavedState)
