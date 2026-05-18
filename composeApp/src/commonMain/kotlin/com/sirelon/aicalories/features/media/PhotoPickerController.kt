@@ -45,7 +45,9 @@ fun rememberPhotoPickerController(
         type = type,
         selectionMode = selectionMode,
     ) { files ->
-        onResult(Result.success(files))
+        if (files.isNotEmpty()) {
+            onResult(Result.success(files))
+        }
     }
 
     return remember(permissionController) {
