@@ -79,6 +79,8 @@ class PreviewAdViewModel(
 
     private val selectedCategoryId = MutableStateFlow<Int?>(null)
     private val publishSuccessData = MutableStateFlow(restoredSavedState.publishSuccessData)
+    private var nonGuestSetupStarted = false
+    private var skipRestoredTitleSuggestion = restoredSavedState.selectedCategoryId != null
 
     init {
         combine(
@@ -95,11 +97,8 @@ class PreviewAdViewModel(
             .launchIn(viewModelScope)
 
         viewModelScope.launch {
-            val restoredCategoryId = restoredSavedState.selectedCategoryId
-            if (restoredCategoryId != null) {
-                categoriesRepository.getCategoryById(restoredCategoryId)?.let { category ->
-                    updateSelectedCategory(category = category)
-                }
+            restoredSavedState.selectedCategoryId?.let { id ->
+                categoriesRepository.getCategoryById(id)?.let { updateSelectedCategory(it) }
             }
 
             val savedLocation = restoredSavedState.location ?: locationRepository.getSavedLocation()
@@ -109,62 +108,73 @@ class PreviewAdViewModel(
 
             val isGuest = authRepository.currentSession().mode == SellerSessionMode.Guest
             setState { it.copy(isGuest = isGuest, isSessionResolved = true) }
-
-            if (isGuest) return@launch
-
-            var skipRestoredTitleSuggestion = restoredCategoryId != null
-            snapshotFlow { titleState.text }
-                .distinctUntilChanged()
-                .debounce(300L)
-                .filter {
-                    if (skipRestoredTitleSuggestion) {
-                        skipRestoredTitleSuggestion = false
-                        false
-                    } else {
-                        true
-                    }
-                }
-                .flatMapLatest {
-                    categoriesRepository.categorySuggestion(it.toString())
-                }
-                .onEach {
-                    updateSelectedCategory(category = it)
-                }
-                .flatMapLatest {
-                    categoriesRepository.getAttributes(it.id)
-                }
-                .onEach { attributes ->
-                    setState { it.copy(attributes = attributes) }
-                }
-                .catch {
-                    postEffect(ShowMessage(getString(Res.string.error_category_suggestion_failed)))
-                }
-                .launchIn(viewModelScope)
-
-            selectedCategoryId
-                .filterNotNull()
-                .flatMapLatest { categoryId ->
-                    categoriesRepository.getAttributes(categoryId)
-                }
-                .onEach { attributes ->
-                    setState {
-                        it.copy(
-                            attributeItems = attributes.map { attribute ->
-                                OlxAttributeState(
-                                    attribute = attribute,
-                                    selectedValues = restoredSavedState.attributeValues[attribute.code]
-                                        ?: filledAdvertisement.filledAttributes[attribute.code].orEmpty(),
-                                )
-                            }
-                        )
-                    }
-                }
-                .catch {
-                    setState { state -> state.copy(attributeItems = emptyList()) }
-                    postEffect(ShowMessage(getString(Res.string.error_attributes_load_failed)))
-                }
-                .launchIn(viewModelScope)
+            if (!isGuest) startNonGuestSetup()
         }
+
+        authRepository.sessionModeFlow
+            .onEach { mode ->
+                val isGuest = mode == SellerSessionMode.Guest
+                setState { it.copy(isGuest = isGuest) }
+                if (!isGuest) startNonGuestSetup()
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private fun startNonGuestSetup() {
+        if (nonGuestSetupStarted) return
+        nonGuestSetupStarted = true
+
+        snapshotFlow { titleState.text }
+            .distinctUntilChanged()
+            .debounce(300L)
+            .filter {
+                if (skipRestoredTitleSuggestion) {
+                    skipRestoredTitleSuggestion = false
+                    false
+                } else {
+                    true
+                }
+            }
+            .flatMapLatest {
+                categoriesRepository.categorySuggestion(it.toString())
+            }
+            .onEach {
+                updateSelectedCategory(category = it)
+            }
+            .flatMapLatest {
+                categoriesRepository.getAttributes(it.id)
+            }
+            .onEach { attributes ->
+                setState { it.copy(attributes = attributes) }
+            }
+            .catch {
+                postEffect(ShowMessage(getString(Res.string.error_category_suggestion_failed)))
+            }
+            .launchIn(viewModelScope)
+
+        selectedCategoryId
+            .filterNotNull()
+            .flatMapLatest { categoryId ->
+                categoriesRepository.getAttributes(categoryId)
+            }
+            .onEach { attributes ->
+                setState {
+                    it.copy(
+                        attributeItems = attributes.map { attribute ->
+                            OlxAttributeState(
+                                attribute = attribute,
+                                selectedValues = restoredSavedState.attributeValues[attribute.code]
+                                    ?: filledAdvertisement.filledAttributes[attribute.code].orEmpty(),
+                            )
+                        }
+                    )
+                }
+            }
+            .catch {
+                setState { state -> state.copy(attributeItems = emptyList()) }
+                postEffect(ShowMessage(getString(Res.string.error_attributes_load_failed)))
+            }
+            .launchIn(viewModelScope)
     }
 
     override fun initialState() = PreviewAdState(
