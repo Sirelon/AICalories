@@ -1,6 +1,7 @@
 package com.sirelon.sellsnap.di
 
 import com.sirelon.sellsnap.Greeting
+import com.sirelon.sellsnap.analytics.analyticsModule
 import com.sirelon.sellsnap.features.media.di.mediaModule
 import com.sirelon.sellsnap.features.seller.ad.generate_ad.di.generateAdModule
 import com.sirelon.sellsnap.features.seller.ad.preview_ad.di.previewAdModule
@@ -27,6 +28,7 @@ val applicationScopeQualifier = named("applicationScope")
 
 val appModule = module {
     includes(
+        analyticsModule,
         mediaModule,
         sellerAuthModule,
         generateAdModule,

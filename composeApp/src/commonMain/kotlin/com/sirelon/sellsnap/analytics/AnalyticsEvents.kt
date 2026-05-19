@@ -1,0 +1,17 @@
+package com.sirelon.sellsnap.analytics
+
+object AnalyticsEvents {
+    const val AUTH_STARTED = "auth_started"
+    const val AUTH_COMPLETED = "auth_completed"
+    const val AUTH_FAILED = "auth_failed"
+
+    const val ONBOARDING_COMPLETED = "onboarding_completed"
+
+    const val AD_GENERATION_STARTED = "ad_generation_started"
+    const val AD_GENERATION_SUCCEEDED = "ad_generation_succeeded"
+    const val AD_GENERATION_FAILED = "ad_generation_failed"
+
+    const val AD_PUBLISH_STARTED = "ad_publish_started"
+    const val AD_PUBLISH_SUCCEEDED = "ad_publish_succeeded"
+    const val AD_PUBLISH_FAILED = "ad_publish_failed"
+}

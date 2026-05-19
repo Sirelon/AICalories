@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.mohamedrejeb.calf.io.KmpFile
 import com.mohamedrejeb.calf.io.getName
+import com.sirelon.sellsnap.analytics.Analytics
+import com.sirelon.sellsnap.analytics.AnalyticsEvents
 import com.sirelon.sellsnap.features.common.presentation.BaseViewModel
 import com.sirelon.sellsnap.features.media.upload.DraftMediaFileStore
 import com.sirelon.sellsnap.features.media.upload.DraftPhoto
@@ -51,6 +53,7 @@ class GenerateAdViewModel(
     private val adFlowTimerStore: AdFlowTimerStore,
     private val savedStateHandle: SavedStateHandle,
     private val json: Json,
+    private val analytics: Analytics,
 ) : BaseViewModel<GenerateAdContract.GenerateAdState, GenerateAdContract.GenerateAdEvent, GenerateAdContract.GenerateAdEffect>() {
 
     private val restoredSavedState = readSavedState()
@@ -106,6 +109,10 @@ class GenerateAdViewModel(
         flowOf(1)
             .onStart {
                 adFlowTimerStore.markFlowStartedIfNeeded()
+                analytics.logEvent(
+                    AnalyticsEvents.AD_GENERATION_STARTED,
+                    mapOf("is_guest" to isGuest),
+                )
                 setState {
                     it.copy(
                         isLoading = true,
@@ -158,6 +165,7 @@ class GenerateAdViewModel(
 
             .onEach { ad ->
                 adFlowTimerStore.markGenerationCompleted()
+                analytics.logEvent(AnalyticsEvents.AD_GENERATION_SUCCEEDED)
                 clearDraft()
                 postEffect(GenerateAdContract.GenerateAdEffect.OpenAdPreview(ad = ad))
             }
@@ -165,6 +173,8 @@ class GenerateAdViewModel(
                 val message = error.toGenerateAdErrorMessage(
                     defaultMessage = getString(Res.string.error_generate_ad_failed),
                 )
+                analytics.recordException(error, AnalyticsEvents.AD_GENERATION_FAILED)
+                analytics.logEvent(AnalyticsEvents.AD_GENERATION_FAILED)
                 setState { it.copy(isLoading = false) }
                 showError(message)
             }

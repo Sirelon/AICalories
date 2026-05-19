@@ -1,6 +1,8 @@
 package com.sirelon.sellsnap.features.seller.auth.presentation
 
 import androidx.lifecycle.viewModelScope
+import com.sirelon.sellsnap.analytics.Analytics
+import com.sirelon.sellsnap.analytics.AnalyticsEvents
 import com.sirelon.sellsnap.features.common.presentation.BaseViewModel
 import com.sirelon.sellsnap.features.seller.auth.data.OlxAuthRepository
 import com.sirelon.sellsnap.generated.resources.Res
@@ -11,6 +13,7 @@ import org.jetbrains.compose.resources.getString
 
 class SellerAuthViewModel(
     private val authRepository: OlxAuthRepository,
+    private val analytics: Analytics,
 ) : BaseViewModel<SellerAuthContract.SellerAuthState, SellerAuthContract.SellerAuthEvent, SellerAuthContract.SellerAuthEffect>() {
 
     override fun initialState(): SellerAuthContract.SellerAuthState =
@@ -56,6 +59,7 @@ class SellerAuthViewModel(
 
             authRepository.completeAuthorization(callbackUrl)
                 .onSuccess {
+                    analytics.logEvent(AnalyticsEvents.AUTH_COMPLETED)
                     setState {
                         it.copy(
                             status = SellerAuthContract.SellerAuthStatus.Authorized,
@@ -65,12 +69,14 @@ class SellerAuthViewModel(
                     postEffect(SellerAuthContract.SellerAuthEffect.OpenHome)
                 }
                 .onFailure { error ->
+                    analytics.logEvent(AnalyticsEvents.AUTH_FAILED)
                     showError(getString(Res.string.error_olx_auth_complete_failed))
                 }
         }
     }
 
     private fun startAuthorization() {
+        analytics.logEvent(AnalyticsEvents.AUTH_STARTED)
         viewModelScope.launch {
             runCatching { authRepository.createAuthorizationRequest() }
                 .onSuccess { request ->
@@ -88,6 +94,7 @@ class SellerAuthViewModel(
                     }
                 }
                 .onFailure { error ->
+                    analytics.logEvent(AnalyticsEvents.AUTH_FAILED)
                     showError(getString(Res.string.error_olx_auth_prepare_failed))
                 }
         }

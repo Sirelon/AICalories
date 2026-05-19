@@ -15,6 +15,8 @@ import androidx.navigation3.ui.NavDisplay
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import com.mohamedrejeb.calf.picker.coil.KmpFileFetcher
+import com.sirelon.sellsnap.analytics.Analytics
+import com.sirelon.sellsnap.analytics.AnalyticsEvents
 import com.sirelon.sellsnap.designsystem.AppTheme
 import com.sirelon.sellsnap.designsystem.screens.LoadingOverlay
 import com.sirelon.sellsnap.di.appModule
@@ -78,7 +80,9 @@ fun App() {
                     }
 
                     entry<AppDestination.SellerOnboarding> {
+                        val analytics: Analytics = koinInject()
                         OnboardingScreen {
+                            analytics.logEvent(AnalyticsEvents.ONBOARDING_COMPLETED)
                             navVm.replaceWith(AppDestination.SellerLanding)
                         }
                     }

@@ -45,6 +45,11 @@ supabase = "3.6.0"
 buildKonfig = "0.20.0"
 compose = "1.11.0-rc01"
 playServicesLocation = "21.3.0"
+# https://github.com/GitLiveApp/firebase-kotlin-sdk/releases
+gitliveFirebase = "2.4.0"
+googleServices = "4.4.4"
+crashlyticsPlugin = "3.0.7"
+firebaseBom = "34.13.0"
 
 [libraries]
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3Runtime" }
@@ -118,6 +123,9 @@ supabase-compose-auth-ui = { module = "io.github.jan-tennert.supabase:compose-au
 supabase-coil3-integration = { module = "io.github.jan-tennert.supabase:coil3-integration", version.ref = "supabase" }
 supabase-realtime = { module = "io.github.jan-tennert.supabase:realtime-kt", version.ref = "supabase" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+gitlive-firebase-analytics = { module = "dev.gitlive:firebase-analytics", version.ref = "gitliveFirebase" }
+gitlive-firebase-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "gitliveFirebase" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -132,3 +140,5 @@ kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
+googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlyticsPlugin" }
