@@ -18,6 +18,9 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.http.takeFrom
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.time.Clock
@@ -32,6 +35,8 @@ class OlxAuthRepository(
     private val guestModeStore: GuestModeStore,
     private val errorParser: OlxRemoteErrorParser,
 ) {
+    private val _sessionModeUpdates = MutableSharedFlow<SellerSessionMode>(replay = 0)
+    val sessionModeFlow: Flow<SellerSessionMode> = _sessionModeUpdates.asSharedFlow()
     suspend fun createAuthorizationRequest(): OlxAuthorizationRequest {
         val state = Uuid.random().toString()
         val redirectUri = redirectHandler.buildRedirectUri()
@@ -63,23 +68,27 @@ class OlxAuthRepository(
         return request
     }
 
-    suspend fun completeAuthorization(callbackUrl: String): Result<OlxTokens> = runCatching {
-        val callback = redirectHandler.parseCallback(callbackUrl)
-        val pendingSession = authSessionStore.read()
-            ?: throw OlxApiException(OlxApiError.InvalidState("No active OLX authorization session was found."))
+    suspend fun completeAuthorization(callbackUrl: String): Result<OlxTokens> {
+        val result = runCatching {
+            val callback = redirectHandler.parseCallback(callbackUrl)
+            val pendingSession = authSessionStore.read()
+                ?: throw OlxApiException(OlxApiError.InvalidState("No active OLX authorization session was found."))
 
-        validateCallback(callback, pendingSession)
+            validateCallback(callback, pendingSession)
 
-        val tokenResponse = exchangeAuthorizationCode(
-            callback = callback,
-            redirectUri = pendingSession.redirectUri,
-        )
-        tokenStore.write(tokenResponse)
-        authSessionStore.clear()
-        guestModeStore.setGuest(false)
-        tokenResponse
-    }.onFailure {
-        authSessionStore.clear()
+            val tokenResponse = exchangeAuthorizationCode(
+                callback = callback,
+                redirectUri = pendingSession.redirectUri,
+            )
+            tokenStore.write(tokenResponse)
+            authSessionStore.clear()
+            guestModeStore.setGuest(false)
+            tokenResponse
+        }.onFailure {
+            authSessionStore.clear()
+        }
+        if (result.isSuccess) _sessionModeUpdates.emit(SellerSessionMode.Authenticated)
+        return result
     }
 
     suspend fun refreshIfNeeded(force: Boolean = false): Result<OlxTokens> = runCatching {
@@ -105,14 +114,17 @@ class OlxAuthRepository(
         tokenStore.clear()
         authSessionStore.clear()
         guestModeStore.setGuest(false)
+        _sessionModeUpdates.emit(SellerSessionMode.Unauthenticated)
     }
 
     suspend fun enterGuestMode() {
         guestModeStore.setGuest(true)
+        _sessionModeUpdates.emit(SellerSessionMode.Guest)
     }
 
     suspend fun exitGuestMode() {
         guestModeStore.setGuest(false)
+        _sessionModeUpdates.emit(SellerSessionMode.Unauthenticated)
     }
 
     suspend fun currentSession(): OlxSessionState {
