@@ -153,6 +153,8 @@ fun AdRootScreen(
                             onBackToGenerate = { navBackStack.removeAt(navBackStack.lastIndex) },
                             onChangeCategoryClick = { navBackStack.add(AdDestination.SelectCategory) },
                             onPublishSuccess = {
+                                navBackStack.clear()
+                                navBackStack.add(AdDestination.GenerateAd)
                                 navBackStack.add(AdDestination.SellerPublishSuccess(it))
                             },
                             pendingCategory = pendingCategory,
@@ -230,7 +232,11 @@ fun AdRootScreen(
                                     .ifBlank { "https://www.olx.ua/uk/myaccount/" }
                                 openUrl(url)
                             },
-                            onCreateAnother = popToAdRoot,
+                            onCreateAnother = {
+                                popToAdRoot()
+                                navBackStack.clear()
+                                navBackStack.add(AdDestination.GenerateAd)
+                            },
                         )
                     }
                 },

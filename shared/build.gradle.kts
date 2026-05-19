@@ -130,6 +130,12 @@ kotlin {
     }
 }
 
+afterEvaluate {
+    tasks.matching { it.name == "prepareAndroidMainArtProfile" }.configureEach {
+        dependsOn("generateBuildKonfig")
+    }
+}
+
 buildkonfig {
     packageName = "com.sirelon.sellsnap.supabase"
     exposeObjectWithName = "SupabaseConfig"

@@ -126,7 +126,7 @@
     const stored = localStorage.getItem(LANG_KEY);
     if (stored && SUPPORTED_LANGS.includes(stored)) return stored;
     const nav = (navigator.language || "en").toLowerCase();
-    return nav.startsWith("uk") ? "uk" : "en";
+    return nav.startsWith("en") ? "en" : "uk";
   }
 
   function applyLang(lang) {

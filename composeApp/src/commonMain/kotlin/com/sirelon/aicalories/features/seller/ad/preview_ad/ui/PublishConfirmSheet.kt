@@ -48,7 +48,7 @@ fun PublishConfirmSheet(
         if (imageUrls.isNotEmpty()) {
             BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                 val gap = AppDimens.Spacing.l
-                val cellSize = (maxWidth - gap * 2) / 3
+                val cellSize = minOf((maxWidth - gap * 2) / 3, AppDimens.Size.xl18)
                 Column(verticalArrangement = Arrangement.spacedBy(gap)) {
                     imageUrls.chunked(3).forEach { row ->
                         Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
