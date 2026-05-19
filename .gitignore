@@ -279,7 +279,6 @@ deploymentTargetDropDown.xml
 render.experimental.xml
 *.jks
 *.keystore
-google-services.json
 *.hprof
 /calf_sources.txt
 /props.txt

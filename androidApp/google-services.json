@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "186709313778",
+    "project_id": "sellsnap-6e85c",
+    "storage_bucket": "sellsnap-6e85c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:186709313778:android:934749849d0b3b9dfc286b",
+        "android_client_info": {
+          "package_name": "com.sirelon.sellsnap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1ILsxvB9Ubjrz6DkydcJ3Xdcll9oHyhE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
