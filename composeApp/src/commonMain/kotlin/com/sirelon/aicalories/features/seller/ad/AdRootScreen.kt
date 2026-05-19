@@ -217,7 +217,11 @@ fun AdRootScreen(
                     entry<AdDestination.SellerPublishSuccess> { destination ->
                         PublishSuccessScreen(
                             data = destination.data,
-                            onViewOnOlx = { openUrl(destination.data.url) },
+                            onViewOnOlx = {
+                                val url = destination.data.url
+                                    .ifBlank { "https://www.olx.ua/uk/myaccount/" }
+                                openUrl(url)
+                            },
                             onCreateAnother = popToAdRoot,
                         )
                     }

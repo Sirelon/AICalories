@@ -170,7 +170,6 @@ import kotlin.time.Duration.Companion.milliseconds
 private const val TitleMinLength = 10
 private const val DescriptionMinLength = 30
 
-@OptIn(androidx.compose.foundation.layout.ExperimentalGridApi::class)
 @Composable
 fun PreviewAdScreen(
     advertisement: AdvertisementWithAttributes,

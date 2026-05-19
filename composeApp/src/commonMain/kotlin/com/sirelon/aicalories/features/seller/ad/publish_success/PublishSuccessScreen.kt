@@ -122,7 +122,6 @@ fun PublishSuccessScreen(
                     text = stringResource(Res.string.publish_success_view_on_olx),
                     style = AppButtonDefaults.success(),
                     trailingIcon = painterResource(Res.drawable.ic_arrow_right),
-                    enabled = data.url.isNotBlank(),
                     onClick = onViewOnOlx,
                 )
                 AppButton(

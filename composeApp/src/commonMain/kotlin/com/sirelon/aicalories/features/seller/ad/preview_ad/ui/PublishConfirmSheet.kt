@@ -1,16 +1,14 @@
 package com.sirelon.sellsnap.features.seller.ad.preview_ad.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalGridApi
-import androidx.compose.foundation.layout.Grid
-import androidx.compose.foundation.layout.GridTrackSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,7 +29,6 @@ import com.sirelon.sellsnap.generated.resources.publish_confirm_title
 import com.sirelon.sellsnap.generated.resources.publish_confirm_yes
 import org.jetbrains.compose.resources.stringResource
 
-@ExperimentalGridApi
 @Composable
 fun PublishConfirmSheet(
     imageUrls: List<String>,
@@ -49,22 +46,22 @@ fun PublishConfirmSheet(
         verticalArrangement = Arrangement.spacedBy(AppDimens.Spacing.xl3),
     ) {
         if (imageUrls.isNotEmpty()) {
-            Grid(
-                modifier = Modifier.fillMaxWidth(),
-                config = {
-                    repeat(3) {
-                        column(GridTrackSize.Auto)
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val gap = AppDimens.Spacing.l
+                val cellSize = (maxWidth - gap * 2) / 3
+                Column(verticalArrangement = Arrangement.spacedBy(gap)) {
+                    imageUrls.chunked(3).forEach { row ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+                            row.forEach { url ->
+                                AppAsyncImage(
+                                    model = url,
+                                    modifier = Modifier
+                                        .size(cellSize)
+                                        .clip(RoundedCornerShape(AppDimens.BorderRadius.xl2)),
+                                )
+                            }
+                        }
                     }
-                    gap(AppDimens.Spacing.l)
-                },
-            ) {
-                imageUrls.forEach { url ->
-                    AppAsyncImage(
-                        model = url,
-                        modifier = Modifier
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(AppDimens.BorderRadius.xl2)),
-                    )
                 }
             }
         }
@@ -116,7 +113,6 @@ private fun AdSummaryRow(label: String, isBold: Boolean = false) {
     }
 }
 
-@OptIn(ExperimentalGridApi::class)
 @PreviewLightDark
 @Composable
 private fun PublishConfirmSheetPreview() {

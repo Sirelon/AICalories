@@ -361,7 +361,6 @@ class GenerateAdViewModel(
     private fun clearDraft() {
         val photos = readSavedState().photos
         viewModelScope.launch { draftMediaFileStore.delete(photos) }
-        adFlowTimerStore.clear()
         setState { GenerateAdContract.GenerateAdState() }
     }
 
