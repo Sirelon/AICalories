@@ -50,6 +50,7 @@ import com.sirelon.sellsnap.generated.resources.ic_user
 import com.sirelon.sellsnap.generated.resources.nav_my_ads
 import com.sirelon.sellsnap.generated.resources.new_listing
 import com.sirelon.sellsnap.generated.resources.profile_screen_title
+import com.sirelon.sellsnap.generated.resources.guest_connect_olx_cta
 import com.sirelon.sellsnap.platform.openUrl
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -66,6 +67,7 @@ fun AdRootScreen(
         adNavigationSavedStateConfiguration,
         AdDestination.GenerateAd,
     )
+    val connectOlxReason = stringResource(Res.string.guest_connect_olx_cta)
 
     // TODO: WHat is it???
     var pendingCategory by remember { mutableStateOf<OlxCategory?>(null) }
@@ -155,7 +157,13 @@ fun AdRootScreen(
                             },
                             pendingCategory = pendingCategory,
                             onCategoryConsumed = { pendingCategory = null },
-                            onConnectOlxClick = onConnectOlxClick,
+                            onConnectOlxClick = {
+                                navBackStack.add(
+                                    AdDestination.Profile(
+                                        reason = connectOlxReason,
+                                    )
+                                )
+                            },
                             showImagesPreview = { images, initialPage ->
                                 navBackStack.add(AdDestination.ImagesPreview(images, initialPage))
                             },
