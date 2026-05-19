@@ -4,6 +4,8 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.sirelon.sellsnap.analytics.Analytics
+import com.sirelon.sellsnap.analytics.AnalyticsEvents
 import com.sirelon.sellsnap.designsystem.formatPrice
 import com.sirelon.sellsnap.features.common.presentation.BaseViewModel
 import com.sirelon.sellsnap.features.seller.ad.AdFlowTimerStore
@@ -69,6 +71,7 @@ class PreviewAdViewModel(
     private val adFlowTimerStore: AdFlowTimerStore,
     private val savedStateHandle: SavedStateHandle,
     private val json: Json,
+    private val analytics: Analytics,
 ) : BaseViewModel<PreviewAdState, PreviewAdEvent, PreviewAdEffect>() {
 
     private val advertisement = filledAdvertisement.advertisement
@@ -291,6 +294,7 @@ class PreviewAdViewModel(
             return
         }
 
+        analytics.logEvent(AnalyticsEvents.AD_PUBLISH_STARTED)
         postEffect(PreviewAdEffect.NavigateToPublishing)
 
         try {
@@ -319,8 +323,11 @@ class PreviewAdViewModel(
                 status = data.status,
             )
             publishSuccessData.value = successData
+            analytics.logEvent(AnalyticsEvents.AD_PUBLISH_SUCCEEDED)
             postEffect(PreviewAdEffect.PublishSuccess(successData))
         } catch (error: Throwable) {
+            analytics.recordException(error, AnalyticsEvents.AD_PUBLISH_FAILED)
+            analytics.logEvent(AnalyticsEvents.AD_PUBLISH_FAILED)
             val olxError = (error as? OlxApiException)?.error
             if (olxError is OlxApiError.ValidationError && olxError.field.startsWith("contact.")) {
                 postEffect(PreviewAdEffect.NavigateToProfile(getString(Res.string.error_publish_missing_contact_name)))
